@@ -1,12 +1,11 @@
 package com.thepapiok.multiplecard.collections;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
+import lombok.Data;
 
 @Data
 public class Review {
-    private String description;
-    private int rating;
-    private LocalDateTime createdAt;
+  private String description;
+  private int rating;
+  private LocalDateTime createdAt;
 }
