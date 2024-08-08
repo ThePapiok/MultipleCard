@@ -10,5 +10,6 @@ public class MultiplecardApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(MultiplecardApplication.class, args);
+    System.out.println("xd");
   }
 }
