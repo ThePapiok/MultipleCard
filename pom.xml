@@ -73,8 +73,8 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 	<build>
+		<finalName>multipleCard</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
