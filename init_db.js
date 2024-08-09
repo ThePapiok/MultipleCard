@@ -1,6 +1,10 @@
 conn = new Mongo();
 db = conn.getDB("multipleCard")
-
+db.createUser({
+    "user": "user",
+    "pwd": "user",
+    "roles": ["readWrite"]
+})
 db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
