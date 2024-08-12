@@ -13,31 +13,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public UserDetailsService userDetailsService(){
-        UserDetails user1 = User.builder()
-                .username("Admin")
-                .password("{noop}Admin")
-                .roles("ADMIN")
-                .build();
-        UserDetails user2 = User.builder()
-                .username("User")
-                .password("{noop}User")
-                .roles("USER")
-                .build();
-        UserDetails user3 = User.builder()
-                .username("Shop")
-                .password("{noop}Shop")
-                .roles("SHOP")
-                .build();
-        return new InMemoryUserDetailsManager(user1, user2, user3);
-    }
+  @Bean
+  public UserDetailsService userDetailsService() {
+    UserDetails user1 =
+        User.builder().username("Admin").password("{noop}Admin").roles("ADMIN").build();
+    UserDetails user2 =
+        User.builder().username("User").password("{noop}User").roles("USER").build();
+    UserDetails user3 =
+        User.builder().username("Shop").password("{noop}Shop").roles("SHOP").build();
+    return new InMemoryUserDetailsManager(user1, user2, user3);
+  }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                authorize -> authorize.anyRequest().permitAll()
-        ).formLogin(Customizer.withDefaults());
-        return http.build();
-    }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+        .formLogin(Customizer.withDefaults());
+    return http.build();
+  }
 }

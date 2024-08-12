@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LandingPageController {
 
-    @GetMapping
-    public String getLandingPage(@RequestParam(defaultValue = "false") String added, Model model){
-        model.addAttribute("review", new ReviewDTO());
-        model.addAttribute("added", added);
-        return "landingPage";
-    }
+  @GetMapping
+  public String getLandingPage(@RequestParam(defaultValue = "false") String added, Model model) {
+    model.addAttribute("review", new ReviewDTO());
+    model.addAttribute("added", added);
+    return "landingPage";
+  }
 }
