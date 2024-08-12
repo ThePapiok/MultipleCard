@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,17 +17,17 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService(){
         UserDetails user1 = User.builder()
                 .username("Admin")
-                .password("Admin")
+                .password("{noop}Admin")
                 .roles("ADMIN")
                 .build();
         UserDetails user2 = User.builder()
                 .username("User")
-                .password("User")
+                .password("{noop}User")
                 .roles("USER")
                 .build();
         UserDetails user3 = User.builder()
                 .username("Shop")
-                .password("Shop")
+                .password("{noop}Shop")
                 .roles("SHOP")
                 .build();
         return new InMemoryUserDetailsManager(user1, user2, user3);
@@ -36,7 +37,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
                 authorize -> authorize.anyRequest().permitAll()
-        );
+        ).formLogin(Customizer.withDefaults());
         return http.build();
     }
 }

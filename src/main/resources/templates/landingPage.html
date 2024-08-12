@@ -1,21 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>MultipleCard</title>
-    <link rel="stylesheet" href="styles/landingPage.css">
+    <link rel="stylesheet" href="css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/4RCLq1L.png">
 </head>
 <body>
+<script src="js/landingPage.js"></script>
 <div id="container">
     <div id="header">
-        <button class="blackButton" id="b1">Zaloguj</button>
-        <button class="redButton" id="b2">Załóż konto</button>
+        <a th:href="@{/login}" >
+            <button sec:authorize="isAnonymous()" class="blackButton b1">Zaloguj</button>
+        </a>
+        <a th:href="@{/register}">
+            <button sec:authorize="isAnonymous()" class="redButton b2">Załóż konto</button>
+        </a>
+        <a th:href="@{/user}">
+            <button sec:authorize="hasRole('USER')" class="blackButton b1">Moje konto</button>
+        </a>
+        <a th:href="@{/logout}">
+            <button sec:authorize="hasRole('USER')" class="redButton b2">Wyloguj</button>
+        </a>
+        <a th:href="@{/products}">
+            <button sec:authorize="hasRole('SHOP')" class="blackButton" id="b5">Produkty</button>
+        </a>
+        <a th:href="@{/orders}">
+            <button sec:authorize="hasRole('SHOP')" class="blackButton" id="b6">Zamówienia</button>
+        </a>
+        <a th:href="@{/logout}">
+            <button sec:authorize="hasRole('SHOP')" class="redButton" id="b7">Wyloguj</button>
+        </a>
     </div>
     <div id="body">
         <div id="info">
             <p class="title">MultipleCard</p>
-            <button class="blackButton" id="b3">O projekcie</button>
+            <a th:href="@{/about}">
+                <button class="blackButton" id="b3">O projekcie</button>
+            </a>
             <img id="image" src="/images/holdingCard.jpg">
         </div>
         <span id="recenzje">
@@ -80,6 +102,41 @@
                 </div>
             </div>
         </div>
+        <a th:href="@{/reviews}">
+            <button class="blackButton" id="b4">Więcej</button>
+        </a>
+        <form th:action="@{/review}" id="addOpinion" method="post">
+            <textarea id="text" required placeholder="Wpisz tu swoją opinię..." maxlength="80"></textarea>
+            <div id="starsAndSubmit">
+                <label>
+                    <input id="check1" type="checkbox" onclick="checked1()">
+                    <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png">
+                    <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png">
+                </label>
+                <label>
+                    <input id="check2" type="checkbox" onclick="checked2()">
+                    <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png">
+                    <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png">
+                </label>
+                <label>
+                    <input id="check3" type="checkbox" onclick="checked3()">
+                    <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png">
+                    <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png">
+                </label>
+                <label>
+                    <input id="check4" type="checkbox" onclick="checked4()">
+                    <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png">
+                    <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png">
+                </label>
+                <label>
+                    <input id="check5" type="checkbox" onclick="checked5()">
+                    <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png">
+                    <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png">
+                </label>
+                <button id="submit" type="submit" class="greenButton">Wyślij</button>
+            </div>
+        </form>
+        <span th:if="${added} == 'true'" id="textReview">Opinia została pomyślnie dodana !</span>
     </div>
     <div id="footer">
     </div>
