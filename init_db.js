@@ -1,10 +1,37 @@
 conn = new Mongo();
-db = conn.getDB("multipleCard")
+db = conn.getDB("multipleCard");
 db.createUser({
     "user": "user",
     "pwd": "user",
     "roles": ["readWrite"]
-})
+});
+db.createCollection("accounts", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "login", "password", "role"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "login": {
+                    "bsonType": "string",
+                    "description": "login is required and must be string"
+                },
+                "password": {
+                    "bsonType": "string",
+                    "description": "password is required and must be string"
+                },
+                "role": {
+                    "enum": ["ROLE_ADMIN", "ROLE_USER", "ROLE_SHOP"],
+                    "description": "role is required and must be either of ROlE_SHOP, ROLE_USER and ROLE_ADMIN"
+                }
+            }
+        }
+    }
+});
 db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
@@ -29,14 +56,6 @@ db.createCollection("shops", {
                     "bsonType": "string",
                     "description": "imageUrl is required and must be string"
                 },
-                "password": {
-                    "bsonType": "string",
-                    "description": "password is required and must be string"
-                },
-                "role": {
-                    "enum": ["ROLE_SHOP"],
-                    "description": "role is required and must be ROlE_SHOP"
-                }
             }
         }
     }
@@ -214,10 +233,6 @@ db.createCollection("users", {
                     "bsonType": "objectId",
                     "description": "countryId is required and must be objectId"
                 },
-                "phone": {
-                    "bsonType": "string",
-                    "description": "phone is required and must be string"
-                },
                 "city": {
                     "bsonType": "string",
                     "description": "city is required and must be string"
@@ -240,10 +255,6 @@ db.createCollection("users", {
                     "minimum": 1,
                     "description": "apartamentNumber should be int or null and must be greater than 0"
                 },
-                "password": {
-                    "bsonType": "string",
-                    "description": "password is required and must be string"
-                },
                 "isActive": {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
@@ -257,10 +268,6 @@ db.createCollection("users", {
                 "verificationNumber": {
                     "bsonType": "string",
                     "description": "string is required and must be string"
-                },
-                "role": {
-                    "enum": ["ROLE_USER", "ROLE_ADMIN"],
-                    "description": "role is required and must be either ROLE_USER or ROLE_ADMIN"
                 },
                 "card":{
                     "bsonType": ["object", "null"],
@@ -314,7 +321,7 @@ db.createCollection("users", {
 db.countries.createIndex({"name": 1, "code": 1}, {"unique": true});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
-db.users.createIndex({"phone": 1}, {"unique": true});
+db.accounts.createIndex({"login": 1}, {"unique": true});
 db.countries.insertMany([
     {
         "name": "Polska",
