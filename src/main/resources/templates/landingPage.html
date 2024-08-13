@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>MultipleCard</title>
-    <link rel="stylesheet" href="css/landingPage.css">
+    <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/4RCLq1L.png">
 </head>
 <body>
-<script src="js/landingPage.js"></script>
+<script src="/js/landingPage.js"></script>
 <div id="container">
     <div id="header">
         <a th:href="@{/login}" >
@@ -38,7 +38,7 @@
             <a th:href="@{/about}">
                 <button class="blackButton" id="b3">O projekcie</button>
             </a>
-            <img id="image" src="/images/holdingCard.jpg">
+            <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
         </div>
         <span id="recenzje">
             Recenzje
@@ -50,16 +50,16 @@
                         <span class="name">Ewelina</span>
                         <div class="amountHearths">
                             <span class="amount">15</span>
-                            <img class="hearth" src="/images/hearth.png">
+                            <img class="hearth" src="/images/hearth.png" alt="hearth">
                         </div>
                     </div>
                     <span class="description">"Świetna aplikacja"</span>
                     <div class="stars">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
                     </div>
                 </div>
             </div>
@@ -69,16 +69,16 @@
                         <span class="name">Jakub</span>
                         <div class="amountHearths">
                             <span class="amount">7</span>
-                            <img class="hearth" src="/images/hearth.png">
+                            <img class="hearth" src="/images/hearth.png" alt="hearth">
                         </div>
                     </div>
                     <span class="description">“Najgorsza aplikacja na świecie, Adrian byś się wstydził”</span>
                     <div class="stars">
-                        <img class="star" src="/images/gwiazdapusta.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
                     </div>
                 </div>
             </div>
@@ -88,16 +88,16 @@
                         <span class="name">Adrian</span>
                         <div class="amountHearths">
                             <span class="amount">1</span>
-                            <img class="hearth" src="/images/hearth.png">
+                            <img class="hearth" src="/images/hearth.png" alt="hearth">
                         </div>
                     </div>
                     <span class="description">"Ok!"</span>
                     <div class="stars">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwizadkacala.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
-                        <img class="star" src="/images/gwiazdapusta.png">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
                     </div>
                 </div>
             </div>
@@ -106,32 +106,32 @@
             <button class="blackButton" id="b4">Więcej</button>
         </a>
         <form th:action="@{/review}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
-            <textarea th:field="*{description}" id="text" required placeholder="Wpisz tu swoją opinię..." maxlength="80"></textarea>
+            <label for="text"></label><textarea th:field="*{description}" id="text" required placeholder="Wpisz tu swoją opinię..." maxlength="80"></textarea>
             <div id="starsAndSubmit">
                 <label>
                     <input th:field="*{star1}" id="check1" type="checkbox" onclick="checked1()">
-                    <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png">
-                    <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png">
+                    <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
                     <input th:field="*{star2}" id="check2" type="checkbox" onclick="checked2()">
-                    <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png">
-                    <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png">
+                    <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
                     <input th:field="*{star3}" id="check3" type="checkbox" onclick="checked3()">
-                    <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png">
-                    <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png">
+                    <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
                     <input th:field="*{star4}" id="check4" type="checkbox" onclick="checked4()">
-                    <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png">
-                    <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png">
+                    <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
                     <input th:field="*{star5}" id="check5" type="checkbox" onclick="checked5()">
-                    <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png">
-                    <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png">
+                    <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <button id="submit" type="submit" class="greenButton">Wyślij</button>
             </div>

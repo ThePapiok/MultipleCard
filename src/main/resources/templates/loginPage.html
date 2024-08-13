@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>MultipleCard</title>
+  <link rel="stylesheet" href="/css/loginPage.css">
+  <link rel="icon" type="image/x-icon" href="https://i.imgur.com/4RCLq1L.png">
+</head>
+<body>
+<script src="/js/loginPage.js"></script>
+<div id="container">
+  <div id="header">
+    <a th:href="@{/}" >
+      <button class="blackButton" id="b1">Strona główna</button>
+    </a>
+  </div>
+  <div id="body">
+    <p class="title">Logowanie</p>
+    <form th:action="@{/login}" th:object="${login}" id="form" method="post">
+    <label>
+      <input th:field="*{login}" type="text" placeholder="Numer telefonu lub number ID" id="loginInput" required oninput="checkLogin()">
+      <div id="validationLogin">
+        Login musi spełniać następujące warunki:
+        <ul>
+          <li>długość 9 lub 24</li>
+        </ul>
+      </div>
+      <img id="close1" src="/images/close.png" onmouseenter="showValidationLogin()" onmouseleave="hideValidationLogin()" alt="close">
+      <img id="check1" src="/images/check.png" alt="check">
+    </label>
+    <label>
+      <input th:field="*{password}" type="password" placeholder="Hasło" id="passwordInput" required oninput="checkPassword()">
+      <div id="validationPassword">
+        Hasło musi spełniać następujące warunki:
+        <ul>
+          <li>długość od 6</li>
+          <li>zawiera jedną mała literę</li>
+          <li>zawiera jedną wielką literę</li>
+          <li>zawiera jedną cyfrę</li>
+          <li>zawiera jeden znak specjalny</li>
+        </ul>
+      </div>
+      <img id="close2" src="/images/close.png" onmouseenter="showValidationPassword()" onmouseleave="hideValidationPassword()" alt="close">
+      <img id="check2"  src="/images/check.png" alt="check">
+    </label>
+      <p th:if="${param.error}" id="error">Podane dane są niepoprawne</p>
+      <button type="button" class="grayButton" id="login" >Zaloguj</button>
+      <a th:href="@{/register}">
+        <button type="button" class="blackButton" id="register">Załóż konto</button>
+      </a>
+      <a th:href="@{/password_reset}">
+        <button type="button" class="blackButton" id="forget">Przypomnij hasło</button>
+      </a>
+    </form>
+
+  </div>
+  <div id="footer">
+  </div>
+</div>
+</body>
+</html>
