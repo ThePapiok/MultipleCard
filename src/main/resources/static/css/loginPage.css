@@ -1,0 +1,182 @@
+body{
+    background-color: #F7F6F3;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+
+}
+#container{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+
+#body{
+    height: 75%;
+    max-width: 100%;
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#header{
+    border-bottom: 3px solid #BDBBB6;
+    height: 13.2%;
+    max-width: 100%;
+    width: 100%;
+
+}
+
+#footer{
+    height: 10%;
+}
+
+
+@font-face {
+    font-family: "Inter";
+    src: url('/fonts/Inter.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: "Inconsolata";
+    src: url('/fonts/Inconsolata.ttf') format('truetype');
+}
+
+button{
+    color: #FEF9EF;
+    width: 130px;
+    height: 40px;
+    font-size: 13px;
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    margin-right: 50px;
+
+}
+#b1{
+    top: 30%;
+    position: relative;
+    left: 3%;
+
+
+}
+
+.blackButton{
+    background-color: #48483A;
+}
+
+.greenButton{
+    background-color: #96BE8C;
+}
+
+.grayButton{
+    background-color: #CFCBCB;
+    cursor: auto;
+}
+
+.blackButton:hover {
+    background-color: #3B3B2F;
+}
+
+
+.greenButton:hover {
+    background-color: #7FA176;
+}
+
+
+
+.title {
+    color: #48483A;
+    font-weight: 700;
+    font-size: 50px;
+    font-family: "Inconsolata", cursive;
+    letter-spacing: 10px;
+    margin-left: 3%;
+}
+
+#form{
+    margin-top: 10%;
+    margin-left: 3%;
+    height: 42%;
+    width: 40%;
+}
+
+
+label{
+    display: block;
+    width: 100%;
+    height: 20%;
+    margin-bottom: 7%;
+    border: 1px solid black;
+    box-sizing: border-box;
+    position: relative;
+}
+
+input{
+    width: 100%;
+    height: 100%;
+    font-size: 25px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+}
+
+img{
+    position: absolute;
+    left:91%;
+    z-index: 1;
+    width: 70px;
+    height: 70px;
+    top: -10px;
+}
+
+#check1, #check2{
+    display: none;
+}
+
+#error{
+    font-family: "Inter", sans-serif;
+    font-size: 25px;
+    color: #FF5A5F;
+    font-weight: 500;
+}
+
+#validationLogin{
+    height: 100px;
+    width: 60%;
+    z-index: 2;
+    left: 100%;
+    top:-90px;
+    background-color: #CCD5FF;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    position: absolute;
+    border-radius: 10px;
+    opacity: 70%;
+    display: none;
+}
+
+#validationPassword{
+    height: 200px;
+    width: 60%;
+    z-index: 2;
+    left: 100%;
+    top:-190px;
+    background-color: #CCD5FF;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    position: absolute;
+    border-radius: 10px;
+    opacity: 70%;
+    display: none;
+}
+
+
+
+
+
