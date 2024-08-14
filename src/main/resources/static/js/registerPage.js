@@ -10,6 +10,7 @@ const regPhone = new RegExp("^[0-9]*$")
 let previousPostalCode = "";
 let ok = [false, false, false, false, true, false, false, false, false, false];
 let previous = [false, false, false, false, true, false, false, false, false, false];
+let success = false;
 
 
 function check(i, con){
@@ -19,8 +20,11 @@ function check(i, con){
             document.getElementById("close"+i).style.display = "none";
             document.getElementById("check"+i).style.display = "inline";
         }
-        activeButton();
-        previous[i-1] = true;
+        if(ok[i-1] !== previous[i-1])
+        {
+            activeButton();
+            previous[i-1] = true;
+        }
     }
     else{
         ok[i-1] = false;
@@ -28,8 +32,11 @@ function check(i, con){
             document.getElementById("close"+i).style.display = "inline";
             document.getElementById("check"+i).style.display = "none";
         }
-        disableButton();
-        previous[i-1] = false;
+        if(ok[i-1] !== previous[i-1])
+        {
+            disableButton();
+            previous[i-1] = false;
+        }
     }
 }
 function checkFirstName(e){
@@ -95,22 +102,21 @@ function  checkRetypedPassword(e){
 
 
 function activeButton(){
-    if(true){
-        const button = document.getElementById("login");
+    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9]){
+        const button = document.getElementById("next");
         button.className = "greenButton";
         button.type = "submit";
+        success = true;
     }
 }
 
 function disableButton(){
-    /*
-    if(((!okLogin && previousLogin) && (okPassword)) || ((!okPassword && previousPassword) && (okLogin))){
-        var button = document.getElementById("login");
+    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9]) && success){
+        var button = document.getElementById("next");
         button.className = "grayButton";
         button.type = "button";
+        success = false;
     }
-
-     */
 }
 function showValidation(e){
     const info = document.getElementById("validation" + e.parentElement.id);
