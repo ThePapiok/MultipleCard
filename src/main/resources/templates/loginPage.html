@@ -19,30 +19,30 @@
     <form th:action="@{/login}" th:object="${login}" id="form" method="post">
     <label>
       <input th:field="*{login}" type="text" placeholder="Numer telefonu lub number ID" id="loginInput" required oninput="checkLogin()">
-      <div id="validationLogin">
+      <img id="close1" src="/images/close.png" onmouseenter="showValidationLogin()" onmouseleave="hideValidationLogin()" alt="close">
+      <img id="check1" src="/images/check.png" alt="check">
+    </label>
+    <div class="validation" id="validationLogin">
         Login musi spełniać następujące warunki:
         <ul>
           <li>długość 9 lub 24</li>
         </ul>
-      </div>
-      <img id="close1" src="/images/close.png" onmouseenter="showValidationLogin()" onmouseleave="hideValidationLogin()" alt="close">
-      <img id="check1" src="/images/check.png" alt="check">
-    </label>
+    </div>
     <label>
-      <input th:field="*{password}" type="password" placeholder="Hasło" id="passwordInput" required oninput="checkPassword()">
-      <div id="validationPassword">
+      <input th:field="*{password}" type="password" placeholder="Hasło" id="passwordInput" required oninput="checkPassword()" minlength="6" maxlength="25">
+      <img id="close2" src="/images/close.png" onmouseenter="showValidationPassword()" onmouseleave="hideValidationPassword()" alt="close">
+      <img id="check2"  src="/images/check.png" alt="check">
+    </label>
+      <div class="validation" id="validationPassword">
         Hasło musi spełniać następujące warunki:
         <ul>
-          <li>długość od 6</li>
+          <li>długość od 6 do 25</li>
           <li>zawiera jedną mała literę</li>
           <li>zawiera jedną wielką literę</li>
           <li>zawiera jedną cyfrę</li>
           <li>zawiera jeden znak specjalny</li>
         </ul>
       </div>
-      <img id="close2" src="/images/close.png" onmouseenter="showValidationPassword()" onmouseleave="hideValidationPassword()" alt="close">
-      <img id="check2"  src="/images/check.png" alt="check">
-    </label>
       <p th:if="${param.error}" id="error">Podane dane są niepoprawne</p>
       <button type="button" class="grayButton" id="login" >Zaloguj</button>
       <a th:href="@{/register}">

@@ -2,7 +2,10 @@ let previousLogin = false;
 let previousPassword = false;
 let okLogin= false;
 let okPassword= false;
+let x;
+let y;
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
+document.addEventListener("mousemove", getCoordinates);
 
 
 
@@ -69,18 +72,31 @@ function disableButton(){
 }
 
 function showValidationLogin(){
-    document.getElementById("validationLogin").style.display = "inline";
+    var info = document.getElementById("validationLogin");
+    changeCoordinates(info);
 }
 
 function hideValidationLogin() {
     document.getElementById("validationLogin").style.display = "none";
-
 }
 
 function showValidationPassword(){
-    document.getElementById("validationPassword").style.display = "inline";
+    var info = document.getElementById("validationPassword");
+    changeCoordinates(info);
+
 }
 
 function hideValidationPassword(){
     document.getElementById("validationPassword").style.display = "none";
+}
+
+function changeCoordinates(e){
+    e.style.display = "inline";
+    e.style.left = x + 'px';
+    e.style.top = y-150 + 'px';
+}
+
+function getCoordinates(e){
+    x=e.screenX;
+    y=e.screenY;
 }

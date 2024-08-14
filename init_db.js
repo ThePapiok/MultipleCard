@@ -214,7 +214,7 @@ db.createCollection("users", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "countryId", "phone", "city", "postalCode", "street", "houseNumber", "apartamentNumber", "password", "card" , "isActive", "points", "verificationNumber", "role", "review"],
+            "required": ["_id", "firstName", "lastName", "countryId", "phone", "city", "postalCode", "street", "houseNumber", "apartmentNumber", "password", "card" , "isActive", "points", "verificationNumber", "role", "review"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -246,14 +246,13 @@ db.createCollection("users", {
                     "description": "street is required and must be string"
                 },
                 "houseNumber": {
-                    "bsonType": "int",
-                    "minimum": 1,
-                    "description": "houseNumber is required, must be int and must be greater than 0"
+                    "bsonType": "string",
+                    "description": "houseNumber is required, must be string"
                 },
-                "apartamentNumber": {
+                "apartmentNumber": {
                     "bsonType": ["int", "null"],
                     "minimum": 1,
-                    "description": "apartamentNumber should be int or null and must be greater than 0"
+                    "description": "apartmentNumber should be int or null and must be greater than 0"
                 },
                 "isActive": {
                     "bsonType": "bool",

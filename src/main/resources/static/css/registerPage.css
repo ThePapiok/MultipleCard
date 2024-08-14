@@ -8,7 +8,7 @@ body{
 #container{
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 150vh;
 }
 
 
@@ -22,7 +22,7 @@ body{
 
 #header{
     border-bottom: 3px solid #BDBBB6;
-    height: 13.2%;
+    height: 8.8%;
     max-width: 100%;
     width: 100%;
 
@@ -101,19 +101,55 @@ button{
 #form{
     margin-top: 10%;
     margin-left: 3%;
-    height: 42%;
-    width: 40%;
+    height: 110%;
+    width: 90%;
 }
 
 
 label{
     display: block;
-    width: 100%;
-    height: 20%;
-    margin-bottom: 7%;
+    height: 100%;
+    margin-bottom: 2%;
     box-sizing: border-box;
     position: relative;
+    margin-right: 2%;
 }
+
+#FirstName, #Street, #Password, #RetypedPassword, #PostalCode{
+    width: 45%;
+}
+
+#LastName, #City{
+    width: 50%;
+}
+
+#HouseNumber{
+    width: 24%;
+}
+
+#ApartmentNumber{
+    width: 24%;
+}
+
+#Phone{
+    width: 35%;
+}
+
+#Country{
+    width: 60%;
+    height: 110%;
+    margin-right: 2%;
+    font-size: 25px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+}
+
+#Password, #RetypedPassword{
+    height: 5%;
+}
+
+
+
 
 input{
     width: 100%;
@@ -132,8 +168,26 @@ img{
     top: -10px;
 }
 
-#check1, #check2{
+#check1, #check2, #check3, #check4, #close5, #check6, #check7, #check8, #check9, #check10{
     display: none;
+}
+
+#check4, #close4, #close5, #check5{
+    left: 83%
+}
+
+#check2, #close2, #check10, #close10{
+    left: 92%;
+}
+
+#check6, #close6{
+    left: 89%;
+}
+
+.block-horizontally{
+    display: flex;
+    height: 5%;
+    margin-bottom: 2%;
 }
 
 #error{
@@ -154,14 +208,55 @@ img{
     border-radius: 10px;
     opacity: 70%;
     display: none;
+    pointer-events: none;
 }
 
-#validationLogin{
+#validationFirstName{
+    height: 80px;
+}
+
+#validationLastName{
+    height: 80px;
+    transform: translateX(-100%);
+}
+
+#validationStreet{
     height: 100px;
 }
 
+#validationHouseNumber{
+    height: 80px;
+}
+
+#validationApartmentNumber{
+    height: 80px;
+    transform: translateX(-100%);
+}
+
 #validationPassword{
-    height: 150px;
+    height: 140px;
+}
+
+#validationRetypedPassword{
+    height: 60px;
+}
+
+#validationPhone{
+    height: 60px;
+    transform: translateX(-100%);
+}
+
+#validationPostalCode{
+    height: 60px;
+}
+
+#validationCity{
+    height: 100px;
+    transform: translateX(-100%);
+}
+
+select:invalid {
+    color: #757575;
 }
 
 
