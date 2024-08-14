@@ -25,7 +25,7 @@ public class AuthenticationController {
   }
 
   @GetMapping("/register")
-  public String register(Model model){
+  public String register(Model model) {
     model.addAttribute("countries", countryService.getDTOs());
     model.addAttribute("register", new RegisterDTO());
     return "registerPage";
