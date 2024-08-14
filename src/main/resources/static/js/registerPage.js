@@ -58,17 +58,19 @@ function checkApartmentNumber(e){
 }
 
 function checkPostalCode(e){
-    let length = e.length;
+    let input = e.value;
+    let length = input.length;
     if(length === 2){
-        if(previousPostalCode.charAt(previousPostalCode.length-1)==="-")
+        if(previousPostalCode.charAt(previousPostalCode.length-1) === "-")
         {
-            e.value=e.value.substring(0,length-1);
+            e.value = input.substring(0,length-1);
         }
         else{
             e.value+="-";
         }
+        input = e.value;
     }
-    previousPostalCode=e.value;
+    previousPostalCode = input;
     check(9, (regPostalCode.test(input)));
 }
 
