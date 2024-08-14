@@ -103,7 +103,7 @@ function  checkRetypedPassword(e){
 
 function activeButton(){
     if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9]){
-        const button = document.getElementById("next");
+        let button = document.getElementById("nextButton");
         button.className = "greenButton";
         button.type = "submit";
         success = true;
@@ -112,14 +112,14 @@ function activeButton(){
 
 function disableButton(){
     if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9]) && success){
-        var button = document.getElementById("next");
+        let button = document.getElementById("nextButton");
         button.className = "grayButton";
         button.type = "button";
         success = false;
     }
 }
 function showValidation(e){
-    const info = document.getElementById("validation" + e.parentElement.id);
+    let info = document.getElementById("validation" + e.parentElement.id);
     const cord = e.getBoundingClientRect();
     info.style.display = "inline";
     info.style.left = cord.right + window.scrollX + 'px';

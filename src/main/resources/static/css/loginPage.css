@@ -154,14 +154,16 @@ img{
     border-radius: 10px;
     opacity: 70%;
     display: none;
+    pointer-events: none;
+    padding: 3px;
 }
 
 #validationLogin{
-    height: 100px;
+    height: 60px;
 }
 
 #validationPassword{
-    height: 150px;
+    height: 140px;
 }
 
 

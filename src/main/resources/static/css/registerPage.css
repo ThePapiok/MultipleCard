@@ -209,6 +209,7 @@ img{
     opacity: 70%;
     display: none;
     pointer-events: none;
+    padding: 3px;
 }
 
 #validationFirstName{
