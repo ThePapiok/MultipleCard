@@ -15,4 +15,6 @@ public class Product {
   private String categoryId;
   private int amount;
   private String shopId;
+  private boolean isActive;
+  private int promotion;
 }

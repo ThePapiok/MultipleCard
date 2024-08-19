@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "accounts")
 public class Account {
   @Id private String id;
-  private String login;
+  private String phone;
   private String password;
   private Role role;
+  private boolean isActive;
+  private String verificationNumber;
 }

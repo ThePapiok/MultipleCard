@@ -3,6 +3,8 @@ let ok = [false, false];
 let success = false;
 
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
+const regLogin = new RegExp("^[0-9]*$");
+
 
 
 function check(i, con){
@@ -34,7 +36,7 @@ function check(i, con){
 
 function checkLogin(e){
     const input = e.value;
-    check(1, (input.length === 24 || input.length === 9));
+    check(1, (input.length === 9 && regLogin.test(input)));
 }
 
 function  checkPassword(e){
