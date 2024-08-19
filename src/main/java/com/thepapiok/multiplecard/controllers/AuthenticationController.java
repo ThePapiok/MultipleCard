@@ -18,7 +18,8 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @Autowired
-  public AuthenticationController(CountryService countryService, AuthenticationService authenticationService) {
+  public AuthenticationController(
+      CountryService countryService, AuthenticationService authenticationService) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
   }
@@ -37,7 +38,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/register")
-  public String createUser(@ModelAttribute RegisterDTO register){
+  public String createUser(@ModelAttribute RegisterDTO register) {
     authenticationService.createUser(register);
     return "redirect:/login";
   }

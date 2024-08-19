@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AccountConverter {
-    public Account getEntity(RegisterDTO registerDTO){
-        Account account = new Account();
-        account.setPassword(registerDTO.getPassword());
-        account.setPhone(registerDTO.getPhone());
-        return account;
-    }
+  public Account getEntity(RegisterDTO registerDTO) {
+    Account account = new Account();
+    account.setPassword(registerDTO.getPassword());
+    account.setPhone(registerDTO.getPhone());
+    return account;
+  }
 }

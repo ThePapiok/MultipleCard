@@ -15,34 +15,38 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthenticationService {
 
-    private final AccountRepository accountRepository;
-    private final UserRepository userRepository;
-    private final UserConverter userConverter;
-    private final AccountConverter accountConverter;
+  private final AccountRepository accountRepository;
+  private final UserRepository userRepository;
+  private final UserConverter userConverter;
+  private final AccountConverter accountConverter;
 
-    @Autowired
-    public AuthenticationService(AccountRepository accountRepository, UserRepository userRepository, UserConverter userConverter, AccountConverter accountConverter) {
-        this.accountRepository = accountRepository;
-        this.userRepository = userRepository;
-        this.userConverter = userConverter;
-        this.accountConverter = accountConverter;
-    }
+  @Autowired
+  public AuthenticationService(
+      AccountRepository accountRepository,
+      UserRepository userRepository,
+      UserConverter userConverter,
+      AccountConverter accountConverter) {
+    this.accountRepository = accountRepository;
+    this.userRepository = userRepository;
+    this.userConverter = userConverter;
+    this.accountConverter = accountConverter;
+  }
 
-    @Transactional
-    public void createUser(RegisterDTO register){
-        User user = userConverter.getEntity(register);
-        user.setCard(null);
-        user.setPoints(0);
-        user.setReview(null);
-        user = userRepository.save(user);
-        Account account = accountConverter.getEntity(register);
-        //TODO add encode password
-        account.setId(user.getId());
-        account.setRole(Role.ROLE_USER);
-        account.setActive(true);
-        //TODO add verificiation
-        account.setVerificationNumber(null);
-        account.setShop(false);
-        accountRepository.save(account);
-    }
+  @Transactional
+  public void createUser(RegisterDTO register) {
+    User user = userConverter.getEntity(register);
+    user.setCard(null);
+    user.setPoints(0);
+    user.setReview(null);
+    user = userRepository.save(user);
+    Account account = accountConverter.getEntity(register);
+    // TODO add encode password
+    account.setId(user.getId());
+    account.setRole(Role.ROLE_USER);
+    account.setActive(true);
+    // TODO add verificiation
+    account.setVerificationNumber(null);
+    account.setShop(false);
+    accountRepository.save(account);
+  }
 }
