@@ -109,27 +109,27 @@
             <label for="text"></label><textarea th:field="*{description}" id="text" required placeholder="Wpisz tu swoją opinię..." maxlength="80"></textarea>
             <div id="starsAndSubmit">
                 <label>
-                    <input th:field="*{star1}" id="check1" type="checkbox" onclick="checked1()">
+                    <input th:field="*{star1}" id="check1" type="checkbox" onclick="checked1(this)">
                     <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
                     <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
-                    <input th:field="*{star2}" id="check2" type="checkbox" onclick="checked2()">
+                    <input th:field="*{star2}" id="check2" type="checkbox" onclick="checked2(this)">
                     <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
                     <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
-                    <input th:field="*{star3}" id="check3" type="checkbox" onclick="checked3()">
+                    <input th:field="*{star3}" id="check3" type="checkbox" onclick="checked3(this)">
                     <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
                     <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
-                    <input th:field="*{star4}" id="check4" type="checkbox" onclick="checked4()">
+                    <input th:field="*{star4}" id="check4" type="checkbox" onclick="checked4(this)">
                     <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
                     <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
                 </label>
                 <label>
-                    <input th:field="*{star5}" id="check5" type="checkbox" onclick="checked5()">
+                    <input th:field="*{star5}" id="check5" type="checkbox" onclick="checked5(this)">
                     <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
                     <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
                 </label>
