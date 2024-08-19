@@ -10,15 +10,8 @@ public class User {
   @Id private String id;
   private String firstName;
   private String lastName;
-  private String countryId;
-  private String city;
-  private String postalCode;
-  private String street;
-  private int houseNumber;
-  private int apartamentNumber;
   private Card card;
-  private boolean isActive;
   private int points;
-  private String verificationNumber;
   private Review review;
+  private Address address;
 }

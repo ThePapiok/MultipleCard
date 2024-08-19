@@ -9,14 +9,14 @@ db.createCollection("accounts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "login", "password", "role"],
+            "required": ["_id", "phone", "password", "role", "isActive", "verificationNumber"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
                     "bsonType": "objectId",
                     "description": "_id is required and must be objectId"
                 },
-                "login": {
+                "phone": {
                     "bsonType": "string",
                     "description": "login is required and must be string"
                 },
@@ -27,6 +27,14 @@ db.createCollection("accounts", {
                 "role": {
                     "enum": ["ROLE_ADMIN", "ROLE_USER", "ROLE_SHOP"],
                     "description": "role is required and must be either of ROlE_SHOP, ROLE_USER and ROLE_ADMIN"
+                },
+                "isActive": {
+                    "bsonType": "bool",
+                    "description": "isActive is required and must be bool"
+                },
+                "verificationNumber": {
+                    "bsonType": "string",
+                    "description": "string is required and must be string"
                 }
             }
         }
@@ -36,7 +44,7 @@ db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "totalAmount", "imageUrl", "password", "role"],
+            "required": ["_id", "name", "totalAmount", "imageUrl", "points"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -56,6 +64,46 @@ db.createCollection("shops", {
                     "bsonType": "string",
                     "description": "imageUrl is required and must be string"
                 },
+                "points": {
+                    "bsonType": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "additionalProperties": false,
+                    "uniqueItems": true,
+                    "items": {
+                        "bsonType": "object",
+                        "required": ["countryId", "city", "postalCode", "street", "houseNumber", "apartmentNumber"],
+                        "additionalProperties": false,
+                        "properties": {
+                            "countryId": {
+                                "bsonType": "objectId",
+                                "description": "countryId is required and must be objectId"
+                            },
+                            "city": {
+                                "bsonType": "string",
+                                "description": "city is required and must be string"
+                            },
+                            "postalCode": {
+                                "bsonType": "string",
+                                "description": "postalCode is required and must be string"
+                            },
+                            "street": {
+                                "bsonType": "string",
+                                "description": "street is required and must be string"
+                            },
+                            "houseNumber": {
+                                "bsonType": "string",
+                                "description": "houseNumber is required, must be string"
+                            },
+                            "apartmentNumber": {
+                                "bsonType": ["int", "null"],
+                                "minimum": 1,
+                                "description": "apartmentNumber should be int or null and must be greater than 0"
+                            }
+                        }
+                    }
+
+                },
             }
         }
     }
@@ -65,14 +113,14 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "promotion"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
                     "bsonType": "objectId",
                     "description": "_id is required and must be objectId"
                 },
-                "name":  {
+                "name": {
                     "bsonType": "string",
                     "description": "name is required and must be string"
                 },
@@ -90,7 +138,7 @@ db.createCollection("products", {
                 },
                 "categoryId": {
                     "bsonType": "objectId",
-                    "description": "categoryId is required and must be objectId" 
+                    "description": "categoryId is required and must be objectId"
                 },
                 "amount": {
                     "bsonType": "int",
@@ -99,7 +147,16 @@ db.createCollection("products", {
                 },
                 "shopId": {
                     "bsonType": "objectId",
-                    "description": "shopId is required and must be objectId" 
+                    "description": "shopId is required and must be objectId"
+                },
+                "isActive": {
+                    "bsonType": "bool",
+                    "description": "isActive is required and must be bool"
+                },
+                "promotion": {
+                    "bsonType": ["int", "null"],
+                    "minimum": 0,
+                    "description": "amount must be greater or equal 0"
                 }
             }
         }
@@ -214,7 +271,7 @@ db.createCollection("users", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "countryId", "phone", "city", "postalCode", "street", "houseNumber", "apartmentNumber", "password", "card" , "isActive", "points", "verificationNumber", "role", "review"],
+            "required": ["_id", "firstName", "lastName", "card", "points", "review", "address"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -229,34 +286,37 @@ db.createCollection("users", {
                     "bsonType": "string",
                     "description": "lastName is required and must be string"
                 },
-                "countryId": {
-                    "bsonType": "objectId",
-                    "description": "countryId is required and must be objectId"
-                },
-                "city": {
-                    "bsonType": "string",
-                    "description": "city is required and must be string"
-                },
-                "postalCode": {
-                    "bsonType": "string",
-                    "description": "postalCode is required and must be string"
-                },
-                "street": {
-                    "bsonType": "string",
-                    "description": "street is required and must be string"
-                },
-                "houseNumber": {
-                    "bsonType": "string",
-                    "description": "houseNumber is required, must be string"
-                },
-                "apartmentNumber": {
-                    "bsonType": ["int", "null"],
-                    "minimum": 1,
-                    "description": "apartmentNumber should be int or null and must be greater than 0"
-                },
-                "isActive": {
-                    "bsonType": "bool",
-                    "description": "isActive is required and must be bool"
+                "address": {
+                    "bsonType": "object",
+                    "required": ["countryId", "city", "postalCode", "street", "houseNumber", "apartmentNumber"],
+                    "additionalProperties": false,
+                    "properties": {
+                        "countryId": {
+                            "bsonType": "objectId",
+                            "description": "countryId is required and must be objectId"
+                        },
+                        "city": {
+                            "bsonType": "string",
+                            "description": "city is required and must be string"
+                        },
+                        "postalCode": {
+                            "bsonType": "string",
+                            "description": "postalCode is required and must be string"
+                        },
+                        "street": {
+                            "bsonType": "string",
+                            "description": "street is required and must be string"
+                        },
+                        "houseNumber": {
+                            "bsonType": "string",
+                            "description": "houseNumber is required, must be string"
+                        },
+                        "apartmentNumber": {
+                            "bsonType": ["int", "null"],
+                            "minimum": 1,
+                            "description": "apartmentNumber should be int or null and must be greater than 0"
+                        }
+                    }
                 },
                 "points": {
                     "bsonType": "int",
@@ -264,13 +324,10 @@ db.createCollection("users", {
                     "description":
                         "points is required, must be int and greater or equal than 0"
                 },
-                "verificationNumber": {
-                    "bsonType": "string",
-                    "description": "string is required and must be string"
-                },
                 "card":{
                     "bsonType": ["object", "null"],
                     "required": ["name", "imageUrl", "pin", "attempts"],
+                    "additionalProperties": false,
                     "properties": {
                         "name": {
                             "bsonType": "string",
@@ -295,6 +352,7 @@ db.createCollection("users", {
                 "review": {
                     "bsonType": ["object", "null"],
                     "required": ["description", "rating", "createdAt"],
+                    "additionalProperties": false,
                     "properties": {
                         "description": {
                             "bsonType": "string",
@@ -320,7 +378,7 @@ db.createCollection("users", {
 db.countries.createIndex({"name": 1, "code": 1}, {"unique": true});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
-db.accounts.createIndex({"login": 1}, {"unique": true});
+db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.countries.insertMany([
     {
         "name": "Polska",
