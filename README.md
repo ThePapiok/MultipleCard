@@ -4,7 +4,7 @@
 Aplikacja webowa pozwalająca na korzystanie z wielkrotynych kart podarunkowych. Kartę można doładować kupując na niej jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
 
-![Logo](https://i.imgur.com/4RCLq1L.png)
+![Logo](https://i.imgur.com/C5RsVmp.png)
 
 ## Linki
 
