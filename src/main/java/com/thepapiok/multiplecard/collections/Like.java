@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.collections;
 
 import lombok.Data;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,6 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "likes")
 public class Like {
   @Id private String id;
-  private String reviewUserId;
-  private String userId;
+  private ObjectId reviewUserId;
+  private ObjectId userId;
 }

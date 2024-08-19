@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.collections;
 
 import lombok.Data;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,9 +13,9 @@ public class Product {
   private String description;
   private String imageUrl;
   private String barcode;
-  private String categoryId;
+  private ObjectId categoryId;
   private int amount;
-  private String shopId;
+  private ObjectId shopId;
   private boolean isActive;
   private int promotion;
 }
