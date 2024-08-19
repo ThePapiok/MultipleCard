@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class AuthenticationService {
 
@@ -48,5 +50,9 @@ public class AuthenticationService {
     account.setVerificationNumber(null);
     account.setShop(false);
     accountRepository.save(account);
+  }
+
+  public List<String> getPhones(){
+    return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
   }
 }
