@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/css/registerPage.css">
   <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body onload="setDefault()">
+<body onload="checkAll()">
 <script src="/js/registerPage.js"></script>
 <div id="container">
   <div id="header">
@@ -85,8 +85,8 @@
       <div class="block-horizontally">
         <label id="PostalCode">
           <input th:field="*{postalCode}" type="text" placeholder="Kod pocztowy" required oninput="checkPostalCode(this)" maxlength="6" minlength="6">
-          <img id="close9" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
-          <img id="check9" src="/images/check.png" alt="check">
+          <img id="close6" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+          <img id="check6" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPostalCode">
           Kod pocztowy musi spełniać następujące warunki:
@@ -96,8 +96,8 @@
         </div>
         <label id="City">
           <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)" maxlength="40">
-          <img id="close10" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
-          <img id="check10"  src="/images/check.png" alt="check">
+          <img id="close7" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+          <img id="check7"  src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationCity">
           Miejscowość musi spełniać następujące warunki:
@@ -109,14 +109,14 @@
         </div>
       </div>
       <div class="block-horizontally">
-          <select th:field="*{country}" id="Country" required>
+          <select th:field="*{country}" id="Country" oninput="checkCountry(this)" required>
           <option value="" disabled selected hidden>Kraj</option>
           <option th:each="country : ${countries}" th:value="${country.name}" th:text="${country.name} + ' (' + ${country.code} + ')'"> </option>
         </select>
         <label id="Phone">
           <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="9" minlength="9">
-          <img id="close6" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
-          <img id="check6" src="/images/check.png" alt="check">
+          <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+          <img id="check8" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPhone">
           Telefon musi spełniać następujące warunki:
@@ -127,8 +127,8 @@
       </div>
       <label id="Password">
         <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" id="passwordInput" min="6" max="25">
-        <img id="close7" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
-        <img id="check7"  src="/images/check.png" alt="check">
+        <img id="close9" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+        <img id="check9"  src="/images/check.png" alt="check">
       </label>
       <div class="validation" id="validationPassword">
         Hasło musi spełniać następujące warunki:
@@ -142,8 +142,8 @@
       </div>
       <label id="RetypedPassword">
         <input th:field="*{retypedPassword}" type="password" placeholder="Powtórz hasło" required oninput="checkRetypedPassword(this)" min="6" max="25">
-        <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
-        <img id="check8"  src="/images/check.png" alt="check">
+        <img id="close10" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+        <img id="check10"  src="/images/check.png" alt="check">
       </label>
       <div class="validation" id="validationRetypedPassword">
         Powtórzone hasło musi spełniać następujące warunki:
@@ -151,7 +151,7 @@
           <li>takie same jak pole hasło</li>
         </ul>
       </div>
-      <p th:if="${param.error}" id="error">Podane dane są niepoprawne</p>
+      <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
       <button type="button" class="grayButton" id="nextButton" >Dalej</button>
       <a th:href="@{/login}">
         <button type="button" class="blackButton">Logowanie</button>

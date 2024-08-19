@@ -168,7 +168,7 @@ img{
     top: -10px;
 }
 
-#check1, #check2, #check3, #check4, #close5, #check6, #check7, #check8, #check9, #check10{
+#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10{
     display: none;
 }
 
@@ -176,12 +176,13 @@ img{
     left: 83%
 }
 
-#check2, #close2, #check10, #close10{
+#check2, #close2 , #check7, #close7{
     left: 92%;
 }
 
-#check6, #close6{
-    left: 89%;
+
+#check8, #close8{
+    left: 88%;
 }
 
 .block-horizontally{

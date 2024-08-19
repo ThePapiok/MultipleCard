@@ -74,9 +74,8 @@ function hideValidation(e) {
     document.getElementById("validation"+e.parentElement.id).style.display = "none";
 }
 
-function setDefault(){
+function checkAll(){
     let inputs = document.getElementsByTagName("input");
-    for(let i = 0; i < inputs.length; i++){
-        inputs[i].value="";
-    }
+    checkLogin(inputs[0]);
+
 }
