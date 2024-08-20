@@ -5,9 +5,11 @@ import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,9 +59,20 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public String createUser(
-      @ModelAttribute RegisterDTO register, Model model, HttpSession httpSession) {
-    if (authenticationService.getPhones().contains(register.getPhone())) {
-      httpSession.setAttribute(errorMessage, "Użytkownik o takim numerze telefonu już istnieje");
+      @Valid @ModelAttribute RegisterDTO register,
+      BindingResult bindingResult,
+      HttpSession httpSession) {
+    boolean error = false;
+    String message = null;
+    if (bindingResult.hasErrors()) {
+      error = true;
+      message = "Podane dane są niepoprawne";
+    } else if (authenticationService.getPhones().contains(register.getPhone())) {
+      error = true;
+      message = "Użytkownik o takim numerze telefonu już istnieje";
+    }
+    if (error) {
+      httpSession.setAttribute(errorMessage, message);
       httpSession.setAttribute(this.register, register);
       return "redirect:/register?error";
     }

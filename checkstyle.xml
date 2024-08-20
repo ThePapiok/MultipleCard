@@ -11,7 +11,9 @@
         <module name="AvoidStarImport"/>
         <module name="AvoidNestedBlocks"/>
         <module name="MissingOverride"/>
-        <module name="AnnotationLocation"/>
+        <module name="AnnotationLocation">
+            <property name="allowSamelineMultipleAnnotations" value="true"/>
+        </module>
         <module name="EmptyBlock"/>
         <module name="EmptyCatchBlock"/>
         <module name="LeftCurly"/>
@@ -26,7 +28,9 @@
             <property name="checkLastCaseGroup" value="true"/>
         </module>
         <module name="InnerAssignment"/>
-        <module name="MagicNumber"/>
+        <module name="MagicNumber">
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
         <module name="MissingSwitchDefault"/>
         <module name="ModifiedControlVariable"/>
         <module name="MultipleStringLiterals"/>
