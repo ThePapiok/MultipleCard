@@ -17,16 +17,16 @@
   <div id="body">
     <p class="title">Logowanie</p>
     <form th:action="@{/login}" th:object="${login}" id="form" method="post">
-    <label id="Login">
-      <input th:field="*{login}" type="text" placeholder="Numer telefonu" required oninput="checkLogin(this)" minlength="9" maxlength="9">
+    <label id="Phone">
+      <input th:field="*{phone}" type="text" placeholder="Numer telefonu" required oninput="checkPhone(this)" minlength="11" maxlength="17">
       <img id="close1" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
       <img id="check1" src="/images/check.png" alt="check">
     </label>
-    <div class="validation" id="validationLogin">
-        Login musi spełniać następujące warunki:
+    <div class="validation" id="validationPhone">
+        Telefon musi spełniać następujące warunki:
         <ul>
-          <li>długość 9</li>
-          <li>zawiera tylko cyfry</li>
+          <li>zawiera poprzedający numer kierunkowy np. +48</li>
+          <li>zawiera 9 cyfr numeru telefonu</li>
         </ul>
     </div>
     <label id="Password">

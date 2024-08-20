@@ -45,8 +45,8 @@ public class RegisterDTO {
   @NotBlank @IsCountry private String country;
 
   @NotBlank
-  @Pattern(regexp = "^\\+[0-9]*$")
-  @Size(min = 11, max = 14)
+  @Pattern(regexp = "^\\+[0-9]{1,4} ?[0-9]{3} ?[0-9]{3} ?[0-9]{3}$")
+  @Size(min = 11, max = 17)
   private String phone;
 
   @NotBlank

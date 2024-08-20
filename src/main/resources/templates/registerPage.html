@@ -95,7 +95,7 @@
           </ul>
         </div>
         <label id="City">
-          <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)" maxlength="40">
+          <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)" minlength="2" maxlength="40">
           <img id="close7" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check7"  src="/images/check.png" alt="check">
         </label>
@@ -114,7 +114,7 @@
           <option th:each="country : ${countries}" th:value="${country.name}" th:text="${country.name} + ' (' + ${country.code} + ')'"> </option>
         </select>
         <label id="Phone">
-          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="14" minlength="11">
+          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="17" minlength="11">
           <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check8" src="/images/check.png" alt="check">
         </label>

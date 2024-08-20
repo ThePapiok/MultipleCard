@@ -3,9 +3,9 @@ let ok = [false, false];
 let success = false;
 
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
-const regLogin = new RegExp("^[0-9]*$");
+const regPhone = new RegExp("^\\+([0-9]{1,4} [0-9]{3} [0-9]{3} [0-9]{3}|[0-9]*)$")
 
-
+// TODO make unique this and css
 
 function check(i, con){
     if(con){
@@ -34,9 +34,9 @@ function check(i, con){
     }
 }
 
-function checkLogin(e){
+function checkPhone(e){
     const input = e.value;
-    check(1, (input.length === 9 && regLogin.test(input)));
+    check(1, (input.length >= 11 && input.length <= 17 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -76,6 +76,5 @@ function hideValidation(e) {
 
 function checkAll(){
     let inputs = document.getElementsByTagName("input");
-    checkLogin(inputs[0]);
-
+    checkPhone(inputs[0]);
 }

@@ -23,6 +23,7 @@ public class AuthenticationController {
   private final String errorMessage = "errorMessage";
   private final String successMessage = "successMessage";
   private final String register = "register";
+  private final String phone = "phone";
   private final String login = "login";
 
   @Autowired
@@ -33,14 +34,14 @@ public class AuthenticationController {
   }
 
   @GetMapping("/login")
-  public String login(
+  public String loginPage(
       @RequestParam(required = false) String success, Model model, HttpSession httpSession) {
     if (success != null) {
       model.addAttribute(successMessage, httpSession.getAttribute(successMessage));
       httpSession.removeAttribute(successMessage);
       LoginDTO loginDTO = new LoginDTO();
-      loginDTO.setLogin((String) httpSession.getAttribute(login));
-      httpSession.removeAttribute(login);
+      loginDTO.setPhone((String) httpSession.getAttribute(phone));
+      httpSession.removeAttribute(phone);
       model.addAttribute(login, loginDTO);
 
     } else {
@@ -73,6 +74,7 @@ public class AuthenticationController {
     String message = null;
     String redirect = "redirect:/register?error";
     if (bindingResult.hasErrors()) {
+      System.out.println(bindingResult);
       error = true;
       message = "Podane dane są niepoprawne";
     } else if (authenticationService.getPhones().contains(register.getPhone())) {
@@ -88,7 +90,8 @@ public class AuthenticationController {
       return redirect;
     }
     try {
-      authenticationService.createUser(register);
+      System.out.println(register);
+      // authenticationService.createUser(register);
     } catch (Exception e) {
       httpSession.setAttribute(errorMessage, "Nieoczekiwany błąd");
       httpSession.setAttribute(this.register, register);
@@ -96,7 +99,7 @@ public class AuthenticationController {
     }
     // TODO maybe add better exception
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
-    httpSession.setAttribute(login, register.getPhone());
+    httpSession.setAttribute(phone, register.getPhone());
     return "redirect:/login?success";
   }
 }
