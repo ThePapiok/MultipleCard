@@ -114,14 +114,15 @@
           <option th:each="country : ${countries}" th:value="${country.name}" th:text="${country.name} + ' (' + ${country.code} + ')'"> </option>
         </select>
         <label id="Phone">
-          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="9" minlength="9">
+          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="14" minlength="11">
           <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check8" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPhone">
           Telefon musi spełniać następujące warunki:
           <ul>
-            <li>zawiera 9 cyfr</li>
+            <li>zawiera poprzedający numer kierunkowy np. +48</li>
+            <li>zawiera 9 cyfr numeru telefonu</li>
           </ul>
         </div>
       </div>

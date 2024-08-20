@@ -168,7 +168,7 @@ img{
     top: -10px;
 }
 
-#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10{
+#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7{
     display: none;
 }
 
@@ -244,7 +244,7 @@ img{
 }
 
 #validationPhone{
-    height: 60px;
+    height: 80px;
     transform: translateX(-100%);
 }
 

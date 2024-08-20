@@ -4,7 +4,7 @@ const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńó�
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
 const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
-const regPhone = new RegExp("^[0-9]*$")
+const regPhone = new RegExp("^\\+[0-9]*$")
 
 
 let previousPostalCode = "";
@@ -108,7 +108,7 @@ function checkCountry(e){
 
 function checkPhone(e){
     const input = e.value;
-    check(8, (input.length === 9 && regPhone.test(input)));
+    check(8, (input.length >= 11 && input.length <= 14 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
