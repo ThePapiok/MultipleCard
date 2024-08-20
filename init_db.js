@@ -32,10 +32,6 @@ db.createCollection("accounts", {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
                 },
-                "verificationNumber": {
-                    "bsonType": "string",
-                    "description": "verificationNumber is required and must be string"
-                },
                 "isShop": {
                     "bsonType": "bool",
                     "description": "isShop is required and must be bool"
