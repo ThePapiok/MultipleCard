@@ -1,6 +1,5 @@
 package com.thepapiok.multiplecard.dto;
 
-import com.thepapiok.multiplecard.validators.IsApartmentNumber;
 import com.thepapiok.multiplecard.validators.IsCountry;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -29,7 +28,8 @@ public class RegisterDTO {
   @Size(min = 1, max = 10)
   private String houseNumber;
 
-  @IsApartmentNumber(regexp = "^[1-9][0-9]*$", min = 1, max = 5)
+  @Pattern(regexp = "^([1-9][0-9]*|)$")
+  @Size(max = 5)
   private String apartmentNumber;
 
   @NotBlank
@@ -58,4 +58,8 @@ public class RegisterDTO {
   @Pattern(regexp = "^(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*]).*$")
   @Size(min = 6, max = 25)
   private String retypedPassword;
+
+  @Pattern(regexp = "^(|[0-9]{3} [0-9]{3})$")
+  @Size(max = 6)
+  private String verificationNumber;
 }
