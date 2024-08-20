@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.dto.LoginDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
+import com.thepapiok.multiplecard.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class AuthenticationController {
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
   private final PasswordEncoder passwordEncoder;
+  private final SmsService smsService;
   private final String errorMessage = "errorMessage";
   private final String successMessage = "successMessage";
   private final String register = "register";
@@ -35,10 +37,12 @@ public class AuthenticationController {
   public AuthenticationController(
       CountryService countryService,
       AuthenticationService authenticationService,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder,
+      SmsService smsService) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
     this.passwordEncoder = passwordEncoder;
+    this.smsService = smsService;
   }
 
   @GetMapping("/login")
@@ -107,9 +111,7 @@ public class AuthenticationController {
       httpSession.setAttribute(errorMessage, message);
       return redirect;
     }
-    String verificationNumber = authenticationService.getVerificationNumber();
-    System.out.println(verificationNumber);
-    httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+    getVerificationNumber(httpSession, register.getPhone());
     httpSession.setAttribute(codeAmount, 1);
     return "redirect:/account_verifications";
   }
@@ -122,12 +124,14 @@ public class AuthenticationController {
       Model model,
       HttpSession httpSession) {
     final int maxAmount = 3;
+    RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(register);
     if (newCode != null) {
       Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
       if (codeAmountInt != maxAmount) {
-        String verificationNumber = authenticationService.getVerificationNumber();
-        System.out.println(verificationNumber);
-        httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+        if (!getVerificationNumber(httpSession, registerDTO.getPhone())) {
+          httpSession.setAttribute(errorMessage, "Błąd podczas wysyłania sms");
+          return redirectVerificationError;
+        }
         httpSession.setAttribute(codeAmount, codeAmountInt + 1);
       } else {
         httpSession.setAttribute(errorMessage, "Za dużo razy poprosiłeś o nowy kod");
@@ -141,7 +145,7 @@ public class AuthenticationController {
       model.addAttribute(errorMessage, httpSession.getAttribute(errorMessage));
       httpSession.removeAttribute(errorMessage);
     }
-    model.addAttribute(register, httpSession.getAttribute(register));
+    model.addAttribute("registerDTO", registerDTO);
     return "verificationPage";
   }
 
@@ -172,5 +176,16 @@ public class AuthenticationController {
     httpSession.removeAttribute(register);
     httpSession.removeAttribute(code);
     httpSession.removeAttribute(codeAmount);
+  }
+
+  private boolean getVerificationNumber(HttpSession httpSession, String phone) {
+    try {
+      String verificationNumber = authenticationService.getVerificationNumber();
+      smsService.sendSms("Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, phone);
+      httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }
