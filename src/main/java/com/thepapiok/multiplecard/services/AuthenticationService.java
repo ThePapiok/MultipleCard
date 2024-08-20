@@ -44,7 +44,6 @@ public class AuthenticationService {
     account.setId(user.getId());
     account.setRole(Role.ROLE_USER);
     account.setActive(true);
-    // TODO add verificiation
     account.setVerificationNumber(null);
     account.setShop(false);
     accountRepository.save(account);

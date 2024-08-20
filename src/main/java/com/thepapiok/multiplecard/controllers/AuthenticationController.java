@@ -71,19 +71,30 @@ public class AuthenticationController {
       HttpSession httpSession) {
     boolean error = false;
     String message = null;
+    String redirect = "redirect:/register?error";
     if (bindingResult.hasErrors()) {
       error = true;
       message = "Podane dane są niepoprawne";
     } else if (authenticationService.getPhones().contains(register.getPhone())) {
       error = true;
       message = "Użytkownik o takim numerze telefonu już istnieje";
+    } else if (!register.getPassword().equals(register.getRetypedPassword())) {
+      error = true;
+      message = "Podane hasła różnią się";
     }
     if (error) {
       httpSession.setAttribute(errorMessage, message);
       httpSession.setAttribute(this.register, register);
-      return "redirect:/register?error";
+      return redirect;
     }
-    authenticationService.createUser(register);
+    try {
+      authenticationService.createUser(register);
+    } catch (Exception e) {
+      httpSession.setAttribute(errorMessage, "Nieoczekiwany błąd");
+      httpSession.setAttribute(this.register, register);
+      return redirect;
+    }
+    // TODO maybe add better exception
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
     httpSession.setAttribute(login, register.getPhone());
     return "redirect:/login?success";
