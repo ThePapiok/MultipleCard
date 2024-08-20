@@ -23,6 +23,7 @@ public class AuthenticationController {
   private final String errorMessage = "errorMessage";
   private final String successMessage = "successMessage";
   private final String register = "register";
+  private final String login = "login";
 
   @Autowired
   public AuthenticationController(
@@ -37,8 +38,14 @@ public class AuthenticationController {
     if (success != null) {
       model.addAttribute(successMessage, httpSession.getAttribute(successMessage));
       httpSession.removeAttribute(successMessage);
+      LoginDTO loginDTO = new LoginDTO();
+      loginDTO.setLogin((String) httpSession.getAttribute(login));
+      httpSession.removeAttribute(login);
+      model.addAttribute(login, loginDTO);
+
+    } else {
+      model.addAttribute(login, new LoginDTO());
     }
-    model.addAttribute("login", new LoginDTO());
     return "loginPage";
   }
 
@@ -78,6 +85,7 @@ public class AuthenticationController {
     }
     // authenticationService.createUser(register);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
+    httpSession.setAttribute(login, register.getPhone());
     return "redirect:/login?success";
   }
 }
