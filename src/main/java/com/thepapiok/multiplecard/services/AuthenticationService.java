@@ -9,6 +9,7 @@ import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,5 +52,20 @@ public class AuthenticationService {
 
   public List<String> getPhones() {
     return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
+  }
+
+  public String getVerificationNumber() {
+    Random random = new Random();
+    final int bound = 10;
+    final int forBound = 3;
+    StringBuilder verificationNumber = new StringBuilder();
+    for (int i = 1; i <= forBound; i++) {
+      verificationNumber.append(random.nextInt(bound));
+    }
+    verificationNumber.append(" ");
+    for (int i = 1; i <= forBound; i++) {
+      verificationNumber.append(random.nextInt(bound));
+    }
+    return verificationNumber.toString();
   }
 }

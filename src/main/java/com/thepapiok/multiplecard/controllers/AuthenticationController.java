@@ -7,6 +7,7 @@ import com.thepapiok.multiplecard.services.CountryService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,22 +21,32 @@ public class AuthenticationController {
 
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
+  private final PasswordEncoder passwordEncoder;
   private final String errorMessage = "errorMessage";
   private final String successMessage = "successMessage";
   private final String register = "register";
   private final String phone = "phone";
   private final String login = "login";
+  private final String code = "code";
+  private final String redirectVerificationError = "redirect:/account_verifications?error";
+  private final String codeAmount = "codeAmount";
 
   @Autowired
   public AuthenticationController(
-      CountryService countryService, AuthenticationService authenticationService) {
+      CountryService countryService,
+      AuthenticationService authenticationService,
+      PasswordEncoder passwordEncoder) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
+    this.passwordEncoder = passwordEncoder;
   }
 
   @GetMapping("/login")
   public String loginPage(
-      @RequestParam(required = false) String success, Model model, HttpSession httpSession) {
+      @RequestParam(required = false) String success,
+      @RequestParam(required = false) String error,
+      Model model,
+      HttpSession httpSession) {
     if (success != null) {
       model.addAttribute(successMessage, httpSession.getAttribute(successMessage));
       httpSession.removeAttribute(successMessage);
@@ -44,6 +55,14 @@ public class AuthenticationController {
       httpSession.removeAttribute(phone);
       model.addAttribute(login, loginDTO);
 
+    } else if (error != null) {
+      String message = (String) httpSession.getAttribute(errorMessage);
+      if (message == null) {
+        model.addAttribute(errorMessage, message);
+        httpSession.removeAttribute(message);
+      } else {
+        model.addAttribute(errorMessage, "Niepoprawny login lub hasło");
+      }
     } else {
       model.addAttribute(login, new LoginDTO());
     }
@@ -73,8 +92,8 @@ public class AuthenticationController {
     boolean error = false;
     String message = null;
     String redirect = "redirect:/register?error";
+    httpSession.setAttribute(this.register, register);
     if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       error = true;
       message = "Podane dane są niepoprawne";
     } else if (authenticationService.getPhones().contains(register.getPhone())) {
@@ -86,20 +105,72 @@ public class AuthenticationController {
     }
     if (error) {
       httpSession.setAttribute(errorMessage, message);
-      httpSession.setAttribute(this.register, register);
       return redirect;
     }
+    String verificationNumber = authenticationService.getVerificationNumber();
+    System.out.println(verificationNumber);
+    httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+    httpSession.setAttribute(codeAmount, 1);
+    return "redirect:/account_verifications";
+  }
+
+  @GetMapping("/account_verifications")
+  public String verificationPage(
+      @RequestParam(required = false) String newCode,
+      @RequestParam(required = false) String reset,
+      @RequestParam(required = false) String error,
+      Model model,
+      HttpSession httpSession) {
+    final int maxAmount = 3;
+    if (newCode != null) {
+      Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
+      if (codeAmountInt != maxAmount) {
+        String verificationNumber = authenticationService.getVerificationNumber();
+        System.out.println(verificationNumber);
+        httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+        httpSession.setAttribute(codeAmount, codeAmountInt + 1);
+      } else {
+        httpSession.setAttribute(errorMessage, "Za dużo razy poprosiłeś o nowy kod");
+        return redirectVerificationError;
+      }
+
+    } else if (reset != null) {
+      resetRegister(httpSession);
+      return "redirect:/login";
+    } else if (error != null) {
+      model.addAttribute(errorMessage, httpSession.getAttribute(errorMessage));
+      httpSession.removeAttribute(errorMessage);
+    }
+    model.addAttribute(register, httpSession.getAttribute(register));
+    return "verificationPage";
+  }
+
+  @PostMapping("/account_verifications")
+  public String verification(@ModelAttribute RegisterDTO registerDTO, HttpSession httpSession) {
     try {
-      System.out.println(register);
-      // authenticationService.createUser(register);
+      if (passwordEncoder.matches(
+          registerDTO.getVerificationNumber(), (String) httpSession.getAttribute(code))) {
+        authenticationService.createUser((RegisterDTO) httpSession.getAttribute(register));
+      } else {
+        httpSession.setAttribute(errorMessage, "Nieprawidłowy kod");
+        return redirectVerificationError;
+      }
     } catch (Exception e) {
+      System.out.println(e);
+      resetRegister(httpSession);
       httpSession.setAttribute(errorMessage, "Nieoczekiwany błąd");
-      httpSession.setAttribute(this.register, register);
-      return redirect;
+      return "redirect:/login?error";
+      // TODO maybe add better exception
     }
-    // TODO maybe add better exception
+    resetRegister(httpSession);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
-    httpSession.setAttribute(phone, register.getPhone());
+    httpSession.setAttribute(phone, registerDTO.getPhone());
     return "redirect:/login?success";
+  }
+
+  private void resetRegister(HttpSession httpSession) {
+    httpSession.removeAttribute(register);
+    httpSession.removeAttribute(code);
+    httpSession.removeAttribute(codeAmount);
   }
 }
