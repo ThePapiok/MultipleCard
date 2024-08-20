@@ -41,7 +41,6 @@ public class AuthenticationService {
     user.setReview(null);
     user = userRepository.save(user);
     Account account = accountConverter.getEntity(register);
-    // TODO add encode password
     account.setId(user.getId());
     account.setRole(Role.ROLE_USER);
     account.setActive(true);

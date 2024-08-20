@@ -83,7 +83,7 @@ public class AuthenticationController {
       httpSession.setAttribute(this.register, register);
       return "redirect:/register?error";
     }
-    // authenticationService.createUser(register);
+    authenticationService.createUser(register);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
     httpSession.setAttribute(login, register.getPhone());
     return "redirect:/login?success";
