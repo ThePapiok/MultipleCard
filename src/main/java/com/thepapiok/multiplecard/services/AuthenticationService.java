@@ -8,11 +8,10 @@ import com.thepapiok.multiplecard.misc.AccountConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class AuthenticationService {
@@ -52,7 +51,7 @@ public class AuthenticationService {
     accountRepository.save(account);
   }
 
-  public List<String> getPhones(){
+  public List<String> getPhones() {
     return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
   }
 }
