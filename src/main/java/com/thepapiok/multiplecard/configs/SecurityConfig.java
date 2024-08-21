@@ -1,7 +1,9 @@
 package com.thepapiok.multiplecard.configs;
 
+import com.thepapiok.multiplecard.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +21,7 @@ public class SecurityConfig {
             login ->
                 login
                     .loginPage(loginUrl)
-                    .successForwardUrl("/")
+                    .loginProcessingUrl(loginUrl)
                     .usernameParameter("phone")
                     .passwordParameter("password"))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl(loginUrl))
@@ -30,5 +32,13 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public DaoAuthenticationProvider authenticationProvider(UserService userService) {
+    DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+    daoAuthenticationProvider.setUserDetailsService(userService);
+    daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+    return daoAuthenticationProvider;
   }
 }
