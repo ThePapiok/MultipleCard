@@ -166,9 +166,9 @@ public class AuthenticationController {
       return "redirect:/login?error";
       // TODO maybe add better exception
     }
+    httpSession.setAttribute(phone, ((RegisterDTO) httpSession.getAttribute(register)).getPhone());
     resetRegister(httpSession);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
-    httpSession.setAttribute(phone, registerDTO.getPhone());
     return "redirect:/login?success";
   }
 
