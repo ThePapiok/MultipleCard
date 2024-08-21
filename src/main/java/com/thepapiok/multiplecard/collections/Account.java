@@ -13,4 +13,5 @@ public class Account {
   private Role role;
   private boolean isActive;
   private String verificationNumber;
+  private boolean isShop;
 }

@@ -9,7 +9,7 @@ db.createCollection("accounts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "phone", "password", "role", "isActive", "verificationNumber"],
+            "required": ["_id", "phone", "password", "role", "isActive", "isShop", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -32,10 +32,15 @@ db.createCollection("accounts", {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
                 },
-                "verificationNumber": {
+                "isShop": {
+                    "bsonType": "bool",
+                    "description": "isShop is required and must be bool"
+                },
+                "_class": {
                     "bsonType": "string",
-                    "description": "string is required and must be string"
+                    "description": "_class is required and must be string",
                 }
+
             }
         }
     }
@@ -44,7 +49,7 @@ db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "totalAmount", "imageUrl", "points"],
+            "required": ["_id", "name", "totalAmount", "imageUrl", "points", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -68,11 +73,10 @@ db.createCollection("shops", {
                     "bsonType": "array",
                     "minItems": 1,
                     "maxItems": 5,
-                    "additionalProperties": false,
                     "uniqueItems": true,
                     "items": {
                         "bsonType": "object",
-                        "required": ["countryId", "city", "postalCode", "street", "houseNumber", "apartmentNumber"],
+                        "required": ["countryId", "city", "postalCode", "street", "houseNumber"],
                         "additionalProperties": false,
                         "properties": {
                             "countryId": {
@@ -104,6 +108,10 @@ db.createCollection("shops", {
                     }
 
                 },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
             }
         }
     }
@@ -113,7 +121,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "promotion"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "promotion", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -157,6 +165,10 @@ db.createCollection("products", {
                     "bsonType": ["int", "null"],
                     "minimum": 0,
                     "description": "amount must be greater or equal 0"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -167,7 +179,7 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "userId", "productId", "createdAt", "isUsed", "amount"],
+            "required": ["_id", "userId", "productId", "createdAt", "isUsed", "amount", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -176,7 +188,7 @@ db.createCollection("orders", {
                 },
                 "userId": {
                     "bsonType": "objectId",
-                    "description": "userId is required and must be objectId" 
+                    "description": "userId is required and must be objectId"
                 },
                 "productId": {
                     "bsonType": "objectId",
@@ -194,6 +206,10 @@ db.createCollection("orders", {
                     "bsonType": "int",
                     "minimum": 0,
                     "description": "amount is required and must be greater or equal 0"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -204,7 +220,7 @@ db.createCollection("categories", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name"],
+            "required": ["_id", "name", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -214,6 +230,10 @@ db.createCollection("categories", {
                 "name":  {
                     "bsonType": "string",
                     "description": "name is required and must be string"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -224,7 +244,7 @@ db.createCollection("countries", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["name", "code", "_id"],
+            "required": ["name", "code", "_id", "_class"],
             "additionalProperties": false,
             "properties": {
                 "name": {
@@ -238,6 +258,10 @@ db.createCollection("countries", {
                 "_id": {
                     "bsonType": "objectId",
                     "description": "_id is required and must be objectId"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -248,7 +272,7 @@ db.createCollection("likes", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id","reviewUserId", "userId"],
+            "required": ["_id","reviewUserId", "userId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -262,6 +286,10 @@ db.createCollection("likes", {
                 "userId": {
                     "bsonType": "objectId",
                     "description": "userId is required and must be objectId"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -271,7 +299,7 @@ db.createCollection("users", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "card", "points", "review", "address"],
+            "required": ["_id", "firstName", "lastName", "points", "address", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -288,7 +316,7 @@ db.createCollection("users", {
                 },
                 "address": {
                     "bsonType": "object",
-                    "required": ["countryId", "city", "postalCode", "street", "houseNumber", "apartmentNumber"],
+                    "required": ["countryId", "city", "postalCode", "street", "houseNumber"],
                     "additionalProperties": false,
                     "properties": {
                         "countryId": {
@@ -370,6 +398,10 @@ db.createCollection("users", {
                         }
 
                     }
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
                 }
             }
         }
@@ -382,90 +414,112 @@ db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.countries.insertMany([
     {
         "name": "Polska",
-        "code": "PL"
+        "code": "PL",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Niemcy",
-        "code": "DE"
+        "code": "DE",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Chiny",
-        "code": "CN"
+        "code": "CN",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Czechy",
-        "code": "CZ"
+        "code": "CZ",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Chorwacja",
-        "code": "HR"
+        "code": "HR",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Dania",
-        "code": "DK"
+        "code": "DK",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Finlandia",
-        "code": "FI"
+        "code": "FI",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Francja",
-        "code": "FR"
+        "code": "FR",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Grecja",
-        "code": "GR"
+        "code": "GR",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Hiszpania",
-        "code": "ES"
+        "code": "ES",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Japonia",
-        "code": "JP"
+        "code": "JP",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Indie",
-        "code": "IN"
+        "code": "IN",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Kanada",
-        "code": "CA"
+        "code": "CA",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Norwegia",
-        "code": "NO"
+        "code": "NO",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Rosja",
-        "code": "RU"
+        "code": "RU",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Stany zjednoczone",
-        "code": "US"
+        "code": "US",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Szwecja",
-        "code": "CH"
+        "code": "CH",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Szwajcaria",
-        "code": "SE"
+        "code": "SE",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Turcja",
-        "code": "TR"
+        "code": "TR",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Węgry",
-        "code": "HU"
+        "code": "HU",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Wielka Brytania",
-        "code": "GB"
+        "code": "GB",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     },
     {
         "name": "Włochy",
-        "code": "IT"
+        "code": "IT",
+        "_class": "com.thepapiok.multiplecard.collections.Country"
     }
 ]);
