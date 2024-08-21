@@ -1,6 +1,5 @@
 package com.thepapiok.multiplecard.controllers;
 
-import com.thepapiok.multiplecard.dto.LoginDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -28,7 +27,6 @@ public class AuthenticationController {
   private final String successMessage = "successMessage";
   private final String register = "register";
   private final String phone = "phone";
-  private final String login = "login";
   private final String code = "code";
   private final String redirectVerificationError = "redirect:/account_verifications?error";
   private final String codeAmount = "codeAmount";
@@ -54,21 +52,17 @@ public class AuthenticationController {
     if (success != null) {
       model.addAttribute(successMessage, httpSession.getAttribute(successMessage));
       httpSession.removeAttribute(successMessage);
-      LoginDTO loginDTO = new LoginDTO();
-      loginDTO.setPhone((String) httpSession.getAttribute(phone));
+      model.addAttribute(phone, httpSession.getAttribute(phone));
       httpSession.removeAttribute(phone);
-      model.addAttribute(login, loginDTO);
 
     } else if (error != null) {
       String message = (String) httpSession.getAttribute(errorMessage);
-      if (message == null) {
+      if (message != null) {
         model.addAttribute(errorMessage, message);
         httpSession.removeAttribute(message);
       } else {
         model.addAttribute(errorMessage, "Niepoprawny login lub hasło");
       }
-    } else {
-      model.addAttribute(login, new LoginDTO());
     }
     return "loginPage";
   }

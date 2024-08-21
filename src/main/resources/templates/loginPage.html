@@ -16,9 +16,9 @@
   </div>
   <div id="body">
     <p class="title">Logowanie</p>
-    <form th:action="@{/login}" th:object="${login}" id="form" method="post">
+    <form th:action="@{/login}" id="form" method="post">
     <label id="Phone">
-      <input th:field="*{phone}" type="text" placeholder="Numer telefonu" required oninput="checkPhone(this)" minlength="11" maxlength="17">
+      <input name="phone" type="text" placeholder="Numer telefonu" th:text="${phone}" required oninput="checkPhone(this)" minlength="11" maxlength="17">
       <img id="close1" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
       <img id="check1" src="/images/check.png" alt="check">
     </label>
@@ -30,7 +30,7 @@
         </ul>
     </div>
     <label id="Password">
-      <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25">
+      <input name="password" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25">
       <img id="close2" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
       <img id="check2"  src="/images/check.png" alt="check">
     </label>
