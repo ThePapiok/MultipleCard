@@ -21,6 +21,17 @@ Aby projekt działał potrzebuje on dodania zmiennych środowiskowych:
 
 `MONGODB_PASSWORD`
 
+`MONGODB_PRE` - mongodb lub mongodb+srv
+
+`AUTH_TOKEN` - token z api twilio
+
+`PHONE_NUMBER` - numer telefonu z api twilio
+
+`ACCOUNT_SID` - account sid z api twilio
+
+
+
+
 
 ## Uruchomienie z dockerem
 
@@ -36,17 +47,22 @@ Wejdź do uzyskanego folderu
   cd MultipleCard
 ```
 
+Dodaj zmienne środowiskowe (przykładowe)
+
+```bash
+  export PHONE_NUMBER=+123123123123
+  export ACCOUNT_SID=accountSidTest
+  export AUTH_TOKEN=authTokenTest
+```
+
 Uruchom kontenery
 
 ```bash
   docker-compose up
 ```
 
-Wejdź na adres
+Wejdź na adres **[localhost:8080](http://localhost:8080/)**
 
-```bash
-  localhost:8080
-```
 
 
 ## Uruchomienie testów

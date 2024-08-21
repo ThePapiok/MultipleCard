@@ -6,6 +6,7 @@
     <module name="UniqueProperties"/>
     <module name="LineLength">
         <property name="max" value="120"/>
+        <property name="fileExtensions" value="java"/>
     </module>
     <module name="TreeWalker">
         <module name="AvoidStarImport"/>

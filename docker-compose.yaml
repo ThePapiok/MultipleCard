@@ -6,9 +6,13 @@ services:
     ports:
       - 8080:8080
     environment:
+      MONGODB_PRE: mongodb
       MONGODB_HOST: db
       MONGODB_USERNAME: user
       MONGODB_PASSWORD: user
+      AUTH_TOKEN: ${AUTH_TOKEN}
+      ACCOUNT_SID: ${ACCOUNT_SID}
+      PHONE_NUMBER: ${PHONE_NUMBER}
     depends_on:
       - db
   db:
