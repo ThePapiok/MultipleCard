@@ -103,9 +103,12 @@ public class AuthenticationController {
     String redirect = "redirect:/register?error";
     httpSession.setAttribute(this.register, register);
     if (bindingResult.hasErrors()) {
+      System.out.println(bindingResult);
       error = true;
       message = "Podane dane są niepoprawne";
-    } else if (authenticationService.getPhones().contains(register.getPhone())) {
+    } else if (authenticationService
+        .getPhones()
+        .contains(register.getAreaCode() + register.getPhone())) {
       error = true;
       message = "Użytkownik o takim numerze telefonu już istnieje";
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
@@ -116,7 +119,7 @@ public class AuthenticationController {
       httpSession.setAttribute(errorMessage, message);
       return redirect;
     }
-    getVerificationNumber(httpSession, register.getPhone());
+    getVerificationNumber(httpSession, register.getPhone(), register.getAreaCode());
     httpSession.setAttribute(codeAmount, 1);
     return "redirect:/account_verifications";
   }
@@ -133,7 +136,8 @@ public class AuthenticationController {
     if (newCode != null) {
       Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
       if (codeAmountInt != maxAmount) {
-        if (!getVerificationNumber(httpSession, registerDTO.getPhone())) {
+        if (!getVerificationNumber(
+            httpSession, registerDTO.getPhone(), registerDTO.getAreaCode())) {
           httpSession.setAttribute(errorMessage, "Błąd podczas wysyłania sms");
           return redirectVerificationError;
         }
@@ -183,10 +187,11 @@ public class AuthenticationController {
     httpSession.removeAttribute(codeAmount);
   }
 
-  private boolean getVerificationNumber(HttpSession httpSession, String phone) {
+  private boolean getVerificationNumber(HttpSession httpSession, String phone, String areaCode) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
-      smsService.sendSms("Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, phone);
+      smsService.sendSms(
+          "Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, areaCode + phone);
       httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
