@@ -1,11 +1,14 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.dto.CountryDTO;
+import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -50,11 +53,13 @@ public class AuthenticationController {
       Model model,
       HttpSession httpSession) {
     if (success != null) {
-      model.addAttribute(successMessage, httpSession.getAttribute(successMessage));
-      httpSession.removeAttribute(successMessage);
-      model.addAttribute(phone, httpSession.getAttribute(phone));
-      httpSession.removeAttribute(phone);
-
+      String message = (String) httpSession.getAttribute(successMessage);
+      if (message != null) {
+        model.addAttribute(successMessage, message);
+        httpSession.removeAttribute(successMessage);
+        model.addAttribute(phone, httpSession.getAttribute(phone));
+        httpSession.removeAttribute(phone);
+      }
     } else if (error != null) {
       String message = (String) httpSession.getAttribute(errorMessage);
       if (message != null) {
@@ -70,15 +75,20 @@ public class AuthenticationController {
   @GetMapping("/register")
   public String registerPage(
       @RequestParam(required = false) String error, Model model, HttpSession httpSession) {
-    if (error != null) {
-      model.addAttribute(errorMessage, httpSession.getAttribute(errorMessage));
+    String message = (String) httpSession.getAttribute(errorMessage);
+    if (error != null && message != null) {
+      model.addAttribute(errorMessage, message);
       httpSession.removeAttribute(errorMessage);
       model.addAttribute(register, httpSession.getAttribute(register));
       httpSession.removeAttribute(register);
     } else {
       model.addAttribute(register, new RegisterDTO());
     }
-    model.addAttribute("countries", countryService.getDTOs());
+    List<CountryDTO> countries = countryService.getAll();
+    model.addAttribute(
+        "countries",
+        countries.stream().map(e -> new CountryNamesDTO(e.getName(), e.getCode())).toList());
+    model.addAttribute("areaCodes", countries.stream().map(CountryDTO::getAreaCode).toList());
     return "registerPage";
   }
 

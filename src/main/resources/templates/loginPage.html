@@ -18,7 +18,7 @@
     <p class="title">Logowanie</p>
     <form th:action="@{/login}" id="form" method="post">
     <label id="Phone">
-      <input name="phone" type="text" placeholder="Numer telefonu" th:text="${phone}" required oninput="checkPhone(this)" minlength="11" maxlength="17">
+      <input name="phone" type="text" placeholder="Numer telefonu" th:value="${phone}" required oninput="checkPhone(this)" minlength="11" maxlength="17">
       <img id="close1" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
       <img id="check1" src="/images/check.png" alt="check">
     </label>
