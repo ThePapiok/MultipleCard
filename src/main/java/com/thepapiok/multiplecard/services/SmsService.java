@@ -11,20 +11,20 @@ import org.springframework.stereotype.Service;
 public class SmsService {
 
   @Value("${ACCOUNT_SID}")
-  private String accountSid;
+  private String accountSID;
 
   @Value("${AUTH_TOKEN}")
   private String authToken;
 
-  @Value("${PHONE_NUMBER}")
-  private String phoneNumber;
+  @Value("${MESSAGING_SERVICE_SID}")
+  private String messagingServiceSID;
 
   @PostConstruct
   public void init() {
-    Twilio.init(accountSid, authToken);
+    Twilio.init(accountSID, authToken);
   }
 
   public void sendSms(String text, String number) {
-    Message.creator(new PhoneNumber(number), new PhoneNumber(phoneNumber), text).create();
+    Message.creator(new PhoneNumber(number), messagingServiceSID, text).create();
   }
 }
