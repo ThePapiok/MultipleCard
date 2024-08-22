@@ -34,8 +34,8 @@ public class AuthenticationController {
   private final String code = "code";
   private final String redirectVerificationError = "redirect:/account_verifications?error";
   private final String codeAmount = "codeAmount";
-
   private final String areaCodes = "areaCodes";
+  private final String areaCode = "areaCode";
 
   @Autowired
   public AuthenticationController(
@@ -62,6 +62,8 @@ public class AuthenticationController {
         httpSession.removeAttribute(successMessage);
         model.addAttribute(phone, httpSession.getAttribute(phone));
         httpSession.removeAttribute(phone);
+        model.addAttribute(areaCode, httpSession.getAttribute(areaCode));
+        httpSession.removeAttribute(areaCode);
       }
     } else if (error != null) {
       String message = (String) httpSession.getAttribute(errorMessage);
@@ -169,10 +171,11 @@ public class AuthenticationController {
 
   @PostMapping("/account_verifications")
   public String verification(@ModelAttribute RegisterDTO registerDTO, HttpSession httpSession) {
+    RegisterDTO registerSession = (RegisterDTO) httpSession.getAttribute(register);
     try {
       if (passwordEncoder.matches(
           registerDTO.getVerificationNumber(), (String) httpSession.getAttribute(code))) {
-        authenticationService.createUser((RegisterDTO) httpSession.getAttribute(register));
+        authenticationService.createUser(registerSession);
       } else {
         httpSession.setAttribute(errorMessage, "Nieprawidłowy kod");
         return redirectVerificationError;
@@ -184,7 +187,8 @@ public class AuthenticationController {
       return "redirect:/login?error";
       // TODO maybe add better exception
     }
-    httpSession.setAttribute(phone, ((RegisterDTO) httpSession.getAttribute(register)).getPhone());
+    httpSession.setAttribute(phone, registerSession.getPhone());
+    httpSession.setAttribute(areaCode, registerSession.getAreaCode());
     resetRegister(httpSession);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
     return "redirect:/login?success";
