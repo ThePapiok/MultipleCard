@@ -151,18 +151,25 @@ function disableButton(){
     }
 }
 function showValidation(e){
-    let info = document.getElementById("validation" + e.parentElement.id);
-    const cord = e.getBoundingClientRect();
-    info.style.display = "inline";
-    info.style.left = cord.right + window.scrollX + 'px';
-    info.style.top = cord.top + window.scrollY  + 'px';
+    let validation = e.parentElement.nextElementSibling;
+    if(validation.dataset.display === "0") {
+        const cord = e.getBoundingClientRect();
+        validation.style.display = "inline";
+        validation.style.left = cord.right + window.scrollX + 'px';
+        validation.style.top = cord.top + window.scrollY+50 + 'px';
+        validation.dataset.display = "1";
+    }
 }
 
 function hideValidation(e){
-    document.getElementById("validation"+e.parentElement.id).style.display = "none";
+    let validation = e.parentElement.nextElementSibling;
+    if(validation.dataset.display === "1") {
+        validation.style.display = "none";
+        validation.dataset.display = "0";
+    }
 }
 
-function checkAll() {
+function atStart() {
     checkFirstName(document.getElementById("firstName"));
     checkLastName(document.getElementById("lastName"));
     checkStreet(document.getElementById("street"));
@@ -173,7 +180,6 @@ function checkAll() {
     checkPhone(document.getElementById("phone"));
     checkCountry(document.getElementById("valueCountry"));
     checkAreaCode(document.getElementById("valueAreaCode"))
-
 }
 
 function showOrHideSelect(cond, searchName, optionsName, upName, downName){

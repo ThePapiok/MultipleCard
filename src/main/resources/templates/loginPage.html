@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/css/loginPage.css">
   <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body onload="checkAll()">
+<body onload="atStart()">
 <script src="/js/loginPage.js"></script>
 <div id="container">
   <div id="header">
@@ -30,24 +30,24 @@
             </ul>
         </label>
         <label id="Phone">
-          <input id="phoneInput" type="text" placeholder="Numer telefonu" th:value="${phone}" required oninput="checkPhone(this)" minlength="7" maxlength="28">
-          <img id="close1" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+          <input id="phoneInput" type="text" placeholder="Numer telefonu" th:value="${phone}" required oninput="checkPhone(this)" minlength="7" maxlength="28" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+          <img id="close1" src="/images/close.png" alt="close">
           <img id="check1" src="/images/check.png" alt="check">
         </label>
+        <div class="validation" id="validationPhone" data-display="0">
+          Telefon musi spełniać następujące warunki:
+          <ul>
+            <li>zawiera od 9 cyfr</li>
+            <li>łączna długość z kierunkowym nie przekracza 15</li>
+          </ul>
+        </div>
       </div>
-    <div class="validation" id="validationPhone">
-        Telefon musi spełniać następujące warunki:
-        <ul>
-          <li>zawiera od 9 cyfr</li>
-          <li>łączna długość z kierunkowym nie przekracza 15</li>
-        </ul>
-    </div>
     <label id="Password">
-      <input name="password" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25">
-      <img id="close2" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
+      <input name="password" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+      <img id="close2" src="/images/close.png" alt="close">
       <img id="check2"  src="/images/check.png" alt="check">
     </label>
-      <div class="validation" id="validationPassword">
+      <div class="validation" id="validationPassword" data-display="0">
         Hasło musi spełniać następujące warunki:
         <ul>
           <li>długość od 6 do 25</li>

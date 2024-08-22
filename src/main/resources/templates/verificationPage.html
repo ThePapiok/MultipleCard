@@ -18,8 +18,8 @@
         <p class="title">Potwierdzenie konta</p>
         <form th:action="@{/account_verifications}" th:object="${registerDTO}" id="form" method="post">
             <label id="VerificationNumber">
-                <input th:field="*{verificationNumber}" type="text" placeholder="Kod sms" required oninput="checkVerificationNumber(this)" minlength="7" maxlength="7">
-                <img id="close1" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation()" alt="close">
+                <input th:field="*{verificationNumber}" type="text" placeholder="Kod sms" required oninput="checkVerificationNumber(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation()">
+                <img id="close1" src="/images/close.png" alt="close">
                 <img id="check1" src="/images/check.png" alt="check">
             </label>
             <div class="validation" id="validationVerificationNumber">
