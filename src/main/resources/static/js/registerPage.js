@@ -4,12 +4,12 @@ const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńó�
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
 const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
-const regPhone = new RegExp("^\\+([0-9]{1,4} [0-9]{3} [0-9]{3} [0-9]{3}|[0-9]*)$")
+const regPhone = new RegExp("^[1-9][0-9 ]*$")
 
 
 let previousPostalCode = "";
-let ok = [false, false, false, false, true, false, false, false, false, false, false];
-let previous = [false, false, false, false, true, false, false, false, false, false, false];
+let ok = [false, false, false, false, true, false, false, false, false, false, false, false];
+let previous = [false, false, false, false, true, false, false, false, false, false, false, false];
 let success = false;
 let country = false;
 let areaCode = false;
@@ -89,29 +89,38 @@ function checkCity(e){
     check(7, (input.length <= 40 && regLastNameAndCity.test(input)));
 }
 
-function checkCountry(e){
-    const input = e.value;
+function checkSelect(input, index){
     if(input === ''){
-        ok[10] = false;
-        if(previous[10] !== ok[10])
+        ok[index] = false;
+        if(previous[index] !== ok[index])
         {
             disableButton();
-            previous[10] = false;
+            previous[index] = false;
         }
     }
     else{
-        ok[10] = true;
-        if(previous[10] !== ok[10])
+        ok[index] = true;
+        if(previous[index] !== ok[index])
         {
             activeButton();
-            previous[10] = false;
+            previous[index] = false;
         }
     }
 }
 
+function checkCountry(e){
+    checkSelect(e.value, 10)
+}
+
+function checkAreaCode(e){
+    checkSelect(e.value, 11)
+    checkPhone(document.getElementById("phone"));
+}
+
 function checkPhone(e){
-    const input = e.value;
-    check(8, (input.length >= 11 && input.length <= 17 && regPhone.test(input)));
+    const input = e.value.toString().replaceAll(" ", "");
+    const areaCodeLength = document.getElementById("valueAreaCode").value.length;
+    check(8, (input.length >= 8 && input.length + areaCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -125,7 +134,7 @@ function  checkRetypedPassword(e){
 
 
 function activeButton(){
-    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10]){
+    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10] && ok[11]){
         let button = document.getElementById("nextButton");
         button.className = "greenButton";
         button.type = "submit";
@@ -134,7 +143,7 @@ function activeButton(){
 }
 
 function disableButton(){
-    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10]) && success){
+    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10] || !ok[11]) && success){
         let button = document.getElementById("nextButton");
         button.className = "grayButton";
         button.type = "button";
@@ -154,8 +163,6 @@ function hideValidation(e){
 }
 
 function checkAll() {
-    let inputs = document.getElementsByTagName("input");
-    console.log(inputs);
     checkFirstName(document.getElementById("firstName"));
     checkLastName(document.getElementById("lastName"));
     checkStreet(document.getElementById("street"));
@@ -165,6 +172,7 @@ function checkAll() {
     checkCity(document.getElementById("city"));
     checkPhone(document.getElementById("phone"));
     checkCountry(document.getElementById("valueCountry"));
+    checkAreaCode(document.getElementById("valueAreaCode"))
 
 }
 

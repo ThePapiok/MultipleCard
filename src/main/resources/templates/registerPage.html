@@ -124,15 +124,15 @@
           </ul>
         </label>
         <label id="Phone">
-          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="17" minlength="11">
+          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="28" minlength="7">
           <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check8" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPhone">
           Telefon musi spełniać następujące warunki:
           <ul>
-            <li>zawiera poprzedający numer kierunkowy np. +48</li>
-            <li>zawiera 9 cyfr numeru telefonu</li>
+            <li>zawiera od 9 cyfr</li>
+            <li>łączna długość z kierunkowym nie przekracza 15</li>
           </ul>
         </div>
       </div>

@@ -46,8 +46,8 @@ public class RegisterDTO {
   @NotBlank private String areaCode;
 
   @NotBlank
-  @Pattern(regexp = "^\\+[0-9]{1,4} ?[0-9]{3} ?[0-9]{3} ?[0-9]{3}$")
-  @Size(min = 11, max = 17)
+  @Pattern(regexp = "^[1-9][0-9 ]*$")
+  @Size(min = 7, max = 14)
   private String phone;
 
   @NotBlank
