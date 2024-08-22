@@ -206,7 +206,7 @@ function showOrHideAreaCode(){
 
 function setValueCountry(e){
     let valueSelect = document.getElementById("valueCountry");
-    valueSelect.value = e.value;
+    valueSelect.value = e.textContent;
     checkCountry(valueSelect);
 }
 
