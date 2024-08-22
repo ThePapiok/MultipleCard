@@ -33,6 +33,8 @@ public class AuthenticationController {
   private final String phone = "phone";
   private final String code = "code";
   private final String redirectVerificationError = "redirect:/account_verifications?error";
+  private final String redirectLogin = "redirect:/login";
+
   private final String codeAmount = "codeAmount";
   private final String areaCodes = "areaCodes";
   private final String areaCode = "areaCode";
@@ -144,6 +146,9 @@ public class AuthenticationController {
       HttpSession httpSession) {
     final int maxAmount = 3;
     RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(register);
+    if (registerDTO == null) {
+      return redirectLogin;
+    }
     if (newCode != null) {
       Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
       if (codeAmountInt != maxAmount) {
@@ -160,7 +165,7 @@ public class AuthenticationController {
 
     } else if (reset != null) {
       resetRegister(httpSession);
-      return "redirect:/login";
+      return redirectLogin;
     } else if (error != null) {
       model.addAttribute(errorMessage, httpSession.getAttribute(errorMessage));
       httpSession.removeAttribute(errorMessage);
