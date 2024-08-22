@@ -218,7 +218,7 @@ img{
     font-size: 25px;
     font-family: "Inter", sans-serif;
     overflow-y: auto;
-    height: 500%;
+    max-height: 500%;
     margin: 0;
     padding-top: 5px;
     padding-left: 0;
@@ -235,7 +235,14 @@ img{
 
 .optionSelect{
     cursor: pointer;
+}
+
+li{
     padding: 4px;
+}
+
+#nothingAreaCode{
+    display: none;
 }
 
 .optionSelect:hover{

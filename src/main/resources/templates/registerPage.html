@@ -115,7 +115,8 @@
           <img id="up1" src="/images/keyboard_up.png" alt="up">
           <input id="searchCountry" class="searchSelect" type="text" oninput="searchAllCountries(this)">
           <ul id="optionsCountry" class="optionsSelect">
-            <li class="optionSelect optionCountry" th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
+            <li class="optionSelect optionCountry" th:data-code="${country.code}"  th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
+            <li id="nothingCountry">Brak wyników</li>
           </ul>
         </label>
         <label id="AreaCode">
@@ -124,7 +125,8 @@
           <img id="up2" src="/images/keyboard_up.png" alt="up">
           <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
           <ul id="optionsAreaCode" class="optionsSelect">
-            <li class="optionSelect optionAreaCode" th:each="areaCode : ${areaCodes}" th:text="${areaCode}" onclick="setValueAreaCode(this)"></li>
+            <li class="optionSelect optionAreaCode" th:data-code="${areaCode.code}" th:data-value="${areaCode.areaCode}" th:each="areaCode : ${areaCodes}" th:text="${areaCode.areaCode} + ' (' + ${areaCode.code} + ')'" onclick="setValueAreaCode(this)"></li>
+            <li id="nothingAreaCode">Brak wyników</li>
           </ul>
         </label>
         <label id="Phone">

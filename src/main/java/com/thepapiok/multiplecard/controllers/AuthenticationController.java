@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.dto.AreaCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
@@ -73,7 +74,9 @@ public class AuthenticationController {
     }
     model.addAttribute(
         areaCodes,
-        countryService.getAll().stream().map(CountryDTO::getAreaCode).distinct().toList());
+        countryService.getAll().stream()
+            .map(e -> new AreaCodeDTO(e.getAreaCode(), e.getCode()))
+            .toList());
     return "loginPage";
   }
 
@@ -94,7 +97,8 @@ public class AuthenticationController {
         "countries",
         countries.stream().map(e -> new CountryNamesDTO(e.getName(), e.getCode())).toList());
     model.addAttribute(
-        areaCodes, countries.stream().map(CountryDTO::getAreaCode).distinct().toList());
+        areaCodes,
+        countries.stream().map(e -> new AreaCodeDTO(e.getAreaCode(), e.getCode())).toList());
     return "registerPage";
   }
 

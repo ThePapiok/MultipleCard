@@ -25,7 +25,8 @@
             <img id="up1" src="/images/keyboard_up.png" alt="up">
             <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
             <ul id="optionsAreaCode" class="optionsSelect">
-              <li class="optionSelect optionAreaCode" th:each="areaCode : ${areaCodes}" th:text="${areaCode}" onclick="setValueAreaCode(this)"></li>
+              <li class="optionSelect optionAreaCode" th:data-code="${areaCode.code}"  th:data-value="${areaCode.areaCode}" th:each="areaCode : ${areaCodes}" th:text="${areaCode.areaCode} + ' (' + ${areaCode.code} + ')'" onclick="setValueAreaCode(this)"></li>
+              <li id="nothingAreaCode">Brak wyników</li>
             </ul>
         </label>
         <label id="Phone">

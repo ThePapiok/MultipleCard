@@ -206,42 +206,69 @@ function showOrHideAreaCode(){
 
 function setValueCountry(e){
     let valueSelect = document.getElementById("valueCountry");
-    valueSelect.value = e.textContent;
+    valueSelect.value = e.value;
     checkCountry(valueSelect);
 }
 
 function setValueAreaCode(e){
     let valueSelect = document.getElementById("valueAreaCode");
-    valueSelect.value = e.textContent;
+    valueSelect.value = e.dataset.value;
     checkAreaCode(valueSelect);
 }
 
 function searchAllCountries(e){
-    let text = e.value.toString();
+    let text = e.value.toString().toLowerCase();
     let options = document.getElementsByClassName("optionCountry");
+    let nothing = document.getElementById("nothingCountry");
+    let option;
+    let isFound = false;
     for(let i = 0; i < options.length; i++){
-        if(options[i].textContent.toLowerCase().startsWith(text.toLowerCase())){
-            options[i].style.display = "block";
+        option = options[i];
+        if(option.textContent.toLowerCase().startsWith(text) || option.dataset.code.toLowerCase().startsWith(text)){
+            option.style.display = "block";
+            isFound = true;
         }
         else{
-            options[i].style.display = "none";
+            option.style.display = "none";
         }
     }
+    if(!isFound){
+        nothing.style.display = "block";
+    }
+    else{
+        nothing.style.display = "none";
+    }
+
 }
 
 function searchAllAreaCodes(e){
     let text = e.value.toString();
-    if(text.charAt(0) !== '+'){
+    const char = text.charAt(0);
+    let options = document.getElementsByClassName("optionAreaCode");
+    let nothing = document.getElementById("nothingAreaCode");
+    let option;
+    let isFound = false;
+    if(!isNaN(char)){
         text = "+" + text;
     }
-    let options = document.getElementsByClassName("optionAreaCode");
+    else if(char !== '+'){
+        text = text.toLowerCase();
+    }
     for(let i = 0; i < options.length; i++){
-        if(options[i].textContent.startsWith(text)){
-            options[i].style.display = "block";
+        option = options[i];
+        if(option.textContent.startsWith(text) || option.dataset.code.toLowerCase().startsWith(text)){
+            option.style.display = "block";
+            isFound = true;
         }
         else{
-            options[i].style.display = "none";
+            option.style.display = "none";
         }
+    }
+    if(!isFound){
+        nothing.style.display = "block";
+    }
+    else{
+        nothing.style.display = "none";
     }
 }
 
