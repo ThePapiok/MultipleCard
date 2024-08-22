@@ -70,7 +70,7 @@
           </ul>
         </div>
         <label id="ApartmentNumber">
-          <input id="inputApartmentNumber" th:field="*{apartmentNumber}" type="text" placeholder="Nr lokalu" oninput="checkApartmentNumber(this)" maxlength="6">
+          <input th:field="*{apartmentNumber}" type="text" placeholder="Nr lokalu" oninput="checkApartmentNumber(this)" maxlength="6">
           <img id="close5" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check5"  src="/images/check.png" alt="check">
         </label>
@@ -109,25 +109,41 @@
         </div>
       </div>
       <div class="block-horizontally">
-          <select th:field="*{country}" id="Country" oninput="checkCountry(this)" required>
-          <option value="" disabled selected hidden>Kraj</option>
-          <option th:each="country : ${countries}" th:value="${country.name}" th:text="${country.name} + ' (' + ${country.code} + ')'"> </option>
-        </select>
+        <label id="Country">
+          <input th:field="*{country}" id="valueCountry" class="valueSelect"  type="text" readonly placeholder="Kraj" onclick="showOrHideCountry()" value="">
+          <img id="down1" src="/images/keyboard_down.png" alt="down">
+          <img id="up1" src="/images/keyboard_up.png" alt="up">
+          <input id="searchCountry" class="searchSelect" type="text" oninput="searchAllCountries(this)">
+          <ul id="optionsCountry" class="optionsSelect">
+            <li class="optionSelect optionCountry" th:data-code="${country.code}"  th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
+            <li id="nothingCountry">Brak wyników</li>
+          </ul>
+        </label>
+        <label id="AreaCode">
+          <input th:field="*{areaCode}" id="valueAreaCode" class="valueSelect"  type="text" readonly placeholder="Kierunkowy" onclick="showOrHideAreaCode()" value="">
+          <img id="down2" src="/images/keyboard_down.png" alt="down">
+          <img id="up2" src="/images/keyboard_up.png" alt="up">
+          <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
+          <ul id="optionsAreaCode" class="optionsSelect">
+            <li class="optionSelect optionAreaCode" th:data-code="${areaCode.code}" th:data-value="${areaCode.areaCode}" th:each="areaCode : ${areaCodes}" th:text="${areaCode.areaCode} + ' (' + ${areaCode.code} + ')'" onclick="setValueAreaCode(this)"></li>
+            <li id="nothingAreaCode">Brak wyników</li>
+          </ul>
+        </label>
         <label id="Phone">
-          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="17" minlength="11">
+          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="28" minlength="7">
           <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
           <img id="check8" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPhone">
           Telefon musi spełniać następujące warunki:
           <ul>
-            <li>zawiera poprzedający numer kierunkowy np. +48</li>
-            <li>zawiera 9 cyfr numeru telefonu</li>
+            <li>zawiera od 9 cyfr</li>
+            <li>łączna długość z kierunkowym nie przekracza 15</li>
           </ul>
         </div>
       </div>
       <label id="Password">
-        <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" id="passwordInput" min="6" max="25">
+        <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" min="6" max="25">
         <img id="close9" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
         <img id="check9"  src="/images/check.png" alt="check">
       </label>

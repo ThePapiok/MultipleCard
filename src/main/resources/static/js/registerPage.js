@@ -4,14 +4,17 @@ const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńó�
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
 const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
-const regPhone = new RegExp("^\\+([0-9]{1,4} [0-9]{3} [0-9]{3} [0-9]{3}|[0-9]*)$")
+const regPhone = new RegExp("^[1-9][0-9 ]*$")
 
 
 let previousPostalCode = "";
-let ok = [false, false, false, false, true, false, false, false, false, false, false];
-let previous = [false, false, false, false, true, false, false, false, false, false, false];
+let ok = [false, false, false, false, true, false, false, false, false, false, false, false];
+let previous = [false, false, false, false, true, false, false, false, false, false, false, false];
 let success = false;
+let country = false;
+let areaCode = false;
 
+// TODO - check number validation after bad
 
 function check(i, con){
     if(con){
@@ -86,29 +89,38 @@ function checkCity(e){
     check(7, (input.length <= 40 && regLastNameAndCity.test(input)));
 }
 
-function checkCountry(e){
-    const input = e.value;
-    if(input.value === ''){
-        ok[10] = false;
-        if(previous[10] !== ok[10])
+function checkSelect(input, index){
+    if(input === ''){
+        ok[index] = false;
+        if(previous[index] !== ok[index])
         {
             disableButton();
-            previous[10] = false;
+            previous[index] = false;
         }
     }
     else{
-        ok[10] = true;
-        if(previous[10] !== ok[10])
+        ok[index] = true;
+        if(previous[index] !== ok[index])
         {
             activeButton();
-            previous[10] = false;
+            previous[index] = false;
         }
     }
 }
 
+function checkCountry(e){
+    checkSelect(e.value, 10)
+}
+
+function checkAreaCode(e){
+    checkSelect(e.value, 11)
+    checkPhone(document.getElementById("phone"));
+}
+
 function checkPhone(e){
-    const input = e.value;
-    check(8, (input.length >= 11 && input.length <= 17 && regPhone.test(input)));
+    const input = e.value.toString().replaceAll(" ", "");
+    const areaCodeLength = document.getElementById("valueAreaCode").value.length;
+    check(8, (input.length >= 8 && input.length + areaCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -117,12 +129,12 @@ function  checkPassword(e){
 }
 
 function  checkRetypedPassword(e){
-    check(10, (e.value === document.getElementById("passwordInput").value));
+    check(10, (e.value === document.getElementById("password").value));
 }
 
 
 function activeButton(){
-    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10]){
+    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10] && ok[11]){
         let button = document.getElementById("nextButton");
         button.className = "greenButton";
         button.type = "submit";
@@ -131,7 +143,7 @@ function activeButton(){
 }
 
 function disableButton(){
-    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10]) && success){
+    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10] || !ok[11]) && success){
         let button = document.getElementById("nextButton");
         button.className = "grayButton";
         button.type = "button";
@@ -151,17 +163,113 @@ function hideValidation(e){
 }
 
 function checkAll() {
-    let inputs = document.getElementsByTagName("input");
-    checkFirstName(inputs[0]);
-    checkLastName(inputs[1]);
-    checkStreet(inputs[2]);
-    checkHouseNumber(inputs[3]);
-    checkApartmentNumber(inputs[4]);
-    checkPostalCode(inputs[5]);
-    checkCity(inputs[6]);
-    checkPhone(inputs[7]);
-    checkCountry(document.getElementById("Country"));
+    checkFirstName(document.getElementById("firstName"));
+    checkLastName(document.getElementById("lastName"));
+    checkStreet(document.getElementById("street"));
+    checkHouseNumber(document.getElementById("houseNumber"));
+    checkApartmentNumber(document.getElementById("apartmentNumber"));
+    checkPostalCode(document.getElementById("postalCode"));
+    checkCity(document.getElementById("city"));
+    checkPhone(document.getElementById("phone"));
+    checkCountry(document.getElementById("valueCountry"));
+    checkAreaCode(document.getElementById("valueAreaCode"))
+
 }
 
+function showOrHideSelect(cond, searchName, optionsName, upName, downName){
+    let search = document.getElementById(searchName);
+    let options = document.getElementById(optionsName);
+    let up = document.getElementById(upName);
+    let down = document.getElementById(downName);
+    if(cond){
+        search.style.display = "block";
+        options.style.display = "block";
+        up.style.display = "block";
+        down.style.display = "none";
+    }else{
+        search.style.display = "none";
+        options.style.display = "none";
+        up.style.display = "none";
+        down.style.display = "block";
+    }
+}
+
+function showOrHideCountry(){
+    country=!country;
+    showOrHideSelect(country, "searchCountry", "optionsCountry", "up1", "down1")
+}
+
+function showOrHideAreaCode(){
+    areaCode=!areaCode;
+    showOrHideSelect(areaCode, "searchAreaCode", "optionsAreaCode", "up2", "down2")
+}
+
+function setValueCountry(e){
+    let valueSelect = document.getElementById("valueCountry");
+    valueSelect.value = e.value;
+    checkCountry(valueSelect);
+}
+
+function setValueAreaCode(e){
+    let valueSelect = document.getElementById("valueAreaCode");
+    valueSelect.value = e.dataset.value;
+    checkAreaCode(valueSelect);
+}
+
+function searchAllCountries(e){
+    let text = e.value.toString().toLowerCase();
+    let options = document.getElementsByClassName("optionCountry");
+    let nothing = document.getElementById("nothingCountry");
+    let option;
+    let isFound = false;
+    for(let i = 0; i < options.length; i++){
+        option = options[i];
+        if(option.textContent.toLowerCase().startsWith(text) || option.dataset.code.toLowerCase().startsWith(text)){
+            option.style.display = "block";
+            isFound = true;
+        }
+        else{
+            option.style.display = "none";
+        }
+    }
+    if(!isFound){
+        nothing.style.display = "block";
+    }
+    else{
+        nothing.style.display = "none";
+    }
+
+}
+
+function searchAllAreaCodes(e){
+    let text = e.value.toString();
+    const char = text.charAt(0);
+    let options = document.getElementsByClassName("optionAreaCode");
+    let nothing = document.getElementById("nothingAreaCode");
+    let option;
+    let isFound = false;
+    if(!isNaN(char)){
+        text = "+" + text;
+    }
+    else if(char !== '+'){
+        text = text.toLowerCase();
+    }
+    for(let i = 0; i < options.length; i++){
+        option = options[i];
+        if(option.textContent.startsWith(text) || option.dataset.code.toLowerCase().startsWith(text)){
+            option.style.display = "block";
+            isFound = true;
+        }
+        else{
+            option.style.display = "none";
+        }
+    }
+    if(!isFound){
+        nothing.style.display = "block";
+    }
+    else{
+        nothing.style.display = "none";
+    }
+}
 
 

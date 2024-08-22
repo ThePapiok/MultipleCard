@@ -136,19 +136,22 @@ label{
 }
 
 #Country{
-    width: 60%;
-    height: 110%;
-    margin-right: 2%;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
+    width: 45%;
 }
+
+#AreaCode, #Country{
+    height: 100%;
+}
+
+#AreaCode {
+    width: 13%;
+}
+
+
 
 #Password, #RetypedPassword{
     height: 5%;
 }
-
-
 
 
 input{
@@ -157,6 +160,63 @@ input{
     font-size: 25px;
     font-family: "Inter", sans-serif;
     font-weight: 600;
+}
+
+.valueSelect{
+    cursor: pointer;
+}
+
+.valueSelect, .searchSelect{
+    height: 100%;
+}
+
+
+.searchSelect{
+    position: relative;
+    z-index: 2;
+    display: none;
+}
+
+.optionsSelect{
+    position: relative;
+    z-index: 2;
+    list-style-type: none;
+    font-size: 25px;
+    font-family: "Inter", sans-serif;
+    overflow-y: auto;
+    max-height: 600%;
+    margin: 0;
+    padding-top: 5px;
+    padding-left: 0;
+    font-weight: 600;
+    background-color: white;
+    display: none;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+
+#optionsCountry{
+    width: 101%;
+}
+
+#optionsAreaCode{
+    width: 104%;
+}
+
+.optionSelect{
+    cursor: pointer;
+}
+
+li{
+    padding: 4px;
+}
+
+#nothingAreaCode, #nothingCountry{
+    display: none;
+}
+
+.optionSelect:hover{
+    background-color: lightgray;
 }
 
 img{
@@ -168,8 +228,12 @@ img{
     top: -10px;
 }
 
-#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7{
+#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7, #up1, #up2{
     display: none;
+}
+
+#up2, #down2{
+    left: 73%;
 }
 
 #check4, #close4, #close5, #check5{
@@ -182,7 +246,7 @@ img{
 
 
 #check8, #close8{
-    left: 88%;
+    left: 88.6%;
 }
 
 .block-horizontally{

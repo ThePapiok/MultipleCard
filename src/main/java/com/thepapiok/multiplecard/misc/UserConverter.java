@@ -3,20 +3,14 @@ package com.thepapiok.multiplecard.misc;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
-import com.thepapiok.multiplecard.repositories.CountryRepository;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserConverter {
 
-  private final CountryRepository countryRepository;
-
   @Autowired
-  public UserConverter(CountryRepository countryRepository) {
-    this.countryRepository = countryRepository;
-  }
+  public UserConverter() {}
 
   public User getEntity(RegisterDTO registerDTO) {
     Address address = new Address();
@@ -30,9 +24,7 @@ public class UserConverter {
     } else {
       address.setApartmentNumber(Integer.parseInt(apartmentNumber));
     }
-    address.setCountryId(
-        new ObjectId(countryRepository.findByName(registerDTO.getCountry()).getId()));
-    // TODO maybe add default value
+    address.setCountry(registerDTO.getCountry());
     User user = new User();
     user.setFirstName(registerDTO.getFirstName());
     user.setLastName(registerDTO.getLastName());
