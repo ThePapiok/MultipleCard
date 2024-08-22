@@ -137,8 +137,16 @@ label{
 
 #Country{
     width: 45%;
+}
+
+#AreaCode, #Country{
     height: 100%;
 }
+
+#AreaCode {
+    width: 13%;
+}
+
 
 
 #Password, #RetypedPassword{
@@ -182,10 +190,17 @@ input{
     padding-left: 0;
     font-weight: 600;
     background-color: white;
-    width: 101%;
     display: none;
     box-sizing: border-box;
     border: 1px solid black;
+}
+
+#optionsCountry{
+    width: 101%;
+}
+
+#optionsAreaCode{
+    width: 104%;
 }
 
 .optionSelect{
@@ -220,7 +235,7 @@ img{
 
 
 #check8, #close8{
-    left: 88%;
+    left: 88.6%;
 }
 
 .block-horizontally{

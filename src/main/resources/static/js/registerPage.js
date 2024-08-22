@@ -12,6 +12,7 @@ let ok = [false, false, false, false, true, false, false, false, false, false, f
 let previous = [false, false, false, false, true, false, false, false, false, false, false];
 let success = false;
 let country = false;
+let areaCode = false;
 
 // TODO - check number validation after bad
 
@@ -167,11 +168,10 @@ function checkAll() {
 
 }
 
-function showOrHideCountry(){
-    country=!country;
-    let search = document.getElementById("searchCountry");
-    let options = document.getElementById("optionsCountry");
-    if(country){
+function showOrHideSelect(cond, searchName, optionsName){
+    let search = document.getElementById(searchName);
+    let options = document.getElementById(optionsName);
+    if(cond){
         search.style.display = "block";
         options.style.display = "block";
     }else{
@@ -180,10 +180,26 @@ function showOrHideCountry(){
     }
 }
 
+function showOrHideCountry(){
+    country=!country;
+    showOrHideSelect(country, "searchCountry", "optionsCountry")
+}
+
+function showOrHideAreaCode(){
+    areaCode=!areaCode;
+    showOrHideSelect(areaCode, "searchAreaCode", "optionsAreaCode")
+}
+
 function setValueCountry(e){
     let valueSelect = document.getElementById("valueCountry");
     valueSelect.value = e.textContent;
     checkCountry(valueSelect);
+}
+
+function setValueAreaCode(e){
+    let valueSelect = document.getElementById("valueAreaCode");
+    valueSelect.value = e.textContent;
+    checkAreaCode(valueSelect);
 }
 
 function searchAllCountries(e){
@@ -197,7 +213,22 @@ function searchAllCountries(e){
             options[i].style.display = "none";
         }
     }
+}
 
+function searchAllAreaCodes(e){
+    let text = e.value.toString();
+    if(text.charAt(0) !== '+'){
+        text = "+" + text;
+    }
+    let options = document.getElementsByClassName("optionAreaCode");
+    for(let i = 0; i < options.length; i++){
+        if(options[i].textContent.startsWith(text)){
+            options[i].style.display = "block";
+        }
+        else{
+            options[i].style.display = "none";
+        }
+    }
 }
 
 

@@ -116,6 +116,13 @@
             <li class="optionSelect optionCountry" th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
           </ul>
         </label>
+        <label id="AreaCode">
+          <input th:field="*{areaCode}" id="valueAreaCode" class="valueSelect"  type="text" readonly placeholder="Kierunkowy" onclick="showOrHideAreaCode()" value="">
+          <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
+          <ul id="optionsAreaCode" class="optionsSelect">
+            <li class="optionSelect optionAreaCode" th:each="areaCode : ${areaCodes}" th:text="${areaCode}" onclick="setValueAreaCode(this)"></li>
+          </ul>
+        </label>
         <label id="Phone">
           <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="17" minlength="11">
           <img id="close8" src="/images/close.png" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)" alt="close">
