@@ -1,9 +1,12 @@
-let previous = [false, false];
-let ok = [false, false];
+let previous = [false, false, false];
+let ok = [false, false, false];
 let success = false;
+let areaCode = false;
+let areaCodeValue = "";
+let phoneValue = "";
 
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
-const regPhone = new RegExp("^\\+([0-9]{1,4} [0-9]{3} [0-9]{3} [0-9]{3}|[0-9]*)$")
+const regPhone = new RegExp("^[1-9][0-9 ]*$")
 
 // TODO make unique this and css
 
@@ -35,8 +38,11 @@ function check(i, con){
 }
 
 function checkPhone(e){
-    const input = e.value;
-    check(1, (input.length >= 11 && input.length <= 17 && regPhone.test(input)));
+    const input = e.value.toString().replaceAll(" ", "");
+    phoneValue = input;
+    setFullPhone();
+    const areaCodeLength = document.getElementById("valueAreaCode").value.length;
+    check(1, (input.length >= 8 && input.length + areaCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -44,8 +50,29 @@ function  checkPassword(e){
     check(2, (input.length >= 6 && input.length <= 25 && regPassword.test(input)));
 }
 
+function checkAreaCode(e){
+    const input = e.value;
+    if(input === ''){
+        ok[2] = false;
+        if(previous[2] !== ok[2])
+        {
+            disableButton();
+            previous[2] = false;
+        }
+    }
+    else{
+        ok[2] = true;
+        if(previous[2] !== ok[2])
+        {
+            activeButton();
+            previous[2] = false;
+        }
+    }
+    checkPhone(document.getElementById("phoneInput"));
+}
+
 function activeButton(){
-    if(ok[0] && ok[1]){
+    if(ok[0] && ok[1] && ok[2]){
         let button = document.getElementById("loginButton");
         button.className = "greenButton";
         button.type = "submit";
@@ -54,7 +81,7 @@ function activeButton(){
 }
 
 function disableButton(){
-    if((!ok[0] || !ok[1]) && success){
+    if((!ok[0] || !ok[1] || !ok[2]) && success){
         let button = document.getElementById("loginButton");
         button.className = "grayButton";
         button.type = "button";
@@ -75,6 +102,46 @@ function hideValidation(e) {
 }
 
 function checkAll(){
-    let inputs = document.getElementsByTagName("input");
-    checkPhone(inputs[0]);
+    checkPhone(document.getElementById("phoneInput"));
+}
+
+function showOrHideAreaCode(){
+    areaCode=!areaCode;
+    let search = document.getElementById("searchAreaCode");
+    let options = document.getElementById("optionsAreaCode");
+    if(areaCode){
+        search.style.display = "block";
+        options.style.display = "block";
+    }else{
+        search.style.display = "none";
+        options.style.display = "none";
+    }
+}
+
+function searchAllAreaCodes(e){
+    let text = e.value.toString();
+    if(text.charAt(0) !== '+'){
+        text = "+" + text;
+    }
+    let options = document.getElementsByClassName("optionAreaCode");
+    for(let i = 0; i < options.length; i++){
+        if(options[i].textContent.startsWith(text)){
+            options[i].style.display = "block";
+        }
+        else{
+            options[i].style.display = "none";
+        }
+    }
+}
+
+function setValueAreaCode(e){
+    let valueSelect = document.getElementById("valueAreaCode");
+    valueSelect.value = e.textContent;
+    checkAreaCode(valueSelect);
+    areaCodeValue = e.textContent;
+    setFullPhone();
+}
+
+function setFullPhone(){
+    document.getElementById("fullPhone").value = areaCodeValue + phoneValue;
 }

@@ -34,6 +34,8 @@ public class AuthenticationController {
   private final String redirectVerificationError = "redirect:/account_verifications?error";
   private final String codeAmount = "codeAmount";
 
+  private final String areaCodes = "areaCodes";
+
   @Autowired
   public AuthenticationController(
       CountryService countryService,
@@ -69,6 +71,9 @@ public class AuthenticationController {
         model.addAttribute(errorMessage, "Niepoprawny login lub hasło");
       }
     }
+    model.addAttribute(
+        areaCodes,
+        countryService.getAll().stream().map(CountryDTO::getAreaCode).distinct().toList());
     return "loginPage";
   }
 
@@ -89,7 +94,7 @@ public class AuthenticationController {
         "countries",
         countries.stream().map(e -> new CountryNamesDTO(e.getName(), e.getCode())).toList());
     model.addAttribute(
-        "areaCodes", countries.stream().map(CountryDTO::getAreaCode).distinct().toList());
+        areaCodes, countries.stream().map(CountryDTO::getAreaCode).distinct().toList());
     return "registerPage";
   }
 
