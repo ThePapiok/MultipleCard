@@ -111,6 +111,8 @@
       <div class="block-horizontally">
         <label id="Country">
           <input th:field="*{country}" id="valueCountry" class="valueSelect"  type="text" readonly placeholder="Kraj" onclick="showOrHideCountry()" value="">
+          <img id="down1" src="/images/keyboard_down.png" alt="down">
+          <img id="up1" src="/images/keyboard_up.png" alt="up">
           <input id="searchCountry" class="searchSelect" type="text" oninput="searchAllCountries(this)">
           <ul id="optionsCountry" class="optionsSelect">
             <li class="optionSelect optionCountry" th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
@@ -118,6 +120,8 @@
         </label>
         <label id="AreaCode">
           <input th:field="*{areaCode}" id="valueAreaCode" class="valueSelect"  type="text" readonly placeholder="Kierunkowy" onclick="showOrHideAreaCode()" value="">
+          <img id="down2" src="/images/keyboard_down.png" alt="down">
+          <img id="up2" src="/images/keyboard_up.png" alt="up">
           <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
           <ul id="optionsAreaCode" class="optionsSelect">
             <li class="optionSelect optionAreaCode" th:each="areaCode : ${areaCodes}" th:text="${areaCode}" onclick="setValueAreaCode(this)"></li>

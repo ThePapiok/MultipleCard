@@ -221,8 +221,12 @@ img{
     top: -10px;
 }
 
-#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7{
+#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7, #up1, #up2{
     display: none;
+}
+
+#up2, #down2{
+    left: 73%;
 }
 
 #check4, #close4, #close5, #check5{

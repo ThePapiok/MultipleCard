@@ -21,6 +21,8 @@
       <div class="block-horizontally">
         <label id="AreaCode">
             <input th:value="${areaCode}" id="valueAreaCode" class="valueSelect"  type="text" readonly placeholder="Kierunkowy" onclick="showOrHideAreaCode()" value="">
+            <img id="down1" src="/images/keyboard_down.png" alt="down">
+            <img id="up1" src="/images/keyboard_up.png" alt="up">
             <input id="searchAreaCode" class="searchSelect" type="text" oninput="searchAllAreaCodes(this)">
             <ul id="optionsAreaCode" class="optionsSelect">
               <li class="optionSelect optionAreaCode" th:each="areaCode : ${areaCodes}" th:text="${areaCode}" onclick="setValueAreaCode(this)"></li>

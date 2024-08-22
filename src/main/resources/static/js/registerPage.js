@@ -176,26 +176,32 @@ function checkAll() {
 
 }
 
-function showOrHideSelect(cond, searchName, optionsName){
+function showOrHideSelect(cond, searchName, optionsName, upName, downName){
     let search = document.getElementById(searchName);
     let options = document.getElementById(optionsName);
+    let up = document.getElementById(upName);
+    let down = document.getElementById(downName);
     if(cond){
         search.style.display = "block";
         options.style.display = "block";
+        up.style.display = "block";
+        down.style.display = "none";
     }else{
         search.style.display = "none";
         options.style.display = "none";
+        up.style.display = "none";
+        down.style.display = "block";
     }
 }
 
 function showOrHideCountry(){
     country=!country;
-    showOrHideSelect(country, "searchCountry", "optionsCountry")
+    showOrHideSelect(country, "searchCountry", "optionsCountry", "up1", "down1")
 }
 
 function showOrHideAreaCode(){
     areaCode=!areaCode;
-    showOrHideSelect(areaCode, "searchAreaCode", "optionsAreaCode")
+    showOrHideSelect(areaCode, "searchAreaCode", "optionsAreaCode", "up2", "down2")
 }
 
 function setValueCountry(e){

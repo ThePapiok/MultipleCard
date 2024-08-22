@@ -133,8 +133,12 @@ img{
     top: -10px;
 }
 
-#check1, #check2{
+#check1, #check2, #up1{
     display: none;
+}
+
+#up1, #down1{
+    left: 73%;
 }
 
 #check1, #close1{
@@ -179,12 +183,12 @@ img{
 }
 
 #AreaCode {
-    width: 28%;
+    width: 30%;
     height: 100%;
 }
 
 #Phone{
-    width: 70%;
+    width: 68%;
 }
 
 #Password{

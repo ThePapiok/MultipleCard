@@ -109,12 +109,18 @@ function showOrHideAreaCode(){
     areaCode=!areaCode;
     let search = document.getElementById("searchAreaCode");
     let options = document.getElementById("optionsAreaCode");
+    let up = document.getElementById("up1");
+    let down = document.getElementById("down1");
     if(areaCode){
         search.style.display = "block";
         options.style.display = "block";
+        up.style.display = "block";
+        down.style.display = "none";
     }else{
         search.style.display = "none";
         options.style.display = "none";
+        up.style.display = "none";
+        down.style.display = "block";
     }
 }
 
