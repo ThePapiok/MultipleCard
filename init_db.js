@@ -76,12 +76,12 @@ db.createCollection("shops", {
                     "uniqueItems": true,
                     "items": {
                         "bsonType": "object",
-                        "required": ["countryId", "city", "postalCode", "street", "houseNumber"],
+                        "required": ["country", "city", "postalCode", "street", "houseNumber"],
                         "additionalProperties": false,
                         "properties": {
-                            "countryId": {
-                                "bsonType": "objectId",
-                                "description": "countryId is required and must be objectId"
+                            "country": {
+                                "bsonType": "string",
+                                "description": "country is required and must be string"
                             },
                             "city": {
                                 "bsonType": "string",
@@ -240,34 +240,6 @@ db.createCollection("categories", {
     }
 }
 );
-db.createCollection("countries", {
-    "validator": {
-        $jsonSchema: {
-            "bsonType": "object",
-            "required": ["name", "code", "_id", "_class"],
-            "additionalProperties": false,
-            "properties": {
-                "name": {
-                    "bsonType": "string",
-                    "description": "name is required and must be string"
-                },
-                "code": {
-                    "bsonType": "string",
-                    "description": "code is required and must be string"
-                },
-                "_id": {
-                    "bsonType": "objectId",
-                    "description": "_id is required and must be objectId"
-                },
-                "_class": {
-                    "bsonType": "string",
-                    "description": "_class is required and must be string",
-                }
-            }
-        }
-    }
-}
-);
 db.createCollection("likes", {
     "validator": {
         $jsonSchema: {
@@ -316,12 +288,12 @@ db.createCollection("users", {
                 },
                 "address": {
                     "bsonType": "object",
-                    "required": ["countryId", "city", "postalCode", "street", "houseNumber"],
+                    "required": ["country", "city", "postalCode", "street", "houseNumber"],
                     "additionalProperties": false,
                     "properties": {
-                        "countryId": {
-                            "bsonType": "objectId",
-                            "description": "countryId is required and must be objectId"
+                        "country": {
+                            "bsonType": "string",
+                            "description": "country is required and must be string"
                         },
                         "city": {
                             "bsonType": "string",
@@ -407,119 +379,6 @@ db.createCollection("users", {
         }
     }
 });
-db.countries.createIndex({"name": 1, "code": 1}, {"unique": true});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
-db.countries.insertMany([
-    {
-        "name": "Polska",
-        "code": "PL",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Niemcy",
-        "code": "DE",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Chiny",
-        "code": "CN",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Czechy",
-        "code": "CZ",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Chorwacja",
-        "code": "HR",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Dania",
-        "code": "DK",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Finlandia",
-        "code": "FI",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Francja",
-        "code": "FR",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Grecja",
-        "code": "GR",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Hiszpania",
-        "code": "ES",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Japonia",
-        "code": "JP",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Indie",
-        "code": "IN",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Kanada",
-        "code": "CA",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Norwegia",
-        "code": "NO",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Rosja",
-        "code": "RU",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Stany zjednoczone",
-        "code": "US",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Szwecja",
-        "code": "CH",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Szwajcaria",
-        "code": "SE",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Turcja",
-        "code": "TR",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Węgry",
-        "code": "HU",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Wielka Brytania",
-        "code": "GB",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    },
-    {
-        "name": "Włochy",
-        "code": "IT",
-        "_class": "com.thepapiok.multiplecard.collections.Country"
-    }
-]);

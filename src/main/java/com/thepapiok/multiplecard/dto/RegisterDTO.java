@@ -1,6 +1,5 @@
 package com.thepapiok.multiplecard.dto;
 
-import com.thepapiok.multiplecard.validators.IsCountry;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -42,7 +41,7 @@ public class RegisterDTO {
   @Size(min = 2, max = 40)
   private String city;
 
-  @NotBlank @IsCountry private String country;
+  @NotBlank private String country;
 
   @NotBlank
   @Pattern(regexp = "^\\+[0-9]{1,4} ?[0-9]{3} ?[0-9]{3} ?[0-9]{3}$")
