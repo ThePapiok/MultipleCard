@@ -237,7 +237,7 @@ img{
     cursor: pointer;
 }
 
-li{
+#nothingAreaCode, .optionSelect{
     padding: 4px;
 }
 

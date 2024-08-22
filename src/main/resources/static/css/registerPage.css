@@ -207,7 +207,7 @@ input{
     cursor: pointer;
 }
 
-li{
+#nothingAreaCode, #nothingCountry, .optionSelect{
     padding: 4px;
 }
 
@@ -281,45 +281,24 @@ img{
     height: 80px;
 }
 
-#validationLastName{
+#validationHouseNumber, #validationLastName, #validationApartmentNumber, #validationPhone, #validationCity{
     height: 80px;
     transform: translateX(-100%);
 }
 
-#validationStreet{
+#validationStreet, #validationCity{
     height: 100px;
 }
 
-#validationHouseNumber{
-    height: 80px;
-}
-
-#validationApartmentNumber{
-    height: 80px;
-    transform: translateX(-100%);
-}
 
 #validationPassword{
     height: 140px;
 }
 
-#validationRetypedPassword{
+#validationRetypedPassword, #validationPostalCode{
     height: 60px;
 }
 
-#validationPhone{
-    height: 80px;
-    transform: translateX(-100%);
-}
-
-#validationPostalCode{
-    height: 60px;
-}
-
-#validationCity{
-    height: 100px;
-    transform: translateX(-100%);
-}
 
 select:invalid {
     color: #757575;
