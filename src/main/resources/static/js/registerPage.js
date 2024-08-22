@@ -11,7 +11,9 @@ let previousPostalCode = "";
 let ok = [false, false, false, false, true, false, false, false, false, false, false];
 let previous = [false, false, false, false, true, false, false, false, false, false, false];
 let success = false;
+let country = false;
 
+// TODO - check number validation after bad
 
 function check(i, con){
     if(con){
@@ -88,7 +90,7 @@ function checkCity(e){
 
 function checkCountry(e){
     const input = e.value;
-    if(input.value === ''){
+    if(input === ''){
         ok[10] = false;
         if(previous[10] !== ok[10])
         {
@@ -117,7 +119,7 @@ function  checkPassword(e){
 }
 
 function  checkRetypedPassword(e){
-    check(10, (e.value === document.getElementById("passwordInput").value));
+    check(10, (e.value === document.getElementById("password").value));
 }
 
 
@@ -152,16 +154,50 @@ function hideValidation(e){
 
 function checkAll() {
     let inputs = document.getElementsByTagName("input");
-    checkFirstName(inputs[0]);
-    checkLastName(inputs[1]);
-    checkStreet(inputs[2]);
-    checkHouseNumber(inputs[3]);
-    checkApartmentNumber(inputs[4]);
-    checkPostalCode(inputs[5]);
-    checkCity(inputs[6]);
-    checkPhone(inputs[7]);
-    checkCountry(document.getElementById("Country"));
+    console.log(inputs);
+    checkFirstName(document.getElementById("firstName"));
+    checkLastName(document.getElementById("lastName"));
+    checkStreet(document.getElementById("street"));
+    checkHouseNumber(document.getElementById("houseNumber"));
+    checkApartmentNumber(document.getElementById("apartmentNumber"));
+    checkPostalCode(document.getElementById("postalCode"));
+    checkCity(document.getElementById("city"));
+    checkPhone(document.getElementById("phone"));
+    checkCountry(document.getElementById("valueCountry"));
+
 }
 
+function showOrHideCountry(){
+    country=!country;
+    let search = document.getElementById("searchCountry");
+    let options = document.getElementById("optionsCountry");
+    if(country){
+        search.style.display = "block";
+        options.style.display = "block";
+    }else{
+        search.style.display = "none";
+        options.style.display = "none";
+    }
+}
+
+function setValueCountry(e){
+    let valueSelect = document.getElementById("valueCountry");
+    valueSelect.value = e.textContent;
+    checkCountry(valueSelect);
+}
+
+function searchAllCountries(e){
+    let text = e.value.toString();
+    let options = document.getElementsByClassName("optionCountry");
+    for(let i = 0; i < options.length; i++){
+        if(options[i].textContent.toLowerCase().startsWith(text.toLowerCase())){
+            options[i].style.display = "block";
+        }
+        else{
+            options[i].style.display = "none";
+        }
+    }
+
+}
 
 

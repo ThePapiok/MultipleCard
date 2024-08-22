@@ -136,19 +136,14 @@ label{
 }
 
 #Country{
-    width: 60%;
-    height: 110%;
-    margin-right: 2%;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
+    width: 45%;
+    height: 100%;
 }
+
 
 #Password, #RetypedPassword{
     height: 5%;
 }
-
-
 
 
 input{
@@ -157,6 +152,49 @@ input{
     font-size: 25px;
     font-family: "Inter", sans-serif;
     font-weight: 600;
+}
+
+.valueSelect{
+    cursor: pointer;
+}
+
+.valueSelect, .searchSelect{
+    height: 100%;
+}
+
+
+.searchSelect{
+    position: relative;
+    z-index: 2;
+    display: none;
+}
+
+.optionsSelect{
+    position: relative;
+    z-index: 2;
+    list-style-type: none;
+    font-size: 25px;
+    font-family: "Inter", sans-serif;
+    overflow-y: auto;
+    height: 600%;
+    margin: 0;
+    padding-top: 5px;
+    padding-left: 0;
+    font-weight: 600;
+    background-color: white;
+    width: 101%;
+    display: none;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+
+.optionSelect{
+    cursor: pointer;
+    padding: 4px;
+}
+
+.optionSelect:hover{
+    background-color: lightgray;
 }
 
 img{
