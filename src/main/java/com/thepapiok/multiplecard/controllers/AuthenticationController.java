@@ -88,7 +88,8 @@ public class AuthenticationController {
     model.addAttribute(
         "countries",
         countries.stream().map(e -> new CountryNamesDTO(e.getName(), e.getCode())).toList());
-    model.addAttribute("areaCodes", countries.stream().map(CountryDTO::getAreaCode).toList());
+    model.addAttribute(
+        "areaCodes", countries.stream().map(CountryDTO::getAreaCode).distinct().toList());
     return "registerPage";
   }
 
