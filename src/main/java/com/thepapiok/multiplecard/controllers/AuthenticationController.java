@@ -1,6 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
-import com.thepapiok.multiplecard.dto.AreaCodeDTO;
+import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
@@ -36,8 +36,8 @@ public class AuthenticationController {
   private final String redirectLogin = "redirect:/login";
 
   private final String codeAmount = "codeAmount";
-  private final String areaCodes = "areaCodes";
-  private final String areaCode = "areaCode";
+  private final String callingCodes = "callingCodes";
+  private final String callingCode = "callingCode";
 
   @Autowired
   public AuthenticationController(
@@ -64,8 +64,8 @@ public class AuthenticationController {
         httpSession.removeAttribute(successMessage);
         model.addAttribute(phone, httpSession.getAttribute(phone));
         httpSession.removeAttribute(phone);
-        model.addAttribute(areaCode, httpSession.getAttribute(areaCode));
-        httpSession.removeAttribute(areaCode);
+        model.addAttribute(callingCode, httpSession.getAttribute(callingCode));
+        httpSession.removeAttribute(callingCode);
       }
     } else if (error != null) {
       String message = (String) httpSession.getAttribute(errorMessage);
@@ -77,9 +77,9 @@ public class AuthenticationController {
       }
     }
     model.addAttribute(
-        areaCodes,
+        callingCodes,
         countryService.getAll().stream()
-            .map(e -> new AreaCodeDTO(e.getAreaCode(), e.getCode()))
+            .map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode()))
             .toList());
     return "loginPage";
   }
@@ -99,10 +99,13 @@ public class AuthenticationController {
     List<CountryDTO> countries = countryService.getAll();
     model.addAttribute(
         "countries",
-        countries.stream().map(e -> new CountryNamesDTO(e.getName(), e.getCode())).toList());
+        countries.stream()
+            .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
+            .distinct()
+            .toList());
     model.addAttribute(
-        areaCodes,
-        countries.stream().map(e -> new AreaCodeDTO(e.getAreaCode(), e.getCode())).toList());
+        callingCodes,
+        countries.stream().map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode())).toList());
     return "registerPage";
   }
 
@@ -121,7 +124,7 @@ public class AuthenticationController {
       message = "Podane dane są niepoprawne";
     } else if (authenticationService
         .getPhones()
-        .contains(register.getAreaCode() + register.getPhone())) {
+        .contains(register.getCallingCode() + register.getPhone())) {
       error = true;
       message = "Użytkownik o takim numerze telefonu już istnieje";
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
@@ -132,7 +135,7 @@ public class AuthenticationController {
       httpSession.setAttribute(errorMessage, message);
       return redirect;
     }
-    getVerificationNumber(httpSession, register.getPhone(), register.getAreaCode());
+    getVerificationNumber(httpSession, register.getPhone(), register.getCallingCode());
     httpSession.setAttribute(codeAmount, 1);
     return "redirect:/account_verifications";
   }
@@ -153,7 +156,7 @@ public class AuthenticationController {
       Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
       if (codeAmountInt != maxAmount) {
         if (!getVerificationNumber(
-            httpSession, registerDTO.getPhone(), registerDTO.getAreaCode())) {
+            httpSession, registerDTO.getPhone(), registerDTO.getCallingCode())) {
           httpSession.setAttribute(errorMessage, "Błąd podczas wysyłania sms");
           return redirectVerificationError;
         }
@@ -193,7 +196,7 @@ public class AuthenticationController {
       // TODO maybe add better exception
     }
     httpSession.setAttribute(phone, registerSession.getPhone());
-    httpSession.setAttribute(areaCode, registerSession.getAreaCode());
+    httpSession.setAttribute(callingCode, registerSession.getCallingCode());
     resetRegister(httpSession);
     httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
     return "redirect:/login?success";
@@ -205,11 +208,11 @@ public class AuthenticationController {
     httpSession.removeAttribute(codeAmount);
   }
 
-  private boolean getVerificationNumber(HttpSession httpSession, String phone, String areaCode) {
+  private boolean getVerificationNumber(HttpSession httpSession, String phone, String callingCode) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
       smsService.sendSms(
-          "Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, areaCode + phone);
+          "Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, callingCode + phone);
       httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
