@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AreaCodeDTO {
-  private String areaCode;
+public class CallingCodeDTO {
+  private String callingCode;
   private String code;
 }

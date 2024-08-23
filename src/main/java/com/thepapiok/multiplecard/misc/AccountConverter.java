@@ -18,7 +18,7 @@ public class AccountConverter {
   public Account getEntity(RegisterDTO registerDTO) {
     Account account = new Account();
     account.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-    account.setPhone(registerDTO.getAreaCode() + registerDTO.getPhone());
+    account.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
     return account;
   }
 }

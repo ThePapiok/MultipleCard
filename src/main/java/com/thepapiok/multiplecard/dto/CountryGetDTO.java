@@ -8,6 +8,8 @@ public class CountryGetDTO {
   private String cca2;
   private Idd idd;
   private Map<String, Translation> translations;
+  private Float area;
+  private Integer population;
 
   @Data
   public static class Idd {

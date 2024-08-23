@@ -139,11 +139,11 @@ label{
     width: 45%;
 }
 
-#AreaCode, #Country{
+#CallingCode, #Country{
     height: 100%;
 }
 
-#AreaCode {
+#CallingCode {
     width: 13%;
 }
 
@@ -199,7 +199,7 @@ input{
     width: 101%;
 }
 
-#optionsAreaCode{
+#optionsCallingCode{
     width: 104%;
 }
 
@@ -207,11 +207,11 @@ input{
     cursor: pointer;
 }
 
-#nothingAreaCode, #nothingCountry, .optionSelect{
+#nothingCallingCode, #nothingCountry, .optionSelect{
     padding: 4px;
 }
 
-#nothingAreaCode, #nothingCountry{
+#nothingCallingCode, #nothingCountry{
     display: none;
 }
 
