@@ -12,7 +12,7 @@ let ok = [false, false, false, false, true, false, false, false, false, false, f
 let previous = [false, false, false, false, true, false, false, false, false, false, false, false];
 let success = false;
 let country = false;
-let areaCode = false;
+let callingCode = false;
 
 // TODO - check number validation after bad
 
@@ -112,15 +112,15 @@ function checkCountry(e){
     checkSelect(e.value, 10)
 }
 
-function checkAreaCode(e){
+function checkCallingCode(e){
     checkSelect(e.value, 11)
     checkPhone(document.getElementById("phone"));
 }
 
 function checkPhone(e){
     const input = e.value.toString().replaceAll(" ", "");
-    const areaCodeLength = document.getElementById("valueAreaCode").value.length;
-    check(8, (input.length >= 8 && input.length + areaCodeLength <= 16 && regPhone.test(input)));
+    const callingCodeLength = document.getElementById("valueCallingCode").value.length;
+    check(8, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -179,7 +179,7 @@ function atStart() {
     checkCity(document.getElementById("city"));
     checkPhone(document.getElementById("phone"));
     checkCountry(document.getElementById("valueCountry"));
-    checkAreaCode(document.getElementById("valueAreaCode"))
+    checkCallingCode(document.getElementById("valueCallingCode"))
 }
 
 function showOrHideSelect(cond, searchName, optionsName, upName, downName){
@@ -205,9 +205,9 @@ function showOrHideCountry(){
     showOrHideSelect(country, "searchCountry", "optionsCountry", "up1", "down1")
 }
 
-function showOrHideAreaCode(){
-    areaCode=!areaCode;
-    showOrHideSelect(areaCode, "searchAreaCode", "optionsAreaCode", "up2", "down2")
+function showOrHideCallingCode(){
+    callingCode=!callingCode;
+    showOrHideSelect(callingCode, "searchCallingCode", "optionsCallingCode", "up2", "down2")
 }
 
 function setValueCountry(e){
@@ -216,10 +216,10 @@ function setValueCountry(e){
     checkCountry(valueSelect);
 }
 
-function setValueAreaCode(e){
-    let valueSelect = document.getElementById("valueAreaCode");
+function setValueCallingCode(e){
+    let valueSelect = document.getElementById("valueCallingCode");
     valueSelect.value = e.dataset.value;
-    checkAreaCode(valueSelect);
+    checkCallingCode(valueSelect);
 }
 
 function searchAllCountries(e){
@@ -247,11 +247,11 @@ function searchAllCountries(e){
 
 }
 
-function searchAllAreaCodes(e){
+function searchAllCallingCodes(e){
     let text = e.value.toString();
     const char = text.charAt(0);
-    let options = document.getElementsByClassName("optionAreaCode");
-    let nothing = document.getElementById("nothingAreaCode");
+    let options = document.getElementsByClassName("optionCallingCode");
+    let nothing = document.getElementById("nothingCallingCode");
     let option;
     let isFound = false;
     if(!isNaN(char)){

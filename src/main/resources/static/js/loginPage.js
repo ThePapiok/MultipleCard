@@ -1,8 +1,8 @@
 let previous = [false, false, false];
 let ok = [false, false, false];
 let success = false;
-let areaCode = false;
-let areaCodeValue = "";
+let callingCode = false;
+let callingCodeValue = "";
 let phoneValue = "";
 let firstTime = [false, false];
 
@@ -42,8 +42,8 @@ function checkPhone(e){
     const input = e.value.toString().replaceAll(" ", "");
     phoneValue = input;
     setFullPhone();
-    const areaCodeLength = document.getElementById("valueAreaCode").value.length;
-    check(1, (input.length >= 8 && input.length + areaCodeLength <= 16 && regPhone.test(input)));
+    const callingCodeLength = document.getElementById("valueCallingCode").value.length;
+    check(1, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
@@ -51,7 +51,7 @@ function  checkPassword(e){
     check(2, (input.length >= 6 && input.length <= 25 && regPassword.test(input)));
 }
 
-function checkAreaCode(e){
+function checkCallingCode(e){
     const input = e.value;
     if(input === ''){
         ok[2] = false;
@@ -110,16 +110,17 @@ function hideValidation(e) {
 }
 
 function atStart(){
+    checkCallingCode(document.getElementById("valueCallingCode"));
     checkPhone(document.getElementById("phoneInput"));
 }
 
-function showOrHideAreaCode(){
-    areaCode=!areaCode;
-    let search = document.getElementById("searchAreaCode");
-    let options = document.getElementById("optionsAreaCode");
+function showOrHideCallingCode(){
+    callingCode=!callingCode;
+    let search = document.getElementById("searchCallingCode");
+    let options = document.getElementById("optionsCallingCode");
     let up = document.getElementById("up1");
     let down = document.getElementById("down1");
-    if(areaCode){
+    if(callingCode){
         search.style.display = "block";
         options.style.display = "block";
         up.style.display = "block";
@@ -132,11 +133,11 @@ function showOrHideAreaCode(){
     }
 }
 
-function searchAllAreaCodes(e){
+function searchAllCallingCodes(e){
     let text = e.value.toString();
     const char = text.charAt(0);
-    let options = document.getElementsByClassName("optionAreaCode");
-    let nothing = document.getElementById("nothingAreaCode");
+    let options = document.getElementsByClassName("optionCallingCode");
+    let nothing = document.getElementById("nothingCallingCode");
     let option;
     let isFound = false;
     if(!isNaN(char)){
@@ -163,16 +164,15 @@ function searchAllAreaCodes(e){
     }
 }
 
-function setValueAreaCode(e){
-    let valueSelect = document.getElementById("valueAreaCode");
+function setValueCallingCode(e){
+    let valueSelect = document.getElementById("valueCallingCode");
     valueSelect.value = e.dataset.value;
-    checkAreaCode(valueSelect);
-    areaCodeValue = valueSelect.value;
+    checkCallingCode(valueSelect);
+    callingCodeValue = valueSelect.value;
     setFullPhone();
 }
 
 function setFullPhone(){
-    document.getElementById("fullPhone").value = areaCodeValue + phoneValue;
-    console.log(areaCodeValue + phoneValue);
+    document.getElementById("fullPhone").value = callingCodeValue + phoneValue;
 }
 
