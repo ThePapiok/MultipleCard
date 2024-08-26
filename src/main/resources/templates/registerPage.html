@@ -19,7 +19,7 @@
     <form th:action="@{/register}" th:object="${register}" id="form" method="post">
       <div class="block-horizontally">
       <label id="FirstName">
-        <input th:field="*{firstName}" type="text" placeholder="Imię" required oninput="checkFirstName(this)" maxlength="15" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+        <input th:field="*{firstName}" type="text" placeholder="Imię" required oninput="checkFirstName(this)" minlength="2" maxlength="15" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
         <img id="close1" src="/images/close.png" alt="close">
         <img id="check1" src="/images/check.png" alt="check">
       </label>
@@ -31,7 +31,7 @@
           </ul>
         </div>
       <label id="LastName">
-        <input th:field="*{lastName}" type="text" placeholder="Nazwisko" required oninput="checkLastName(this)" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+        <input th:field="*{lastName}" type="text" placeholder="Nazwisko" required oninput="checkLastName(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
         <img id="close2" src="/images/close.png" alt="close">
         <img id="check2"  src="/images/check.png" alt="check">
       </label>
@@ -44,10 +44,37 @@
         </div>
       </div>
       <div class="block-horizontally">
-        <label id="Street">
-          <input th:field="*{street}" type="text" placeholder="Ulica" required oninput="checkStreet(this)" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+        <label id="Email">
+          <input th:field="*{email}" type="text" placeholder="Email" required oninput="checkEmail(this)" minlength="4" maxlength="30" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
           <img id="close3" src="/images/close.png" alt="close">
-          <img id="check3" src="/images/check.png" alt="check">
+          <img id="check3"  src="/images/check.png" alt="check">
+        </label>
+        <div class="validation" id="validationEmail" data-display="0">
+          Email musi spełniać następujące warunki:
+          <ul>
+            <li>długość od 4 do 30</li>
+            <li>zawiera @</li>
+          </ul>
+        </div>
+        <label id="Province">
+          <input th:field="*{province}" type="text" placeholder="Województwo" required oninput="checkProvince(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+          <img id="close4" src="/images/close.png" alt="close">
+          <img id="check4"  src="/images/check.png" alt="check">
+        </label>
+        <div class="validation" id="validationProvince" data-display="0">
+          Województwo musi spełniać następujące warunki:
+          <ul>
+            <li>zaczyna się wielką literą</li>
+            <li>zawiera tylko litery</li>
+            <li>maksymalnie 2 człony</li>
+          </ul>
+        </div>
+      </div>
+      <div class="block-horizontally">
+        <label id="Street">
+          <input th:field="*{street}" type="text" placeholder="Ulica" required oninput="checkStreet(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+          <img id="close5" src="/images/close.png" alt="close">
+          <img id="check5" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationStreet" data-display="0">
           Ulica musi spełniać następujące warunki:
@@ -58,9 +85,9 @@
           </ul>
         </div>
         <label id="HouseNumber">
-          <input th:field="*{houseNumber}" type="text" placeholder="Nr domu" required oninput="checkHouseNumber(this)" maxlength="10" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close4" src="/images/close.png" alt="close">
-          <img id="check4"  src="/images/check.png" alt="check">
+          <input th:field="*{houseNumber}" type="text" placeholder="Nr domu" required oninput="checkHouseNumber(this)" minlength="1" maxlength="10" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+          <img id="close6" src="/images/close.png" alt="close">
+          <img id="check6"  src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationHouseNumber" data-display="0">
           Numer domu musi spełniać następujące warunki:
@@ -71,8 +98,8 @@
         </div>
         <label id="ApartmentNumber">
           <input th:field="*{apartmentNumber}" type="text" placeholder="Nr lokalu" oninput="checkApartmentNumber(this)" maxlength="6" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close5" src="/images/close.png" alt="close">
-          <img id="check5"  src="/images/check.png" alt="check">
+          <img id="close7" src="/images/close.png" alt="close">
+          <img id="check7"  src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationApartmentNumber" data-display="0">
           Numer lokalu musi spełniać następujące warunki:
@@ -85,8 +112,8 @@
       <div class="block-horizontally">
         <label id="PostalCode">
           <input th:field="*{postalCode}" type="text" placeholder="Kod pocztowy" required oninput="checkPostalCode(this)" maxlength="6" minlength="6" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close6" src="/images/close.png" alt="close">
-          <img id="check6" src="/images/check.png" alt="check">
+          <img id="close8" src="/images/close.png" alt="close">
+          <img id="check8" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPostalCode" data-display="0">
           Kod pocztowy musi spełniać następujące warunki:
@@ -96,8 +123,8 @@
         </div>
         <label id="City">
           <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close7" src="/images/close.png" alt="close">
-          <img id="check7"  src="/images/check.png" alt="check">
+          <img id="close9" src="/images/close.png" alt="close">
+          <img id="check9"  src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationCity" data-display="0">
           Miejscowość musi spełniać następujące warunki:
@@ -131,8 +158,8 @@
         </label>
         <label id="Phone">
           <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="28" minlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close8" src="/images/close.png" alt="close">
-          <img id="check8" src="/images/check.png" alt="check">
+          <img id="close10" src="/images/close.png" alt="close">
+          <img id="check10" src="/images/check.png" alt="check">
         </label>
         <div class="validation" id="validationPhone" data-display="0">
           Telefon musi spełniać następujące warunki:
@@ -143,9 +170,9 @@
         </div>
       </div>
       <label id="Password">
-        <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" min="6" max="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close9" src="/images/close.png" alt="close">
-        <img id="check9"  src="/images/check.png" alt="check">
+        <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+        <img id="close11" src="/images/close.png" alt="close">
+        <img id="check11"  src="/images/check.png" alt="check">
       </label>
       <div class="validation" id="validationPassword" data-display="0">
         Hasło musi spełniać następujące warunki:
@@ -158,9 +185,9 @@
         </ul>
       </div>
       <label id="RetypedPassword">
-        <input th:field="*{retypedPassword}" type="password" placeholder="Powtórz hasło" required oninput="checkRetypedPassword(this)" min="6" max="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close10" src="/images/close.png" alt="close">
-        <img id="check10"  src="/images/check.png" alt="check">
+        <input th:field="*{retypedPassword}" type="password" placeholder="Powtórz hasło" required oninput="checkRetypedPassword(this)" minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+        <img id="close12" src="/images/close.png" alt="close">
+        <img id="check12"  src="/images/check.png" alt="check">
       </label>
       <div class="validation" id="validationRetypedPassword" data-display="0">
         Powtórzone hasło musi spełniać następujące warunki:
