@@ -10,7 +10,7 @@ public class Account {
   @Id private String id;
   private String phone;
   private String password;
+  private String email;
   private Role role;
   private boolean isActive;
-  private boolean isShop;
 }

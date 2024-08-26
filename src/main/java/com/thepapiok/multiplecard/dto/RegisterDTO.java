@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,16 @@ public class RegisterDTO {
   @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$")
   @Size(min = 2, max = 40)
   private String lastName;
+
+  @NotBlank
+  @Email
+  @Size(min = 4, max = 30)
+  private String email;
+
+  @NotBlank
+  @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$")
+  @Size(min = 2, max = 40)
+  private String province;
 
   @NotBlank
   @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$")
@@ -63,8 +74,4 @@ public class RegisterDTO {
   @Pattern(regexp = "^(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*]).*$")
   @Size(min = 6, max = 25)
   private String retypedPassword;
-
-  @Pattern(regexp = "^(|[0-9]{3} [0-9]{3})$")
-  @Size(max = 6)
-  private String verificationNumber;
 }

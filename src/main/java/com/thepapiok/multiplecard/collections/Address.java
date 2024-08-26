@@ -10,4 +10,5 @@ public class Address {
   private String street;
   private String houseNumber;
   private Integer apartmentNumber;
+  private String province;
 }
