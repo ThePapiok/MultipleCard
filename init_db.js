@@ -390,3 +390,4 @@ db.createCollection("users", {
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
+db.accounts.createIndex({"email": 1}, {"unique": true});
