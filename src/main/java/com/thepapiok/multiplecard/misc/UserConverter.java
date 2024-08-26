@@ -14,6 +14,7 @@ public class UserConverter {
 
   public User getEntity(RegisterDTO registerDTO) {
     Address address = new Address();
+    address.setProvince(registerDTO.getProvince());
     address.setCity(registerDTO.getCity());
     address.setStreet(registerDTO.getStreet());
     address.setPostalCode(registerDTO.getPostalCode());

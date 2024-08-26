@@ -49,7 +49,6 @@ public class AuthenticationService {
     account.setId(user.getId());
     account.setRole(Role.ROLE_USER);
     account.setActive(true);
-    account.setShop(false);
     accountRepository.save(account);
   }
 

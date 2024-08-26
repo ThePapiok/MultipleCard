@@ -19,6 +19,7 @@ public class AccountConverter {
     Account account = new Account();
     account.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
     account.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
+    account.setEmail(registerDTO.getEmail());
     return account;
   }
 }
