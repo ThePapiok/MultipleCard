@@ -114,6 +114,7 @@ public class AuthenticationController {
       @Valid @ModelAttribute RegisterDTO register,
       BindingResult bindingResult,
       HttpSession httpSession) {
+    // TODO - add check field isActive
     boolean error = false;
     String message = null;
     String redirect = "redirect:/register?error";
