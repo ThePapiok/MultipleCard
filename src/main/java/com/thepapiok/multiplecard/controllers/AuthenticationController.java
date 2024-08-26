@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AuthenticationController {
-
+  private static final String ERROR_AT_SMS_SENDING = "Błąd podczas wysyłania sms";
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
   private final PasswordEncoder passwordEncoder;
@@ -135,7 +135,10 @@ public class AuthenticationController {
       httpSession.setAttribute(errorMessage, message);
       return redirect;
     }
-    getVerificationNumber(httpSession, register.getPhone(), register.getCallingCode());
+    if (!getVerificationNumber(httpSession, register.getPhone(), register.getCallingCode())) {
+      httpSession.setAttribute(errorMessage, ERROR_AT_SMS_SENDING);
+      return redirectVerificationError;
+    }
     httpSession.setAttribute(codeAmount, 1);
     return "redirect:/account_verifications";
   }
@@ -157,7 +160,7 @@ public class AuthenticationController {
       if (codeAmountInt != maxAmount) {
         if (!getVerificationNumber(
             httpSession, registerDTO.getPhone(), registerDTO.getCallingCode())) {
-          httpSession.setAttribute(errorMessage, "Błąd podczas wysyłania sms");
+          httpSession.setAttribute(errorMessage, ERROR_AT_SMS_SENDING);
           return redirectVerificationError;
         }
         httpSession.setAttribute(codeAmount, codeAmountInt + 1);
