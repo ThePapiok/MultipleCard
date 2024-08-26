@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class ReviewController {
 
   @PostMapping("/review")
-  public String addReview(@ModelAttribute("review") ReviewDTO review, Model model) {
-    return "redirect:/?added=true";
+  public String addReview(@ModelAttribute("review") ReviewDTO review) {
+    return "redirect:/?added";
   }
 }
