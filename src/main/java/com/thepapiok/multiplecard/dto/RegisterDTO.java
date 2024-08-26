@@ -3,9 +3,13 @@ package com.thepapiok.multiplecard.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterDTO {
   @NotBlank
   @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$")
@@ -43,7 +47,7 @@ public class RegisterDTO {
 
   @NotBlank private String country;
 
-  @NotBlank private String areaCode;
+  @NotBlank private String callingCode;
 
   @NotBlank
   @Pattern(regexp = "^[1-9][0-9 ]*$")

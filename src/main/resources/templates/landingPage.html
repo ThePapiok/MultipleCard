@@ -135,8 +135,8 @@
                 </label>
                 <button id="submit" type="submit" class="greenButton">Wyślij</button>
             </div>
+            <span th:if="${param.added}" id="textReview">Opinia została pomyślnie dodana !</span>
         </form>
-        <span th:if="${added} == 'true'" id="textReview">Opinia została pomyślnie dodana !</span>
     </div>
     <div id="footer">
     </div>

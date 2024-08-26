@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class CountryDTO implements Comparable<CountryDTO> {
   private String name;
   private String code;
-  private String areaCode;
+  private String callingCode;
 
   @Override
   public int compareTo(CountryDTO o) {

@@ -11,6 +11,7 @@ import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,8 @@ public class AuthenticationService {
   private final UserConverter userConverter;
   private final AccountConverter accountConverter;
 
+  private Random random;
+
   @Autowired
   public AuthenticationService(
       AccountRepository accountRepository,
@@ -32,6 +35,7 @@ public class AuthenticationService {
     this.userRepository = userRepository;
     this.userConverter = userConverter;
     this.accountConverter = accountConverter;
+    random = new Random();
   }
 
   @Transactional
@@ -50,11 +54,14 @@ public class AuthenticationService {
   }
 
   public List<String> getPhones() {
-    return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
+    try {
+      return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   public String getVerificationNumber() {
-    Random random = new Random();
     final int bound = 10;
     final int forBound = 3;
     StringBuilder verificationNumber = new StringBuilder();
@@ -66,5 +73,10 @@ public class AuthenticationService {
       verificationNumber.append(random.nextInt(bound));
     }
     return verificationNumber.toString();
+  }
+
+  @Profile("test")
+  public void setRandom(Random random) {
+    this.random = random;
   }
 }

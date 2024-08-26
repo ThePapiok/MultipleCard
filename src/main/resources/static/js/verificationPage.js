@@ -54,7 +54,7 @@ function showValidation(e){
     const cord = e.getBoundingClientRect();
     info.style.display = "inline";
     info.style.left = cord.right + window.scrollX + 'px';
-    info.style.top = cord.top + window.scrollY  + 'px';
+    info.style.top = cord.top + window.scrollY + 50  + 'px';
 }
 
 function hideValidation() {

@@ -182,7 +182,7 @@ img{
     height: 140px;
 }
 
-#AreaCode {
+#CallingCode {
     width: 30%;
     height: 100%;
 }
@@ -229,7 +229,7 @@ img{
     border: 1px solid black;
 }
 
-#optionsAreaCode{
+#optionsCallingCode{
     width: 104%;
 }
 
@@ -237,11 +237,11 @@ img{
     cursor: pointer;
 }
 
-li{
+#nothingCallingCode, .optionSelect{
     padding: 4px;
 }
 
-#nothingAreaCode{
+#nothingCallingCode{
     display: none;
 }
 
