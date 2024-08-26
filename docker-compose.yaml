@@ -12,7 +12,7 @@ services:
       MONGODB_PASSWORD: user
       AUTH_TOKEN: ${AUTH_TOKEN}
       ACCOUNT_SID: ${ACCOUNT_SID}
-      PHONE_NUMBER: ${PHONE_NUMBER}
+      MESSAGING_SERVICE_SID: ${MESSAGING_SERVICE_SID}
     depends_on:
       - db
   db:
