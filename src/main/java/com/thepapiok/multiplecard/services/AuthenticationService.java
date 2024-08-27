@@ -60,6 +60,14 @@ public class AuthenticationService {
     }
   }
 
+  public List<String> getEmails() {
+    try {
+      return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   public String getVerificationNumber() {
     final int bound = 10;
     final int forBound = 3;

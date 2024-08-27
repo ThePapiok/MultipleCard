@@ -46,4 +46,33 @@ public class AccountRepositoryTest {
 
     assertEquals(expectedAccounts, accountRepository.findAllPhones());
   }
+
+  @Test
+  public void shouldSuccessFindAllEmails() {
+    final String email1 = "test1@test";
+    final String email2 = "Test2@tset";
+    Account account1 = new Account();
+    account1.setPhone("+1231231");
+    account1.setEmail(email1);
+    account1.setId("1232rfvbb");
+    account1.setPassword("123sdfadvvdb");
+    account1.setActive(true);
+    account1.setRole(Role.ROLE_USER);
+    Account account2 = new Account();
+    account2.setPhone("+234324345");
+    account2.setId("vadv1223dvbv");
+    account2.setEmail(email2);
+    account2.setPassword("sadfb34545dfvb");
+    account2.setActive(true);
+    account2.setRole(Role.ROLE_USER);
+    Account expectedAccount1 = new Account();
+    expectedAccount1.setEmail(email1);
+    Account expectedAccount2 = new Account();
+    expectedAccount2.setEmail(email2);
+    List<Account> expectedAccounts = List.of(expectedAccount1, expectedAccount2);
+    accountRepository.save(account1);
+    accountRepository.save(account2);
+
+    assertEquals(expectedAccounts, accountRepository.findAllEmails());
+  }
 }

@@ -106,6 +106,27 @@ public class AuthenticationServiceTest {
   }
 
   @Test
+  public void shouldSuccessGetEmails() {
+    Account account1 = new Account();
+    account1.setEmail("test1@test");
+    Account account2 = new Account();
+    account2.setEmail("Test2@tests");
+    List<Account> expectedAccountList = List.of(account1, account2);
+    List<String> expectedEmails = List.of(account1.getEmail(), account2.getEmail());
+
+    when(accountRepository.findAllEmails()).thenReturn(expectedAccountList);
+
+    assertEquals(expectedEmails, authenticationService.getEmails());
+  }
+
+  @Test
+  public void shouldFailGetEmails() {
+    when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
+
+    assertNull(authenticationService.getEmails());
+  }
+
+  @Test
   public void shouldSuccessGetVerificationNumber() {
     authenticationService.setRandom(random);
 

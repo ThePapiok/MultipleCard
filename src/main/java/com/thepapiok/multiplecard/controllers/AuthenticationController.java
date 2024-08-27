@@ -138,6 +138,9 @@ public class AuthenticationController {
         .contains(register.getCallingCode() + register.getPhone())) {
       error = true;
       message = "Użytkownik o takim numerze telefonu już istnieje";
+    } else if (authenticationService.getEmails().contains(register.getEmail())) {
+      error = true;
+      message = "Użytkownik o takim emailu już istnieje";
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
       error = true;
       message = "Podane hasła różnią się";

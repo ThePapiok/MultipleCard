@@ -189,9 +189,11 @@ public class AuthenticationControllerTest {
     final String verificationNumber = "123 456";
     final String encodeVerificationNumber = "sad8h121231z#$2";
     final List<String> phones = List.of("+34234234234");
-    MockHttpSession httpSession = new MockHttpSession();
+    final List<String> emails = List.of("test@test");
 
+    MockHttpSession httpSession = new MockHttpSession();
     when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
     when(authenticationService.getVerificationNumber()).thenReturn(verificationNumber);
     when(passwordEncoder.encode(verificationNumber)).thenReturn(encodeVerificationNumber);
 
@@ -220,7 +222,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterByUsersTheSame() throws Exception {
+  public void shouldRedirectToRegisterByUsersTheSameByPhone() throws Exception {
     final String errorMessage = "Użytkownik o takim numerze telefonu już istnieje";
     final List<String> phones = List.of("+48123456789", "+1212345673123");
     MockHttpSession httpSession = new MockHttpSession();
@@ -235,10 +237,32 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenErrorAtGetVerificationSms() throws Exception {
-    final String verificationNumber = "123 456";
+  public void shouldRedirectToRegisterByUsersTheSameByEmail() throws Exception {
+    final String errorMessage = "Użytkownik o takim emailu już istnieje";
+    final List<String> phones = List.of("+1212345673123");
+    final List<String> emails = List.of("Test@Test.pl", "test@test");
+
     MockHttpSession httpSession = new MockHttpSession();
 
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+
+    performPostRegister(expectedRegisterDTO, httpSession, "/register?error");
+    assertEquals(
+        expectedRegisterDTO.toString(),
+        Objects.requireNonNull(httpSession.getAttribute("register")).toString());
+    assertEquals(errorMessage, httpSession.getAttribute("errorMessage"));
+  }
+
+  @Test
+  public void shouldRedirectToVerificationWhenErrorAtGetVerificationSms() throws Exception {
+    final String verificationNumber = "123 456";
+    final List<String> phones = List.of("+34234234234");
+    final List<String> emails = List.of("test@test");
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
     when(authenticationService.getVerificationNumber()).thenReturn(verificationNumber);
     doThrow(ApiException.class)
         .when(smsService)
@@ -256,8 +280,12 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToVerificationWhenErrorAtGetVerificationEmail() throws Exception {
     final String verificationNumber = "123 456";
+    final List<String> phones = List.of("+34234234234");
+    final List<String> emails = List.of("test@test");
     MockHttpSession httpSession = new MockHttpSession();
 
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
     when(authenticationService.getVerificationNumber()).thenReturn(verificationNumber);
     doThrow(ApiException.class)
         .when(emailService)
@@ -275,6 +303,8 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToRegisterByPasswordsNotTheSame() throws Exception {
     final String errorMessage = "Podane hasła różnią się";
+    final List<String> phones = List.of("+34234234234");
+    final List<String> emails = List.of("test@test");
     MockHttpSession httpSession = new MockHttpSession();
     RegisterDTO expectedRegisterDTO = new RegisterDTO();
     expectedRegisterDTO.setPhone("12312313231");
@@ -290,6 +320,9 @@ public class AuthenticationControllerTest {
     expectedRegisterDTO.setCallingCode("+48");
     expectedRegisterDTO.setPostalCode("00-000");
     expectedRegisterDTO.setStreet("Test");
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
 
     performPostRegister(expectedRegisterDTO, httpSession, "/register?error");
     assertEquals(
