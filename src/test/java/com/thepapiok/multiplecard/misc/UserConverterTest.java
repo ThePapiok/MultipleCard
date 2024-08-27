@@ -9,6 +9,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class UserConverterTest {
+  private static final String TEST_HOUSE_APARTMENT_NUMBER = "1";
+  private static final String TEST_CITY = "City";
+  private static final String TEST_STREET = "Street";
+  private static final String TEST_POSTAL_CODE = "Postal Code";
+  private static final String TEST_COUNTRY = "Country";
+  private static final String TEST_FIRST_NAME = "First Name";
+  private static final String TEST_LAST_NAME = "Last Name";
+  private static final String TEST_PROVINCE = "Province";
+
   private UserConverter userConverter;
 
   @BeforeEach
@@ -19,14 +28,14 @@ public class UserConverterTest {
   @Test
   public void shouldSuccessGetEntityWithoutApartmentNumber() {
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setCity("City");
-    registerDTO.setStreet("Street");
-    registerDTO.setPostalCode("Postal Code");
-    registerDTO.setHouseNumber("1");
-    registerDTO.setCountry("Country");
-    registerDTO.setFirstName("First Name");
-    registerDTO.setLastName("Last Name");
-    registerDTO.setProvince("Province");
+    registerDTO.setCity(TEST_CITY);
+    registerDTO.setStreet(TEST_STREET);
+    registerDTO.setPostalCode(TEST_POSTAL_CODE);
+    registerDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER);
+    registerDTO.setCountry(TEST_COUNTRY);
+    registerDTO.setFirstName(TEST_FIRST_NAME);
+    registerDTO.setLastName(TEST_LAST_NAME);
+    registerDTO.setProvince(TEST_PROVINCE);
     registerDTO.setApartmentNumber("");
     Address address = new Address();
     address.setCity(registerDTO.getCity());
@@ -46,14 +55,15 @@ public class UserConverterTest {
   @Test
   public void shouldSuccessGetEntity() {
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setCity("City");
-    registerDTO.setStreet("Street");
-    registerDTO.setPostalCode("Postal Code");
-    registerDTO.setHouseNumber("1");
-    registerDTO.setCountry("Country");
-    registerDTO.setFirstName("First Name");
-    registerDTO.setLastName("Last Name");
-    registerDTO.setApartmentNumber("1");
+    registerDTO.setCity(TEST_CITY);
+    registerDTO.setStreet(TEST_STREET);
+    registerDTO.setPostalCode(TEST_POSTAL_CODE);
+    registerDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER);
+    registerDTO.setCountry(TEST_COUNTRY);
+    registerDTO.setFirstName(TEST_FIRST_NAME);
+    registerDTO.setLastName(TEST_LAST_NAME);
+    registerDTO.setProvince(TEST_PROVINCE);
+    registerDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER);
     Address address = new Address();
     address.setCity(registerDTO.getCity());
     address.setStreet(registerDTO.getStreet());
@@ -61,6 +71,7 @@ public class UserConverterTest {
     address.setHouseNumber(registerDTO.getHouseNumber());
     address.setCountry(registerDTO.getCountry());
     address.setApartmentNumber(1);
+    address.setProvince(registerDTO.getProvince());
     User expectedUser = new User();
     expectedUser.setAddress(address);
     expectedUser.setFirstName(registerDTO.getFirstName());

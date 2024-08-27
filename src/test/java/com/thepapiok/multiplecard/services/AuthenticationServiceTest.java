@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("test")
 public class AuthenticationServiceTest {
-
   private AuthenticationService authenticationService;
   @Mock private UserConverter userConverter;
   @Mock private UserRepository userRepository;
@@ -42,18 +41,19 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldSuccessCreateUser() {
+    final String testText = "Test";
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setFirstName("Test");
-    registerDTO.setLastName("Test");
-    registerDTO.setStreet("Test");
-    registerDTO.setCity("Test");
+    registerDTO.setFirstName(testText);
+    registerDTO.setLastName(testText);
+    registerDTO.setStreet(testText);
+    registerDTO.setCity(testText);
     registerDTO.setCountry("Polska");
     registerDTO.setPostalCode("+48");
     registerDTO.setPhone("12312312321");
     registerDTO.setPassword("Test123!");
     registerDTO.setHouseNumber("1");
     registerDTO.setEmail("test@test");
-    registerDTO.setProvince("Test");
+    registerDTO.setProvince(testText);
     Address expectedAddress = new Address();
     expectedAddress.setCity(registerDTO.getCity());
     expectedAddress.setStreet(registerDTO.getStreet());

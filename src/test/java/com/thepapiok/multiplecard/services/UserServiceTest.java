@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.services;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Account;
@@ -16,6 +17,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class UserServiceTest {
+  private static final String TEST_PHONE = "+4823423411423";
   private UserService userService;
   @Mock private AccountRepository accountRepository;
 
@@ -27,10 +29,9 @@ public class UserServiceTest {
 
   @Test
   public void shouldSuccessLoadUserByUsername() {
-    final String phone = "+4823423411423";
     final String password = "123wefasdfasd123bsedf";
     Account expectedAccount = new Account();
-    expectedAccount.setPhone(phone);
+    expectedAccount.setPhone(TEST_PHONE);
     expectedAccount.setId("123123dfasdf");
     expectedAccount.setEmail("email");
     expectedAccount.setActive(true);
@@ -38,21 +39,20 @@ public class UserServiceTest {
     expectedAccount.setPassword(password);
     User user =
         new User(
-            phone,
+            TEST_PHONE,
             password,
             Collections.singleton(new SimpleGrantedAuthority(Role.ROLE_USER.name())));
 
-    when(accountRepository.findByPhone(phone)).thenReturn(expectedAccount);
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(expectedAccount);
 
-    assertEquals(user, userService.loadUserByUsername(phone));
+    assertEquals(user, userService.loadUserByUsername(TEST_PHONE));
   }
 
   @Test
   public void shouldFailLoadUserByUsername() {
-    final String phone = "+4823423411423";
 
-    when(accountRepository.findByPhone(phone)).thenReturn(null);
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(null);
 
-    assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(phone));
+    assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(TEST_PHONE));
   }
 }
