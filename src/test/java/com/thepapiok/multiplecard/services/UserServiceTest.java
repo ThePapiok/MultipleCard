@@ -32,7 +32,7 @@ public class UserServiceTest {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(phone);
     expectedAccount.setId("123123dfasdf");
-    expectedAccount.setShop(false);
+    expectedAccount.setEmail("email");
     expectedAccount.setActive(true);
     expectedAccount.setRole(Role.ROLE_USER);
     expectedAccount.setPassword(password);

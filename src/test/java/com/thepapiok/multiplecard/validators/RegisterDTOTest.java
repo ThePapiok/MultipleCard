@@ -76,11 +76,12 @@ public class RegisterDTOTest {
   }
 
   @Test
-  public void shouldSuccessAtValidationLastNameCityAndStreet() {
+  public void shouldSuccessAtValidationLastNameCityStreetAndProvince() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test");
     registerDTO.setCity("Test");
     registerDTO.setStreet("Test");
+    registerDTO.setProvince("Test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -89,14 +90,17 @@ public class RegisterDTOTest {
     assertTrue(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertTrue(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void shouldSuccessAtValidationLastNameCityAndStreetWithTwoParts1() {
+  public void shouldSuccessAtValidationLastNameCityStreetAndProvinceWithTwoParts1() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test Test");
     registerDTO.setCity("Test Test");
     registerDTO.setStreet("Test Test");
+    registerDTO.setProvince("Test Test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -105,14 +109,17 @@ public class RegisterDTOTest {
     assertTrue(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertTrue(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void shouldSuccessAtValidationLastNameCityAndStreetWithTwoParts2() {
+  public void shouldSuccessAtValidationLastNameCityStreetAndProvinceWithTwoParts2() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test-Test");
     registerDTO.setCity("Test-Test");
     registerDTO.setStreet("Test-Test");
+    registerDTO.setProvince("Test-Test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -121,14 +128,17 @@ public class RegisterDTOTest {
     assertTrue(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertTrue(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenNoStartWithUpperCase() {
+  public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenNoStartWithUpperCase() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("test");
-    registerDTO.setLastName("test");
-    registerDTO.setLastName("test");
+    registerDTO.setCity("test");
+    registerDTO.setStreet("test");
+    registerDTO.setProvince("test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -137,14 +147,17 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenContainsDigits() {
+  public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenContainsDigits() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Te1st");
     registerDTO.setCity("Te1st");
     registerDTO.setStreet("Te1st");
+    registerDTO.setProvince("Te1st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -153,14 +166,17 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenContainsSpecialSymbols() {
+  public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenContainsSpecialSymbols() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Te@st");
     registerDTO.setCity("Te@st");
     registerDTO.setStreet("Te@st");
+    registerDTO.setProvince("Te@st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -169,14 +185,18 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartNoStartWithUpperCase1() {
+  public void
+      shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartNoStartWithUpperCase1() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test test");
     registerDTO.setCity("Test test");
     registerDTO.setStreet("Test test");
+    registerDTO.setProvince("Test test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -185,14 +205,18 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartNoStartWithUpperCase2() {
+  public void
+      shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartNoStartWithUpperCase2() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test-test");
     registerDTO.setCity("Test-test");
     registerDTO.setStreet("Test-test");
+    registerDTO.setProvince("Test-test");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -201,14 +225,17 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartContainsDigits1() {
+  public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsDigits1() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test Te1st");
     registerDTO.setCity("Test Te1st");
     registerDTO.setStreet("Test Te1st");
+    registerDTO.setProvince("Test Te1st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -217,14 +244,17 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartContainsDigits2() {
+  public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsDigits2() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test-Te1st");
     registerDTO.setCity("Test-Te1st");
     registerDTO.setStreet("Test-Te1st");
+    registerDTO.setProvince("Test-Te1st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -233,14 +263,18 @@ public class RegisterDTOTest {
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
     assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
+    assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartContainsSpecialSymbols1() {
+  public void
+      shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsSpecialSymbols1() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test Te!st");
     registerDTO.setCity("Test Te!st");
     registerDTO.setStreet("Test Te!st");
+    registerDTO.setProvince("Test Te!st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -248,15 +282,19 @@ public class RegisterDTOTest {
     violations = validator.validateProperty(registerDTO, "city");
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
+    assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationLastNameCityAndStreetWhenSecondPartContainsSpecialSymbols2() {
+  public void
+      shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsSpecialSymbols2() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName("Test-Te!st");
     registerDTO.setCity("Test-Te!st");
     registerDTO.setStreet("Test-Te!st");
+    registerDTO.setProvince("Test-Te!st");
     Set<ConstraintViolation<RegisterDTO>> violations;
 
     violations = validator.validateProperty(registerDTO, "lastName");
@@ -264,6 +302,8 @@ public class RegisterDTOTest {
     violations = validator.validateProperty(registerDTO, "city");
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "street");
+    assertFalse(violations.isEmpty());
+    violations = validator.validateProperty(registerDTO, "province");
     assertFalse(violations.isEmpty());
   }
 
@@ -619,6 +659,76 @@ public class RegisterDTOTest {
     violations = validator.validateProperty(registerDTO, "password");
     assertFalse(violations.isEmpty());
     violations = validator.validateProperty(registerDTO, "retypedPassword");
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldSuccessAtValidationEmail() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("Em.-1_ail@T1e.pL");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertTrue(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenNotContainsAt() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("emailte.pl");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenNotContainsDot() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("email@tepl");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenContainsMoreThanOneAt() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("em@ail@te.pl");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenContainsDigitsAfterDot() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("email@te.p1l");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenWordAfterDotIsTooShort() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("email@te.p");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationEmailWhenWordAfterDotIsTooLong() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setEmail("email@te.psdaf");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, "email");
+
     assertFalse(violations.isEmpty());
   }
 }

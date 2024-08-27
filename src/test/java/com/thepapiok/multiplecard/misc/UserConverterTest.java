@@ -26,6 +26,7 @@ public class UserConverterTest {
     registerDTO.setCountry("Country");
     registerDTO.setFirstName("First Name");
     registerDTO.setLastName("Last Name");
+    registerDTO.setProvince("Province");
     registerDTO.setApartmentNumber("");
     Address address = new Address();
     address.setCity(registerDTO.getCity());
@@ -33,6 +34,7 @@ public class UserConverterTest {
     address.setPostalCode(registerDTO.getPostalCode());
     address.setHouseNumber(registerDTO.getHouseNumber());
     address.setCountry(registerDTO.getCountry());
+    address.setProvince(registerDTO.getProvince());
     User expectedUser = new User();
     expectedUser.setAddress(address);
     expectedUser.setFirstName(registerDTO.getFirstName());

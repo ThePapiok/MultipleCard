@@ -52,12 +52,15 @@ public class AuthenticationServiceTest {
     registerDTO.setPhone("12312312321");
     registerDTO.setPassword("Test123!");
     registerDTO.setHouseNumber("1");
+    registerDTO.setEmail("test@test");
+    registerDTO.setProvince("Test");
     Address expectedAddress = new Address();
     expectedAddress.setCity(registerDTO.getCity());
     expectedAddress.setStreet(registerDTO.getStreet());
     expectedAddress.setPostalCode(registerDTO.getPostalCode());
     expectedAddress.setHouseNumber(registerDTO.getHouseNumber());
     expectedAddress.setCountry(registerDTO.getCountry());
+    expectedAddress.setProvince(registerDTO.getProvince());
     User expectedUser = new User();
     expectedUser.setFirstName(registerDTO.getFirstName());
     expectedUser.setLastName(registerDTO.getLastName());
@@ -70,6 +73,7 @@ public class AuthenticationServiceTest {
     Account expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
+    expectedAccount.setEmail(registerDTO.getEmail());
 
     when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);

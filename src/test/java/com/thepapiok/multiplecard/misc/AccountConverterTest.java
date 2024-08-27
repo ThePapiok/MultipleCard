@@ -29,9 +29,11 @@ public class AccountConverterTest {
     registerDTO.setPassword(password);
     registerDTO.setCallingCode("+4");
     registerDTO.setPhone("8");
+    registerDTO.setEmail("test@test");
     Account expectedAccount = new Account();
     expectedAccount.setPassword(encodePassword);
     expectedAccount.setPhone("+48");
+    expectedAccount.setEmail("test@test");
 
     when(passwordEncoder.encode(password)).thenReturn(encodePassword);
 

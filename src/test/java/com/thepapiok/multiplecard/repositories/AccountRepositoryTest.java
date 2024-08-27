@@ -24,16 +24,16 @@ public class AccountRepositoryTest {
     final String phone2 = "+76546545343";
     Account account1 = new Account();
     account1.setPhone(phone1);
+    account1.setEmail("mail");
     account1.setId("1232rfvbb");
     account1.setPassword("123sdfadvvdb");
-    account1.setShop(false);
     account1.setActive(true);
     account1.setRole(Role.ROLE_USER);
     Account account2 = new Account();
     account2.setPhone(phone2);
     account2.setId("vadv1223dvbv");
+    account2.setEmail("mail");
     account2.setPassword("sadfb34545dfvb");
-    account2.setShop(false);
     account2.setActive(true);
     account2.setRole(Role.ROLE_USER);
     Account expectedAccount1 = new Account();
