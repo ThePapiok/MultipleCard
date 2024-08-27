@@ -205,6 +205,7 @@ public class AuthenticationControllerTest {
     assertEquals(encodeVerificationNumber, httpSession.getAttribute("codeSms"));
     assertEquals(1, httpSession.getAttribute("codeAmountEmail"));
     assertEquals(encodeVerificationNumber, httpSession.getAttribute("codeEmail"));
+    assertEquals(0, httpSession.getAttribute("attempts"));
   }
 
   @Test
@@ -493,6 +494,7 @@ public class AuthenticationControllerTest {
     assertNull(httpSession.getAttribute("codeSms"));
     assertNull(httpSession.getAttribute("codeAmountEmail"));
     assertNull(httpSession.getAttribute("codeEmail"));
+    assertNull(httpSession.getAttribute("attempts"));
   }
 
   @Test
@@ -518,6 +520,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute("register", expectedRegisterDTO);
     httpSession.setAttribute("codeEmail", codeEmail);
     httpSession.setAttribute("codeSms", codeSms);
+    httpSession.setAttribute("attempts", 0);
 
     when(passwordEncoder.matches(verificationEmail, codeEmail)).thenReturn(true);
     when(passwordEncoder.matches(verificationSms, codeSms)).thenReturn(true);
@@ -537,6 +540,30 @@ public class AuthenticationControllerTest {
     assertNull(httpSession.getAttribute("codeAmountSms"));
     assertNull(httpSession.getAttribute("codeEmail"));
     assertNull(httpSession.getAttribute("codeAmountEmail"));
+    assertNull(httpSession.getAttribute("attempts"));
+  }
+
+  @Test
+  public void shouldRedirectToVerificationWhenTooManyAttempts() throws Exception {
+    final String message = "Za dużo razy wpisałeś niepoprawny kod";
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute("register", expectedRegisterDTO);
+    httpSession.setAttribute("attempts", 3);
+
+    mockMvc
+        .perform(
+            post("/account_verifications")
+                .session(httpSession)
+                .param("verificationNumberEmail", "123 234")
+                .param("verificationNumberSms", "123 323"))
+        .andExpect(redirectedUrl("/login?error"));
+    assertEquals(message, httpSession.getAttribute("errorMessage"));
+    assertNull(httpSession.getAttribute("register"));
+    assertNull(httpSession.getAttribute("codeSms"));
+    assertNull(httpSession.getAttribute("codeAmountSms"));
+    assertNull(httpSession.getAttribute("codeEmail"));
+    assertNull(httpSession.getAttribute("codeAmountEmail"));
+    assertNull(httpSession.getAttribute("attempts"));
   }
 
   @Test
@@ -547,6 +574,7 @@ public class AuthenticationControllerTest {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute("register", expectedRegisterDTO);
     httpSession.setAttribute("codeEmail", codeEmail);
+    httpSession.setAttribute("attempts", 0);
 
     when(passwordEncoder.matches(verificationEmail, codeEmail)).thenReturn(false);
 
@@ -558,6 +586,7 @@ public class AuthenticationControllerTest {
                 .param("verificationNumberSms", "123 123"))
         .andExpect(redirectedUrl("/account_verifications?error"));
     assertEquals(message, httpSession.getAttribute("errorMessage"));
+    assertEquals(1, httpSession.getAttribute("attempts"));
   }
 
   @Test
@@ -571,6 +600,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute("register", expectedRegisterDTO);
     httpSession.setAttribute("codeEmail", codeEmail);
     httpSession.setAttribute("codeSms", codeSms);
+    httpSession.setAttribute("attempts", 0);
 
     when(passwordEncoder.matches(verificationEmail, codeEmail)).thenReturn(true);
     when(passwordEncoder.matches(verificationSms, codeSms)).thenReturn(false);
@@ -583,6 +613,7 @@ public class AuthenticationControllerTest {
                 .param("verificationNumberSms", verificationSms))
         .andExpect(redirectedUrl("/account_verifications?error"));
     assertEquals(message, httpSession.getAttribute("errorMessage"));
+    assertEquals(1, httpSession.getAttribute("attempts"));
   }
 
   @Test
@@ -596,6 +627,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute("register", expectedRegisterDTO);
     httpSession.setAttribute("codeEmail", codeEmail);
     httpSession.setAttribute("codeSms", codeSms);
+    httpSession.setAttribute("attempts", 0);
 
     when(passwordEncoder.matches(verificationEmail, codeEmail)).thenReturn(true);
     when(passwordEncoder.matches(verificationSms, codeSms)).thenReturn(true);

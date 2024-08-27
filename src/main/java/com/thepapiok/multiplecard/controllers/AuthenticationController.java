@@ -26,6 +26,8 @@ public class AuthenticationController {
   private static final String ERROR_AT_SMS_SENDING = "Błąd podczas wysyłania sms";
   private static final String ERROR_AT_EMAIL_SENDING = "Błąd podczas wysyłania emaila";
   private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard to: ";
+  private static final String ATTEMPTS = "attempts";
+  private static final String REDIRECT_LOGIN_ERROR = "redirect:/login?error";
 
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
@@ -159,6 +161,7 @@ public class AuthenticationController {
     }
     httpSession.setAttribute(codeAmountSms, 1);
     httpSession.setAttribute(codeAmountEmail, 1);
+    httpSession.setAttribute(ATTEMPTS, 0);
     return "redirect:/account_verifications";
   }
 
@@ -218,8 +221,15 @@ public class AuthenticationController {
       @RequestParam String verificationNumberSms,
       HttpSession httpSession) {
     RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(register);
-    if (!passwordEncoder.matches(
+    Integer attempts = (Integer) httpSession.getAttribute(ATTEMPTS);
+    final int maxAmount = 3;
+    if (attempts == maxAmount) {
+      resetRegister(httpSession);
+      httpSession.setAttribute(errorMessage, "Za dużo razy wpisałeś niepoprawny kod");
+      return REDIRECT_LOGIN_ERROR;
+    } else if (!passwordEncoder.matches(
         verificationNumberEmail, (String) httpSession.getAttribute(codeEmail))) {
+      httpSession.setAttribute(ATTEMPTS, attempts + 1);
       httpSession.setAttribute(errorMessage, "Nieprawidłowy kod email");
       return redirectVerificationError;
     }
@@ -229,13 +239,14 @@ public class AuthenticationController {
         authenticationService.createUser(registerDTO);
       } else {
         httpSession.setAttribute(errorMessage, "Nieprawidłowy kod sms");
+        httpSession.setAttribute(ATTEMPTS, attempts + 1);
         return redirectVerificationError;
       }
     } catch (Exception e) {
       System.out.println(e);
       resetRegister(httpSession);
       httpSession.setAttribute(errorMessage, "Nieoczekiwany błąd");
-      return "redirect:/login?error";
+      return REDIRECT_LOGIN_ERROR;
     }
     httpSession.setAttribute(phone, registerDTO.getPhone());
     httpSession.setAttribute(callingCode, registerDTO.getCallingCode());
@@ -250,6 +261,7 @@ public class AuthenticationController {
     httpSession.removeAttribute(codeAmountSms);
     httpSession.removeAttribute(codeEmail);
     httpSession.removeAttribute(codeAmountEmail);
+    httpSession.removeAttribute(ATTEMPTS);
   }
 
   private boolean getVerificationSms(HttpSession httpSession, String phone, String callingCode) {
