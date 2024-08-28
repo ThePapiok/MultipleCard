@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,15 @@ public class UserService implements UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(String username)
+      throws UsernameNotFoundException, NotActiveException {
     Account account = accountRepository.findByPhone(username);
+    System.out.println("xd");
     if (account == null) {
       throw new UsernameNotFoundException("Błędny login lub hasło");
+    }
+    if (!account.isActive()) {
+      throw new NotActiveException("Konto nie jest aktywowane");
     }
     return new org.springframework.security.core.userdetails.User(
         account.getPhone(),
