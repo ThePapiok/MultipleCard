@@ -44,6 +44,8 @@ body{
 }
 
 button{
+    position: relative;
+    z-index: 1;
     color: #FEF9EF;
     width: 130px;
     height: 40px;

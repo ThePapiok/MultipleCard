@@ -44,6 +44,8 @@ body{
 }
 
 button{
+    position: relative;
+    z-index: 1;
     color: #FEF9EF;
     width: 130px;
     height: 40px;
@@ -102,7 +104,7 @@ button{
     margin-top: 10%;
     margin-left: 3%;
     height: 42%;
-    width: 40%;
+    width: 50%;
 }
 
 
@@ -132,7 +134,7 @@ img{
     top: -10px;
 }
 
-#check1{
+#check1, #check2{
     display: none;
 }
 
@@ -156,10 +158,6 @@ img{
     display: none;
     pointer-events: none;
     padding: 3px;
-}
-
-#validationVerificationNumber{
-    height: 60px;
 }
 
 

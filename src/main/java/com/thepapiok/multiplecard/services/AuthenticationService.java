@@ -49,13 +49,20 @@ public class AuthenticationService {
     account.setId(user.getId());
     account.setRole(Role.ROLE_USER);
     account.setActive(true);
-    account.setShop(false);
     accountRepository.save(account);
   }
 
   public List<String> getPhones() {
     try {
       return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public List<String> getEmails() {
+    try {
+      return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
     } catch (Exception e) {
       return null;
     }

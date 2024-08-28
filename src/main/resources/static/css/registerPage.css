@@ -44,6 +44,8 @@ body{
 }
 
 button{
+    position: relative;
+    z-index: 1;
     color: #FEF9EF;
     width: 130px;
     height: 40px;
@@ -115,11 +117,11 @@ label{
     margin-right: 2%;
 }
 
-#FirstName, #Street, #Password, #RetypedPassword, #PostalCode{
+#FirstName, #Street, #Password, #RetypedPassword, #PostalCode, #Email{
     width: 45%;
 }
 
-#LastName, #City{
+#LastName, #City, #Province{
     width: 50%;
 }
 
@@ -228,7 +230,7 @@ img{
     top: -10px;
 }
 
-#check1, #check2, #check3, #check4, #close5, #check6, #check9, #check10, #check8, #check7, #up1, #up2{
+#check1, #check2, #check3, #check4, #check5, #check6, #close7, #check8, #check9, #check10, #check11, #check12, #up1, #up2{
     display: none;
 }
 
@@ -236,16 +238,16 @@ img{
     left: 73%;
 }
 
-#check4, #close4, #close5, #check5{
+#check6, #close6, #close7, #check7{
     left: 83%
 }
 
-#check2, #close2 , #check7, #close7{
+#check2, #close2 , #check9, #close9{
     left: 92%;
 }
 
 
-#check8, #close8{
+#check10, #close10{
     left: 88.6%;
 }
 
@@ -277,7 +279,7 @@ img{
     padding: 3px;
 }
 
-#validationFirstName{
+#validationFirstName, #validationEmail{
     height: 80px;
 }
 
@@ -286,10 +288,13 @@ img{
     transform: translateX(-100%);
 }
 
-#validationStreet, #validationCity{
+#validationStreet, #validationCity, #validationProvince{
     height: 100px;
 }
 
+#validationProvince{
+    transform: translateX(-100%);
+}
 
 #validationPassword{
     height: 140px;

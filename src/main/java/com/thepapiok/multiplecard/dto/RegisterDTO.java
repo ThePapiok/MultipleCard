@@ -22,6 +22,16 @@ public class RegisterDTO {
   private String lastName;
 
   @NotBlank
+  @Pattern(regexp = "^[A-za-z0-9-._]+@[A-z0-9a-z-.]+\\.[a-zA-z]{2,4}$")
+  @Size(min = 4, max = 30)
+  private String email;
+
+  @NotBlank
+  @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$")
+  @Size(min = 2, max = 40)
+  private String province;
+
+  @NotBlank
   @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$")
   @Size(min = 2, max = 40)
   private String street;
@@ -63,8 +73,4 @@ public class RegisterDTO {
   @Pattern(regexp = "^(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*]).*$")
   @Size(min = 6, max = 25)
   private String retypedPassword;
-
-  @Pattern(regexp = "^(|[0-9]{3} [0-9]{3})$")
-  @Size(max = 6)
-  private String verificationNumber;
 }

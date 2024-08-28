@@ -18,4 +18,4 @@ COPY --from=build /app/target/multipleCard.jar ./
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "multipleCard.jar"]
+CMD ["java", "-jar", "multipleCard.jar", "--spring.profiles.active=prod"]

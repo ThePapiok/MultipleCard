@@ -1,9 +1,11 @@
 package com.thepapiok.multiplecard.configs;
 
-import com.thepapiok.multiplecard.services.UserService;
+import com.thepapiok.multiplecard.misc.CustomAuthenticationFailureHandler;
+import com.thepapiok.multiplecard.misc.CustomAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, CustomAuthenticationFailureHandler customAuthenticationFailureHandler)
+      throws Exception {
     String loginUrl = "/login";
     http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
         .formLogin(
@@ -23,7 +27,8 @@ public class SecurityConfig {
                     .loginPage(loginUrl)
                     .loginProcessingUrl(loginUrl)
                     .usernameParameter("phone")
-                    .passwordParameter("password"))
+                    .passwordParameter("password")
+                    .failureHandler(customAuthenticationFailureHandler))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl(loginUrl))
         .csrf(AbstractHttpConfigurer::disable);
     return http.build();
@@ -35,10 +40,12 @@ public class SecurityConfig {
   }
 
   @Bean
-  public DaoAuthenticationProvider authenticationProvider(UserService userService) {
-    DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-    daoAuthenticationProvider.setUserDetailsService(userService);
-    daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-    return daoAuthenticationProvider;
+  public AuthenticationManager authManager(
+      HttpSecurity http, CustomAuthenticationProvider customAuthenticationProvider)
+      throws Exception {
+    AuthenticationManagerBuilder authenticationManagerBuilder =
+        http.getSharedObject(AuthenticationManagerBuilder.class);
+    authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider);
+    return authenticationManagerBuilder.build();
   }
 }

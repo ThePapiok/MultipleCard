@@ -1,16 +1,29 @@
-let previousVerificationNumber = "";
-let ok = false;
-let previous = false;
+let previousVerification = ["", ""];
+let ok = [false, false];
+let previous = [false, false];
+let success = false;
 const regVerificationNumber = new RegExp("^[0-9]{3} [0-9]{3}$");
 
-function checkVerificationNumber(e){
+
+function checkVerificationEmail(e){
     let input = e.value;
     let length = input.length;
+    addWhiteSpace(e, 0, input, length);
+    check(1,  length === 7 && regVerificationNumber.test(input));
+}
+
+function checkVerificationSms(e){
+    let input = e.value;
+    let length = input.length;
+    addWhiteSpace(e, 1, input, length);
+    check(2,  length === 7 && regVerificationNumber.test(input));
+}
+
+function addWhiteSpace(e, index, input, length){
+    let previous = previousVerification[index];
     if(length === 3){
-        console.log(previousVerificationNumber.charAt(previousVerificationNumber.length-1));
-        if(previousVerificationNumber.charAt(previousVerificationNumber.length-1) === " ")
+        if(previous.charAt(previous.length-1) === " ")
         {
-            console.log("xd");
             e.value = input.substring(0,length-1);
         }
         else{
@@ -18,47 +31,64 @@ function checkVerificationNumber(e){
         }
         input = e.value;
     }
-    previousVerificationNumber = input;
-    if(length === 7 && regVerificationNumber.test(input)){
-        ok = true;
-        if(previous === false){
-            document.getElementById("close1").style.display = "none";
-            document.getElementById("check1").style.display = "inline";
+    previousVerification[index] = input;
+}
+
+function check(i, con){
+    if(con){
+        ok[i-1] = true;
+        if(previous[i-1] === false){
+            document.getElementById("close"+i).style.display = "none";
+            document.getElementById("check"+i).style.display = "inline";
         }
-        if(ok !== previous)
+        if(ok[i-1] !== previous[i-1])
         {
-            let button = document.getElementById("registerButton");
-            button.className = "greenButton";
-            button.type = "submit";
-            previous = true;
+            activeButton();
+            previous[i-1] = true;
         }
     }
     else{
-        ok = false;
-        if(previous === true){
-            document.getElementById("close1").style.display = "inline";
-            document.getElementById("check1").style.display = "none";
+        ok[i-1] = false;
+        if(previous[i-1] === true){
+            document.getElementById("close"+i).style.display = "inline";
+            document.getElementById("check"+i).style.display = "none";
         }
-        if(ok !== previous)
+        if(ok[i-1] !== previous[i-1])
         {
-            let button = document.getElementById("registerButton");
-            button.className = "grayButton";
-            button.type = "button";
-            previous = false;
+            disableButton();
+            previous[i-1] = false;
         }
+    }
+}
+
+function activeButton(){
+    if(ok[0] && ok[1]){
+        let button = document.getElementById("registerButton");
+        button.className = "greenButton";
+        button.type = "submit";
+        success = true;
+    }
+}
+
+function disableButton(){
+    if((!ok[0] || !ok[1]) && success){
+        let button = document.getElementById("registerButton");
+        button.className = "grayButton";
+        button.type = "button";
+        success = false;
     }
 }
 
 function showValidation(e){
-    let info = document.getElementById("validationVerificationNumber");
+    let validation = e.parentElement.nextElementSibling;
     const cord = e.getBoundingClientRect();
-    info.style.display = "inline";
-    info.style.left = cord.right + window.scrollX + 'px';
-    info.style.top = cord.top + window.scrollY + 50  + 'px';
+    validation.style.display = "inline";
+    validation.style.left = cord.right + window.scrollX + 'px';
+    validation.style.top = cord.top + window.scrollY + 50  + 'px';
 }
 
-function hideValidation() {
-    document.getElementById("validationVerificationNumber").style.display = "none";
+function hideValidation(e) {
+    e.parentElement.nextElementSibling.style.display = "none";
 }
 
 

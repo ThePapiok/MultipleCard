@@ -92,26 +92,20 @@ function disableButton(){
 
 function showValidation(e) {
     let validation = e.parentElement.nextElementSibling;
-    if (validation.dataset.display === "0") {
-        const cord = e.getBoundingClientRect();
-        validation.style.display = "inline";
-        validation.style.left = cord.right + window.scrollX + 'px';
-        validation.style.top = cord.top + window.scrollY + 50 + 'px';
-        validation.dataset.display = "1";
-    }
+    const cord = e.getBoundingClientRect();
+    validation.style.display = "inline";
+    validation.style.left = cord.right + window.scrollX + 'px';
+    validation.style.top = cord.top + window.scrollY + 50 + 'px';
 }
 
 function hideValidation(e) {
-    let validation = e.parentElement.nextElementSibling;
-    if(validation.dataset.display === "1") {
-        validation.style.display = "none";
-        validation.dataset.display = "0";
-    }
+    e.parentElement.nextElementSibling.style.display = "none";
 }
 
 function atStart(){
     checkCallingCode(document.getElementById("valueCallingCode"));
     checkPhone(document.getElementById("phoneInput"));
+    document.getElementById("searchCallingCode").value = "";
 }
 
 function showOrHideCallingCode(){

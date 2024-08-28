@@ -4,12 +4,13 @@ const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńó�
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
 const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
-const regPhone = new RegExp("^[1-9][0-9 ]*$")
+const regPhone = new RegExp("^[1-9][0-9 ]*$");
+const regEmail = new RegExp("^[A-za-z0-9-._]+@[A-z0-9a-z-.]+\\.[a-zA-z]{2,4}$");
 
 
 let previousPostalCode = "";
-let ok = [false, false, false, false, true, false, false, false, false, false, false, false];
-let previous = [false, false, false, false, true, false, false, false, false, false, false, false];
+let ok = [false, false, false, false, false, false, true, false, false, false, false, false, false, false];
+let previous = [false, false, false, false, false, false, true, false, false, false, false, false, false, false];
 let success = false;
 let country = false;
 let callingCode = false;
@@ -44,27 +45,37 @@ function check(i, con){
 }
 function checkFirstName(e){
     const input = e.value;
-    check(1, (input.length >= 2 && input.length <=15 && regFirstName.test(input)));
+    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)));
 }
 
 function checkLastName(e){
     const input = e.value;
-    check(2, (input.length >= 2 && input.length <=40 && regLastNameAndCity.test(input)));
+    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)));
+}
+
+function checkEmail(e){
+    const input = e.value;
+    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)));
+}
+
+function checkProvince(e){
+    const input = e.value;
+    check(4, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)));
 }
 
 function checkStreet(e){
     const input = e.value;
-    check(3, (input.length >= 2 && input.length <=40 && regLastNameAndCity.test(input)));
+    check(5, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)));
 }
 
 function checkHouseNumber(e){
     const input = e.value;
-    check(4, (input.length >= 1 && input.length <=10 && regHouseNumber.test(input)));
+    check(6, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)));
 }
 
 function checkApartmentNumber(e){
     const input = e.value;
-    check(5, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0));
+    check(7, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0));
 }
 
 function checkPostalCode(e){
@@ -73,7 +84,7 @@ function checkPostalCode(e){
     if(length === 2){
         if(previousPostalCode.charAt(previousPostalCode.length-1) === "-")
         {
-            e.value = input.substring(0,length-1);
+            e.value = input.substring(0, length - 1);
         }
         else{
             e.value+="-";
@@ -81,12 +92,12 @@ function checkPostalCode(e){
         input = e.value;
     }
     previousPostalCode = input;
-    check(6, (regPostalCode.test(input)));
+    check(8, (regPostalCode.test(input)));
 }
 
 function checkCity(e){
     const input = e.value;
-    check(7, (input.length <= 40 && regLastNameAndCity.test(input)));
+    check(9, (input.length <= 40 && regLastNameAndCity.test(input)));
 }
 
 function checkSelect(input, index){
@@ -109,32 +120,32 @@ function checkSelect(input, index){
 }
 
 function checkCountry(e){
-    checkSelect(e.value, 10)
+    checkSelect(e.value, 12)
 }
 
 function checkCallingCode(e){
-    checkSelect(e.value, 11)
+    checkSelect(e.value, 13)
     checkPhone(document.getElementById("phone"));
 }
 
 function checkPhone(e){
     const input = e.value.toString().replaceAll(" ", "");
     const callingCodeLength = document.getElementById("valueCallingCode").value.length;
-    check(8, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)));
+    check(10, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)));
 }
 
 function  checkPassword(e){
     const input = e.value;
-    check(9, (input.length >= 6 && input.length <= 25 && regPassword.test(input)));
+    check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)));
 }
 
 function  checkRetypedPassword(e){
-    check(10, (e.value === document.getElementById("password").value));
+    check(12, (e.value === document.getElementById("password").value));
 }
 
 
 function activeButton(){
-    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10] && ok[11]){
+    if(ok[0] && ok[1] && ok[2] && ok[3] && ok[4] && ok[5] && ok[6] && ok[7] && ok[8] && ok[9] && ok[10] && ok[11] && ok[12] && ok[13]){
         let button = document.getElementById("nextButton");
         button.className = "greenButton";
         button.type = "submit";
@@ -143,7 +154,7 @@ function activeButton(){
 }
 
 function disableButton(){
-    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10] || !ok[11]) && success){
+    if((!ok[0] || !ok[1] || !ok[2] || !ok[3] || !ok[4] || !ok[5] || !ok[6] || !ok[7] || !ok[8] || !ok[9] || !ok[10] || !ok[11] || !ok[12] || !ok[13]) && success){
         let button = document.getElementById("nextButton");
         button.className = "grayButton";
         button.type = "button";
@@ -152,26 +163,21 @@ function disableButton(){
 }
 function showValidation(e){
     let validation = e.parentElement.nextElementSibling;
-    if(validation.dataset.display === "0") {
-        const cord = e.getBoundingClientRect();
-        validation.style.display = "inline";
-        validation.style.left = cord.right + window.scrollX + 'px';
-        validation.style.top = cord.top + window.scrollY+50 + 'px';
-        validation.dataset.display = "1";
-    }
+    const cord = e.getBoundingClientRect();
+    validation.style.display = "inline";
+    validation.style.left = cord.right + window.scrollX + 'px';
+    validation.style.top = cord.top + window.scrollY + 50 + 'px';
 }
 
 function hideValidation(e){
-    let validation = e.parentElement.nextElementSibling;
-    if(validation.dataset.display === "1") {
-        validation.style.display = "none";
-        validation.dataset.display = "0";
-    }
+    e.parentElement.nextElementSibling.style.display = "none";
 }
 
 function atStart() {
     checkFirstName(document.getElementById("firstName"));
     checkLastName(document.getElementById("lastName"));
+    checkEmail(document.getElementById("email"));
+    checkProvince(document.getElementById("province"));
     checkStreet(document.getElementById("street"));
     checkHouseNumber(document.getElementById("houseNumber"));
     checkApartmentNumber(document.getElementById("apartmentNumber"));
@@ -180,6 +186,8 @@ function atStart() {
     checkPhone(document.getElementById("phone"));
     checkCountry(document.getElementById("valueCountry"));
     checkCallingCode(document.getElementById("valueCallingCode"))
+    document.getElementById("searchCallingCode").value = "";
+    document.getElementById("searchCountry").value = "";
 }
 
 function showOrHideSelect(cond, searchName, optionsName, upName, downName){

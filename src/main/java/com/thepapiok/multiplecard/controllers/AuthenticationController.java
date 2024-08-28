@@ -6,6 +6,7 @@ import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
+import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -22,33 +23,41 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AuthenticationController {
-  private static final String ERROR_AT_SMS_SENDING = "Błąd podczas wysyłania sms";
+  private static final String ERROR_AT_SMS_SENDING_MESSAGE = "Błąd podczas wysyłania sms";
+  private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emaila";
+  private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard to: ";
+  private static final String ATTEMPTS_PARAM = "attempts";
+  private static final String REDIRECT_LOGIN_ERROR = "redirect:/login?error";
+  private static final String ERROR_MESSAGE_PARAM = "errorMessage";
+  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
+  private static final String REGISTER_PARAM = "register";
+  private static final String PHONE_PARAM = "phone";
+  private static final String CODE_SMS_PARAM = "codeSms";
+  private static final String CODE_EMAIL_PARAM = "codeEmail";
+  private static final String REDIRECT_VERIFICATION_ERROR = "redirect:/account_verifications?error";
+  private static final String REDIRECT_LOGIN = "redirect:/login";
+  private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
+  private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
+  private static final String CALLING_CODES_PARAM = "callingCodes";
+  private static final String CALLING_CODE_PARAM = "callingCode";
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
   private final PasswordEncoder passwordEncoder;
   private final SmsService smsService;
-  private final String errorMessage = "errorMessage";
-  private final String successMessage = "successMessage";
-  private final String register = "register";
-  private final String phone = "phone";
-  private final String code = "code";
-  private final String redirectVerificationError = "redirect:/account_verifications?error";
-  private final String redirectLogin = "redirect:/login";
-
-  private final String codeAmount = "codeAmount";
-  private final String callingCodes = "callingCodes";
-  private final String callingCode = "callingCode";
+  private final EmailService emailService;
 
   @Autowired
   public AuthenticationController(
       CountryService countryService,
       AuthenticationService authenticationService,
       PasswordEncoder passwordEncoder,
-      SmsService smsService) {
+      SmsService smsService,
+      EmailService emailService) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
     this.passwordEncoder = passwordEncoder;
     this.smsService = smsService;
+    this.emailService = emailService;
   }
 
   @GetMapping("/login")
@@ -58,26 +67,24 @@ public class AuthenticationController {
       Model model,
       HttpSession httpSession) {
     if (success != null) {
-      String message = (String) httpSession.getAttribute(successMessage);
+      String message = (String) httpSession.getAttribute(SUCCESS_MESSAGE_PARAM);
       if (message != null) {
-        model.addAttribute(successMessage, message);
-        httpSession.removeAttribute(successMessage);
-        model.addAttribute(phone, httpSession.getAttribute(phone));
-        httpSession.removeAttribute(phone);
-        model.addAttribute(callingCode, httpSession.getAttribute(callingCode));
-        httpSession.removeAttribute(callingCode);
+        model.addAttribute(SUCCESS_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
+        model.addAttribute(PHONE_PARAM, httpSession.getAttribute(PHONE_PARAM));
+        httpSession.removeAttribute(PHONE_PARAM);
+        model.addAttribute(CALLING_CODE_PARAM, httpSession.getAttribute(CALLING_CODE_PARAM));
+        httpSession.removeAttribute(CALLING_CODE_PARAM);
       }
     } else if (error != null) {
-      String message = (String) httpSession.getAttribute(errorMessage);
+      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
-        model.addAttribute(errorMessage, message);
-        httpSession.removeAttribute(message);
-      } else {
-        model.addAttribute(errorMessage, "Niepoprawny login lub hasło");
+        model.addAttribute(ERROR_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
     model.addAttribute(
-        callingCodes,
+        CALLING_CODES_PARAM,
         countryService.getAll().stream()
             .map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode()))
             .toList());
@@ -87,14 +94,14 @@ public class AuthenticationController {
   @GetMapping("/register")
   public String registerPage(
       @RequestParam(required = false) String error, Model model, HttpSession httpSession) {
-    String message = (String) httpSession.getAttribute(errorMessage);
+    String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
     if (error != null && message != null) {
-      model.addAttribute(errorMessage, message);
-      httpSession.removeAttribute(errorMessage);
-      model.addAttribute(register, httpSession.getAttribute(register));
-      httpSession.removeAttribute(register);
+      model.addAttribute(ERROR_MESSAGE_PARAM, message);
+      httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      model.addAttribute(REGISTER_PARAM, httpSession.getAttribute(REGISTER_PARAM));
+      httpSession.removeAttribute(REGISTER_PARAM);
     } else {
-      model.addAttribute(register, new RegisterDTO());
+      model.addAttribute(REGISTER_PARAM, new RegisterDTO());
     }
     List<CountryDTO> countries = countryService.getAll();
     model.addAttribute(
@@ -104,7 +111,7 @@ public class AuthenticationController {
             .distinct()
             .toList());
     model.addAttribute(
-        callingCodes,
+        CALLING_CODES_PARAM,
         countries.stream().map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode())).toList());
     return "registerPage";
   }
@@ -114,10 +121,11 @@ public class AuthenticationController {
       @Valid @ModelAttribute RegisterDTO register,
       BindingResult bindingResult,
       HttpSession httpSession) {
+    // TODO - add check field isActive
     boolean error = false;
     String message = null;
     String redirect = "redirect:/register?error";
-    httpSession.setAttribute(this.register, register);
+    httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
       System.out.println(bindingResult);
       error = true;
@@ -127,97 +135,148 @@ public class AuthenticationController {
         .contains(register.getCallingCode() + register.getPhone())) {
       error = true;
       message = "Użytkownik o takim numerze telefonu już istnieje";
+    } else if (authenticationService.getEmails().contains(register.getEmail())) {
+      error = true;
+      message = "Użytkownik o takim emailu już istnieje";
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
       error = true;
       message = "Podane hasła różnią się";
     }
     if (error) {
-      httpSession.setAttribute(errorMessage, message);
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
       return redirect;
     }
-    if (!getVerificationNumber(httpSession, register.getPhone(), register.getCallingCode())) {
-      httpSession.setAttribute(errorMessage, ERROR_AT_SMS_SENDING);
-      return redirectVerificationError;
+    if (!getVerificationSms(httpSession, register.getPhone(), register.getCallingCode())) {
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_AT_SMS_SENDING_MESSAGE);
+      return REDIRECT_VERIFICATION_ERROR;
     }
-    httpSession.setAttribute(codeAmount, 1);
+    if (!getVerificationEmail(httpSession, register.getEmail())) {
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE);
+      return REDIRECT_VERIFICATION_ERROR;
+    }
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
     return "redirect:/account_verifications";
   }
 
   @GetMapping("/account_verifications")
   public String verificationPage(
-      @RequestParam(required = false) String newCode,
+      @RequestParam(required = false) String newCodeSms,
+      @RequestParam(required = false) String newCodeEmail,
       @RequestParam(required = false) String reset,
       @RequestParam(required = false) String error,
       Model model,
       HttpSession httpSession) {
     final int maxAmount = 3;
-    RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(register);
+    RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(REGISTER_PARAM);
     if (registerDTO == null) {
-      return redirectLogin;
+      return REDIRECT_LOGIN;
     }
-    if (newCode != null) {
-      Integer codeAmountInt = (Integer) httpSession.getAttribute(codeAmount);
-      if (codeAmountInt != maxAmount) {
-        if (!getVerificationNumber(
+    if (newCodeSms != null) {
+      Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
+      if (codeAmountSmsInt != maxAmount) {
+        if (!getVerificationSms(
             httpSession, registerDTO.getPhone(), registerDTO.getCallingCode())) {
-          httpSession.setAttribute(errorMessage, ERROR_AT_SMS_SENDING);
-          return redirectVerificationError;
+          httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_AT_SMS_SENDING_MESSAGE);
+          return REDIRECT_VERIFICATION_ERROR;
         }
-        httpSession.setAttribute(codeAmount, codeAmountInt + 1);
+        httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmountSmsInt + 1);
       } else {
-        httpSession.setAttribute(errorMessage, "Za dużo razy poprosiłeś o nowy kod");
-        return redirectVerificationError;
+        httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Za dużo razy poprosiłeś o nowy kod sms");
+        return REDIRECT_VERIFICATION_ERROR;
+      }
+
+    } else if (newCodeEmail != null) {
+      Integer codeAmountEmailInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM);
+      if (codeAmountEmailInt != maxAmount) {
+        if (!getVerificationEmail(httpSession, registerDTO.getEmail())) {
+          httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE);
+          return REDIRECT_VERIFICATION_ERROR;
+        }
+        httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmountEmailInt + 1);
+      } else {
+        httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Za dużo razy poprosiłeś o nowy kod email");
+        return REDIRECT_VERIFICATION_ERROR;
       }
 
     } else if (reset != null) {
       resetRegister(httpSession);
-      return redirectLogin;
+      return REDIRECT_LOGIN;
     } else if (error != null) {
-      model.addAttribute(errorMessage, httpSession.getAttribute(errorMessage));
-      httpSession.removeAttribute(errorMessage);
+      model.addAttribute(ERROR_MESSAGE_PARAM, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+      httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
     }
-    model.addAttribute("registerDTO", registerDTO);
     return "verificationPage";
   }
 
   @PostMapping("/account_verifications")
-  public String verification(@ModelAttribute RegisterDTO registerDTO, HttpSession httpSession) {
-    RegisterDTO registerSession = (RegisterDTO) httpSession.getAttribute(register);
+  public String verification(
+      @RequestParam String verificationNumberEmail,
+      @RequestParam String verificationNumberSms,
+      HttpSession httpSession) {
+    RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(REGISTER_PARAM);
+    Integer attempts = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
+    final int maxAmount = 3;
+    if (attempts == maxAmount) {
+      resetRegister(httpSession);
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Za dużo razy wpisałeś niepoprawny kod");
+      return REDIRECT_LOGIN_ERROR;
+    } else if (!passwordEncoder.matches(
+        verificationNumberEmail, (String) httpSession.getAttribute(CODE_EMAIL_PARAM))) {
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Nieprawidłowy kod email");
+      return REDIRECT_VERIFICATION_ERROR;
+    }
     try {
       if (passwordEncoder.matches(
-          registerDTO.getVerificationNumber(), (String) httpSession.getAttribute(code))) {
-        authenticationService.createUser(registerSession);
+          verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_PARAM))) {
+        authenticationService.createUser(registerDTO);
       } else {
-        httpSession.setAttribute(errorMessage, "Nieprawidłowy kod");
-        return redirectVerificationError;
+        httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Nieprawidłowy kod sms");
+        httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+        return REDIRECT_VERIFICATION_ERROR;
       }
     } catch (Exception e) {
       System.out.println(e);
       resetRegister(httpSession);
-      httpSession.setAttribute(errorMessage, "Nieoczekiwany błąd");
-      return "redirect:/login?error";
-      // TODO maybe add better exception
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, "Nieoczekiwany błąd");
+      return REDIRECT_LOGIN_ERROR;
     }
-    httpSession.setAttribute(phone, registerSession.getPhone());
-    httpSession.setAttribute(callingCode, registerSession.getCallingCode());
+    httpSession.setAttribute(PHONE_PARAM, registerDTO.getPhone());
+    httpSession.setAttribute(CALLING_CODE_PARAM, registerDTO.getCallingCode());
     resetRegister(httpSession);
-    httpSession.setAttribute(successMessage, "Pomyślnie zarejestrowano");
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, "Pomyślnie zarejestrowano");
     return "redirect:/login?success";
   }
 
   private void resetRegister(HttpSession httpSession) {
-    httpSession.removeAttribute(register);
-    httpSession.removeAttribute(code);
-    httpSession.removeAttribute(codeAmount);
+    httpSession.removeAttribute(REGISTER_PARAM);
+    httpSession.removeAttribute(CODE_SMS_PARAM);
+    httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
+    httpSession.removeAttribute(CODE_EMAIL_PARAM);
+    httpSession.removeAttribute(CODE_AMOUNT_EMAIL_PARAM);
+    httpSession.removeAttribute(ATTEMPTS_PARAM);
   }
 
-  private boolean getVerificationNumber(HttpSession httpSession, String phone, String callingCode) {
+  private boolean getVerificationSms(HttpSession httpSession, String phone, String callingCode) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
-      smsService.sendSms(
-          "Twój kod weryfikacyjny MultipleCard to: " + verificationNumber, callingCode + phone);
-      httpSession.setAttribute(code, passwordEncoder.encode(verificationNumber));
+      smsService.sendSms(VERIFICATION_MESSAGE + verificationNumber, callingCode + phone);
+      httpSession.setAttribute(CODE_SMS_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  private boolean getVerificationEmail(HttpSession httpSession, String email) {
+    try {
+      String verificationNumber = authenticationService.getVerificationNumber();
+      emailService.sendEmail(VERIFICATION_MESSAGE + verificationNumber, email);
+      httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
+    } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
     return true;

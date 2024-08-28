@@ -16,13 +16,24 @@
     </div>
     <div id="body">
         <p class="title">Potwierdzenie konta</p>
-        <form th:action="@{/account_verifications}" th:object="${registerDTO}" id="form" method="post">
-            <label id="VerificationNumber">
-                <input th:field="*{verificationNumber}" type="text" placeholder="Kod sms" required oninput="checkVerificationNumber(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation()">
+        <form th:action="@{/account_verifications}" id="form" method="post">
+            <label id="VerificationEmail">
+                <input id="verificationNumberEmail" name="verificationNumberEmail" type="text" placeholder="Kod email" required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
                 <img id="close1" src="/images/close.png" alt="close">
                 <img id="check1" src="/images/check.png" alt="check">
             </label>
-            <div class="validation" id="validationVerificationNumber">
+            <div class="validation">
+                Kod email musi spełniać następujące warunki:
+                <ul>
+                    <li>zawiera 6 cyfr</li>
+                </ul>
+            </div>
+            <label id="VerificationSms">
+                <input id="verificationNumberSms" name="verificationNumberSms" type="text" placeholder="Kod sms" required oninput="checkVerificationSms(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close2" src="/images/close.png" alt="close">
+                <img id="check2" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation">
                 Kod sms musi spełniać następujące warunki:
                 <ul>
                     <li>zawiera 6 cyfr</li>
@@ -30,8 +41,11 @@
             </div>
             <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
             <button type="button" class="grayButton" id="registerButton">Załóż konto</button>
-            <a th:href="@{'/account_verifications?newCode'}">
-                <button type="button" class="blackButton">Wyślij nowy kod</button>
+            <a th:href="@{'/account_verifications?newCodeSms'}">
+                <button type="button" class="blackButton">Nowy kod sms</button>
+            </a>
+            <a th:href="@{'/account_verifications?newCodeEmail'}">
+                <button type="button" class="blackButton">Nowy kod email</button>
             </a>
             <a th:href="@{'/account_verifications?reset'}">
                 <button type="button" class="blackButton">Anuluj</button>

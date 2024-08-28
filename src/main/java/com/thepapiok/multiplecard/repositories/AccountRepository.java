@@ -10,5 +10,8 @@ public interface AccountRepository extends MongoRepository<Account, String> {
   @Query(value = "{}", fields = "{'_id': 0, 'phone': 1}")
   List<Account> findAllPhones();
 
+  @Query(value = "{}", fields = "{'_id': 0, 'email': 1}")
+  List<Account> findAllEmails();
+
   Account findByPhone(String phone);
 }

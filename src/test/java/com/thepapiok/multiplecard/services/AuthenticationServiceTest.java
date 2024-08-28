@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("test")
 public class AuthenticationServiceTest {
-
   private AuthenticationService authenticationService;
   @Mock private UserConverter userConverter;
   @Mock private UserRepository userRepository;
@@ -42,22 +41,26 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldSuccessCreateUser() {
+    final String testText = "Test";
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setFirstName("Test");
-    registerDTO.setLastName("Test");
-    registerDTO.setStreet("Test");
-    registerDTO.setCity("Test");
+    registerDTO.setFirstName(testText);
+    registerDTO.setLastName(testText);
+    registerDTO.setStreet(testText);
+    registerDTO.setCity(testText);
     registerDTO.setCountry("Polska");
     registerDTO.setPostalCode("+48");
     registerDTO.setPhone("12312312321");
     registerDTO.setPassword("Test123!");
     registerDTO.setHouseNumber("1");
+    registerDTO.setEmail("test@test");
+    registerDTO.setProvince(testText);
     Address expectedAddress = new Address();
     expectedAddress.setCity(registerDTO.getCity());
     expectedAddress.setStreet(registerDTO.getStreet());
     expectedAddress.setPostalCode(registerDTO.getPostalCode());
     expectedAddress.setHouseNumber(registerDTO.getHouseNumber());
     expectedAddress.setCountry(registerDTO.getCountry());
+    expectedAddress.setProvince(registerDTO.getProvince());
     User expectedUser = new User();
     expectedUser.setFirstName(registerDTO.getFirstName());
     expectedUser.setLastName(registerDTO.getLastName());
@@ -70,6 +73,7 @@ public class AuthenticationServiceTest {
     Account expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
+    expectedAccount.setEmail(registerDTO.getEmail());
 
     when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
@@ -99,6 +103,27 @@ public class AuthenticationServiceTest {
     when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
 
     assertNull(authenticationService.getPhones());
+  }
+
+  @Test
+  public void shouldSuccessGetEmails() {
+    Account account1 = new Account();
+    account1.setEmail("test1@test");
+    Account account2 = new Account();
+    account2.setEmail("Test2@tests");
+    List<Account> expectedAccountList = List.of(account1, account2);
+    List<String> expectedEmails = List.of(account1.getEmail(), account2.getEmail());
+
+    when(accountRepository.findAllEmails()).thenReturn(expectedAccountList);
+
+    assertEquals(expectedEmails, authenticationService.getEmails());
+  }
+
+  @Test
+  public void shouldFailGetEmails() {
+    when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
+
+    assertNull(authenticationService.getEmails());
   }
 
   @Test

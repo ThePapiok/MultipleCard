@@ -25,13 +25,16 @@ public class AccountConverterTest {
   public void shouldSuccessGetEntity() {
     final String password = "Test123!";
     final String encodePassword = "123dsfavdva3312";
+    final String email = "test@test";
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setPassword(password);
     registerDTO.setCallingCode("+4");
     registerDTO.setPhone("8");
+    registerDTO.setEmail(email);
     Account expectedAccount = new Account();
     expectedAccount.setPassword(encodePassword);
     expectedAccount.setPhone("+48");
+    expectedAccount.setEmail(email);
 
     when(passwordEncoder.encode(password)).thenReturn(encodePassword);
 
