@@ -13,6 +13,7 @@ services:
       AUTH_TOKEN: ${AUTH_TOKEN}
       ACCOUNT_SID: ${ACCOUNT_SID}
       MESSAGING_SERVICE_SID: ${MESSAGING_SERVICE_SID}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
     depends_on:
       - db
   db:

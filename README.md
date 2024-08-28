@@ -29,6 +29,9 @@ Aby projekt działał potrzebuje on dodania zmiennych środowiskowych:
 
 `ACCOUNT_SID` - account sid z api twilio
 
+`GMAIL_APP_PASSWORD` - hasło aplikacji gmail
+
+
 
 
 
@@ -53,6 +56,7 @@ Dodaj zmienne środowiskowe (przykładowe)
   export PHONE_NUMBER=+123123123123
   export ACCOUNT_SID=accountSidTest
   export AUTH_TOKEN=authTokenTest
+  export GMAIL_APP_PASSWORD=gmailAppPasswordTest
 ```
 
 Uruchom kontenery

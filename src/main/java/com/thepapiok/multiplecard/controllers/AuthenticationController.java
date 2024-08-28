@@ -273,10 +273,10 @@ public class AuthenticationController {
   private boolean getVerificationEmail(HttpSession httpSession, String email) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
-      System.out.println(verificationNumber);
       emailService.sendEmail(VERIFICATION_MESSAGE + verificationNumber, email);
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
     return true;
