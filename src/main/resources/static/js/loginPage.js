@@ -105,6 +105,7 @@ function hideValidation(e) {
 function atStart(){
     checkCallingCode(document.getElementById("valueCallingCode"));
     checkPhone(document.getElementById("phoneInput"));
+    document.getElementById("searchCallingCode").value = "";
 }
 
 function showOrHideCallingCode(){

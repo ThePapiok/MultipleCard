@@ -177,7 +177,7 @@ function atStart() {
     checkFirstName(document.getElementById("firstName"));
     checkLastName(document.getElementById("lastName"));
     checkEmail(document.getElementById("email"));
-    checkEmail(document.getElementById("province"));
+    checkProvince(document.getElementById("province"));
     checkStreet(document.getElementById("street"));
     checkHouseNumber(document.getElementById("houseNumber"));
     checkApartmentNumber(document.getElementById("apartmentNumber"));
@@ -186,6 +186,8 @@ function atStart() {
     checkPhone(document.getElementById("phone"));
     checkCountry(document.getElementById("valueCountry"));
     checkCallingCode(document.getElementById("valueCallingCode"))
+    document.getElementById("searchCallingCode").value = "";
+    document.getElementById("searchCountry").value = "";
 }
 
 function showOrHideSelect(cond, searchName, optionsName, upName, downName){

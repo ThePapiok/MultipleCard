@@ -80,7 +80,7 @@ public class AuthenticationController {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
-        httpSession.removeAttribute(message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       } else {
         model.addAttribute(ERROR_MESSAGE_PARAM, "Niepoprawny login lub hasło");
       }
