@@ -24,7 +24,6 @@ public class UserService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username)
       throws UsernameNotFoundException, NotActiveException {
     Account account = accountRepository.findByPhone(username);
-    System.out.println("xd");
     if (account == null) {
       throw new UsernameNotFoundException("Błędny login lub hasło");
     }

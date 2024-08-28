@@ -182,7 +182,6 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(get(LOGIN_URL).param(ERROR_PARAM, ""))
-        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, "Niepoprawny login lub hasło"))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(view().name(LOGIN_PAGE));
   }

@@ -81,8 +81,6 @@ public class AuthenticationController {
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
-      } else {
-        model.addAttribute(ERROR_MESSAGE_PARAM, "Niepoprawny login lub hasło");
       }
     }
     model.addAttribute(
