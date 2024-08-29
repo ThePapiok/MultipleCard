@@ -29,6 +29,7 @@ a {
 }
 
 button {
+    vertical-align: middle;
     position: relative;
     z-index: 1;
     color: #FEF9EF;

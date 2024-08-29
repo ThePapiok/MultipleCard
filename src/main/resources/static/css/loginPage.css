@@ -1,37 +1,21 @@
-body{
+body {
     background-color: #F7F6F3;
     margin: 0;
     padding: 0;
-    height: 100%;
-
-}
-#container{
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
 }
 
-
-#body{
-    height: 75%;
+iframe, div {
     max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    flex-direction: column;
 }
 
-#header{
+#header {
     border-bottom: 3px solid #BDBBB6;
-    height: 13.2%;
-    max-width: 100%;
-    width: 100%;
-
+    height: 10vh;
 }
 
-#footer{
-    height: 10%;
+#footer {
+    height: 5vh;
 }
-
 
 @font-face {
     font-family: "Inter";
@@ -43,7 +27,12 @@ body{
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-button{
+a {
+    text-decoration: none;
+}
+
+button {
+    vertical-align: middle;
     position: relative;
     z-index: 1;
     color: #FEF9EF;
@@ -59,7 +48,8 @@ button{
     margin-right: 50px;
 
 }
-#b1{
+
+#b1 {
     top: 30%;
     position: relative;
     left: 3%;
@@ -67,15 +57,15 @@ button{
 
 }
 
-.blackButton{
+.blackButton {
     background-color: #48483A;
 }
 
-.greenButton{
+.greenButton {
     background-color: #96BE8C;
 }
 
-.grayButton{
+.grayButton {
     background-color: #CFCBCB;
     cursor: auto;
 }
@@ -90,7 +80,6 @@ button{
 }
 
 
-
 .title {
     color: #48483A;
     font-weight: 700;
@@ -100,7 +89,7 @@ button{
     margin-left: 3%;
 }
 
-#form{
+#form {
     margin-top: 10%;
     margin-left: 3%;
     height: 42%;
@@ -108,9 +97,8 @@ button{
 }
 
 
-label{
+label {
     display: block;
-    width: 100%;
     height: 100%;
     margin-bottom: 7%;
     margin-right: 2%;
@@ -118,50 +106,51 @@ label{
     position: relative;
 }
 
-input{
+input {
     width: 100%;
     height: 100%;
     font-size: 25px;
     font-family: "Inter", sans-serif;
     font-weight: 600;
+    box-sizing: border-box;
 }
 
-img{
+img {
     position: absolute;
-    left:91%;
+    left: 90%;
     z-index: 1;
     width: 70px;
     height: 70px;
     top: -10px;
 }
 
-#check1, #check2, #up1{
+#check1, #check2, #up1 {
     display: none;
 }
 
-#up1, #down1{
-    left: 73%;
+#up1, #down1 {
+    left: 70%;
 }
 
-#check1, #close1{
-    left: 87%;
+#check1, #close1 {
+    left: 85%;
 }
 
-#error{
+#error {
     font-family: "Inter", sans-serif;
     font-size: 25px;
     color: #FF5A5F;
     font-weight: 500;
 }
 
-#success{
+#success {
     font-family: "Inter", sans-serif;
     font-size: 25px;
     color: #7FA176;
     font-weight: 500;
 }
 
-.validation{
+.validation {
     width: 30%;
     z-index: 2;
     background-color: #CCD5FF;
@@ -176,51 +165,43 @@ img{
     padding: 3px;
 }
 
-#validationPhone{
-    height: 80px;
-}
-
-#validationPassword{
-    height: 140px;
-}
-
 #CallingCode {
-    width: 30%;
+    width: 31%;
     height: 100%;
 }
 
-#Phone{
-    width: 68%;
+#Phone {
+    width: 67%;
 }
 
-#Password{
-    height: 19.64%;
+#Password {
+    height: 50px;
     width: 98%;
 }
 
-.valueSelect{
+.valueSelect {
     cursor: pointer;
 }
 
-.valueSelect, .searchSelect{
+.valueSelect, .searchSelect {
     height: 100%;
 }
 
 
-.searchSelect{
+.searchSelect {
     position: relative;
     z-index: 2;
     display: none;
 }
 
-.optionsSelect{
+.optionsSelect {
     position: relative;
     z-index: 2;
     list-style-type: none;
     font-size: 25px;
     font-family: "Inter", sans-serif;
     overflow-y: auto;
-    max-height: 500%;
+    max-height: 400px;
     margin: 0;
     padding-top: 5px;
     padding-left: 0;
@@ -231,30 +212,69 @@ img{
     border: 1px solid black;
 }
 
-#optionsCallingCode{
-    width: 104%;
-}
-
-.optionSelect{
+.optionSelect {
     cursor: pointer;
 }
 
-#nothingCallingCode, .optionSelect{
+#nothingCallingCode, .optionSelect {
     padding: 4px;
 }
 
-#nothingCallingCode{
+#nothingCallingCode {
     display: none;
 }
 
-.optionSelect:hover{
+.optionSelect:hover {
     background-color: lightgray;
 }
 
-.block-horizontally{
+.block-horizontally {
     display: flex;
-    height: 19.64%;
+    height: 50px;
     margin-bottom: 2%;
+}
+
+@media only screen and (max-width: 768px) {
+    button {
+        width: 27%;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+
+    .block-horizontally {
+        display: inline;
+    }
+
+    input, .valueSelect, .searchSelect {
+        height: 50px;
+        border: 1px solid gray;
+    }
+
+    #CallingCode, #Phone, #Password {
+        width: 100%;
+    }
+
+    #form {
+        width: 90%;
+    }
+
+    img, #close1, #check1, #up1, #down1 {
+        left: 82%;
+    }
+
+    button {
+        margin-right: 5px;
+    }
+
+    #validationPhone, #validationPassword {
+        transform: translateX(-100%);
+    }
+
+    .validation {
+        width: 90%;
+    }
 }
 
 
