@@ -295,12 +295,9 @@ select:invalid {
         margin-bottom: 3%;
     }
 
-    #validationFirstName, #validationEmail, #validationStreet, #validationPostalCode, #validationRetypedPassword, #validationPassword {
-        transform: translateX(-100%);
-    }
-
     .validation {
         width: 90%;
+        transform: translateX(-100%);
     }
 
 }
