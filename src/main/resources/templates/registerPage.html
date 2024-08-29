@@ -10,6 +10,7 @@
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
+<script src="/js/forms.js"></script>
 <script src="/js/registerPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="b1">
@@ -161,7 +162,7 @@
                        placeholder="Kraj" onclick="showOrHideCountry()" value="">
                 <img id="down1" src="/images/keyboard_down.png" alt="down">
                 <img id="up1" src="/images/keyboard_up.png" alt="up">
-                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAllCountries(this)">
+                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
                 <ul id="optionsCountry" class="optionsSelect">
                     <li class="optionSelect optionCountry" th:data-code="${country.code}"
                         th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'"
@@ -175,7 +176,7 @@
                 <img id="down2" src="/images/keyboard_down.png" alt="down">
                 <img id="up2" src="/images/keyboard_up.png" alt="up">
                 <input id="searchCallingCode" class="searchSelect" type="text"
-                       oninput="searchAllCallingCodes(this)">
+                       oninput="searchAll(this, false)">
                 <ul id="optionsCallingCode" class="optionsSelect">
                     <li class="optionSelect optionCallingCode" th:data-code="${callingCode.code}"
                         th:data-value="${callingCode.callingCode}" th:each="callingCode : ${callingCodes}"
