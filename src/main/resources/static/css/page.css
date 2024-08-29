@@ -1,0 +1,112 @@
+@font-face {
+    font-family: "Inter";
+    src: url('/fonts/Inter.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: "Inconsolata";
+    src: url('/fonts/Inconsolata.ttf') format('truetype');
+}
+
+body {
+    background-color: #F7F6F3;
+    margin: 0;
+    padding: 0;
+
+}
+
+iframe, div {
+    max-width: 100%;
+}
+
+#header {
+    border-bottom: 3px solid #BDBBB6;
+    height: 10vh;
+}
+
+#footer {
+    height: 5vh;
+}
+
+a {
+    text-decoration: none;
+}
+
+button {
+    vertical-align: middle;
+    position: relative;
+    z-index: 1;
+    color: #FEF9EF;
+    width: 130px;
+    height: 40px;
+    font-size: 13px;
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    margin-right: 50px;
+}
+
+.redButton {
+    background-color: #FF5A5F;
+}
+
+.blackButton {
+    background-color: #48483A;
+}
+
+.greenButton {
+    background-color: #96BE8C;
+}
+
+.grayButton {
+    background-color: #CFCBCB;
+    cursor: auto;
+}
+
+.blackButton:hover {
+    background-color: #3B3B2F;
+}
+
+.greenButton:hover {
+    background-color: #7FA176;
+}
+
+.redButton:hover {
+    background-color: #DE4E53;
+}
+
+.title {
+    color: #48483A;
+    font-weight: 700;
+    font-size: 50px;
+    font-family: "Inconsolata", cursive;
+    letter-spacing: 10px;
+    margin-left: 3%;
+}
+
+#error {
+    color: #FF5A5F;
+}
+
+#success {
+    color: #7FA176;
+}
+
+#success, #error {
+    font-family: "Inter", sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+@media only screen and (max-width: 768px) {
+    button {
+        width: 27%;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+}

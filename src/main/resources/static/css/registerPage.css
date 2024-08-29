@@ -1,24 +1,3 @@
-body {
-    background-color: #F7F6F3;
-    margin: 0;
-    padding: 0;
-
-}
-
-iframe, div {
-    max-width: 100%;
-}
-
-#header {
-    border-bottom: 3px solid #BDBBB6;
-    height: 10vh;
-}
-
-#footer {
-    height: 5vh;
-}
-
-
 @font-face {
     font-family: "Inter";
     src: url('/fonts/Inter.ttf') format('truetype');
@@ -29,82 +8,9 @@ iframe, div {
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-a {
-    text-decoration: none;
-}
-
-button {
-    vertical-align: middle;
-    position: relative;
-    z-index: 1;
-    color: #FEF9EF;
-    width: 130px;
-    height: 40px;
-    font-size: 13px;
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    margin-right: 50px;
-}
-
-#b1 {
-    top: 30%;
-    position: relative;
-    left: 3%;
-
-
-}
-
-.blackButton {
-    background-color: #48483A;
-}
-
-.greenButton {
-    background-color: #96BE8C;
-}
-
-.grayButton {
-    background-color: #CFCBCB;
-    cursor: auto;
-}
-
-.blackButton:hover {
-    background-color: #3B3B2F;
-}
-
-
-.greenButton:hover {
-    background-color: #7FA176;
-}
-
-
-.title {
-    color: #48483A;
-    font-weight: 700;
-    font-size: 50px;
-    font-family: "Inconsolata", cursive;
-    letter-spacing: 10px;
-    margin-left: 3%;
-}
-
 #form {
-    margin-top: 10%;
-    margin-left: 3%;
     height: 110%;
     width: 90%;
-}
-
-
-label {
-    display: block;
-    height: 100%;
-    margin-bottom: 2%;
-    box-sizing: border-box;
-    position: relative;
-    margin-right: 2%;
 }
 
 #FirstName, #Street, #Password, #RetypedPassword, #PostalCode, #Email {
@@ -140,72 +46,12 @@ label {
     height: 50px;
 }
 
-
-input {
-    width: 100%;
-    height: 100%;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    box-sizing: border-box;
-}
-
-.valueSelect {
-    cursor: pointer;
-}
-
-.valueSelect, .searchSelect {
-    height: 100%;
-}
-
-
-.searchSelect {
-    position: relative;
-    z-index: 2;
-    display: none;
-}
-
-.optionsSelect {
-    position: relative;
-    z-index: 2;
-    list-style-type: none;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    overflow-y: auto;
-    max-height: 400px;
-    margin: 0;
-    padding-top: 5px;
-    padding-left: 0;
-    font-weight: 600;
-    background-color: white;
-    display: none;
-    box-sizing: border-box;
-    border: 1px solid black;
-}
-
-.optionSelect {
-    cursor: pointer;
-}
-
 #nothingCallingCode, #nothingCountry, .optionSelect {
     padding: 4px;
 }
 
 #nothingCallingCode, #nothingCountry {
     display: none;
-}
-
-.optionSelect:hover {
-    background-color: lightgray;
-}
-
-img {
-    position: absolute;
-    left: 90%;
-    z-index: 1;
-    width: 70px;
-    height: 70px;
-    top: -10px;
 }
 
 #check1, #check2, #check3, #check4, #check5, #check6, #close7, #check8, #check9, #check10, #check11, #check12, #up1, #up2 {
@@ -229,34 +75,6 @@ img {
     left: 86.6%;
 }
 
-.block-horizontally {
-    display: flex;
-    height: 50px;
-    margin-bottom: 2%;
-}
-
-#error {
-    font-family: "Inter", sans-serif;
-    font-size: 25px;
-    color: #FF5A5F;
-    font-weight: 500;
-}
-
-.validation {
-    width: 30%;
-    z-index: 2;
-    background-color: #CCD5FF;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: "Inter", sans-serif;
-    position: absolute;
-    border-radius: 10px;
-    opacity: 70%;
-    display: none;
-    pointer-events: none;
-    padding: 3px;
-}
-
 #validationHouseNumber, #validationLastName, #validationApartmentNumber, #validationPhone, #validationCity, #validationProvince {
     transform: translateX(-100%);
 }
@@ -266,20 +84,8 @@ select:invalid {
 }
 
 @media only screen and (max-width: 768px) {
-    button {
-        width: 27%;
-    }
-
-    .title {
-        font-size: 30px;
-    }
-
     img, #up2, #down2, #check6, #close6, #close7, #check7, #check4, #close4, #check2, #close2, #check9, #close9, #check10, #close10 {
         left: 82%;
-    }
-
-    .block-horizontally {
-        display: inline;
     }
 
     input, .valueSelect, .searchSelect {
@@ -294,12 +100,6 @@ select:invalid {
     #Password, #RetypedPassword {
         margin-bottom: 3%;
     }
-
-    .validation {
-        width: 90%;
-        transform: translateX(-100%);
-    }
-
 }
 
 
