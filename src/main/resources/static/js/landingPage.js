@@ -1,5 +1,4 @@
-
-function clear(){
+function clear() {
     document.getElementById("check1").checked = false;
     document.getElementById("check2").checked = false;
     document.getElementById("check3").checked = false;
@@ -7,63 +6,18 @@ function clear(){
     document.getElementById("check5").checked = false;
 }
 
-
-function checked1(e){
-    if(e.checked === true || document.getElementById("check2").checked === true){
+function checkStar(e) {
+    const id = e.id.toString();
+    const index = parseInt(id.charAt(id.length - 1));
+    const next = "check" + (index + 1);
+    if (e.checked === true || document.getElementById(next).checked === true) {
         clear();
         e.checked = true;
-    }
-    else{
+        for (let i = 1; i < index; i++) {
+            document.getElementById("check" + i).checked = true;
+        }
+    } else {
         clear();
     }
 }
 
-function checked2(e){
-    if(e.checked === true || document.getElementById("check3").checked === true){
-        clear();
-        document.getElementById("check1").checked = true;
-        e.checked = true;
-
-    }
-    else{
-        clear();
-    }
-}
-
-function checked3(e){
-    if(e.checked === true || document.getElementById("check4").checked === true){
-        clear();
-        document.getElementById("check1").checked = true;
-        document.getElementById("check2").checked = true;
-        e.checked = true;
-    }
-    else{
-        clear();
-    }
-}
-
-function checked4(e){
-    if(e.checked === true || document.getElementById("check5").checked === true){
-        clear();
-        document.getElementById("check1").checked = true;
-        document.getElementById("check2").checked = true;
-        document.getElementById("check3").checked = true;
-        e.checked = true;
-    }
-    else{
-        clear();
-    }
-}
-
-function checked5(e){
-    if(e.checked === true){
-        document.getElementById("check1").checked = true;
-        document.getElementById("check2").checked = true;
-        document.getElementById("check3").checked = true;
-        document.getElementById("check4").checked = true;
-        e.checked = true;
-    }
-    else{
-        clear();
-    }
-}

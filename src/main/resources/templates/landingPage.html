@@ -1,145 +1,147 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body>
 <script src="/js/landingPage.js"></script>
-<div id="container">
-    <div id="header">
-        <a th:href="@{/login}" >
-            <button sec:authorize="isAnonymous()" class="blackButton b1">Zaloguj</button>
+<div id="header">
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="b1">
+        <button class="blackButton">Zaloguj</button>
+    </a>
+    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="b2">
+        <button class="redButton">Załóż konto</button>
+    </a>
+    <a sec:authorize="hasRole('USER')" th:href="@{/user}" class="b1">
+        <button class="blackButton">Moje konto</button>
+    </a>
+    <a sec:authorize="hasRole('USER')" th:href="@{/logout}" class="b2">
+        <button class="redButton">Wyloguj</button>
+    </a>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/products}" id="b5">
+        <button class="blackButton">Produkty</button>
+    </a>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="b6">
+        <button class="blackButton">Zamówienia</button>
+    </a>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/logout}" id="b7">
+        <button class="redButton">Wyloguj</button>
+    </a>
+</div>
+<div id="body">
+    <div id="info">
+        <p class="title">MultipleCard</p>
+        <a th:href="@{/about}">
+            <button class="blackButton" id="b3">O projekcie</button>
         </a>
-        <a th:href="@{/register}">
-            <button sec:authorize="isAnonymous()" class="redButton b2">Załóż konto</button>
-        </a>
-        <a th:href="@{/user}">
-            <button sec:authorize="hasRole('USER')" class="blackButton b1">Moje konto</button>
-        </a>
-        <a th:href="@{/logout}">
-            <button sec:authorize="hasRole('USER')" class="redButton b2">Wyloguj</button>
-        </a>
-        <a th:href="@{/products}">
-            <button sec:authorize="hasRole('SHOP')" class="blackButton" id="b5">Produkty</button>
-        </a>
-        <a th:href="@{/orders}">
-            <button sec:authorize="hasRole('SHOP')" class="blackButton" id="b6">Zamówienia</button>
-        </a>
-        <a th:href="@{/logout}">
-            <button sec:authorize="hasRole('SHOP')" class="redButton" id="b7">Wyloguj</button>
-        </a>
+        <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
     </div>
-    <div id="body">
-        <div id="info">
-            <p class="title">MultipleCard</p>
-            <a th:href="@{/about}">
-                <button class="blackButton" id="b3">O projekcie</button>
-            </a>
-            <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
-        </div>
-        <span id="recenzje">
+    <span id="recenzje">
             Recenzje
         </span>
-        <div id="reviews">
-            <div class="review">
-                <div class="review-vertical">
-                    <div class="review-horizontal">
-                        <span class="name">Ewelina</span>
-                        <div class="amountHearths">
-                            <span class="amount">15</span>
-                            <img class="hearth" src="/images/hearth.png" alt="hearth">
-                        </div>
-                    </div>
-                    <span class="description">"Świetna aplikacja"</span>
-                    <div class="stars">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
+    <div id="reviews">
+        <div class="review" id="review1">
+            <div class="review-vertical">
+                <div class="review-horizontal">
+                    <span class="name">Ewelina</span>
+                    <div class="amountHearths">
+                        <span class="amount">15</span>
+                        <img class="hearth" src="/images/hearth.png" alt="hearth">
                     </div>
                 </div>
-            </div>
-            <div class="review">
-                <div class="review-vertical">
-                    <div class="review-horizontal">
-                        <span class="name">Jakub</span>
-                        <div class="amountHearths">
-                            <span class="amount">7</span>
-                            <img class="hearth" src="/images/hearth.png" alt="hearth">
-                        </div>
-                    </div>
-                    <span class="description">“Najgorsza aplikacja na świecie, Adrian byś się wstydził”</span>
-                    <div class="stars">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    </div>
-                </div>
-            </div>
-            <div class="review">
-                <div class="review-vertical">
-                    <div class="review-horizontal">
-                        <span class="name">Adrian</span>
-                        <div class="amountHearths">
-                            <span class="amount">1</span>
-                            <img class="hearth" src="/images/hearth.png" alt="hearth">
-                        </div>
-                    </div>
-                    <span class="description">"Ok!"</span>
-                    <div class="stars">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwizadkacala.png" alt="star">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                        <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    </div>
+                <span class="description">"Świetna aplikacja"</span>
+                <div class="stars">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
                 </div>
             </div>
         </div>
-        <a th:href="@{/reviews}">
-            <button class="blackButton" id="b4">Więcej</button>
-        </a>
-        <form th:action="@{/review}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
-            <label for="text"></label><textarea th:field="*{description}" id="text" required placeholder="Wpisz tu swoją opinię..." maxlength="80"></textarea>
-            <div id="starsAndSubmit">
-                <label>
-                    <input th:field="*{star1}" id="check1" type="checkbox" onclick="checked1(this)">
-                    <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
-                </label>
-                <label>
-                    <input th:field="*{star2}" id="check2" type="checkbox" onclick="checked2(this)">
-                    <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
-                </label>
-                <label>
-                    <input th:field="*{star3}" id="check3" type="checkbox" onclick="checked3(this)">
-                    <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
-                </label>
-                <label>
-                    <input th:field="*{star4}" id="check4" type="checkbox" onclick="checked4(this)">
-                    <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
-                </label>
-                <label>
-                    <input th:field="*{star5}" id="check5" type="checkbox" onclick="checked5(this)">
-                    <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
-                </label>
-                <button id="submit" type="submit" class="greenButton">Wyślij</button>
+        <div class="review" id="review2">
+            <div class="review-vertical">
+                <div class="review-horizontal">
+                    <span class="name">Jakub</span>
+                    <div class="amountHearths">
+                        <span class="amount">7</span>
+                        <img class="hearth" src="/images/hearth.png" alt="hearth">
+                    </div>
+                </div>
+                <span class="description">“Najgorsza aplikacja na świecie, Adrian byś się wstydził”</span>
+                <div class="stars">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                </div>
             </div>
-            <span th:if="${param.added}" id="textReview">Opinia została pomyślnie dodana !</span>
-        </form>
+        </div>
+        <div class="review" id="review3">
+            <div class="review-vertical">
+                <div class="review-horizontal">
+                    <span class="name">Adrian</span>
+                    <div class="amountHearths">
+                        <span class="amount">1</span>
+                        <img class="hearth" src="/images/hearth.png" alt="hearth">
+                    </div>
+                </div>
+                <span class="description">"Ok!"</span>
+                <div class="stars">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwizadkacala.png" alt="star">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="footer">
-    </div>
+    <a th:href="@{/reviews}" id="b4">
+        <button class="blackButton">Więcej</button>
+    </a>
+    <form th:action="@{/review}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
+        <label for="text"></label>
+        <textarea th:field="*{description}" id="text" required placeholder="Wpisz tu swoją opinię..."
+                  maxlength="80"></textarea>
+        <div id="starsAndSubmit">
+            <label>
+                <input th:field="*{star1}" id="check1" type="checkbox" onclick="checkStar(this)">
+                <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
+            </label>
+            <label>
+                <input th:field="*{star2}" id="check2" type="checkbox" onclick="checkStar(this)">
+                <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
+            </label>
+            <label>
+                <input th:field="*{star3}" id="check3" type="checkbox" onclick="checkStar(this)">
+                <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
+            </label>
+            <label>
+                <input th:field="*{star4}" id="check4" type="checkbox" onclick="checkStar(this)">
+                <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
+            </label>
+            <label>
+                <input th:field="*{star5}" id="check5" type="checkbox" onclick="checkStar(this)">
+                <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
+            </label>
+            <button id="submit" type="submit" class="greenButton">Wyślij</button>
+        </div>
+        <span th:if="${param.added}" id="success">Opinia została pomyślnie dodana !</span>
+    </form>
+</div>
+<div id="footer">
 </div>
 </body>
 </html>

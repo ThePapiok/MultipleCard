@@ -1,38 +1,3 @@
-body{
-    background-color: #F7F6F3;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-
-}
-#container{
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-
-#body{
-    height: 75%;
-    max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    flex-direction: column;
-}
-
-#header{
-    border-bottom: 3px solid #BDBBB6;
-    height: 13.2%;
-    max-width: 100%;
-    width: 100%;
-
-}
-
-#footer{
-    height: 10%;
-}
-
-
 @font-face {
     font-family: "Inter";
     src: url('/fonts/Inter.ttf') format('truetype');
@@ -43,218 +8,66 @@ body{
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-button{
-    position: relative;
-    z-index: 1;
-    color: #FEF9EF;
-    width: 130px;
-    height: 40px;
-    font-size: 13px;
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    margin-right: 50px;
-
-}
-#b1{
-    top: 30%;
-    position: relative;
-    left: 3%;
-
-
-}
-
-.blackButton{
-    background-color: #48483A;
-}
-
-.greenButton{
-    background-color: #96BE8C;
-}
-
-.grayButton{
-    background-color: #CFCBCB;
-    cursor: auto;
-}
-
-.blackButton:hover {
-    background-color: #3B3B2F;
-}
-
-
-.greenButton:hover {
-    background-color: #7FA176;
-}
-
-
-
-.title {
-    color: #48483A;
-    font-weight: 700;
-    font-size: 50px;
-    font-family: "Inconsolata", cursive;
-    letter-spacing: 10px;
-    margin-left: 3%;
-}
-
-#form{
-    margin-top: 10%;
-    margin-left: 3%;
+#form {
     height: 42%;
     width: 40%;
 }
 
-
-label{
-    display: block;
-    width: 100%;
-    height: 100%;
-    margin-bottom: 7%;
-    margin-right: 2%;
-    box-sizing: border-box;
-    position: relative;
-}
-
-input{
-    width: 100%;
-    height: 100%;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-}
-
-img{
-    position: absolute;
-    left:91%;
-    z-index: 1;
-    width: 70px;
-    height: 70px;
-    top: -10px;
-}
-
-#check1, #check2, #up1{
+#check1, #check2, #up1 {
     display: none;
 }
 
-#up1, #down1{
-    left: 73%;
+#up1, #down1 {
+    left: 70%;
 }
 
-#check1, #close1{
-    left: 87%;
-}
-
-#error{
-    font-family: "Inter", sans-serif;
-    font-size: 25px;
-    color: #FF5A5F;
-    font-weight: 500;
-}
-
-#success{
-    font-family: "Inter", sans-serif;
-    font-size: 25px;
-    color: #7FA176;
-    font-weight: 500;
-}
-
-.validation{
-    width: 30%;
-    z-index: 2;
-    background-color: #CCD5FF;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: "Inter", sans-serif;
-    position: absolute;
-    border-radius: 10px;
-    opacity: 70%;
-    display: none;
-    pointer-events: none;
-    padding: 3px;
-}
-
-#validationPhone{
-    height: 80px;
-}
-
-#validationPassword{
-    height: 140px;
+#check1, #close1 {
+    left: 85%;
 }
 
 #CallingCode {
-    width: 30%;
+    width: 31%;
     height: 100%;
 }
 
-#Phone{
-    width: 68%;
+#Phone {
+    width: 67%;
 }
 
-#Password{
-    height: 19.64%;
+#Password {
+    height: 50px;
     width: 98%;
 }
 
-.valueSelect{
-    cursor: pointer;
-}
-
-.valueSelect, .searchSelect{
-    height: 100%;
-}
-
-
-.searchSelect{
-    position: relative;
-    z-index: 2;
-    display: none;
-}
-
-.optionsSelect{
-    position: relative;
-    z-index: 2;
-    list-style-type: none;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    overflow-y: auto;
-    max-height: 500%;
-    margin: 0;
-    padding-top: 5px;
-    padding-left: 0;
-    font-weight: 600;
-    background-color: white;
-    display: none;
-    box-sizing: border-box;
-    border: 1px solid black;
-}
-
-#optionsCallingCode{
-    width: 104%;
-}
-
-.optionSelect{
-    cursor: pointer;
-}
-
-#nothingCallingCode, .optionSelect{
+#nothingCallingCode, .optionSelect {
     padding: 4px;
 }
 
-#nothingCallingCode{
+#nothingCallingCode {
     display: none;
 }
 
-.optionSelect:hover{
-    background-color: lightgray;
-}
+@media only screen and (max-width: 768px) {
+    input, .valueSelect, .searchSelect {
+        height: 50px;
+        border: 1px solid gray;
+    }
 
-.block-horizontally{
-    display: flex;
-    height: 19.64%;
-    margin-bottom: 2%;
+    #CallingCode, #Phone, #Password {
+        width: 100%;
+    }
+
+    #form {
+        width: 90%;
+    }
+
+    img, #close1, #check1, #up1, #down1 {
+        left: 82%;
+    }
+
+    button {
+        margin-right: 5px;
+    }
 }
 
 

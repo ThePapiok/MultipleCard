@@ -1,38 +1,3 @@
-body{
-    background-color: #F7F6F3;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-
-}
-#container{
-    display: flex;
-    flex-direction: column;
-    height: 150vh;
-}
-
-
-#body{
-    height: 75%;
-    max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    flex-direction: column;
-}
-
-#header{
-    border-bottom: 3px solid #BDBBB6;
-    height: 8.8%;
-    max-width: 100%;
-    width: 100%;
-
-}
-
-#footer{
-    height: 10%;
-}
-
-
 @font-face {
     font-family: "Inter";
     src: url('/fonts/Inter.ttf') format('truetype');
@@ -43,272 +8,99 @@ body{
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-button{
-    position: relative;
-    z-index: 1;
-    color: #FEF9EF;
-    width: 130px;
-    height: 40px;
-    font-size: 13px;
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-    margin-right: 50px;
-
-}
-#b1{
-    top: 30%;
-    position: relative;
-    left: 3%;
-
-
-}
-
-.blackButton{
-    background-color: #48483A;
-}
-
-.greenButton{
-    background-color: #96BE8C;
-}
-
-.grayButton{
-    background-color: #CFCBCB;
-    cursor: auto;
-}
-
-.blackButton:hover {
-    background-color: #3B3B2F;
-}
-
-
-.greenButton:hover {
-    background-color: #7FA176;
-}
-
-
-
-.title {
-    color: #48483A;
-    font-weight: 700;
-    font-size: 50px;
-    font-family: "Inconsolata", cursive;
-    letter-spacing: 10px;
-    margin-left: 3%;
-}
-
-#form{
-    margin-top: 10%;
-    margin-left: 3%;
+#form {
     height: 110%;
     width: 90%;
 }
 
-
-label{
-    display: block;
-    height: 100%;
-    margin-bottom: 2%;
-    box-sizing: border-box;
-    position: relative;
-    margin-right: 2%;
-}
-
-#FirstName, #Street, #Password, #RetypedPassword, #PostalCode, #Email{
+#FirstName, #Street, #Password, #RetypedPassword, #PostalCode, #Email {
     width: 45%;
 }
 
-#LastName, #City, #Province{
+#LastName, #City, #Province {
     width: 50%;
 }
 
-#HouseNumber{
+#HouseNumber, #ApartmentNumber {
     width: 24%;
 }
 
-#ApartmentNumber{
-    width: 24%;
+#Phone {
+    width: 34%;
 }
 
-#Phone{
-    width: 35%;
-}
-
-#Country{
+#Country {
     width: 45%;
 }
 
-#CallingCode, #Country{
+#CallingCode, #Country {
     height: 100%;
 }
 
 #CallingCode {
-    width: 13%;
+    width: 14%;
 }
 
 
-
-#Password, #RetypedPassword{
-    height: 5%;
+#Password, #RetypedPassword {
+    height: 50px;
 }
 
-
-input{
-    width: 100%;
-    height: 100%;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-}
-
-.valueSelect{
-    cursor: pointer;
-}
-
-.valueSelect, .searchSelect{
-    height: 100%;
-}
-
-
-.searchSelect{
-    position: relative;
-    z-index: 2;
-    display: none;
-}
-
-.optionsSelect{
-    position: relative;
-    z-index: 2;
-    list-style-type: none;
-    font-size: 25px;
-    font-family: "Inter", sans-serif;
-    overflow-y: auto;
-    max-height: 600%;
-    margin: 0;
-    padding-top: 5px;
-    padding-left: 0;
-    font-weight: 600;
-    background-color: white;
-    display: none;
-    box-sizing: border-box;
-    border: 1px solid black;
-}
-
-#optionsCountry{
-    width: 101%;
-}
-
-#optionsCallingCode{
-    width: 104%;
-}
-
-.optionSelect{
-    cursor: pointer;
-}
-
-#nothingCallingCode, #nothingCountry, .optionSelect{
+#nothingCallingCode, #nothingCountry, .optionSelect {
     padding: 4px;
 }
 
-#nothingCallingCode, #nothingCountry{
+#nothingCallingCode, #nothingCountry {
     display: none;
 }
 
-.optionSelect:hover{
-    background-color: lightgray;
-}
-
-img{
-    position: absolute;
-    left:91%;
-    z-index: 1;
-    width: 70px;
-    height: 70px;
-    top: -10px;
-}
-
-#check1, #check2, #check3, #check4, #check5, #check6, #close7, #check8, #check9, #check10, #check11, #check12, #up1, #up2{
+#check1, #check2, #check3, #check4, #check5, #check6, #close7, #check8, #check9, #check10, #check11, #check12, #up1, #up2 {
     display: none;
 }
 
-#up2, #down2{
-    left: 73%;
+#up2, #down2 {
+    left: 68%;
 }
 
-#check6, #close6, #close7, #check7{
-    left: 83%
+#check6, #close6, #close7, #check7 {
+    left: 82%
 }
 
-#check2, #close2 , #check9, #close9{
-    left: 92%;
+#check2, #close2, #check9, #close9, #check4, #close4 {
+    left: 91%;
 }
 
 
-#check10, #close10{
-    left: 88.6%;
+#check10, #close10 {
+    left: 86.6%;
 }
 
-.block-horizontally{
-    display: flex;
-    height: 5%;
-    margin-bottom: 2%;
-}
-
-#error{
-    font-family: "Inter", sans-serif;
-    font-size: 25px;
-    color: #FF5A5F;
-    font-weight: 500;
-}
-
-.validation{
-    width: 30%;
-    z-index: 2;
-    background-color: #CCD5FF;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: "Inter", sans-serif;
-    position: absolute;
-    border-radius: 10px;
-    opacity: 70%;
-    display: none;
-    pointer-events: none;
-    padding: 3px;
-}
-
-#validationFirstName, #validationEmail{
-    height: 80px;
-}
-
-#validationHouseNumber, #validationLastName, #validationApartmentNumber, #validationPhone, #validationCity{
-    height: 80px;
+#validationHouseNumber, #validationLastName, #validationApartmentNumber, #validationPhone, #validationCity, #validationProvince {
     transform: translateX(-100%);
 }
-
-#validationStreet, #validationCity, #validationProvince{
-    height: 100px;
-}
-
-#validationProvince{
-    transform: translateX(-100%);
-}
-
-#validationPassword{
-    height: 140px;
-}
-
-#validationRetypedPassword, #validationPostalCode{
-    height: 60px;
-}
-
 
 select:invalid {
     color: #757575;
 }
 
+@media only screen and (max-width: 768px) {
+    img, #up2, #down2, #check6, #close6, #close7, #check7, #check4, #close4, #check2, #close2, #check9, #close9, #check10, #close10 {
+        left: 82%;
+    }
+
+    input, .valueSelect, .searchSelect {
+        height: 50px;
+        border: 1px solid gray;
+    }
+
+    #FirstName, #LastName, #Email, #Province, #Street, #HouseNumber, #ApartmentNumber, #PostalCode, #City, #Country, #CallingCode, #Phone, #Password, #RetypedPassword {
+        width: 100%;
+    }
+
+    #Password, #RetypedPassword {
+        margin-bottom: 3%;
+    }
+}
 
 
 

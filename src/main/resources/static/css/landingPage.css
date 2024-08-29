@@ -1,33 +1,3 @@
-body{
-    background-color: #F7F6F3;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-
-}
-#container{
-    display: flex;
-    flex-direction: column;
-    height: 220vh;
-}
-
-
-#body{
-    height: 75%;
-    max-width: 100%;
-    width: 100%;
-    justify-content: center;
-    flex-direction: column;
-}
-
-#header{
-    border-bottom: 3px solid #BDBBB6;
-    height: 6%;
-    max-width: 100%;
-    width: 100%;
-
-}
-
 @font-face {
     font-family: "Inter";
     src: url('/fonts/Inter.ttf') format('truetype');
@@ -38,40 +8,13 @@ body{
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-button{
-    position: relative;
-    z-index: 1;
-    color: #FEF9EF;
-    width: 130px;
-    height: 40px;
-    font-size: 13px;
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
-
-}
 .b1, .b2, #b5, #b6, #b7 {
     top: 30%;
     position: relative;
 
 }
 
-.redButton{
-    background-color: #FF5A5F;
-}
-
-.blackButton{
-    background-color: #48483A;
-}
-
-.greenButton{
-    background-color: #96BE8C;
-}
-
-.b1{
+.b1 {
     left: 79%;
 }
 
@@ -79,42 +22,20 @@ button{
     left: 80%;
 }
 
-#b5{
+#b5 {
     left: 69%;
 }
 
-#b6{
+#b6 {
     left: 70%;
 }
 
-#b7{
+#b7 {
     left: 71%;
 }
 
-
-.blackButton:hover {
-    background-color: #3B3B2F;
-}
-
-.redButton:hover {
-    background-color: #DE4E53;
-}
-
-.greenButton:hover {
-    background-color: #7FA176;
-}
-
-.title {
-    color: #48483A;
-    font-weight: 700;
-    font-size: 64px;
-    font-family: "Inconsolata", cursive;
-    letter-spacing: 10px;
-}
-
-
 #image {
-    width: 700px;
+    width: 80%;
     height: 500px;
     border: 4px solid black;
     margin-top: 20px;
@@ -124,27 +45,27 @@ button{
 #info {
     display: grid;
     place-items: center;
-    align-content: center;
     justify-content: center;
 }
 
-#recenzje{
+
+#recenzje {
     letter-spacing: 5px;
-    font-family: "Inconsolata", sans-serif;
     font-size: 48px;
-    font-weight: 700;
-    color: #48483A;
     margin-top: 5%;
     margin-left: 10%;
+    font-family: "Inconsolata", sans-serif;
+    color: #48483A;
+    font-weight: 700;
 }
 
-#reviews{
+#reviews {
     display: flex;
     margin-left: 6%;
     margin-top: 10px;
 }
 
-.review{
+.review {
     width: 420px;
     height: 150px;
     margin-top: 20px;
@@ -152,56 +73,58 @@ button{
     background-color: #FFFFFF;
     border: none;
     border-radius: 15px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25),  -4px 8px 20px rgba(0, 0, 0, 0.10);
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), -4px 8px 20px rgba(0, 0, 0, 0.10);
 
 }
 
-.hearth{
+.hearth {
     height: 25px;
     width: 25px;
 }
 
-.star{
+.star {
     height: 30px;
     width: 30px;
 }
 
-.name{
-    color: #000000;
+.name {
     font-weight: 800;
-    font-family: "Inter", sans-serif;
     font-size: 16px;
 }
 
-.description{
-    color: #000000;
-    font-weight: 500;
-    font-size: 14px;
-    font-family: "Inter", sans-serif;
+.description {
     word-wrap: break-word;
 }
 
-.amount{
+.amount {
     color: #A29C9C;
-    font-family: "Inter", sans-serif;
+
+}
+
+.name, .description {
+    color: #000000;
+}
+
+.description, .amount {
     font-weight: 500;
     font-size: 14px;
 }
 
-.review-horizontal{
+.name, .description, .amount {
+    font-family: "Inter", sans-serif;
+}
+
+.review-horizontal {
     display: flex;
 }
 
-.review-vertical{
-    display: flex;
+.review-vertical {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    justify-content: flex-end;
-
 }
 
-.stars{
+.stars {
     margin-left: 5%;
 }
 
@@ -210,31 +133,30 @@ button{
     margin-top: 10px;
     width: 90%;
 }
-.description{
+
+.description {
     margin-top: 5px;
     margin-left: 10px;
     margin-right: 10px;
     height: 50%;
 }
 
-.amountHearths{
+.amountHearths {
     margin-top: 8px;
     margin-left: 5%;
+}
+
+.review-vertical, .amountHearths {
     display: flex;
     justify-content: flex-end;
-
 }
 
-#footer{
-    height: 10%;
-}
-
-#b4{
+#b4 {
     margin-left: 84%;
     margin-top: 2%;
 }
 
-#addOpinion{
+#addOpinion {
     width: 30%;
     height: 15%;
     margin-left: 35%;
@@ -242,90 +164,98 @@ button{
     margin-bottom: 20px;
 }
 
-.starAtReview{
+.starAtReview {
     height: 50px;
     width: 50px;
+    cursor: pointer;
 }
 
-#text{
+#text {
     border: 5px solid #A29C9C;
     width: 100%;
-    height: 70%;
+    height: 150px;
     box-sizing: border-box;
     padding: 10px;
     font-size: 20px;
 }
 
-label{
-    caret-color: transparent;
-    cursor: pointer;
+label {
     display: block;
-    z-index: 1;
     margin-left: 5px;
-
 }
-label input{
+
+#checked-1, #checked-2, #checked-3, #checked-4, #checked-5, label input, #check1:checked ~ #unchecked-1, #check2:checked ~ #unchecked-2, #check3:checked ~ #unchecked-3, #check4:checked ~ #unchecked-4, #check5:checked ~ #unchecked-5 {
     display: none;
 }
 
-#checked-1, #checked-2, #checked-3, #checked-4, #checked-5{
-    display: none;
-}
-
-#starsAndSubmit{
+#starsAndSubmit {
     display: flex;
+    width: 100vh;
 }
 
-#submit{
+#submit {
     margin-left: 45px;
     margin-top: 10px;
     z-index: 1;
 }
 
-#check1:checked ~ #checked-1{
+button {
+    margin-right: 0;
+}
+
+#check1:checked ~ #checked-1, #check2:checked ~ #checked-2, #check3:checked ~ #checked-3, #check4:checked ~ #checked-4, #check5:checked ~ #checked-5 {
     display: inline;
 }
 
-#check1:checked ~ #unchecked-1{
-    display: none;
-}
+@media only screen and (max-width: 768px) {
+    .b1, .b2 {
+        left: 40%;
+    }
 
-#check2:checked ~ #checked-2{
-    display: inline;
-}
+    #recenzje {
+        font-size: 30px;
+    }
 
-#check2:checked ~ #unchecked-2{
-    display: none;
-}
+    #image {
+        height: 35vh;
+    }
 
-#check3:checked ~ #checked-3{
-    display: inline;
-}
+    #review2, #review3 {
+        display: none;
+    }
 
-#check3:checked ~ #unchecked-3{
-    display: none;
-}
+    #review1 {
+        width: 83%;
+        height: 170px;
+        margin-bottom: 10px;
+    }
 
-#check4:checked ~ #checked-4{
-    display: inline;
-}
+    #b4 {
+        margin-left: 64%;
+    }
 
-#check4:checked ~ #unchecked-4{
-    display: none;
-}
+    #addOpinion {
+        margin-left: 5.5%;
+        width: 100%;
+    }
 
-#check5:checked ~ #checked-5{
-    display: inline;
-}
+    #text {
+        width: 90%;
+        height: 150px;
+    }
 
-#check5:checked ~ #unchecked-5{
-    display: none;
-}
+    .starAtReview {
+        height: 40px;
+        width: 40px;
+    }
 
-#textReview{
-    font-family: "Inter", sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-}
+    #submit {
+        margin-left: 3%;
+        margin-top: 5px;
+    }
 
+    #b3 {
+        width: 100%;
+    }
+}
 

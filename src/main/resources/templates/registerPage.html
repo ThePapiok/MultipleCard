@@ -1,209 +1,243 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>MultipleCard</title>
-  <link rel="stylesheet" href="/css/registerPage.css">
-  <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/registerPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
+<script src="/js/forms.js"></script>
 <script src="/js/registerPage.js"></script>
-<div id="container">
-  <div id="header">
-    <a th:href="@{/}" >
-      <button class="blackButton" id="b1">Strona główna</button>
+<div id="header">
+    <a th:href="@{/}" id="b1">
+        <button class="blackButton">Strona główna</button>
     </a>
-  </div>
-  <div id="body">
+</div>
+<div id="body">
     <p class="title">Rejestracja</p>
     <form th:action="@{/register}" th:object="${register}" id="form" method="post">
-      <div class="block-horizontally">
-      <label id="FirstName">
-        <input th:field="*{firstName}" type="text" placeholder="Imię" required oninput="checkFirstName(this)" minlength="2" maxlength="15" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close1" src="/images/close.png" alt="close">
-        <img id="check1" src="/images/check.png" alt="check">
-      </label>
-        <div class="validation" id="validationFirstName">
-          Imię musi spełniać następujące warunki:
-          <ul>
-            <li>zaczyna się wielką literą</li>
-            <li>zawiera tylko litery</li>
-          </ul>
+        <div class="block-horizontally">
+            <label id="FirstName">
+                <input th:field="*{firstName}" type="text" placeholder="Imię" required
+                       oninput="checkFirstName(this)" minlength="2" maxlength="15"
+                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close1" src="/images/close.png" alt="close">
+                <img id="check1" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation">
+                Imię musi spełniać następujące warunki:
+                <ul>
+                    <li>zaczyna się wielką literą</li>
+                    <li>zawiera tylko litery</li>
+                </ul>
+            </div>
+            <label id="LastName">
+                <input th:field="*{lastName}" type="text" placeholder="Nazwisko" required
+                       oninput="checkLastName(this)" minlength="2" maxlength="40"
+                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close2" src="/images/close.png" alt="close">
+                <img id="check2" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationLastName">
+                Nazwisko musi spełniać następujące warunki:
+                <ul>
+                    <li>maksymalnie 2 człony</li>
+                    <li>każdy człon zaczyna się wielką literą</li>
+                </ul>
+            </div>
         </div>
-      <label id="LastName">
-        <input th:field="*{lastName}" type="text" placeholder="Nazwisko" required oninput="checkLastName(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close2" src="/images/close.png" alt="close">
-        <img id="check2"  src="/images/check.png" alt="check">
-      </label>
-        <div class="validation" id="validationLastName">
-          Nazwisko musi spełniać następujące warunki:
-          <ul>
-            <li>maksymalnie 2 człony</li>
-            <li>każdy człon zaczyna się wielką literą</li>
-          </ul>
+        <div class="block-horizontally">
+            <label id="Email">
+                <input th:field="*{email}" type="text" placeholder="Email" required oninput="checkEmail(this)"
+                       minlength="4" maxlength="30" onmouseenter="showValidation(this)"
+                       onmouseleave="hideValidation(this)">
+                <img id="close3" src="/images/close.png" alt="close">
+                <img id="check3" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation">
+                Email musi spełniać następujące warunki:
+                <ul>
+                    <li>długość od 4 do 30</li>
+                    <li>zawiera @</li>
+                </ul>
+            </div>
+            <label id="Province">
+                <input th:field="*{province}" type="text" placeholder="Województwo" required
+                       oninput="checkProvince(this)" minlength="2" maxlength="40"
+                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close4" src="/images/close.png" alt="close">
+                <img id="check4" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationProvince">
+                Województwo musi spełniać następujące warunki:
+                <ul>
+                    <li>zaczyna się wielką literą</li>
+                    <li>zawiera tylko litery</li>
+                    <li>maksymalnie 2 człony</li>
+                </ul>
+            </div>
         </div>
-      </div>
-      <div class="block-horizontally">
-        <label id="Email">
-          <input th:field="*{email}" type="text" placeholder="Email" required oninput="checkEmail(this)" minlength="4" maxlength="30" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close3" src="/images/close.png" alt="close">
-          <img id="check3"  src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationEmail">
-          Email musi spełniać następujące warunki:
-          <ul>
-            <li>długość od 4 do 30</li>
-            <li>zawiera @</li>
-          </ul>
+        <div class="block-horizontally">
+            <label id="Street">
+                <input th:field="*{street}" type="text" placeholder="Ulica" required oninput="checkStreet(this)"
+                       minlength="2" maxlength="40" onmouseenter="showValidation(this)"
+                       onmouseleave="hideValidation(this)">
+                <img id="close5" src="/images/close.png" alt="close">
+                <img id="check5" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation">
+                Ulica musi spełniać następujące warunki:
+                <ul>
+                    <li>zaczyna się wielką literą</li>
+                    <li>zawiera tylko litery</li>
+                    <li>maksymalnie 2 człony</li>
+                </ul>
+            </div>
+            <label id="HouseNumber">
+                <input th:field="*{houseNumber}" type="text" placeholder="Nr domu" required
+                       oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
+                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close6" src="/images/close.png" alt="close">
+                <img id="check6" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationHouseNumber">
+                Numer domu musi spełniać następujące warunki:
+                <ul>
+                    <li>na końcu może być litera</li>
+                    <li>zapisany może być jako ułamek</li>
+                </ul>
+            </div>
+            <label id="ApartmentNumber">
+                <input th:field="*{apartmentNumber}" type="text" placeholder="Nr lokalu"
+                       oninput="checkApartmentNumber(this)" maxlength="6" onmouseenter="showValidation(this)"
+                       onmouseleave="hideValidation(this)">
+                <img id="close7" src="/images/close.png" alt="close">
+                <img id="check7" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationApartmentNumber">
+                Numer lokalu musi spełniać następujące warunki:
+                <ul>
+                    <li>większy od 0</li>
+                    <li>jest liczbą</li>
+                </ul>
+            </div>
         </div>
-        <label id="Province">
-          <input th:field="*{province}" type="text" placeholder="Województwo" required oninput="checkProvince(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close4" src="/images/close.png" alt="close">
-          <img id="check4"  src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationProvince">
-          Województwo musi spełniać następujące warunki:
-          <ul>
-            <li>zaczyna się wielką literą</li>
-            <li>zawiera tylko litery</li>
-            <li>maksymalnie 2 człony</li>
-          </ul>
+        <div class="block-horizontally">
+            <label id="PostalCode">
+                <input th:field="*{postalCode}" type="text" placeholder="Kod pocztowy" required
+                       oninput="checkPostalCode(this)" maxlength="6" minlength="6"
+                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+                <img id="close8" src="/images/close.png" alt="close">
+                <img id="check8" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation">
+                Kod pocztowy musi spełniać następujące warunki:
+                <ul>
+                    <li>zawiera tylko cyfry</li>
+                </ul>
+            </div>
+            <label id="City">
+                <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)"
+                       minlength="2" maxlength="40" onmouseenter="showValidation(this)"
+                       onmouseleave="hideValidation(this)">
+                <img id="close9" src="/images/close.png" alt="close">
+                <img id="check9" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationCity">
+                Miejscowość musi spełniać następujące warunki:
+                <ul>
+                    <li>zaczyna się wielką literą</li>
+                    <li>zawiera tylko litery</li>
+                    <li>maksymalnie 2 człony</li>
+                </ul>
+            </div>
         </div>
-      </div>
-      <div class="block-horizontally">
-        <label id="Street">
-          <input th:field="*{street}" type="text" placeholder="Ulica" required oninput="checkStreet(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close5" src="/images/close.png" alt="close">
-          <img id="check5" src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationStreet">
-          Ulica musi spełniać następujące warunki:
-          <ul>
-            <li>zaczyna się wielką literą</li>
-            <li>zawiera tylko litery</li>
-            <li>maksymalnie 2 człony</li>
-          </ul>
+        <div class="block-horizontally">
+            <label id="Country">
+                <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
+                       placeholder="Kraj" onclick="showOrHideCountry()" value="">
+                <img id="down1" src="/images/keyboard_down.png" alt="down">
+                <img id="up1" src="/images/keyboard_up.png" alt="up">
+                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
+                <ul id="optionsCountry" class="optionsSelect">
+                    <li class="optionSelect optionCountry" th:data-code="${country.code}"
+                        th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'"
+                        onclick="setValueCountry(this)"></li>
+                    <li id="nothingCountry">Brak wyników</li>
+                </ul>
+            </label>
+            <label id="CallingCode">
+                <input th:field="*{callingCode}" id="valueCallingCode" class="valueSelect" type="text" readonly
+                       placeholder="Kierunkowy" onclick="showOrHideCallingCode()" value="">
+                <img id="down2" src="/images/keyboard_down.png" alt="down">
+                <img id="up2" src="/images/keyboard_up.png" alt="up">
+                <input id="searchCallingCode" class="searchSelect" type="text"
+                       oninput="searchAll(this, false)">
+                <ul id="optionsCallingCode" class="optionsSelect">
+                    <li class="optionSelect optionCallingCode" th:data-code="${callingCode.code}"
+                        th:data-value="${callingCode.callingCode}" th:each="callingCode : ${callingCodes}"
+                        th:text="${callingCode.callingCode} + ' (' + ${callingCode.code} + ')'"
+                        onclick="setValueCallingCode(this)"></li>
+                    <li id="nothingCallingCode">Brak wyników</li>
+                </ul>
+            </label>
+            <label id="Phone">
+                <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)"
+                       maxlength="28" minlength="7" onmouseenter="showValidation(this)"
+                       onmouseleave="hideValidation(this)">
+                <img id="close10" src="/images/close.png" alt="close">
+                <img id="check10" src="/images/check.png" alt="check">
+            </label>
+            <div class="validation" id="validationPhone">
+                Telefon musi spełniać następujące warunki:
+                <ul>
+                    <li>zawiera od 9 cyfr</li>
+                    <li>łączna długość z kierunkowym nie przekracza 15</li>
+                </ul>
+            </div>
         </div>
-        <label id="HouseNumber">
-          <input th:field="*{houseNumber}" type="text" placeholder="Nr domu" required oninput="checkHouseNumber(this)" minlength="1" maxlength="10" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close6" src="/images/close.png" alt="close">
-          <img id="check6"  src="/images/check.png" alt="check">
+        <label id="Password">
+            <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)"
+                   minlength="6" maxlength="25" onmouseenter="showValidation(this)"
+                   onmouseleave="hideValidation(this)">
+            <img id="close11" src="/images/close.png" alt="close">
+            <img id="check11" src="/images/check.png" alt="check">
         </label>
-        <div class="validation" id="validationHouseNumber">
-          Numer domu musi spełniać następujące warunki:
-          <ul>
-            <li>na końcu może być litera</li>
-            <li>zapisany może być jako ułamek</li>
-          </ul>
+        <div class="validation">
+            Hasło musi spełniać następujące warunki:
+            <ul>
+                <li>długość od 6 do 25</li>
+                <li>zawiera jedną mała literę</li>
+                <li>zawiera jedną wielką literę</li>
+                <li>zawiera jedną cyfrę</li>
+                <li>zawiera jeden znak specjalny</li>
+            </ul>
         </div>
-        <label id="ApartmentNumber">
-          <input th:field="*{apartmentNumber}" type="text" placeholder="Nr lokalu" oninput="checkApartmentNumber(this)" maxlength="6" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close7" src="/images/close.png" alt="close">
-          <img id="check7"  src="/images/check.png" alt="check">
+        <label id="RetypedPassword">
+            <input th:field="*{retypedPassword}" type="password" placeholder="Powtórz hasło" required
+                   oninput="checkRetypedPassword(this)" minlength="6" maxlength="25"
+                   onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
+            <img id="close12" src="/images/close.png" alt="close">
+            <img id="check12" src="/images/check.png" alt="check">
         </label>
-        <div class="validation" id="validationApartmentNumber">
-          Numer lokalu musi spełniać następujące warunki:
-          <ul>
-            <li>większy od 0</li>
-            <li>jest liczbą</li>
-          </ul>
+        <div class="validation">
+            Powtórzone hasło musi spełniać następujące warunki:
+            <ul>
+                <li>takie same jak pole hasło</li>
+            </ul>
         </div>
-      </div>
-      <div class="block-horizontally">
-        <label id="PostalCode">
-          <input th:field="*{postalCode}" type="text" placeholder="Kod pocztowy" required oninput="checkPostalCode(this)" maxlength="6" minlength="6" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close8" src="/images/close.png" alt="close">
-          <img id="check8" src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationPostalCode">
-          Kod pocztowy musi spełniać następujące warunki:
-          <ul>
-            <li>zawiera tylko cyfry</li>
-          </ul>
-        </div>
-        <label id="City">
-          <input th:field="*{city}" type="text" placeholder="Miejscowość" required oninput="checkCity(this)" minlength="2" maxlength="40" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close9" src="/images/close.png" alt="close">
-          <img id="check9"  src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationCity">
-          Miejscowość musi spełniać następujące warunki:
-          <ul>
-            <li>zaczyna się wielką literą</li>
-            <li>zawiera tylko litery</li>
-            <li>maksymalnie 2 człony</li>
-          </ul>
-        </div>
-      </div>
-      <div class="block-horizontally">
-        <label id="Country">
-          <input th:field="*{country}" id="valueCountry" class="valueSelect"  type="text" readonly placeholder="Kraj" onclick="showOrHideCountry()" value="">
-          <img id="down1" src="/images/keyboard_down.png" alt="down">
-          <img id="up1" src="/images/keyboard_up.png" alt="up">
-          <input id="searchCountry" class="searchSelect" type="text" oninput="searchAllCountries(this)">
-          <ul id="optionsCountry" class="optionsSelect">
-            <li class="optionSelect optionCountry" th:data-code="${country.code}"  th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'" onclick="setValueCountry(this)"></li>
-            <li id="nothingCountry">Brak wyników</li>
-          </ul>
-        </label>
-        <label id="CallingCode">
-          <input th:field="*{callingCode}" id="valueCallingCode" class="valueSelect"  type="text" readonly placeholder="Kierunkowy" onclick="showOrHideCallingCode()" value="">
-          <img id="down2" src="/images/keyboard_down.png" alt="down">
-          <img id="up2" src="/images/keyboard_up.png" alt="up">
-          <input id="searchCallingCode" class="searchSelect" type="text" oninput="searchAllCallingCodes(this)">
-          <ul id="optionsCallingCode" class="optionsSelect">
-            <li class="optionSelect optionCallingCode" th:data-code="${callingCode.code}" th:data-value="${callingCode.callingCode}" th:each="callingCode : ${callingCodes}" th:text="${callingCode.callingCode} + ' (' + ${callingCode.code} + ')'" onclick="setValueCallingCode(this)"></li>
-            <li id="nothingCallingCode">Brak wyników</li>
-          </ul>
-        </label>
-        <label id="Phone">
-          <input th:field="*{phone}" type="text" placeholder="Telefon" required oninput="checkPhone(this)" maxlength="28" minlength="7" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-          <img id="close10" src="/images/close.png" alt="close">
-          <img id="check10" src="/images/check.png" alt="check">
-        </label>
-        <div class="validation" id="validationPhone">
-          Telefon musi spełniać następujące warunki:
-          <ul>
-            <li>zawiera od 9 cyfr</li>
-            <li>łączna długość z kierunkowym nie przekracza 15</li>
-          </ul>
-        </div>
-      </div>
-      <label id="Password">
-        <input th:field="*{password}" type="password" placeholder="Hasło" required oninput="checkPassword(this)" minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close11" src="/images/close.png" alt="close">
-        <img id="check11"  src="/images/check.png" alt="check">
-      </label>
-      <div class="validation" id="validationPassword">
-        Hasło musi spełniać następujące warunki:
-        <ul>
-          <li>długość od 6 do 25</li>
-          <li>zawiera jedną mała literę</li>
-          <li>zawiera jedną wielką literę</li>
-          <li>zawiera jedną cyfrę</li>
-          <li>zawiera jeden znak specjalny</li>
-        </ul>
-      </div>
-      <label id="RetypedPassword">
-        <input th:field="*{retypedPassword}" type="password" placeholder="Powtórz hasło" required oninput="checkRetypedPassword(this)" minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-        <img id="close12" src="/images/close.png" alt="close">
-        <img id="check12"  src="/images/check.png" alt="check">
-      </label>
-      <div class="validation" id="validationRetypedPassword">
-        Powtórzone hasło musi spełniać następujące warunki:
-        <ul>
-          <li>takie same jak pole hasło</li>
-        </ul>
-      </div>
-      <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-      <button type="button" class="grayButton" id="nextButton" >Dalej</button>
-      <a th:href="@{/login}">
-        <button type="button" class="blackButton">Logowanie</button>
-      </a>
+        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <button type="button" class="grayButton" id="nextButton">Dalej</button>
+        <a th:href="@{/login}">
+            <button type="button" class="blackButton">Logowanie</button>
+        </a>
     </form>
-  </div>
-  <div id="footer">
-  </div>
+</div>
+<div id="footer">
 </div>
 </body>
 </html>
