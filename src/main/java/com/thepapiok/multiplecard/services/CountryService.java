@@ -27,7 +27,7 @@ public class CountryService {
     try {
       countries =
           restTemplate.getForObject(
-              "https://restcountries.com/v3.1/all?fields=idd,cca2,translations,area,population",
+              "https://restcountries.com/v3.1/all?fields=idd,cca2,name,area,population",
               CountryGetDTO[].class);
     } catch (Exception e) {
       return null;
@@ -45,7 +45,7 @@ public class CountryService {
                             .map(
                                 suffix ->
                                     new CountryDTO(
-                                        country.getTranslations().get("pol").getCommon(),
+                                        country.getName().getCommon(),
                                         country.getCca2(),
                                         country.getIdd().getRoot() + suffix)))
                 .toList());

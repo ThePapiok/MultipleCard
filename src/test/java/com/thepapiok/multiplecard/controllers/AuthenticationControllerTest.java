@@ -21,6 +21,7 @@ import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.SmsService;
 import com.twilio.exception.ApiException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,10 @@ public class AuthenticationControllerTest {
   private static List<CallingCodeDTO> expectedCallingCodes;
   private static List<CountryNamesDTO> expectedCountryNames;
   private static RegisterDTO expectedRegisterDTO;
+  private static final Locale LOCALE = new Locale.Builder().setLanguage("pl").build();
+
   private static final String ERROR_AT_SMS_SENDING_MESSAGE = "Błąd podczas wysyłania sms";
-  private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emaila";
+  private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
@@ -67,7 +70,7 @@ public class AuthenticationControllerTest {
   private static final String TEST_CODE = "123 456";
   private static final String TEST_ENCODE_CODE = "sad8h121231z#$2";
   private static final String TEST_PHONE_NUMBER = "+1212345673123";
-  private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard to: ";
+  private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard: ";
   private static final String REDIRECT_VERIFICATION_ERROR = "/account_verifications?error";
   private static final String VERIFICATION_PAGE = "verificationPage";
   private static final String NEW_CODE_SMS_PARAM = "newCodeSms";
@@ -323,7 +326,7 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail());
+        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
 
     performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_VERIFICATION_ERROR);
     assertEquals(
@@ -389,7 +392,8 @@ public class AuthenticationControllerTest {
                 .param(PHONE_PARAM, expectedRegisterDTO.getPhone())
                 .param("password", expectedRegisterDTO.getPassword())
                 .param("retypedPassword", expectedRegisterDTO.getRetypedPassword())
-                .session(httpSession))
+                .session(httpSession)
+                .locale(LOCALE))
         .andExpect(redirectedUrl(redirectUrl));
   }
 
@@ -399,7 +403,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
 
     mockMvc
-        .perform(get(VERIFICATION_URL).session(httpSession))
+        .perform(get(VERIFICATION_URL).session(httpSession).locale(LOCALE))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
 
@@ -455,7 +459,7 @@ public class AuthenticationControllerTest {
       String paramCode, String paramAmount, String paramEncode, MockHttpSession httpSession)
       throws Exception {
     mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession))
+        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
         .andExpect(view().name(VERIFICATION_PAGE));
     assertEquals(1, httpSession.getAttribute(paramAmount));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(paramEncode));
@@ -470,7 +474,7 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail());
+        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
 
     redirectVerificationErrorWhenErrorAtVerification(
         NEW_CODE_EMAIL_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession);
@@ -479,7 +483,7 @@ public class AuthenticationControllerTest {
   private void redirectVerificationErrorWhenErrorAtVerification(
       String paramCode, String paramError, MockHttpSession httpSession) throws Exception {
     mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession))
+        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
         .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
     assertEquals(paramError, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
@@ -516,7 +520,7 @@ public class AuthenticationControllerTest {
       String message)
       throws Exception {
     mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession))
+        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
         .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
     assertEquals(maxCodeAmount, httpSession.getAttribute(paramAmount));
     assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -532,7 +536,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_ENCODE_CODE);
 
     mockMvc
-        .perform(get(VERIFICATION_URL).param("reset", "").session(httpSession))
+        .perform(get(VERIFICATION_URL).param("reset", "").session(httpSession).locale(LOCALE))
         .andExpect(redirectedUrl(LOGIN_URL));
     assertNull(httpSession.getAttribute(REGISTER_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
@@ -549,7 +553,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
 
     mockMvc
-        .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession))
+        .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession).locale(LOCALE))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
@@ -572,6 +576,7 @@ public class AuthenticationControllerTest {
         .perform(
             post(VERIFICATION_URL)
                 .session(httpSession)
+                .locale(LOCALE)
                 .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_CODE)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, verificationSms))
         .andExpect(redirectedUrl("/login?success"));
@@ -632,6 +637,7 @@ public class AuthenticationControllerTest {
         .perform(
             post(VERIFICATION_URL)
                 .session(httpSession)
+                .locale(LOCALE)
                 .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_CODE)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_OTHER_CODE))
         .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
@@ -661,6 +667,7 @@ public class AuthenticationControllerTest {
         .perform(
             post(VERIFICATION_URL)
                 .session(httpSession)
+                .locale(LOCALE)
                 .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_CODE)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_OTHER_CODE))
         .andExpect(redirectedUrl(REDIRECT_LOGIN_ERROR));

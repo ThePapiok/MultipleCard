@@ -153,6 +153,13 @@
 					</java>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Duser.language=pl -Duser.region=PL</argLine>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
