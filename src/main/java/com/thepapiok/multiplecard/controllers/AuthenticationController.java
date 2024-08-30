@@ -190,7 +190,7 @@ public class AuthenticationController {
     final int maxAmount = 3;
     RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(REGISTER_PARAM);
     if (registerDTO == null) {
-      //return REDIRECT_LOGIN;
+      return REDIRECT_LOGIN;
     }
     if (newCodeSms != null) {
       Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
