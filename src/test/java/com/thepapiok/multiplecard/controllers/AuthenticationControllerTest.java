@@ -21,6 +21,7 @@ import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.SmsService;
 import com.twilio.exception.ApiException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,9 @@ public class AuthenticationControllerTest {
   private static List<CallingCodeDTO> expectedCallingCodes;
   private static List<CountryNamesDTO> expectedCountryNames;
   private static RegisterDTO expectedRegisterDTO;
+  private static final Locale LOCALE = new Locale.Builder().setLanguage("pl").build();
   private static final String ERROR_AT_SMS_SENDING_MESSAGE = "Błąd podczas wysyłania sms";
-  private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emaila";
+  private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
@@ -67,7 +69,7 @@ public class AuthenticationControllerTest {
   private static final String TEST_CODE = "123 456";
   private static final String TEST_ENCODE_CODE = "sad8h121231z#$2";
   private static final String TEST_PHONE_NUMBER = "+1212345673123";
-  private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard to: ";
+  private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard: ";
   private static final String REDIRECT_VERIFICATION_ERROR = "/account_verifications?error";
   private static final String VERIFICATION_PAGE = "verificationPage";
   private static final String NEW_CODE_SMS_PARAM = "newCodeSms";
@@ -323,7 +325,7 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail());
+        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
 
     performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_VERIFICATION_ERROR);
     assertEquals(
@@ -389,7 +391,8 @@ public class AuthenticationControllerTest {
                 .param(PHONE_PARAM, expectedRegisterDTO.getPhone())
                 .param("password", expectedRegisterDTO.getPassword())
                 .param("retypedPassword", expectedRegisterDTO.getRetypedPassword())
-                .session(httpSession))
+                .session(httpSession)
+                .locale(LOCALE))
         .andExpect(redirectedUrl(redirectUrl));
   }
 
@@ -470,7 +473,7 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail());
+        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
 
     redirectVerificationErrorWhenErrorAtVerification(
         NEW_CODE_EMAIL_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession);
