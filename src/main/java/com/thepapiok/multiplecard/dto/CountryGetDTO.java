@@ -1,6 +1,5 @@
 package com.thepapiok.multiplecard.dto;
 
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class CountryGetDTO {
   private String cca2;
   private Idd idd;
-  private Map<String, Translation> translations;
+  private Name name;
   private Float area;
   private Integer population;
 
@@ -26,8 +25,7 @@ public class CountryGetDTO {
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class Translation {
-    private String official;
+  public static class Name {
     private String common;
   }
 }
