@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,48 +14,50 @@
 <script src="/js/verificationPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="b1">
-        <button class="blackButton">Strona główna</button>
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
 </div>
 <div id="body">
-    <p class="title">Potwierdzenie konta</p>
+    <p class="title" th:text="#{verificationPage.title}"></p>
     <form th:action="@{/account_verifications}" id="form" method="post">
         <label id="VerificationEmail">
-            <input id="verificationNumberEmail" name="verificationNumberEmail" type="text" placeholder="Kod email"
+            <input id="verificationNumberEmail" name="verificationNumberEmail" type="text" th:placeholder="#{verificationPage.codeEmail.text}"
                    required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7"
                    onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
             <img id="close1" src="/images/close.png" alt="close">
             <img id="check1" src="/images/check.png" alt="check">
         </label>
         <div class="validation">
-            Kod email musi spełniać następujące warunki:
+            <span th:text="#{verificationPage.codeEmail.text} + ' ' + #{validation.text}"></span>
             <ul>
-                <li>zawiera 6 cyfr</li>
+                <li th:text="#{validation.only_digits}"></li>
+                <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
             </ul>
         </div>
         <label id="VerificationSms">
-            <input id="verificationNumberSms" name="verificationNumberSms" type="text" placeholder="Kod sms" required
+            <input id="verificationNumberSms" name="verificationNumberSms" type="text" th:placeholder="#{codeSms.text}" required
                    oninput="checkVerificationSms(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)"
                    onmouseleave="hideValidation(this)">
             <img id="close2" src="/images/close.png" alt="close">
             <img id="check2" src="/images/check.png" alt="check">
         </label>
         <div class="validation">
-            Kod sms musi spełniać następujące warunki:
+            <span th:text="#{codeSms.text} + ' ' + #{validation.text}"></span>
             <ul>
-                <li>zawiera 6 cyfr</li>
+                <li th:text="#{validation.only_digits}"></li>
+                <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
             </ul>
         </div>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-        <button type="button" class="grayButton" id="registerButton">Załóż konto</button>
+        <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}"></button>
         <a th:href="@{'/account_verifications?newCodeSms'}">
-            <button type="button" class="blackButton">Nowy kod sms</button>
+            <button type="button" class="blackButton" th:text="#{verificationPage.button.newCode_sms}"></button>
         </a>
         <a th:href="@{'/account_verifications?newCodeEmail'}">
-            <button type="button" class="blackButton">Nowy kod email</button>
+            <button type="button" class="blackButton" th:text="#{verificationPage.button.newCode_email}"></button>
         </a>
         <a th:href="@{'/account_verifications?reset'}">
-            <button type="button" class="blackButton" id="resetButton">Anuluj</button>
+            <button type="button" class="redButton" id="resetButton" th:text="#{verificationPage.button.reset}"></button>
         </a>
     </form>
 </div>
