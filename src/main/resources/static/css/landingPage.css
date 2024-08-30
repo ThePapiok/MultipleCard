@@ -184,7 +184,7 @@ label {
     margin-left: 5px;
 }
 
-#checked-1, #checked-2, #checked-3, #checked-4, #checked-5, label input, #check1:checked ~ #unchecked-1, #check2:checked ~ #unchecked-2, #check3:checked ~ #unchecked-3, #check4:checked ~ #unchecked-4, #check5:checked ~ #unchecked-5 {
+#checked-1, #checked-2, #checked-3, #checked-4, #checked-5{
     display: none;
 }
 
@@ -193,7 +193,7 @@ label {
     width: 100vh;
 }
 
-#submit {
+#addOpinionButton {
     margin-left: 45px;
     margin-top: 10px;
     z-index: 1;
@@ -201,10 +201,6 @@ label {
 
 button {
     margin-right: 0;
-}
-
-#check1:checked ~ #checked-1, #check2:checked ~ #checked-2, #check3:checked ~ #checked-3, #check4:checked ~ #checked-4, #check5:checked ~ #checked-5 {
-    display: inline;
 }
 
 @media only screen and (max-width: 768px) {
@@ -249,7 +245,7 @@ button {
         width: 40px;
     }
 
-    #submit {
+    #addOpinionButton {
         margin-left: 3%;
         margin-top: 5px;
     }

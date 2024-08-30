@@ -1,13 +1,16 @@
 package com.thepapiok.multiplecard.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 @Data
 public class ReviewDTO {
+  @NotBlank
+  @Size(min = 1, max = 80)
   private String description;
-  private boolean star1;
-  private boolean star2;
-  private boolean star3;
-  private boolean star4;
-  private boolean star5;
+
+  @Range(min = 0, max = 5)
+  private int rating;
 }

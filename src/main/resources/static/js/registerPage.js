@@ -15,37 +15,37 @@ let callingCode = false;
 
 function checkFirstName(e) {
     const input = e.value;
-    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)), ok, previous, nextButtonId, success, false);
+    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkLastName(e) {
     const input = e.value;
-    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, false);
+    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkEmail(e) {
     const input = e.value;
-    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)), ok, previous, nextButtonId, success, false);
+    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkProvince(e) {
     const input = e.value;
-    check(4, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, false);
+    check(4, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkStreet(e) {
     const input = e.value;
-    check(5, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, false);
+    check(5, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkHouseNumber(e) {
     const input = e.value;
-    check(6, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)), ok, previous, nextButtonId, success, false);
+    check(6, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkApartmentNumber(e) {
     const input = e.value;
-    check(7, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, nextButtonId, success, false);
+    check(7, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, nextButtonId, success, true);
 }
 
 function checkPostalCode(e) {
@@ -60,32 +60,32 @@ function checkPostalCode(e) {
         input = e.value;
     }
     previousPostalCode = input;
-    check(8, (regPostalCode.test(input)), ok, previous, nextButtonId, success, false);
+    check(8, (regPostalCode.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkCity(e) {
     const input = e.value;
-    check(9, (input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, false);
+    check(9, (input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkPhone(e) {
     const input = e.value.toString().replaceAll(" ", "");
     const callingCodeLength = document.getElementById("valueCallingCode").value.length;
-    check(10, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, nextButtonId, success, false);
+    check(10, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkPassword(e) {
     const input = e.value;
-    check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, nextButtonId, success, false);
+    check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, nextButtonId, success, true);
 }
 
 function checkRetypedPassword(e) {
-    check(12, (e.value === document.getElementById("password").value), ok, previous, nextButtonId, success, false);
+    check(12, (e.value === document.getElementById("password").value), ok, previous, nextButtonId, success, true);
 }
 
 function checkSelect(e, index) {
     const input = e.value;
-    check(index, (input !== ''), ok, previous, nextButtonId, success, true);
+    check(index, (input !== ''), ok, previous, nextButtonId, success, false);
 }
 
 function atStart() {

@@ -1,24 +1,25 @@
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
 const regPhone = new RegExp("^[1-9][0-9 ]*$")
 
-function check(i, con, ok, previous, id, success, isSelect) {
+function check(i, con, ok, previous, id, success, hasCheck) {
+    const previousCond = previous[i - 1];
     if (con) {
         ok[i - 1] = true;
-        if (!isSelect && previous[i - 1] === false) {
+        if (hasCheck && previousCond === false) {
             document.getElementById("close" + i).style.display = "none";
             document.getElementById("check" + i).style.display = "inline";
         }
-        if (ok[i - 1] !== previous[i - 1]) {
+        if (previousCond === false) {
             activeButton(id, ok, success);
             previous[i - 1] = true;
         }
     } else {
         ok[i - 1] = false;
-        if (!isSelect && previous[i - 1] === true && !isSelect) {
+        if (hasCheck && previousCond === true) {
             document.getElementById("close" + i).style.display = "inline";
             document.getElementById("check" + i).style.display = "none";
         }
-        if (ok[i - 1] !== previous) {
+        if (previousCond === true) {
             disableButton(id, ok, success);
             previous[i - 1] = false;
         }
@@ -56,7 +57,7 @@ function activeButton(id, ok, success) {
 function disableButton(id, ok, success) {
     let cond = false;
     for (let i = 0; i < ok.length; i++) {
-        if (ok[i] === true) {
+        if (ok[i] === false) {
             cond = true;
             break;
         }
