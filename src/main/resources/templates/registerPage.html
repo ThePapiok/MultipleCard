@@ -10,6 +10,7 @@
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
+<script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/registerPage.js"></script>
 <div id="header">
@@ -87,7 +88,8 @@
         </div>
         <div class="block-horizontally">
             <label id="Street">
-                <input th:field="*{street}" type="text" th:placeholder="#{street.text}" required oninput="checkStreet(this)"
+                <input th:field="*{street}" type="text" th:placeholder="#{street.text}" required
+                       oninput="checkStreet(this)"
                        minlength="2" maxlength="40" onmouseenter="showValidation(this)"
                        onmouseleave="hideValidation(this)">
                 <img id="close5" src="/images/close.png" alt="close">
@@ -196,7 +198,8 @@
                 </ul>
             </label>
             <label id="Phone">
-                <input th:field="*{phone}" type="text" th:placeholder="#{phone.text}" required oninput="checkPhone(this)"
+                <input th:field="*{phone}" type="text" th:placeholder="#{phone.text}" required
+                       oninput="checkPhone(this)"
                        maxlength="28" minlength="7" onmouseenter="showValidation(this)"
                        onmouseleave="hideValidation(this)">
                 <img id="close10" src="/images/close.png" alt="close">
@@ -211,7 +214,8 @@
             </div>
         </div>
         <label id="Password">
-            <input th:field="*{password}" type="password" th:placeholder="#{password.text}" required oninput="checkPassword(this)"
+            <input th:field="*{password}" type="password" th:placeholder="#{password.text}" required
+                   oninput="checkPassword(this)"
                    minlength="6" maxlength="25" onmouseenter="showValidation(this)"
                    onmouseleave="hideValidation(this)">
             <img id="close11" src="/images/close.png" alt="close">
@@ -248,6 +252,14 @@
     </form>
 </div>
 <div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=en'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
 </div>
 </body>
 </html>

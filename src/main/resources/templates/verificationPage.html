@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="/css/verificationPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/verificationPage.js"></script>
 <div id="header">
@@ -17,11 +18,12 @@
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
 </div>
-<div id="body">
+<div id="body" onload="atStart()">
     <p class="title" th:text="#{verificationPage.title}"></p>
     <form th:action="@{/account_verifications}" id="form" method="post">
         <label id="VerificationEmail">
-            <input id="verificationNumberEmail" name="verificationNumberEmail" type="text" th:placeholder="#{verificationPage.codeEmail.text}"
+            <input id="verificationNumberEmail" name="verificationNumberEmail" type="text"
+                   th:placeholder="#{verificationPage.codeEmail.text}"
                    required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7"
                    onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
             <img id="close1" src="/images/close.png" alt="close">
@@ -35,7 +37,8 @@
             </ul>
         </div>
         <label id="VerificationSms">
-            <input id="verificationNumberSms" name="verificationNumberSms" type="text" th:placeholder="#{codeSms.text}" required
+            <input id="verificationNumberSms" name="verificationNumberSms" type="text" th:placeholder="#{codeSms.text}"
+                   required
                    oninput="checkVerificationSms(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)"
                    onmouseleave="hideValidation(this)">
             <img id="close2" src="/images/close.png" alt="close">
@@ -57,11 +60,20 @@
             <button type="button" class="blackButton" th:text="#{verificationPage.button.newCode_email}"></button>
         </a>
         <a th:href="@{'/account_verifications?reset'}">
-            <button type="button" class="redButton" id="resetButton" th:text="#{verificationPage.button.reset}"></button>
+            <button type="button" class="redButton" id="resetButton"
+                    th:text="#{verificationPage.button.reset}"></button>
         </a>
     </form>
 </div>
 <div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=en'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
 </div>
 </body>
 </html>

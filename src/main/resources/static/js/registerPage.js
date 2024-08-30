@@ -103,6 +103,7 @@ function atStart() {
     checkPhone(document.getElementById("phone"));
     document.getElementById("searchCallingCode").value = "";
     document.getElementById("searchCountry").value = "";
+    checkLanguage();
 }
 
 function showOrHideCountry() {

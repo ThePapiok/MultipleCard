@@ -30,6 +30,7 @@ function checkCallingCode(e) {
 function atStart() {
     checkCallingCode(document.getElementById("valueCallingCode"));
     document.getElementById("searchCallingCode").value = "";
+    checkLanguage();
 }
 
 function showOrHideCallingCode() {

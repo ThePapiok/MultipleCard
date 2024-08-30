@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
 <script src="/js/landingPage.js"></script>
 <div id="header">
     <a sec:authorize="isAnonymous()" th:href="@{/login}" class="b1">
@@ -140,6 +141,14 @@
     </form>
 </div>
 <div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=en'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
 </div>
 </body>
 </html>

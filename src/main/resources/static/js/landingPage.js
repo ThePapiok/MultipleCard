@@ -21,3 +21,7 @@ function checkStar(e) {
     }
 }
 
+
+function atStart() {
+    checkLanguage();
+}

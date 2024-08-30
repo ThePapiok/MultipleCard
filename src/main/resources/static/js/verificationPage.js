@@ -34,4 +34,8 @@ function addWhiteSpace(e, index, input, length) {
     previousVerification[index] = input;
 }
 
+function atStart() {
+    checkLanguage();
+}
+
 
