@@ -14,4 +14,7 @@ public interface AccountRepository extends MongoRepository<Account, String> {
   List<Account> findAllEmails();
 
   Account findByPhone(String phone);
+
+  @Query(value = "{'phone': ?0}", fields = "{'_id': 1}")
+  Account findIdByPhone(String phone);
 }

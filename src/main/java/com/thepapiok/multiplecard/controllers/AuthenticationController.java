@@ -137,9 +137,7 @@ public class AuthenticationController {
     if (bindingResult.hasErrors()) {
       System.out.println(bindingResult);
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.incorrect_data", null, locale);
+      message = messageSource.getMessage("validation.incorrect_data", null, locale);
     } else if (authenticationService
         .getPhones()
         .contains(register.getCallingCode() + register.getPhone())) {

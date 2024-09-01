@@ -82,4 +82,17 @@ public class AccountRepositoryTest {
 
     assertEquals(expectedAccounts, accountRepository.findAllEmails());
   }
+
+  @Test
+  public void shouldSuccessFindIdByPhone() {
+    final String phone = "1231231231";
+    Account account = new Account();
+    account.setId(TEST_ID);
+    account.setPhone(phone);
+    accountRepository.save(account);
+    Account expectedAccount = new Account();
+    expectedAccount.setId(TEST_ID);
+
+    assertEquals(expectedAccount, accountRepository.findIdByPhone(phone));
+  }
 }

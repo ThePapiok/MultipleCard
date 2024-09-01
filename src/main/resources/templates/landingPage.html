@@ -106,7 +106,7 @@
     <a th:href="@{/reviews}">
         <button class="blackButton" id="b4" th:text="#{landingPage.button.more_reviews}"></button>
     </a>
-    <form th:action="@{/review}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
+    <form th:action="@{/reviews}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
         <label for="text"></label>
         <textarea th:field="*{description}" id="text" required th:placeholder="#{landingPage.review.placeholder}"
                   minlength="1"
@@ -136,7 +136,8 @@
             <button id="addOpinionButton" type="button" class="grayButton"
                     th:text="#{landingPage.button.send_review}"></button>
         </div>
-        <span th:if="${param.added}" id="success"></span>
+        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
     </form>
 </div>
 <div id="footer">
