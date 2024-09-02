@@ -1,7 +1,9 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.ReviewDTO;
+import com.thepapiok.multiplecard.services.UserService;
 import jakarta.servlet.http.HttpSession;
+import java.security.Principal;
 import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LandingPageController {
   private final MessageSource messageSource;
+  private final UserService userService;
 
   @Autowired
-  public LandingPageController(MessageSource messageSource) {
+  public LandingPageController(MessageSource messageSource, UserService userService) {
     this.messageSource = messageSource;
+    this.userService = userService;
   }
 
   @GetMapping
@@ -25,7 +29,8 @@ public class LandingPageController {
       @RequestParam(required = false) String success,
       Model model,
       HttpSession session,
-      Locale locale) {
+      Locale locale,
+      Principal principal) {
     final String errorMessageParam = "errorMessage";
     final String successParam = "success";
     if (error != null) {
@@ -43,7 +48,10 @@ public class LandingPageController {
         session.removeAttribute(successParam);
       }
     }
-    model.addAttribute("review", new ReviewDTO());
+    if (principal != null) {
+      model.addAttribute("reviews", userService.getReviewsFirst3(principal.getName()));
+    }
+    model.addAttribute("newReview", new ReviewDTO());
     return "landingPage";
   }
 }

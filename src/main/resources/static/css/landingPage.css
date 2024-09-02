@@ -80,6 +80,7 @@
 .hearth {
     height: 25px;
     width: 25px;
+    cursor: pointer;
 }
 
 .star {
@@ -216,11 +217,11 @@ button {
         height: 35vh;
     }
 
-    #review2, #review3 {
+    .review:not(:first-child) {
         display: none;
     }
 
-    #review1 {
+    .review:first-of-type {
         width: 83%;
         height: 170px;
         margin-bottom: 10px;

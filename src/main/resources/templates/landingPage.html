@@ -45,60 +45,21 @@
     </div>
     <span id="recenzje" th:text="#{landingPage.reviews.title}"></span>
     <div id="reviews">
-        <div class="review" id="review1">
+        <div class="review" th:each="review : ${reviews}">
+            <span></span>
             <div class="review-vertical">
                 <div class="review-horizontal">
-                    <span class="name">Ewelina</span>
+                    <span class="name" th:text="${review.firstName}"></span>
                     <div class="amountHearths">
-                        <span class="amount">15</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
+                        <span class="amount" th:text="${review.count}"></span>
+                        <img class="hearth" src="/images/hearth.png" alt="hearth" th:if="${review.isAdded} == 1">
+                        <img class="hearth" src="/images/hearth_empty.png" alt="hearth" th:if="${review.isAdded} == 0">
                     </div>
                 </div>
-                <span class="description">"Świetna aplikacja"</span>
+                <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
                 <div class="stars">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                </div>
-            </div>
-        </div>
-        <div class="review" id="review2">
-            <div class="review-vertical">
-                <div class="review-horizontal">
-                    <span class="name">Jakub</span>
-                    <div class="amountHearths">
-                        <span class="amount">7</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
-                    </div>
-                </div>
-                <span class="description">“Najgorsza aplikacja na świecie, Adrian byś się wstydził”</span>
-                <div class="stars">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                </div>
-            </div>
-        </div>
-        <div class="review" id="review3">
-            <div class="review-vertical">
-                <div class="review-horizontal">
-                    <span class="name">Adrian</span>
-                    <div class="amountHearths">
-                        <span class="amount">1</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
-                    </div>
-                </div>
-                <span class="description">"Ok!"</span>
-                <div class="stars">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="star" src="/images/star.png" alt="star" th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                    <img class="star" src="/images/star_empty.png" alt="emptyStar" th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
                 </div>
             </div>
         </div>
@@ -106,32 +67,34 @@
     <a th:href="@{/reviews}">
         <button class="blackButton" id="b4" th:text="#{landingPage.button.more_reviews}"></button>
     </a>
-    <form th:action="@{/reviews}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
+    <form th:action="@{/reviews}" th:object="${newReview}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
         <label for="text"></label>
         <textarea th:field="*{description}" id="text" required th:placeholder="#{landingPage.review.placeholder}"
                   minlength="1"
                   maxlength="80" oninput="checkReview(this)"></textarea>
         <div id="starsAndSubmit">
-            <input th:field="*{rating}" hidden type="number" min="0" max="5" value="0">
+            <label>
+                <input th:field="*{rating}" hidden type="number" min="0" max="5" value="0">
+            </label>
             <label onclick="setStar(1)">
-                <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
+                <img class="starAtReview" id="unchecked-1" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-1" src="/images/star.png" alt="star">
             </label>
             <label onclick="setStar(2)">
-                <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
+                <img class="starAtReview" id="unchecked-2" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-2" src="/images/star.png" alt="star">
             </label>
             <label onclick="setStar(3)">
-                <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
+                <img class="starAtReview" id="unchecked-3" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-3" src="/images/star.png" alt="star">
             </label>
             <label onclick="setStar(4)">
-                <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
+                <img class="starAtReview" id="unchecked-4" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-4" src="/images/star.png" alt="star">
             </label>
             <label onclick="setStar(5)">
-                <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
+                <img class="starAtReview" id="unchecked-5" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-5" src="/images/star.png" alt="star">
             </label>
             <button id="addOpinionButton" type="button" class="grayButton"
                     th:text="#{landingPage.button.send_review}"></button>
