@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 import com.thepapiok.multiplecard.dto.ReviewDTO;
@@ -23,6 +24,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class ReviewControllerTest {
   private static final String TEST_PHONE = "12312312312";
+  private static final String TEST_ID = "dfsa132sd132123fsd";
+  private static final String ID_PARAM = "id";
+  private static final String CONTENT_TRUE_TEXT = "true";
+
   private static final String TEST_DESCRIPTION = "sfdafsdf";
   private static final String REVIEWS_URL = "/reviews";
   private static final String DESCRIPTION_PARAM = "description";
@@ -92,5 +97,25 @@ public class ReviewControllerTest {
                 .session(httpSession))
         .andExpect(redirectedUrl(LANDING_PAGE_ERROR_URL));
     assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldSuccessAddLike() throws Exception {
+    when(reviewService.addLike(TEST_ID, TEST_PHONE)).thenReturn(true);
+
+    mockMvc
+        .perform(post("/reviews/addLike").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(CONTENT_TRUE_TEXT));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldSuccessDeleteLike() throws Exception {
+    when(reviewService.deleteLike(TEST_ID, TEST_PHONE)).thenReturn(true);
+
+    mockMvc
+        .perform(post("/reviews/deleteLike").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(CONTENT_TRUE_TEXT));
   }
 }

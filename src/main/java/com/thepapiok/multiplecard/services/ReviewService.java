@@ -10,6 +10,7 @@ import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.LikeRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,15 +62,21 @@ public class ReviewService {
 
   public boolean addLike(String id, String phone) {
     try {
-      ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
-      ObjectId reviewUserId = new ObjectId(id);
-      atLike(id);
-      if (likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId).isPresent()) {
+      List<ObjectId> objectIds = getObjectId(phone, id);
+      if (objectIds == null) {
+        return false;
+      }
+      if (!atLike(id)) {
+        return false;
+      }
+      if (likeRepository
+          .findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1))
+          .isPresent()) {
         return false;
       }
       Like like = new Like();
-      like.setReviewUserId(reviewUserId);
-      like.setUserId(userId);
+      like.setReviewUserId(objectIds.get(0));
+      like.setUserId(objectIds.get(1));
       likeRepository.save(like);
       return true;
     } catch (Exception e) {
@@ -79,16 +86,22 @@ public class ReviewService {
 
   public boolean deleteLike(String id, String phone) {
     try {
-      ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
-      ObjectId reviewUserId = new ObjectId(id);
-      atLike(id);
-      Optional<Like> like = likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId);
+      List<ObjectId> objectIds = getObjectId(phone, id);
+      if (objectIds == null) {
+        return false;
+      }
+      if (!atLike(id)) {
+        return false;
+      }
+      Optional<Like> like =
+          likeRepository.findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1));
       if (like.isEmpty()) {
         return false;
       }
       likeRepository.delete(like.get());
       return true;
     } catch (Exception e) {
+      // System.out.println(e);
       return false;
     }
   }
@@ -104,5 +117,17 @@ public class ReviewService {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  private List<ObjectId> getObjectId(String phone, String id) {
+    ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+    if (userId.toHexString().length() == 0) {
+      return null;
+    }
+    ObjectId reviewUserId = new ObjectId(id);
+    if (reviewUserId.toHexString().length() == 0) {
+      return null;
+    }
+    return List.of(reviewUserId, userId);
   }
 }

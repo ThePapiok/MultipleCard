@@ -28,7 +28,9 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 public class ReviewServiceTest {
-  private static final String TEST_ID = "66cefb4a78e8125cc175dde6";
+  private static final String TEST_ID1 = "66cefb4a78e8125cc175dde6";
+  private static final String TEST_ID2 = "66cefb4a78e8125cc175dde2";
+
   private static final int TEST_RATING = 3;
   private static final String TEST_DESCRIPTION = "adsdasdasd123123";
   private static final String TEST_PHONE = "1231231231";
@@ -62,7 +64,7 @@ public class ReviewServiceTest {
     review.setDescription(TEST_DESCRIPTION);
     review.setCreatedAt(TEST_DATE);
     account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_ID1);
   }
 
   @Test
@@ -72,15 +74,15 @@ public class ReviewServiceTest {
     expectedReview.setDescription(TEST_DESCRIPTION);
     expectedReview.setCreatedAt(TEST_DATE);
     User user = new User();
-    user.setId(TEST_ID);
+    user.setId(TEST_ID1);
     User expectedUser = new User();
-    expectedUser.setId(TEST_ID);
+    expectedUser.setId(TEST_ID1);
     expectedUser.setReview(expectedReview);
 
     when(reviewConverter.getEntity(reviewDTO)).thenReturn(review);
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
-    when(likeRepository.findByReviewUserId(new ObjectId(TEST_ID))).thenReturn(Optional.empty());
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
+    when(likeRepository.findByReviewUserId(new ObjectId(TEST_ID1))).thenReturn(Optional.empty());
 
     assertTrue(reviewService.addReview(reviewDTO, TEST_PHONE));
     verify(userRepository).save(expectedUser);
@@ -88,22 +90,22 @@ public class ReviewServiceTest {
 
   @Test
   public void shouldSuccessAddReviewWhenAreLikes() {
-    final ObjectId objectId = new ObjectId(TEST_ID);
+    final ObjectId objectId = new ObjectId(TEST_ID1);
     Review expectedReview = new Review();
     expectedReview.setRating(TEST_RATING);
     expectedReview.setDescription(TEST_DESCRIPTION);
     expectedReview.setCreatedAt(TEST_DATE);
     User user = new User();
-    user.setId(TEST_ID);
+    user.setId(TEST_ID1);
     User expectedUser = new User();
-    expectedUser.setId(TEST_ID);
+    expectedUser.setId(TEST_ID1);
     expectedUser.setReview(expectedReview);
     Like like = new Like();
     like.setReviewUserId(objectId);
 
     when(reviewConverter.getEntity(reviewDTO)).thenReturn(review);
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
     when(likeRepository.findByReviewUserId(objectId)).thenReturn(Optional.of(like));
 
     assertTrue(reviewService.addReview(reviewDTO, TEST_PHONE));
@@ -115,7 +117,7 @@ public class ReviewServiceTest {
   public void shouldFailAddReviewWhenUserIsEmpty() {
     when(reviewConverter.getEntity(reviewDTO)).thenReturn(review);
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.empty());
 
     assertFalse(reviewService.addReview(reviewDTO, TEST_PHONE));
   }
@@ -127,18 +129,174 @@ public class ReviewServiceTest {
     expectedReview.setDescription(TEST_DESCRIPTION);
     expectedReview.setCreatedAt(TEST_DATE);
     User user = new User();
-    user.setId(TEST_ID);
+    user.setId(TEST_ID1);
     User expectedUser = new User();
-    expectedUser.setId(TEST_ID);
+    expectedUser.setId(TEST_ID1);
     expectedUser.setReview(expectedReview);
 
     when(reviewConverter.getEntity(reviewDTO)).thenReturn(review);
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
-    when(likeRepository.findByReviewUserId(new ObjectId(TEST_ID))).thenReturn(Optional.empty());
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
+    when(likeRepository.findByReviewUserId(new ObjectId(TEST_ID1))).thenReturn(Optional.empty());
     doThrow(MongoWriteException.class).when(userRepository).save(expectedUser);
 
     assertFalse(reviewService.addReview(reviewDTO, TEST_PHONE));
     verify(userRepository).save(expectedUser);
+  }
+
+  @Test
+  public void shouldSuccessAddLike() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+    Like expectedLike = new Like();
+    expectedLike.setUserId(userId);
+    expectedLike.setReviewUserId(reviewUserId);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.empty());
+
+    assertTrue(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    verify(likeRepository).save(expectedLike);
+  }
+
+  @Test
+  public void shouldFailAddLikeAndDeleteLikeWhenNoUserId() {
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(null);
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeAndDeleteLikeWhenNoReviewUserId() {
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+
+    assertFalse(reviewService.addLike("", TEST_PHONE));
+    assertFalse(reviewService.deleteLike("", TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeAndDeleteLikeWhenNoAccount() {
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.empty());
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeAndDeleteLikeWhenUserNotFound() {
+    Account account1 = new Account();
+    account1.setId(TEST_ID2);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.of(account1));
+    when(userRepository.findById(TEST_ID2)).thenReturn(Optional.empty());
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeAndDeleteLikeWhenUserFoundWithoutReview() {
+    Account account1 = new Account();
+    account1.setId(TEST_ID2);
+    User user = new User();
+    user.setId(TEST_ID2);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.of(account1));
+    when(userRepository.findById(TEST_ID2)).thenReturn(Optional.of(user));
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeWhenFoundLike() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+    Like like = new Like();
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.of(like));
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAddLikeWhenGetException() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+    Like expectedLike = new Like();
+    expectedLike.setUserId(userId);
+    expectedLike.setReviewUserId(reviewUserId);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.empty());
+    doThrow(MongoWriteException.class).when(likeRepository).save(expectedLike);
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+    verify(likeRepository).save(expectedLike);
+  }
+
+  @Test
+  public void shouldFailDeleteLikeWhenNotFoundLike() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.empty());
+
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailDeleteLikeWhenGetException() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+    Like expectedLike = new Like();
+    expectedLike.setUserId(userId);
+    expectedLike.setReviewUserId(reviewUserId);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.of(expectedLike));
+    doThrow(MongoWriteException.class).when(likeRepository).delete(expectedLike);
+
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+    verify(likeRepository).delete(expectedLike);
+  }
+
+  @Test
+  public void shouldSuccessDeleteLike() {
+    ObjectId reviewUserId = new ObjectId(TEST_ID2);
+    ObjectId userId = new ObjectId(TEST_ID1);
+    Like expectedLike = new Like();
+    expectedLike.setUserId(userId);
+    expectedLike.setReviewUserId(reviewUserId);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId))
+        .thenReturn(Optional.of(expectedLike));
+
+    assertTrue(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+    verify(likeRepository).delete(expectedLike);
+  }
+
+  private void atLike() {
+    Account account1 = new Account();
+    account1.setId(TEST_ID2);
+    User user = new User();
+    user.setId(TEST_ID2);
+    user.setReview(review);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.of(account1));
+    when(userRepository.findById(TEST_ID2)).thenReturn(Optional.of(user));
   }
 }
