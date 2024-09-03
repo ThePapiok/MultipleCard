@@ -45,9 +45,12 @@ public class UserService implements UserDetailsService {
   public List<ReviewGetDTO> getReviewsFirst3(String phone) {
     try {
       final int maxSize = 3;
+      ObjectId objectId = null;
+      if (phone != null) {
+        objectId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+      }
       List<ReviewGetDTO> reviewGetDTOS =
-          userRepository.findAllReviewWithCountAndIsAddedCheck(
-              new ObjectId(accountRepository.findIdByPhone(phone).getId()));
+          userRepository.findAllReviewWithCountAndIsAddedCheck(objectId);
       return reviewGetDTOS.subList(0, Math.min(maxSize, reviewGetDTOS.size()));
     } catch (Exception e) {
       return null;

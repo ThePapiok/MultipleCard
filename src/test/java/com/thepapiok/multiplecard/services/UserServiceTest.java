@@ -95,6 +95,7 @@ public class UserServiceTest {
     account.setId(TEST_OBJECT_ID);
     ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
     reviewGetDTO1.setFirstName(TEST1_TEXT);
+    reviewGetDTO1.setOwner(true);
     ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
     reviewGetDTO1.setFirstName(TEST2_TEXT);
     ReviewGetDTO reviewGetDTO3 = new ReviewGetDTO();
@@ -127,6 +128,20 @@ public class UserServiceTest {
         .thenReturn(list);
 
     assertEquals(expected, userService.getReviewsFirst3(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessGetReviewFirst3WhenNotLoginUser() {
+    ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
+    reviewGetDTO1.setFirstName(TEST1_TEXT);
+    ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
+    reviewGetDTO1.setFirstName(TEST2_TEXT);
+    List<ReviewGetDTO> list = List.of(reviewGetDTO1, reviewGetDTO2);
+    List<ReviewGetDTO> expected = List.of(reviewGetDTO1, reviewGetDTO2);
+
+    when(userRepository.findAllReviewWithCountAndIsAddedCheck(null)).thenReturn(list);
+
+    assertEquals(expected, userService.getReviewsFirst3(null));
   }
 
   @Test

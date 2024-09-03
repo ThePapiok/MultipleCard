@@ -33,6 +33,7 @@ public class LandingPageController {
       Principal principal) {
     final String errorMessageParam = "errorMessage";
     final String successParam = "success";
+    String phone = null;
     if (error != null) {
       String message = (String) session.getAttribute(errorMessageParam);
       if (message != null) {
@@ -49,9 +50,11 @@ public class LandingPageController {
       }
     }
     if (principal != null) {
-      model.addAttribute("reviews", userService.getReviewsFirst3(principal.getName()));
+      phone = principal.getName();
     }
+    model.addAttribute("reviews", userService.getReviewsFirst3(phone));
     model.addAttribute("newReview", new ReviewDTO());
+    model.addAttribute("principal", principal != null);
     return "landingPage";
   }
 }

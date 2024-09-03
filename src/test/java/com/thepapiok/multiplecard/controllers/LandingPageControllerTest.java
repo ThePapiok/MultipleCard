@@ -10,6 +10,7 @@ import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,20 +31,14 @@ public class LandingPageControllerTest {
   private static final String LANDING_PAGE_VIEW = "landingPage";
   private static final String ERROR_PARAM = "error";
   private static final String SUCCESS_PARAM = "success";
+  private static final String REVIEWS_PARAM = "reviews";
+  private static final String PRINCIPAL_PARAM = "principal";
+  private static List<ReviewGetDTO> list;
   @Autowired private MockMvc mockMvc;
   @MockBean private UserService userService;
 
-  @Test
-  public void shouldReturnLandingPageWhenNoPrincipal() throws Exception {
-    mockMvc
-        .perform(get(LANDING_PAGE_URL))
-        .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
-        .andExpect(view().name(LANDING_PAGE_VIEW));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnLandingPageWithPrincipal() throws Exception {
+  @BeforeAll
+  public static void setUp() {
     final int rating = 5;
     Review review = new Review();
     review.setRating(rating);
@@ -54,14 +49,31 @@ public class LandingPageControllerTest {
     reviewGetDTO.setId("1232dfafsadfds");
     reviewGetDTO.setFirstName("Test");
     reviewGetDTO.setReview(review);
-    List<ReviewGetDTO> list = List.of();
+    list = List.of(reviewGetDTO);
+  }
 
+  @Test
+  public void shouldReturnLandingPageWhenNoPrincipal() throws Exception {
+    when(userService.getReviewsFirst3(null)).thenReturn(list);
+
+    mockMvc
+        .perform(get(LANDING_PAGE_URL))
+        .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
+        .andExpect(model().attribute(REVIEWS_PARAM, list))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, false))
+        .andExpect(view().name(LANDING_PAGE_VIEW));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnLandingPageWithPrincipal() throws Exception {
     when(userService.getReviewsFirst3(TEST_PHONE)).thenReturn(list);
 
     mockMvc
         .perform(get(LANDING_PAGE_URL))
         .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
-        .andExpect(model().attribute("reviews", list))
+        .andExpect(model().attribute(REVIEWS_PARAM, list))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, true))
         .andExpect(view().name(LANDING_PAGE_VIEW));
   }
 
