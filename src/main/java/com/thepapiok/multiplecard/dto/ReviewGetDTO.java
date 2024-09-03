@@ -11,4 +11,5 @@ public class ReviewGetDTO {
   private Review review;
   private int count;
   private int isAdded;
+  private boolean owner;
 }

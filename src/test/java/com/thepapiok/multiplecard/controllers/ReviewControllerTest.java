@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -116,6 +117,16 @@ public class ReviewControllerTest {
 
     mockMvc
         .perform(post("/reviews/deleteLike").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(CONTENT_TRUE_TEXT));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldSuccessRemoveReview() throws Exception {
+    when(reviewService.removeReview(TEST_ID, TEST_PHONE)).thenReturn(true);
+
+    mockMvc
+        .perform(delete(REVIEWS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(CONTENT_TRUE_TEXT));
   }
 }

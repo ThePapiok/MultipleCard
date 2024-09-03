@@ -85,3 +85,24 @@ function addLike(id, e) {
             console.error(error);
         });
 }
+
+function removeReview(id, e) {
+    fetch("/reviews", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "id": id
+        })
+    })
+        .then(response => response.json())
+        .then(response => {
+            if (response === true) {
+                e.parentElement.parentElement.parentElement.remove();
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}

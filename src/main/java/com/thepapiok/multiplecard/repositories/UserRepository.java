@@ -63,15 +63,24 @@ public interface UserRepository extends MongoRepository<User, String> {
                     }
                     """,
         """
-                    {
-                        $project: {
-                            "firstName": 1,
-                            "review": 1,
-                            "count": {$ifNull: ["$like.count", 0]},
-                            "isAdded": {$ifNull: ["$like.isAdded", 0]}
-                        }
+                {
+                    $project: {
+                        "firstName": 1,
+                        "review": 1,
+                        "count": {$ifNull: ["$like.count", 0]},
+                        "isAdded": {$ifNull: ["$like.isAdded", 0]},
+                        "owner": {
+                            $cond: {
+                                if: {
+                                        $eq: ["$_id", ?0]
+                                    },
+                                then: true,
+                                else: false
+                                    }
+                                }
                     }
-                    """,
+                }
+                """,
         """
                     {
                         $sort: {"count": -1}

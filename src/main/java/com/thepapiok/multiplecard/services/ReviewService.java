@@ -101,7 +101,6 @@ public class ReviewService {
       likeRepository.delete(like.get());
       return true;
     } catch (Exception e) {
-      // System.out.println(e);
       return false;
     }
   }
@@ -129,5 +128,24 @@ public class ReviewService {
       return null;
     }
     return List.of(reviewUserId, userId);
+  }
+
+  public boolean removeReview(String id, String phone) {
+    try {
+      String userId = accountRepository.findIdByPhone(phone).getId();
+      Optional<User> optionalUser = userRepository.findById(id);
+      if (optionalUser.isEmpty()) {
+        return false;
+      }
+      if (!userId.equals(id)) {
+        return false;
+      }
+      User user = optionalUser.get();
+      user.setReview(null);
+      userRepository.save(user);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

@@ -75,6 +75,7 @@ public class UserRepositoryTest {
     reviewGetDTO1.setCount(2);
     reviewGetDTO1.setId(TEST_ID1);
     reviewGetDTO1.setIsAdded(1);
+    reviewGetDTO1.setOwner(true);
     reviewGetDTO1.setReview(review1);
     ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
     reviewGetDTO2.setFirstName(TEST2_TEXT);
@@ -82,6 +83,7 @@ public class UserRepositoryTest {
     reviewGetDTO2.setId(TEST_ID2);
     reviewGetDTO2.setIsAdded(0);
     reviewGetDTO2.setReview(review2);
+    reviewGetDTO2.setOwner(false);
     List<ReviewGetDTO> expected = List.of(reviewGetDTO1, reviewGetDTO2);
 
     assertEquals(expected, userRepository.findAllReviewWithCountAndIsAddedCheck(TEST_OBJECT_ID1));
@@ -110,6 +112,7 @@ public class UserRepositoryTest {
     reviewGetDTO1.setCount(0);
     reviewGetDTO1.setId(TEST_ID1);
     reviewGetDTO1.setIsAdded(0);
+    reviewGetDTO1.setOwner(true);
     reviewGetDTO1.setReview(review1);
     ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
     reviewGetDTO2.setFirstName(TEST2_TEXT);
@@ -117,6 +120,7 @@ public class UserRepositoryTest {
     reviewGetDTO2.setId(TEST_ID2);
     reviewGetDTO2.setIsAdded(0);
     reviewGetDTO2.setReview(review2);
+    reviewGetDTO2.setOwner(false);
     List<ReviewGetDTO> expected = List.of(reviewGetDTO1, reviewGetDTO2);
 
     assertEquals(expected, userRepository.findAllReviewWithCountAndIsAddedCheck(TEST_OBJECT_ID1));

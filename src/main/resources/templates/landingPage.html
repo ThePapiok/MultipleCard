@@ -52,18 +52,22 @@
                     <div class="amountHearths">
                         <span class="amount" id="isAdded" th:text="${review.count}"
                               th:data-is-added="${review.isAdded}"></span>
+                        <img class="hearth" id="notLoginHearth" src="/images/hearth.png" alt="hearth" th:unless="${principal}">
                         <img class="hearth" id="fullHearth" src="/images/hearth.png" alt="hearth"
-                             th:attr="onclick=|deleteLike('${review.id}', this)|">
+                             th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
                         <img class="hearth" id="emptyHearth" src="/images/hearth_empty.png" alt="hearth"
-                             th:attr="onclick=|addLike('${review.id}', this)|">
+                             th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
                     </div>
                 </div>
                 <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
-                <div class="stars">
-                    <img class="star" src="/images/star.png" alt="star"
-                         th:each="i : ${#numbers.sequence(1, review.review.rating)}">
-                    <img class="star" src="/images/star_empty.png" alt="emptyStar"
-                         th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                <div class="review-horizontal">
+                    <div class="stars">
+                        <img class="star" src="/images/star.png" alt="star"
+                             th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                        <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                             th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                    </div>
+                    <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}" th:attr="onclick=|removeReview('${review.id}', this)|">
                 </div>
             </div>
         </div>

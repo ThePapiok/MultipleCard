@@ -83,6 +83,10 @@
     cursor: pointer;
 }
 
+#notLoginHearth {
+    cursor: auto;
+}
+
 .delete {
     margin-top: 5px;
 }

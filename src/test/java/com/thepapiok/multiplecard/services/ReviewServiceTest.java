@@ -299,4 +299,60 @@ public class ReviewServiceTest {
     when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.of(account1));
     when(userRepository.findById(TEST_ID2)).thenReturn(Optional.of(user));
   }
+
+  @Test
+  public void shouldSuccessRemoveReview() {
+    User user = new User();
+    user.setReview(new Review());
+    user.setId(TEST_ID1);
+    User expectedUser = new User();
+    expectedUser.setId(TEST_ID1);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
+
+    assertTrue(reviewService.removeReview(TEST_ID1, TEST_PHONE));
+    verify(userRepository).save(expectedUser);
+  }
+
+  @Test
+  public void shouldFailRemoveReviewWhenUserNotFound() {
+    User expectedUser = new User();
+    expectedUser.setId(TEST_ID1);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.empty());
+
+    assertFalse(reviewService.removeReview(TEST_ID1, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailRemoveReviewWhenNotTheSameId() {
+    User user = new User();
+    user.setReview(new Review());
+    user.setId(TEST_ID1);
+    User expectedUser = new User();
+    expectedUser.setId(TEST_ID1);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
+
+    assertFalse(reviewService.removeReview(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailRemoveReviewWhenGetException() {
+    User user = new User();
+    user.setReview(new Review());
+    user.setId(TEST_ID1);
+    User expectedUser = new User();
+    expectedUser.setId(TEST_ID1);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID1)).thenReturn(Optional.of(user));
+    doThrow(MongoWriteException.class).when(userRepository).save(expectedUser);
+
+    assertFalse(reviewService.removeReview(TEST_ID1, TEST_PHONE));
+    verify(userRepository).save(expectedUser);
+  }
 }

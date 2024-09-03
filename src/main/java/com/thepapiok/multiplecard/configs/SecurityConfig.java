@@ -20,12 +20,15 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, CustomAuthenticationFailureHandler customAuthenticationFailureHandler)
       throws Exception {
-    String loginUrl = "/login";
+    final String loginUrl = "/login";
+    final String roleUser = "USER";
     http.authorizeHttpRequests(
             authorize ->
                 authorize
                     .requestMatchers(HttpMethod.POST, "/reviews/*")
-                    .hasRole("USER")
+                    .hasRole(roleUser)
+                    .requestMatchers(HttpMethod.DELETE, "/reviews")
+                    .hasRole(roleUser)
                     .anyRequest()
                     .permitAll())
         .formLogin(
