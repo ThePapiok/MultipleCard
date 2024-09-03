@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.services;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
@@ -56,5 +57,52 @@ public class ReviewService {
       return false;
     }
     return true;
+  }
+
+  public boolean addLike(String id, String phone) {
+    try {
+      ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+      ObjectId reviewUserId = new ObjectId(id);
+      atLike(id);
+      if (likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId).isPresent()) {
+        return false;
+      }
+      Like like = new Like();
+      like.setReviewUserId(reviewUserId);
+      like.setUserId(userId);
+      likeRepository.save(like);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public boolean deleteLike(String id, String phone) {
+    try {
+      ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+      ObjectId reviewUserId = new ObjectId(id);
+      atLike(id);
+      Optional<Like> like = likeRepository.findByReviewUserIdAndUserId(reviewUserId, userId);
+      if (like.isEmpty()) {
+        return false;
+      }
+      likeRepository.delete(like.get());
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  private boolean atLike(String id) {
+    try {
+      Optional<Account> reviewUser = accountRepository.findById(id);
+      if (reviewUser.isEmpty()) {
+        return false;
+      }
+      Optional<User> user = userRepository.findById(reviewUser.get().getId());
+      return user.isPresent() && user.get().getReview() != null;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

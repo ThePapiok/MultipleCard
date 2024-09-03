@@ -8,5 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface LikeRepository extends MongoRepository<Like, String> {
   Optional<Like> findByReviewUserId(ObjectId id);
 
+  Optional<Like> findByReviewUserIdAndUserId(ObjectId reviewUserId, ObjectId userId);
+
   void deleteAllByReviewUserId(ObjectId id);
 }

@@ -12,8 +12,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@RequestMapping("/reviews")
 public class ReviewController {
 
   private final MessageSource messageSource;
@@ -25,7 +29,7 @@ public class ReviewController {
     this.reviewService = reviewService;
   }
 
-  @PostMapping("/reviews")
+  @PostMapping
   public String addReview(
       @Valid @ModelAttribute ReviewDTO review,
       BindingResult bindingResult,
@@ -45,5 +49,17 @@ public class ReviewController {
     }
     session.setAttribute("success", true);
     return "redirect:/?success";
+  }
+
+  @PostMapping("/addLike")
+  @ResponseBody
+  public boolean addLike(@RequestParam String id, Principal principal) {
+    return reviewService.addLike(id, principal.getName());
+  }
+
+  @PostMapping("/deleteLike")
+  @ResponseBody
+  public boolean deleteLike(@RequestParam String id, Principal principal) {
+    return reviewService.deleteLike(id, principal.getName());
   }
 }

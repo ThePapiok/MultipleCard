@@ -77,10 +77,14 @@
 
 }
 
-.hearth {
+.hearth, .delete {
     height: 25px;
     width: 25px;
     cursor: pointer;
+}
+
+.delete {
+    margin-top: 5px;
 }
 
 .star {
@@ -127,6 +131,7 @@
 
 .stars {
     margin-left: 5%;
+    width: 100%;
 }
 
 .name {
@@ -185,7 +190,7 @@ label {
     margin-left: 5px;
 }
 
-#checked-1, #checked-2, #checked-3, #checked-4, #checked-5{
+#checked-1, #checked-2, #checked-3, #checked-4, #checked-5 {
     display: none;
 }
 
@@ -202,6 +207,14 @@ label {
 
 button {
     margin-right: 0;
+}
+
+#isAdded[data-is-added="1"] ~ #fullHearth, #isAdded[data-is-added="0"] ~ #emptyHearth {
+    display: inline;
+}
+
+#isAdded[data-is-added="1"] ~ #emptyHearth, #isAdded[data-is-added="0"] ~ #fullHearth {
+    display: none;
 }
 
 @media only screen and (max-width: 768px) {

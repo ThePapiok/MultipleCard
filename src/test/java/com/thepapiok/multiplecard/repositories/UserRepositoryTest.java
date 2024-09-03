@@ -35,7 +35,7 @@ public class UserRepositoryTest {
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
-  public void setUp(){
+  public void setUp() {
     userRepository.deleteAll();
     likeRepository.deleteAll();
   }

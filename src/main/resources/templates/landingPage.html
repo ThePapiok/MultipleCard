@@ -46,20 +46,24 @@
     <span id="recenzje" th:text="#{landingPage.reviews.title}"></span>
     <div id="reviews">
         <div class="review" th:each="review : ${reviews}">
-            <span></span>
             <div class="review-vertical">
                 <div class="review-horizontal">
                     <span class="name" th:text="${review.firstName}"></span>
                     <div class="amountHearths">
-                        <span class="amount" th:text="${review.count}"></span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth" th:if="${review.isAdded} == 1">
-                        <img class="hearth" src="/images/hearth_empty.png" alt="hearth" th:if="${review.isAdded} == 0">
+                        <span class="amount" id="isAdded" th:text="${review.count}"
+                              th:data-is-added="${review.isAdded}"></span>
+                        <img class="hearth" id="fullHearth" src="/images/hearth.png" alt="hearth"
+                             th:attr="onclick=|deleteLike('${review.id}', this)|">
+                        <img class="hearth" id="emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                             th:attr="onclick=|addLike('${review.id}', this)|">
                     </div>
                 </div>
                 <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
                 <div class="stars">
-                    <img class="star" src="/images/star.png" alt="star" th:each="i : ${#numbers.sequence(1, review.review.rating)}">
-                    <img class="star" src="/images/star_empty.png" alt="emptyStar" th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                    <img class="star" src="/images/star.png" alt="star"
+                         th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                    <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                         th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
                 </div>
             </div>
         </div>
@@ -67,7 +71,8 @@
     <a th:href="@{/reviews}">
         <button class="blackButton" id="b4" th:text="#{landingPage.button.more_reviews}"></button>
     </a>
-    <form th:action="@{/reviews}" th:object="${newReview}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
+    <form th:action="@{/reviews}" th:object="${newReview}" id="addOpinion" method="post"
+          sec:authorize="hasRole('USER')">
         <label for="text"></label>
         <textarea th:field="*{description}" id="text" required th:placeholder="#{landingPage.review.placeholder}"
                   minlength="1"
