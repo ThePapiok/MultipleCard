@@ -1,13 +1,3 @@
-@font-face {
-    font-family: "Inter";
-    src: url('/fonts/Inter.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: "Inconsolata";
-    src: url('/fonts/Inconsolata.ttf') format('truetype');
-}
-
 #form {
     height: 42%;
     width: 50%;

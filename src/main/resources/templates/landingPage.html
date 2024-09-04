@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/reviews.css">
     <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/reviews.js"></script>
 <script src="/js/landingPage.js"></script>
 <div id="header">
     <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h2 headerButton">
@@ -63,7 +65,7 @@
                         <img class="star" src="/images/star.png" alt="star"
                              th:each="i : ${#numbers.sequence(1, review.review.rating)}">
                         <img class="star" src="/images/star_empty.png" alt="emptyStar"
-                             th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                             th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}" th:if="${review.review.rating} < 5">
                     </div>
                     <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
                          th:attr="onclick=|removeReview('${review.id}', this)|">

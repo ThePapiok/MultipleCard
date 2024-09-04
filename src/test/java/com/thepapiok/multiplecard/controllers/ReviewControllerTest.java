@@ -4,12 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
+import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
+import com.thepapiok.multiplecard.services.UserService;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,21 +36,28 @@ public class ReviewControllerTest {
   private static final String ID_PARAM = "id";
   private static final String CONTENT_TRUE_TEXT = "true";
 
-  private static final String TEST_DESCRIPTION = "sfdafsdf";
+  private static final String TEST_DESCRIPTION1 = "sfdafsdf";
   private static final String REVIEWS_URL = "/reviews";
   private static final String DESCRIPTION_PARAM = "description";
   private static final String RATING_PARAM = "rating";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String LANDING_PAGE_ERROR_URL = "/?error";
+  private static final String TEST_DESCRIPTION2 = "123sdfasdfasdfsaf1";
+  private static final String REVIEWS_PAGE = "reviewPage";
+  private static final String REVIEWS_PARAM = "reviews";
+  private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
+  private static final String PRINCIPAL_PARAM = "principal";
+
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
+  @MockBean private UserService userService;
 
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldRedirectToLandingPageWithParamSuccess() throws Exception {
     final int rating = 3;
     ReviewDTO reviewDTO = new ReviewDTO();
-    reviewDTO.setDescription(TEST_DESCRIPTION);
+    reviewDTO.setDescription(TEST_DESCRIPTION1);
     reviewDTO.setRating(rating);
     MockHttpSession httpSession = new MockHttpSession();
 
@@ -84,7 +98,7 @@ public class ReviewControllerTest {
     final int rating = 3;
     final String message = "Nieoczekiwany błąd";
     ReviewDTO reviewDTO = new ReviewDTO();
-    reviewDTO.setDescription(TEST_DESCRIPTION);
+    reviewDTO.setDescription(TEST_DESCRIPTION1);
     reviewDTO.setRating(rating);
     MockHttpSession httpSession = new MockHttpSession();
 
@@ -128,5 +142,50 @@ public class ReviewControllerTest {
     mockMvc
         .perform(delete(REVIEWS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(CONTENT_TRUE_TEXT));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldSuccessReviewPage() throws Exception {
+    Review review1 = new Review();
+    review1.setDescription(TEST_DESCRIPTION1);
+    Review review2 = new Review();
+    review2.setDescription(TEST_DESCRIPTION2);
+    ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
+    reviewGetDTO1.setReview(review1);
+    ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
+    reviewGetDTO2.setReview(review2);
+    List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
+
+    when(userService.getReviews(TEST_PHONE)).thenReturn(expectedReviews);
+
+    mockMvc
+        .perform(get(REVIEWS_URL))
+        .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
+        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, true))
+        .andExpect(view().name(REVIEWS_PAGE));
+  }
+
+  @Test
+  public void shouldSuccessReviewPageWhenUserNoLogin() throws Exception {
+    Review review1 = new Review();
+    review1.setDescription(TEST_DESCRIPTION1);
+    Review review2 = new Review();
+    review2.setDescription(TEST_DESCRIPTION2);
+    ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
+    reviewGetDTO1.setReview(review1);
+    ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
+    reviewGetDTO2.setReview(review2);
+    List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
+
+    when(userService.getReviews(null)).thenReturn(expectedReviews);
+
+    mockMvc
+        .perform(get(REVIEWS_URL))
+        .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
+        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, false))
+        .andExpect(view().name(REVIEWS_PAGE));
   }
 }

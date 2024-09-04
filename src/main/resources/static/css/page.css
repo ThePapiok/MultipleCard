@@ -8,6 +8,10 @@
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
+label {
+    display: block;
+}
+
 .h1 {
     left: 90%
 }
@@ -94,6 +98,10 @@ button {
     background-color: #96BE8C;
 }
 
+.darkGreenButton {
+    background-color: #839788;
+}
+
 .grayButton {
     background-color: #CFCBCB;
     cursor: auto;
@@ -109,6 +117,10 @@ button {
 
 .redButton:hover {
     background-color: #DE4E53;
+}
+
+.darkGreenButton:hover {
+    background-color: #6A7A6E;
 }
 
 .title {
