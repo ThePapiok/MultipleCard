@@ -8,31 +8,6 @@
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
-.b1, .b2, #b5, #b6, #b7 {
-    top: 30%;
-    position: relative;
-
-}
-
-.b1 {
-    left: 79%;
-}
-
-.b2 {
-    left: 80%;
-}
-
-#b5 {
-    left: 69%;
-}
-
-#b6 {
-    left: 70%;
-}
-
-#b7 {
-    left: 71%;
-}
 
 #image {
     width: 80%;
@@ -161,7 +136,7 @@
     justify-content: flex-end;
 }
 
-#b4 {
+#b2 {
     margin-left: 84%;
     margin-top: 2%;
 }
@@ -209,10 +184,6 @@ label {
     z-index: 1;
 }
 
-button {
-    margin-right: 0;
-}
-
 #isAdded[data-is-added="1"] ~ #fullHearth, #isAdded[data-is-added="0"] ~ #emptyHearth {
     display: inline;
 }
@@ -222,8 +193,8 @@ button {
 }
 
 @media only screen and (max-width: 768px) {
-    .b1, .b2 {
-        left: 40%;
+    #b2 {
+        margin-left: 76%;
     }
 
     #recenzje {
@@ -244,10 +215,6 @@ button {
         margin-bottom: 10px;
     }
 
-    #b4 {
-        margin-left: 64%;
-    }
-
     #addOpinion {
         margin-left: 5.5%;
         width: 100%;
@@ -266,10 +233,6 @@ button {
     #addOpinionButton {
         margin-left: 3%;
         margin-top: 5px;
-    }
-
-    #b3 {
-        width: 100%;
     }
 }
 

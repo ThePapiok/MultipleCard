@@ -13,37 +13,34 @@
 <script src="/js/forms.js"></script>
 <script src="/js/landingPage.js"></script>
 <div id="header">
-    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="b1">
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h2 headerButton">
         <button class="blackButton" th:text="#{button.login}"></button>
     </a>
-    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="b2">
+    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.register}"></button>
     </a>
-    <a sec:authorize="hasRole('USER')" th:href="@{/user}" class="b1">
-        <button class="blackButton" th:text="#{landingPage.button.profile}"></button>
+    <a sec:authorize="isAuthenticated()" th:href="@{/user}" class="h2 headerButton">
+        <button class="blackButton" th:text="#{button.profile}"></button>
     </a>
-    <a sec:authorize="hasRole('USER')" th:href="@{/logout}" class="b2">
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/products}" id="b5">
-        <button class="blackButton" th:text="#{landingPage.button.products}"></button>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/products}" id="h3" class="headerButton">
+        <button class="blackButton" th:text="#{button.products}"></button>
     </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="b6">
-        <button class="blackButton" th:text="#{landingPage.button.orders}"></button>
-    </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/logout}" id="b7">
-        <button class="redButton" th:text="#{button.logout}"></button>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="h4" class="headerButton">
+        <button class="blackButton" th:text="#{button.orders}"></button>
     </a>
 </div>
 <div id="body">
     <div id="info">
         <p class="title">MultipleCard</p>
         <a th:href="@{/about}">
-            <button class="blackButton" id="b3" th:text="#{landingPage.button.about}"></button>
+            <button class="blackButton" id="b1" th:text="#{landingPage.button.about}"></button>
         </a>
         <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
     </div>
-    <span id="recenzje" th:text="#{landingPage.reviews.title}"></span>
+    <span id="recenzje" th:text="#{reviews.title}"></span>
     <div id="reviews">
         <div class="review" th:each="review : ${reviews}">
             <div class="review-vertical">
@@ -52,7 +49,8 @@
                     <div class="amountHearths">
                         <span class="amount" id="isAdded" th:text="${review.count}"
                               th:data-is-added="${review.isAdded}"></span>
-                        <img class="hearth" id="notLoginHearth" src="/images/hearth.png" alt="hearth" th:unless="${principal}">
+                        <img class="hearth" id="notLoginHearth" src="/images/hearth.png" alt="hearth"
+                             th:unless="${principal}">
                         <img class="hearth" id="fullHearth" src="/images/hearth.png" alt="hearth"
                              th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
                         <img class="hearth" id="emptyHearth" src="/images/hearth_empty.png" alt="hearth"
@@ -67,13 +65,14 @@
                         <img class="star" src="/images/star_empty.png" alt="emptyStar"
                              th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
                     </div>
-                    <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}" th:attr="onclick=|removeReview('${review.id}', this)|">
+                    <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
+                         th:attr="onclick=|removeReview('${review.id}', this)|">
                 </div>
             </div>
         </div>
     </div>
-    <a th:href="@{/reviews}">
-        <button class="blackButton" id="b4" th:text="#{landingPage.button.more_reviews}"></button>
+    <a th:href="@{/reviews}" id="b2">
+        <button class="blackButton" th:text="#{landingPage.button.more_reviews}"></button>
     </a>
     <form th:action="@{/reviews}" th:object="${newReview}" id="addOpinion" method="post"
           sec:authorize="hasRole('USER')">
@@ -105,8 +104,10 @@
                 <img class="starAtReview" id="unchecked-5" src="/images/star_empty.png" alt="emptyStar">
                 <img class="starAtReview" id="checked-5" src="/images/star.png" alt="star">
             </label>
-            <button id="addOpinionButton" type="button" class="grayButton"
-                    th:text="#{landingPage.button.send_review}"></button>
+            <a>
+                <button id="addOpinionButton" type="button" class="grayButton"
+                        th:text="#{landingPage.button.send_review}"></button>
+            </a>
         </div>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>

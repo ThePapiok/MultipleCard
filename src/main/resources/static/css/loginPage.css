@@ -47,6 +47,10 @@
     display: none;
 }
 
+#loginButton {
+    width: 130px;
+}
+
 @media only screen and (max-width: 768px) {
     input, .valueSelect, .searchSelect {
         height: 50px;
@@ -63,10 +67,6 @@
 
     img, #close1, #check1, #up1, #down1 {
         left: 82%;
-    }
-
-    button {
-        margin-right: 5px;
     }
 }
 
