@@ -1,12 +1,12 @@
 function atStart(page, isDescending, field) {
     checkLanguage();
     let selectedPage = document.getElementById("page" + page);
-    if(selectedPage !== null){
+    if (selectedPage !== null) {
         selectedPage.classList.add("selectedPage");
     }
     let searchSelect = document.getElementById("searchSelect");
-    if(isDescending === "true") {
-        switch (field){
+    if (isDescending === "true") {
+        switch (field) {
             case "review.createdAt":
                 searchSelect.value = 2;
                 break;
@@ -14,9 +14,8 @@ function atStart(page, isDescending, field) {
                 searchSelect.value = 4;
                 break;
         }
-    }
-    else{
-        switch (field){
+    } else {
+        switch (field) {
             case "count":
                 searchSelect.value = 1;
                 break;
@@ -30,12 +29,12 @@ function atStart(page, isDescending, field) {
     }
 }
 
-function setParams(){
+function setParams() {
     const value = parseInt(document.getElementById("searchSelect").value);
     const text = document.getElementById("searchInput").value;
     let sort = null;
     let url = "/reviews";
-    switch(value){
+    switch (value) {
         case 1:
             sort = "isDescending=false";
             break;
@@ -52,14 +51,13 @@ function setParams(){
             sort = "field=review.rating&isDescending=false";
             break;
     }
-    if(sort != null){
+    if (sort != null) {
         url += ("?" + sort);
     }
-    if(text !== ""){
-        if(sort == null){
+    if (text !== "") {
+        if (sort == null) {
             url += "?";
-        }
-        else{
+        } else {
             url += "&";
         }
         url += ("text=" + text);

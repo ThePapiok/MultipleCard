@@ -25,11 +25,11 @@
     width: 35%;
 }
 
-#searchSelect, #searchInput{
+#searchSelect, #searchInput {
     border: 1px solid #B3B6B7;
 }
 
-#searchSelect, #searchInput, #noResults{
+#searchSelect, #searchInput, #noResults {
     font-family: "Inter", cursive;
     font-size: 20px;
     padding-left: 10px;
@@ -77,30 +77,34 @@
     opacity: 100%;
 }
 
-#pages a{
+#pages a {
     margin-right: 0;
 }
 
-#yourReview{
+#yourReview {
     display: flex;
     justify-content: center;
     margin-bottom: 50px;
 }
 
 @media only screen and (max-width: 768px) {
-    #searchBar{
+    #searchBar {
         width: 94%;
     }
-    #searchInput{
+
+    #searchInput {
         width: 40%;
     }
-    #searchSelect{
+
+    #searchSelect {
         width: 55%;
     }
-    #searchSelect, #searchInput{
+
+    #searchSelect, #searchInput {
         font-size: 13px;
     }
-    #allReviews{
+
+    #allReviews {
         height: auto;
     }
 }

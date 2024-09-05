@@ -106,8 +106,16 @@
     margin-top: 5px;
 }
 
-.yourReview{
+.yourReview {
     font-weight: 1000;
+}
+
+#noResults {
+    display: none;
+}
+
+#noResults[data-review-size="0"] {
+    display: block;
 }
 
 @media only screen and (max-width: 768px) {
@@ -118,7 +126,7 @@
         margin-left: 0;
     }
 
-    #reviews{
+    #reviews {
         justify-content: center;
         margin-left: 0;
     }

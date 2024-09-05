@@ -101,7 +101,7 @@
                     </div>
                 </div>
             </div>
-            <span th:if="${reviewsSize} == 0" th:text="#{select.no_results}" id="noResults"></span>
+            <span th:data-review-size="${reviewsSize}" th:text="#{select.no_results}" id="noResults"></span>
         </div>
     </div>
     <div id="pages">

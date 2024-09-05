@@ -12,13 +12,13 @@
     justify-content: center;
 }
 
-#recenzje{
+#recenzje {
     font-family: "Inconsolata", sans-serif;
     font-size: 48px;
+    letter-spacing: 5px;
 }
 
 #recenzje, #noResults {
-    letter-spacing: 5px;
     margin-top: 5%;
     margin-left: 10%;
     color: #48483A;
@@ -72,8 +72,7 @@ label {
     z-index: 1;
 }
 
-#noResults{
-    display: block;
+#noResults {
     font-family: "Inter", sans-serif;
     font-size: 20px;
 }
@@ -86,7 +85,8 @@ label {
     #recenzje {
         font-size: 30px;
     }
-    #noResults{
+
+    #noResults {
         font-size: 15px;
     }
 

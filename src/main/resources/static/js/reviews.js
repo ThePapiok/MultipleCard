@@ -15,22 +15,22 @@ function deleteLike(id, e) {
                 let amount;
                 let hearths;
                 let reviews;
-                for(let i = 0; i < yourReviews.length; i++){
+                for (let i = 0; i < yourReviews.length; i++) {
                     amount = yourReviews[i].nextElementSibling.firstElementChild;
-                    if(i === 0) {
+                    if (i === 0) {
                         hearths = parseInt(amount.textContent) - 1;
                     }
                     amount.dataset.isAdded = "0";
                     amount.textContent = (hearths).toString();
                     reviews = yourReviews[i].parentElement.parentElement.parentElement.parentElement;
-                    if(reviews.id === "yourReview"){
+                    if (reviews.id === "yourReview") {
                         continue;
                     }
                     const review = yourReviews[i].parentElement.parentElement.parentElement;
                     const nextReview = review.nextElementSibling;
-                    if(nextReview != null){
+                    if (nextReview != null) {
                         const hearthsPreviews = parseInt(nextReview.firstElementChild.firstElementChild.lastElementChild.firstElementChild.textContent);
-                        if(hearths < hearthsPreviews){
+                        if (hearths < hearthsPreviews) {
                             reviews.insertBefore(nextReview, review);
                         }
                     }
@@ -59,22 +59,22 @@ function addLike(id, e) {
                 let amount;
                 let hearths;
                 let reviews;
-                for(let i = 0; i < yourReviews.length; i++){
+                for (let i = 0; i < yourReviews.length; i++) {
                     amount = yourReviews[i].nextElementSibling.firstElementChild;
-                    if(i === 0) {
+                    if (i === 0) {
                         hearths = parseInt(amount.textContent) + 1;
                     }
                     amount.dataset.isAdded = "1";
                     amount.textContent = (hearths).toString();
                     reviews = yourReviews[i].parentElement.parentElement.parentElement.parentElement;
-                    if(reviews.id === "yourReview"){
+                    if (reviews.id === "yourReview") {
                         continue;
                     }
                     const review = yourReviews[i].parentElement.parentElement.parentElement;
                     const previousReview = review.previousElementSibling;
-                    if(previousReview != null){
+                    if (previousReview != null) {
                         const hearthsPreviews = parseInt(previousReview.firstElementChild.firstElementChild.lastElementChild.firstElementChild.textContent);
-                        if(hearths > hearthsPreviews){
+                        if (hearths > hearthsPreviews) {
                             reviews.insertBefore(review, previousReview);
                         }
                     }
@@ -100,9 +100,14 @@ function removeReview(id, e) {
         .then(response => {
             if (response === true) {
                 let yourReviews = document.getElementsByClassName("yourReview");
-                while(yourReviews.length !== 0){
+                while (yourReviews.length !== 0) {
                     yourReviews[0].parentElement.parentElement.parentElement.remove();
                 }
+                let reviews = document.getElementsByClassName("review");
+                if (reviews.length === 0) {
+                    document.getElementById("noResults").dataset.reviewSize = "0";
+                }
+
             }
         })
         .catch((error) => {
