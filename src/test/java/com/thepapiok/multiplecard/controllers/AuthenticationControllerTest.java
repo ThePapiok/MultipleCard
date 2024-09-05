@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
@@ -569,6 +568,7 @@ public class AuthenticationControllerTest {
     httpSession.setAttribute(CODE_SMS_PARAM, codeSms);
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
 
+    when(authenticationService.createUser(expectedRegisterDTO)).thenReturn(true);
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(passwordEncoder.matches(verificationSms, codeSms)).thenReturn(true);
 
@@ -656,7 +656,7 @@ public class AuthenticationControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
-    doThrow(MongoWriteException.class).when(authenticationService).createUser(expectedRegisterDTO);
+    when(authenticationService.createUser(expectedRegisterDTO)).thenReturn(false);
 
     redirectLoginErrorAndReset(httpSession, message);
   }

@@ -38,19 +38,23 @@ public class AuthenticationService {
     random = new Random();
   }
 
-  // TODO - make boolean
   @Transactional
-  public void createUser(RegisterDTO register) {
-    User user = userConverter.getEntity(register);
-    user.setCard(null);
-    user.setPoints(0);
-    user.setReview(null);
-    user = userRepository.save(user);
-    Account account = accountConverter.getEntity(register);
-    account.setId(user.getId());
-    account.setRole(Role.ROLE_USER);
-    account.setActive(true);
-    accountRepository.save(account);
+  public boolean createUser(RegisterDTO register) {
+    try {
+      User user = userConverter.getEntity(register);
+      user.setCard(null);
+      user.setPoints(0);
+      user.setReview(null);
+      user = userRepository.save(user);
+      Account account = accountConverter.getEntity(register);
+      account.setId(user.getId());
+      account.setRole(Role.ROLE_USER);
+      account.setActive(true);
+      accountRepository.save(account);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   public List<String> getPhones() {
