@@ -26,8 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 @AutoConfigureMockMvc
 public class CustomAuthenticationProviderTest {
   private static final String TEST_USER_TEXT = "user";
-  @Autowired
-  private CustomAuthenticationProvider customAuthenticationProvider;
+  @Autowired private CustomAuthenticationProvider customAuthenticationProvider;
   @MockBean private UserService userService;
   @MockBean private PasswordEncoder passwordEncoder;
 

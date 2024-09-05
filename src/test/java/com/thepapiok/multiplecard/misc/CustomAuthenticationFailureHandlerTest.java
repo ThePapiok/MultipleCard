@@ -24,8 +24,7 @@ public class CustomAuthenticationFailureHandlerTest {
 
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
 
-  @Autowired
-  private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+  @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private MockHttpServletRequest httpServletRequest;
   private MockHttpServletResponse httpServletResponse;
 
