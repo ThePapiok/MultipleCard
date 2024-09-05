@@ -47,15 +47,16 @@
         <div class="review" th:each="review : ${reviews}">
             <div class="review-vertical">
                 <div class="review-horizontal">
-                    <span class="name" th:text="${review.firstName}"></span>
+                    <span class="name yourReview" th:text="#{yourReview.name}" th:if="${review.owner}"></span>
+                    <span class="name" th:text="${review.firstName}" th:unless="${review.owner}"></span>
                     <div class="amountHearths">
-                        <span class="amount" id="isAdded" th:text="${review.count}"
+                        <span class="amount isAdded" th:text="${review.count}"
                               th:data-is-added="${review.isAdded}"></span>
-                        <img class="hearth" id="notLoginHearth" src="/images/hearth.png" alt="hearth"
+                        <img class="hearth notLoginHearth" src="/images/hearth.png" alt="hearth"
                              th:unless="${principal}">
-                        <img class="hearth" id="fullHearth" src="/images/hearth.png" alt="hearth"
+                        <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
                              th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
-                        <img class="hearth" id="emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                        <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
                              th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
                     </div>
                 </div>

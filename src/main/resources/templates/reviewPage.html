@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/reviewPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body onload="atStart()">
+<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}')|">
 <script src="/js/page.js"></script>
 <script src="/js/reviews.js"></script>
 <script src="/js/reviewPage.js"></script>
@@ -26,53 +26,91 @@
 </div>
 <div id="body">
     <p class="title" th:text="#{reviews.title}"></p>
-    <div id="searchBar">
-        <input type="text" id="searchInput" th:placeholder="#{search.text}">
-        <select id="searchSelect">
-            <option> xd</option>
-            <option>xd</option>
-        </select>
-        <div id="searchButton">
-            <img id="searchImage" src="/images/search.png" alt="search">
-        </div>
-    </div>
-    <div id="reviews">
-        <div class="review" th:if="${reviewsSize} > 0" th:each="review : ${reviews}">
+    <div id="yourReview" th:if="${yourReview} != null">
+        <div class="review">
             <div class="review-vertical">
                 <div class="review-horizontal">
-                    <span class="name" th:text="${review.firstName}"></span>
+                    <span class="name yourReview" th:text="#{yourReview.name}"></span>
                     <div class="amountHearths">
-                        <span class="amount" id="isAdded" th:text="${review.count}"
-                              th:data-is-added="${review.isAdded}"></span>
-                        <img class="hearth" id="notLoginHearth" src="/images/hearth.png" alt="hearth"
-                             th:unless="${principal}">
-                        <img class="hearth" id="fullHearth" src="/images/hearth.png" alt="hearth"
-                             th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
-                        <img class="hearth" id="emptyHearth" src="/images/hearth_empty.png" alt="hearth"
-                             th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
+                        <span class="amount isAdded" th:text="${yourReview.count}"
+                              th:data-is-added="${yourReview.isAdded}"></span>
+                        <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
+                             th:attr="onclick=|deleteLike('${yourReview.id}', this)|">
+                        <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                             th:attr="onclick=|addLike('${yourReview.id}', this)|">
                     </div>
                 </div>
-                <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
+                <span class="description" th:text="'&quot;' + ${yourReview.review.description} + '&quot;'"></span>
                 <div class="review-horizontal">
                     <div class="stars">
                         <img class="star" src="/images/star.png" alt="star"
-                             th:each="i : ${#numbers.sequence(1, review.review.rating)}">
-                        <img class="star" src="/images/star_empty.png" alt="emptyStar" th:if="${review.review.rating} > 0"
-                             th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                             th:each="i : ${#numbers.sequence(1, yourReview.review.rating)}">
+                        <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                             th:if="${yourReview.review.rating} > 0"
+                             th:each="i : ${#numbers.sequence(1, 5 - yourReview.review.rating)}">
                     </div>
-                    <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
-                         th:attr="onclick=|removeReview('${review.id}', this)|">
+                    <img class="delete" src="/images/close.png" alt="delete"
+                         th:attr="onclick=|removeReview('${yourReview.id}', this)|">
                 </div>
             </div>
         </div>
-        <span th:if="${reviewsSize} == 0" th:text="#{select.no_results}" id="noResults"></span>
+    </div>
+    <div id="searchBar">
+        <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+        <select id="searchSelect">
+            <option th:text="#{reviewPage.select_option.most}" value="0"></option>
+            <option th:text="#{reviewPage.select_option.least}" value="1"></option>
+            <option th:text="#{reviewPage.select_option.oldest}" value="2"></option>
+            <option th:text="#{reviewPage.select_option.latest}" value="3"></option>
+            <option th:text="#{reviewPage.select_option.top}" value="4"></option>
+            <option th:text="#{reviewPage.select_option.lowest}" value="5"></option>
+        </select>
+        <div id="searchButton" onclick="setParams()">
+            <img id="searchImage" src="/images/search.png" alt="search">
+        </div>
+    </div>
+    <div id="allReviews">
+        <div id="reviews">
+            <div class="review" th:if="${reviewsSize} > 0" th:each="review : ${reviews}">
+                <div class="review-vertical">
+                    <div class="review-horizontal">
+                        <span class="name yourReview" th:text="#{yourReview.name}" th:if="${review.owner}"></span>
+                        <span class="name" th:text="${review.firstName}" th:unless="${review.owner}"></span>
+                        <div class="amountHearths">
+                        <span class="amount isAdded" th:text="${review.count}"
+                              th:data-is-added="${review.isAdded}"></span>
+                            <img class="hearth notLoginHearth" src="/images/hearth.png" alt="hearth"
+                                 th:unless="${principal}">
+                            <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
+                                 th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
+                            <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                                 th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
+                        </div>
+                    </div>
+                    <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
+                    <div class="review-horizontal">
+                        <div class="stars">
+                            <img class="star" src="/images/star.png" alt="star"
+                                 th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                            <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                                 th:if="${review.review.rating} > 0"
+                                 th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                        </div>
+                        <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
+                             th:attr="onclick=|removeReview('${review.id}', this)|">
+                    </div>
+                </div>
+            </div>
+            <span th:if="${reviewsSize} == 0" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
     </div>
     <div id="pages">
-        <a id="previousButton">
+        <a>
             <button class="darkGreenButton" th:text="#{reviewPage.button.previous}"></button>
         </a>
         <div id="pagesSelect">
-            <span class="numberPage" id="selectedPage" th:if="${reviewsSize} == 0">0</span>
+            <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
+                  th:if="${reviewsSize} != 0"></span>
         </div>
         <a>
             <button class="darkGreenButton" th:text="#{reviewPage.button.next}"></button>

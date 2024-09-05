@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
-import com.thepapiok.multiplecard.services.UserService;
+import com.thepapiok.multiplecard.services.ReviewService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class LandingPageControllerTest {
   private static final String PRINCIPAL_PARAM = "principal";
   private static List<ReviewGetDTO> list;
   @Autowired private MockMvc mockMvc;
-  @MockBean private UserService userService;
+  @MockBean private ReviewService reviewService;
 
   @BeforeAll
   public static void setUp() {
@@ -54,7 +54,7 @@ public class LandingPageControllerTest {
 
   @Test
   public void shouldReturnLandingPageWhenNoPrincipal() throws Exception {
-    when(userService.getReviewsFirst3(null)).thenReturn(list);
+    when(reviewService.getReviewsFirst3(null)).thenReturn(list);
 
     mockMvc
         .perform(get(LANDING_PAGE_URL))
@@ -67,7 +67,7 @@ public class LandingPageControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnLandingPageWithPrincipal() throws Exception {
-    when(userService.getReviewsFirst3(TEST_PHONE)).thenReturn(list);
+    when(reviewService.getReviewsFirst3(TEST_PHONE)).thenReturn(list);
 
     mockMvc
         .perform(get(LANDING_PAGE_URL))

@@ -87,12 +87,6 @@ label {
         display: none;
     }
 
-    .review:first-of-type {
-        width: 83%;
-        height: 170px;
-        margin-bottom: 10px;
-    }
-
     #addOpinion {
         margin-left: 5.5%;
         width: 100%;

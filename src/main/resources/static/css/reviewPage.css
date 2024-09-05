@@ -1,4 +1,4 @@
-#reviews {
+#allReviews {
     height: 680px;
 }
 
@@ -44,7 +44,8 @@
 
 #pages {
     display: flex;
-    padding-left: 35%;
+    justify-content: center;
+    margin-top: 50px;
 }
 
 #pagesSelect {
@@ -67,15 +68,39 @@
     opacity: 70%;
 }
 
-#selectedPage {
+.selectedPage {
     background-color: #31A49D;
     cursor: auto;
 }
 
-#selectedPage:hover {
+.selectedPage:hover {
     opacity: 100%;
 }
 
-#previousButton{
+#pages a{
     margin-right: 0;
+}
+
+#yourReview{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+@media only screen and (max-width: 768px) {
+    #searchBar{
+        width: 94%;
+    }
+    #searchInput{
+        width: 40%;
+    }
+    #searchSelect{
+        width: 55%;
+    }
+    #searchSelect, #searchInput{
+        font-size: 13px;
+    }
+    #allReviews{
+        height: auto;
+    }
 }

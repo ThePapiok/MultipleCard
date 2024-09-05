@@ -15,7 +15,6 @@ import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
-import com.thepapiok.multiplecard.services.UserService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,23 +33,30 @@ public class ReviewControllerTest {
   private static final String TEST_PHONE = "12312312312";
   private static final String TEST_ID = "dfsa132sd132123fsd";
   private static final String ID_PARAM = "id";
-  private static final String CONTENT_TRUE_TEXT = "true";
-
-  private static final String TEST_DESCRIPTION1 = "sfdafsdf";
+  private static final String TRUE_TEXT = "true";
+  private static final String TEST_DESCRIPTION1 = "sfdafsdf test";
   private static final String REVIEWS_URL = "/reviews";
   private static final String DESCRIPTION_PARAM = "description";
   private static final String RATING_PARAM = "rating";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String LANDING_PAGE_ERROR_URL = "/?error";
-  private static final String TEST_DESCRIPTION2 = "123sdfasdfasdfsaf1";
+  private static final String TEST_DESCRIPTION2 = "123sdfasdfasdfsaf1 test";
   private static final String REVIEWS_PAGE = "reviewPage";
   private static final String REVIEWS_PARAM = "reviews";
   private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
   private static final String PRINCIPAL_PARAM = "principal";
+  private static final String PAGE_PARAM = "page";
+  private static final String FIELD_PARAM = "field";
+  private static final String TEXT_PARAM = "text";
+  private static final String IS_DESCENDING_PARAM = "isDescending";
+  private static final String PAGES_PARAM = "pages";
+  private static final String PAGE_SELECTED_PARAM = "pageSelected";
+  private static final String TEST_PAGE = "1";
+  private static final String TEST_FIELD = "count";
+  private static final String TEST_TEXT = "test";
 
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
-  @MockBean private UserService userService;
 
   @Test
   @WithMockUser(username = TEST_PHONE)
@@ -121,7 +127,7 @@ public class ReviewControllerTest {
 
     mockMvc
         .perform(post("/reviews/addLike").param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(CONTENT_TRUE_TEXT));
+        .andExpect(content().string(TRUE_TEXT));
   }
 
   @Test
@@ -131,7 +137,7 @@ public class ReviewControllerTest {
 
     mockMvc
         .perform(post("/reviews/deleteLike").param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(CONTENT_TRUE_TEXT));
+        .andExpect(content().string(TRUE_TEXT));
   }
 
   @Test
@@ -141,51 +147,72 @@ public class ReviewControllerTest {
 
     mockMvc
         .perform(delete(REVIEWS_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(CONTENT_TRUE_TEXT));
+        .andExpect(content().string(TRUE_TEXT));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldSuccessReviewPage() throws Exception {
+    final int count1 = 5;
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);
-    Review review2 = new Review();
-    review2.setDescription(TEST_DESCRIPTION2);
     ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
     reviewGetDTO1.setReview(review1);
-    ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
-    reviewGetDTO2.setReview(review2);
-    List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
+    reviewGetDTO1.setCount(count1);
 
-    when(userService.getReviews(TEST_PHONE)).thenReturn(expectedReviews);
+    when(reviewService.getReview(TEST_PHONE)).thenReturn(reviewGetDTO1);
 
+    reviewPage(TEST_PHONE, true);
     mockMvc
-        .perform(get(REVIEWS_URL))
-        .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
-        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, true))
-        .andExpect(view().name(REVIEWS_PAGE));
+        .perform(
+            get(REVIEWS_URL)
+                .param(PAGE_PARAM, TEST_PAGE)
+                .param(FIELD_PARAM, TEST_FIELD)
+                .param(IS_DESCENDING_PARAM, TRUE_TEXT)
+                .param(TEXT_PARAM, TEST_TEXT))
+        .andExpect(model().attribute("yourReview", reviewGetDTO1));
   }
 
   @Test
   public void shouldSuccessReviewPageWhenUserNoLogin() throws Exception {
+    reviewPage(null, false);
+  }
+
+  private void reviewPage(String phone, boolean principal) throws Exception {
+    final int testPageInt = Integer.parseInt(TEST_PAGE);
+    final int count1 = 5;
+    final int count2 = 3;
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);
     Review review2 = new Review();
     review2.setDescription(TEST_DESCRIPTION2);
     ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
     reviewGetDTO1.setReview(review1);
+    reviewGetDTO1.setCount(count1);
     ReviewGetDTO reviewGetDTO2 = new ReviewGetDTO();
     reviewGetDTO2.setReview(review2);
+    reviewGetDTO2.setCount(count2);
     List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
+    List<Integer> pages = List.of(1);
 
-    when(userService.getReviews(null)).thenReturn(expectedReviews);
+    when(reviewService.getPages(testPageInt + 1)).thenReturn(pages);
+    when(reviewService.getReviews(phone, testPageInt, TEST_FIELD, true, TEST_TEXT))
+        .thenReturn(expectedReviews);
 
     mockMvc
-        .perform(get(REVIEWS_URL))
+        .perform(
+            get(REVIEWS_URL)
+                .param(PAGE_PARAM, TEST_PAGE)
+                .param(FIELD_PARAM, TEST_FIELD)
+                .param(IS_DESCENDING_PARAM, TRUE_TEXT)
+                .param(TEXT_PARAM, TEST_TEXT))
+        .andExpect(model().attribute(FIELD_PARAM, TEST_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, pages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, testPageInt + 1))
         .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
         .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, false))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
         .andExpect(view().name(REVIEWS_PAGE));
   }
 }

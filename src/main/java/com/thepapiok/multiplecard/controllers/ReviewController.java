@@ -3,7 +3,6 @@ package com.thepapiok.multiplecard.controllers;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
-import com.thepapiok.multiplecard.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -28,14 +27,11 @@ public class ReviewController {
 
   private final MessageSource messageSource;
   private final ReviewService reviewService;
-  private final UserService userService;
 
   @Autowired
-  public ReviewController(
-      MessageSource messageSource, ReviewService reviewService, UserService userService) {
+  public ReviewController(MessageSource messageSource, ReviewService reviewService) {
     this.messageSource = messageSource;
     this.reviewService = reviewService;
-    this.userService = userService;
   }
 
   @PostMapping
@@ -79,12 +75,23 @@ public class ReviewController {
   }
 
   @GetMapping
-  public String reviewPage(Model model, Principal principal) {
+  public String reviewPage(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "count") String field,
+      @RequestParam(defaultValue = "true") Boolean isDescending,
+      @RequestParam(defaultValue = "") String text,
+      Model model,
+      Principal principal) {
     String phone = null;
     if (principal != null) {
       phone = principal.getName();
+      model.addAttribute("yourReview", reviewService.getReview(phone));
     }
-    List<ReviewGetDTO> reviews = userService.getReviews(phone);
+    List<ReviewGetDTO> reviews = reviewService.getReviews(phone, page, field, isDescending, text);
+    model.addAttribute("field", field);
+    model.addAttribute("isDescending", isDescending);
+    model.addAttribute("pages", reviewService.getPages(page + 1));
+    model.addAttribute("pageSelected", page + 1);
     model.addAttribute("reviews", reviews);
     model.addAttribute("reviewsSize", reviews.size());
     model.addAttribute("principal", principal != null);

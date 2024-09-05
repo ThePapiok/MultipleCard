@@ -1,13 +1,10 @@
 package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
-import java.util.List;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,23 +37,5 @@ public class UserService implements UserDetailsService {
         account.getPhone(),
         account.getPassword(),
         Collections.singleton(new SimpleGrantedAuthority(account.getRole().name())));
-  }
-
-  public List<ReviewGetDTO> getReviewsFirst3(String phone) {
-    final int maxSize = 3;
-    List<ReviewGetDTO> reviewGetDTOS = getReviews(phone);
-    return reviewGetDTOS.subList(0, Math.min(maxSize, reviewGetDTOS.size()));
-  }
-
-  public List<ReviewGetDTO> getReviews(String phone) {
-    try {
-      ObjectId objectId = null;
-      if (phone != null) {
-        objectId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
-      }
-      return userRepository.findAllReviewWithCountAndIsAddedCheck(objectId);
-    } catch (Exception e) {
-      return null;
-    }
   }
 }

@@ -12,80 +12,256 @@ public interface UserRepository extends MongoRepository<User, String> {
   @Aggregation(
       pipeline = {
         """
-                    {
-                        "$match": {
-                            "review": {
-                                $exists: true
+                            {
+                                "$match": {
+                                    "review": {
+                                        $exists: true
+                                    },
+                                    $text: {
+                                        $search: ?4
+                                    }
+                                }
                             }
-                        }
-                    }
-                                """,
+                                        """,
         """
-                    {
-                        $lookup: {
-                            "from": "likes",
-                            "localField": "_id",
-                            "foreignField": "reviewUserId",
-                            "as": "like",
-                            "pipeline": [{
+                            {
+                                $lookup: {
+                                    "from": "likes",
+                                    "localField": "_id",
+                                    "foreignField": "reviewUserId",
+                                    "as": "like",
+                                    "pipeline": [{
+                                        $project: {
+                                            "reviewUserId": 1,
+                                            "isAdded": {
+                                                $cond: {
+                                                    if: {
+                                                        $eq: ["$userId", ?0]
+                                                    },
+                                                    then: 1,
+                                                    else: 0
+                                                }
+                                            }
+                                        }
+                                    }, {
+                                                 $group: {
+                                                     "_id": "$reviewUserId",
+                                                     "count": {
+                                                         $count: {}
+                                                     },
+                                                     "isAdded": {
+                                                         $sum: "$isAdded"
+                                                     }
+                                                 }
+                                             }]
+                                         }
+                                     }
+                            """,
+        """
+                            {
+                                $unwind: {
+                                    "path": "$like",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            }
+                            """,
+        """
+                            {
                                 $project: {
-                                    "reviewUserId": 1,
-                                    "isAdded": {
+                                    "firstName": 1,
+                                    "review": 1,
+                                    "count": {$ifNull: ["$like.count", 0]},
+                                    "isAdded": {$ifNull: ["$like.isAdded", 0]},
+                                    "owner": {
                                         $cond: {
                                             if: {
-                                                $eq: ["$userId", ?0]
-                                            },
-                                            then: 1,
-                                            else: 0
-                                        }
-                                    }
+                                                    $eq: ["$_id", ?0]
+                                                },
+                                            then: true,
+                                            else: false
+                                                }
+                                            }
                                 }
-                            }, {
-                                         $group: {
-                                             "_id": "$reviewUserId",
-                                             "count": {
-                                                 $count: {}
-                                             },
-                                             "isAdded": {
-                                                 $sum: "$isAdded"
-                                             }
-                                         }
-                                     }]
+                            }
+                            """,
+        """
+                            {
+                                $sort: {?1: ?2}
+                            }
+                            """,
+        """
+                                  {
+                                      $skip: ?3
+                                  }
+                            """,
+        """
+                                 {
+                                     $limit: 12
                                  }
-                             }
-                    """,
+
+                            """
+      })
+  List<ReviewGetDTO> findPageOfReviewWithCountAndIsAddedCheckWithText(
+      ObjectId id, String field, int sortType, int skip, String text);
+
+  @Aggregation(
+      pipeline = {
         """
-                    {
-                        $unwind: {
-                            "path": "$like",
-                            "preserveNullAndEmptyArrays": true
-                        }
-                    }
-                    """,
-        """
-                {
-                    $project: {
-                        "firstName": 1,
-                        "review": 1,
-                        "count": {$ifNull: ["$like.count", 0]},
-                        "isAdded": {$ifNull: ["$like.isAdded", 0]},
-                        "owner": {
-                            $cond: {
-                                if: {
-                                        $eq: ["$_id", ?0]
-                                    },
-                                then: true,
-                                else: false
+                            {
+                                "$match": {
+                                    "review": {
+                                        $exists: true
                                     }
                                 }
-                    }
-                }
-                """,
+                            }
+                                        """,
         """
-                    {
-                        $sort: {"count": -1}
-                    }
-                    """
+                            {
+                                $lookup: {
+                                    "from": "likes",
+                                    "localField": "_id",
+                                    "foreignField": "reviewUserId",
+                                    "as": "like",
+                                    "pipeline": [{
+                                        $project: {
+                                            "reviewUserId": 1,
+                                            "isAdded": {
+                                                $cond: {
+                                                    if: {
+                                                        $eq: ["$userId", ?0]
+                                                    },
+                                                    then: 1,
+                                                    else: 0
+                                                }
+                                            }
+                                        }
+                                    }, {
+                                                 $group: {
+                                                     "_id": "$reviewUserId",
+                                                     "count": {
+                                                         $count: {}
+                                                     },
+                                                     "isAdded": {
+                                                         $sum: "$isAdded"
+                                                     }
+                                                 }
+                                             }]
+                                         }
+                                     }
+                            """,
+        """
+                            {
+                                $unwind: {
+                                    "path": "$like",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "firstName": 1,
+                                    "review": 1,
+                                    "count": {$ifNull: ["$like.count", 0]},
+                                    "isAdded": {$ifNull: ["$like.isAdded", 0]},
+                                    "owner": {
+                                        $cond: {
+                                            if: {
+                                                    $eq: ["$_id", ?0]
+                                                },
+                                            then: true,
+                                            else: false
+                                                }
+                                            }
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $sort: {?1: ?2}
+                            }
+                            """,
+        """
+                                  {
+                                      $skip: ?3
+                                  }
+                            """,
+        """
+                                 {
+                                     $limit: 12
+                                 }
+
+                            """
       })
-  List<ReviewGetDTO> findAllReviewWithCountAndIsAddedCheck(ObjectId id);
+  List<ReviewGetDTO> findPageOfReviewWithCountAndIsAddedCheck(
+      ObjectId id, String field, int sortType, int skip);
+
+  int countAllByReviewIsNotNull();
+
+  @Aggregation(
+      pipeline = {
+        """
+                            {
+                                "$match": {
+                                    "_id": ?0,
+                                    "review": {
+                                        $exists: true
+                                    }
+                                }
+                            }
+                                        """,
+        """
+                            {
+                                $lookup: {
+                                    "from": "likes",
+                                    "localField": "_id",
+                                    "foreignField": "reviewUserId",
+                                    "as": "like",
+                                    "pipeline": [{
+                                        $project: {
+                                            "reviewUserId": 1,
+                                            "isAdded": {
+                                                $cond: {
+                                                    if: {
+                                                        $eq: ["$userId", ?0]
+                                                    },
+                                                    then: 1,
+                                                    else: 0
+                                                }
+                                            }
+                                        }
+                                    }, {
+                                                 $group: {
+                                                     "_id": "$reviewUserId",
+                                                     "count": {
+                                                         $count: {}
+                                                     },
+                                                     "isAdded": {
+                                                         $sum: "$isAdded"
+                                                     }
+                                                 }
+                                             }]
+                                         }
+                                     }
+                            """,
+        """
+                            {
+                                $unwind: {
+                                    "path": "$like",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "firstName": 1,
+                                    "review": 1,
+                                    "count": {$ifNull: ["$like.count", 0]},
+                                    "isAdded": {$ifNull: ["$like.isAdded", 0]}
+                                }
+                            }
+                            """
+      })
+  ReviewGetDTO findReview(ObjectId objectId);
 }

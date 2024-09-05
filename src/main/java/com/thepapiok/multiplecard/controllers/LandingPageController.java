@@ -1,7 +1,7 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.ReviewDTO;
-import com.thepapiok.multiplecard.services.UserService;
+import com.thepapiok.multiplecard.services.ReviewService;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Locale;
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LandingPageController {
   private final MessageSource messageSource;
-  private final UserService userService;
+  private final ReviewService reviewService;
 
   @Autowired
-  public LandingPageController(MessageSource messageSource, UserService userService) {
+  public LandingPageController(MessageSource messageSource, ReviewService reviewService) {
     this.messageSource = messageSource;
-    this.userService = userService;
+    this.reviewService = reviewService;
   }
 
   @GetMapping
@@ -52,7 +52,8 @@ public class LandingPageController {
     if (principal != null) {
       phone = principal.getName();
     }
-    model.addAttribute("reviews", userService.getReviewsFirst3(phone));
+    // TODO - show message if no reviews
+    model.addAttribute("reviews", reviewService.getReviewsFirst3(phone));
     model.addAttribute("newReview", new ReviewDTO());
     model.addAttribute("principal", principal != null);
     return "landingPage";

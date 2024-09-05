@@ -1,4 +1,5 @@
 #reviews {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     margin-left: 6%;
@@ -6,7 +7,6 @@
 }
 
 .review {
-    min-width: 420px;
     width: 420px;
     height: 150px;
     margin-top: 20px;
@@ -66,11 +66,11 @@
     font-size: 14px;
 }
 
-#isAdded[data-is-added="1"] ~ #fullHearth, #isAdded[data-is-added="0"] ~ #emptyHearth {
+.isAdded[data-is-added="1"] ~ .fullHearth, .isAdded[data-is-added="0"] ~ .emptyHearth {
     display: inline;
 }
 
-#isAdded[data-is-added="1"] ~ #emptyHearth, #isAdded[data-is-added="0"] ~ #fullHearth {
+.isAdded[data-is-added="1"] ~ .emptyHearth, .isAdded[data-is-added="0"] ~ .fullHearth {
     display: none;
 }
 
@@ -80,7 +80,7 @@
     cursor: pointer;
 }
 
-#notLoginHearth {
+.notLoginHearth {
     cursor: auto;
 }
 
@@ -104,4 +104,22 @@
 
 .delete {
     margin-top: 5px;
+}
+
+.yourReview{
+    font-weight: 1000;
+}
+
+@media only screen and (max-width: 768px) {
+    .review {
+        width: 83%;
+        height: 170px;
+        margin-bottom: 10px;
+        margin-left: 0;
+    }
+
+    #reviews{
+        justify-content: center;
+        margin-left: 0;
+    }
 }
