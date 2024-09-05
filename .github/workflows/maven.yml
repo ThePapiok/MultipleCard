@@ -30,6 +30,6 @@ jobs:
     - name: Linter
       run: mvn checkstyle:check
     - name: Build and tests
-      run: mvn clean install -Dcheckstyle.skip=true
+      run: mvn clean install -Dcheckstyle.skip=true -Dspring.profiles.active=test
     
 
