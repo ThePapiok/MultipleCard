@@ -38,7 +38,7 @@ public class AuthenticationService {
     random = new Random();
   }
 
-  // TODO - make boolean and check
+  // TODO - make boolean
   @Transactional
   public void createUser(RegisterDTO register) {
     User user = userConverter.getEntity(register);

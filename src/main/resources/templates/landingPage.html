@@ -43,6 +43,7 @@
         <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
     </div>
     <span id="recenzje" th:text="#{reviews.title}"></span>
+    <span id="noResults" th:if="${reviewsSize} == 0" th:text="#{landingPage.review.not_found}"></span>
     <div id="reviews">
         <div class="review" th:each="review : ${reviews}">
             <div class="review-vertical">

@@ -1,9 +1,11 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.ReviewDTO;
+import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
+import java.util.List;
 import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -52,8 +54,9 @@ public class LandingPageController {
     if (principal != null) {
       phone = principal.getName();
     }
-    // TODO - show message if no reviews
-    model.addAttribute("reviews", reviewService.getReviewsFirst3(phone));
+    List<ReviewGetDTO> reviews = reviewService.getReviewsFirst3(phone);
+    model.addAttribute("reviews", reviews);
+    model.addAttribute("reviewsSize", reviews.size());
     model.addAttribute("newReview", new ReviewDTO());
     model.addAttribute("principal", principal != null);
     return "landingPage";

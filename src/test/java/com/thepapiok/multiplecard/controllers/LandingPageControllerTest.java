@@ -28,6 +28,7 @@ public class LandingPageControllerTest {
   private static final String TEST_PHONE = "123123123";
   private static final String LANDING_PAGE_URL = "/";
   private static final String REVIEW_PARAM = "newReview";
+  private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
   private static final String LANDING_PAGE_VIEW = "landingPage";
   private static final String ERROR_PARAM = "error";
   private static final String SUCCESS_PARAM = "success";
@@ -54,26 +55,24 @@ public class LandingPageControllerTest {
 
   @Test
   public void shouldReturnLandingPageWhenNoPrincipal() throws Exception {
-    when(reviewService.getReviewsFirst3(null)).thenReturn(list);
-
-    mockMvc
-        .perform(get(LANDING_PAGE_URL))
-        .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
-        .andExpect(model().attribute(REVIEWS_PARAM, list))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, false))
-        .andExpect(view().name(LANDING_PAGE_VIEW));
+    returnLandingPage(null, false);
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnLandingPageWithPrincipal() throws Exception {
-    when(reviewService.getReviewsFirst3(TEST_PHONE)).thenReturn(list);
+    returnLandingPage(TEST_PHONE, true);
+  }
+
+  private void returnLandingPage(String phone, boolean principal) throws Exception {
+    when(reviewService.getReviewsFirst3(phone)).thenReturn(list);
 
     mockMvc
         .perform(get(LANDING_PAGE_URL))
         .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
+        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, list.size()))
         .andExpect(model().attribute(REVIEWS_PARAM, list))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, true))
+        .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
         .andExpect(view().name(LANDING_PAGE_VIEW));
   }
 
@@ -88,8 +87,12 @@ public class LandingPageControllerTest {
   }
 
   private void paramWithoutMessage(String param) throws Exception {
+    when(reviewService.getReviewsFirst3(null)).thenReturn(list);
+
     mockMvc
         .perform(get(LANDING_PAGE_URL).param(param, ""))
+        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, list.size()))
+        .andExpect(model().attribute(REVIEWS_PARAM, list))
         .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
         .andExpect(view().name(LANDING_PAGE_VIEW));
   }
@@ -113,8 +116,12 @@ public class LandingPageControllerTest {
 
   private void paramWithMessage(
       String param, MockHttpSession httpSession, String message, String type) throws Exception {
+    when(reviewService.getReviewsFirst3(null)).thenReturn(list);
+
     mockMvc
         .perform(get(LANDING_PAGE_URL).param(param, "").session(httpSession))
+        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, list.size()))
+        .andExpect(model().attribute(REVIEWS_PARAM, list))
         .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
         .andExpect(model().attribute(type, message))
         .andExpect(view().name(LANDING_PAGE_VIEW));

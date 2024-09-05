@@ -12,13 +12,15 @@
     justify-content: center;
 }
 
-
-#recenzje {
-    letter-spacing: 5px;
+#recenzje{
+    font-family: "Inconsolata", sans-serif;
     font-size: 48px;
+}
+
+#recenzje, #noResults {
+    letter-spacing: 5px;
     margin-top: 5%;
     margin-left: 10%;
-    font-family: "Inconsolata", sans-serif;
     color: #48483A;
     font-weight: 700;
 }
@@ -70,6 +72,12 @@ label {
     z-index: 1;
 }
 
+#noResults{
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+}
+
 @media only screen and (max-width: 768px) {
     #b2 {
         margin-left: 76%;
@@ -77,6 +85,9 @@ label {
 
     #recenzje {
         font-size: 30px;
+    }
+    #noResults{
+        font-size: 15px;
     }
 
     #image {
