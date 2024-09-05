@@ -1,7 +1,6 @@
 package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.dto.CountryDTO;
@@ -85,7 +84,7 @@ public class CountryServiceTest {
   public void shouldFailGetAllWhenGetNull() {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class)).thenReturn(null);
 
-    assertNull(countryService.getAll());
+    assertEquals(List.of(), countryService.getAll());
   }
 
   @Test
@@ -93,6 +92,6 @@ public class CountryServiceTest {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class))
         .thenThrow(RestClientException.class);
 
-    assertNull(countryService.getAll());
+    assertEquals(List.of(), countryService.getAll());
   }
 }

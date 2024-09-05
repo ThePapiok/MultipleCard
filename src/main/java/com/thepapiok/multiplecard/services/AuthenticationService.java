@@ -38,6 +38,7 @@ public class AuthenticationService {
     random = new Random();
   }
 
+  // TODO - make boolean and check
   @Transactional
   public void createUser(RegisterDTO register) {
     User user = userConverter.getEntity(register);
@@ -56,7 +57,7 @@ public class AuthenticationService {
     try {
       return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
     } catch (Exception e) {
-      return null;
+      return List.of();
     }
   }
 
@@ -64,7 +65,7 @@ public class AuthenticationService {
     try {
       return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
     } catch (Exception e) {
-      return null;
+      return List.of();
     }
   }
 

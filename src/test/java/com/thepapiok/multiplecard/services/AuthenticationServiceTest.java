@@ -1,7 +1,6 @@
 package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -102,7 +101,7 @@ public class AuthenticationServiceTest {
   public void shouldFailGetPhones() {
     when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
 
-    assertNull(authenticationService.getPhones());
+    assertEquals(List.of(), authenticationService.getPhones());
   }
 
   @Test
@@ -123,7 +122,7 @@ public class AuthenticationServiceTest {
   public void shouldFailGetEmails() {
     when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
 
-    assertNull(authenticationService.getEmails());
+    assertEquals(List.of(), authenticationService.getEmails());
   }
 
   @Test
