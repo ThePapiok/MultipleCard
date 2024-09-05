@@ -12,8 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class CustomAuthenticationFailureHandlerTest {
   private static final String ERROR_USER_NOT_ACTIVE_MESSAGE = "Konto nie jest aktywowane";
