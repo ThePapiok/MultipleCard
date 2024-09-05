@@ -1,12 +1,28 @@
 package com.thepapiok.multiplecard.repositories;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.thepapiok.multiplecard.collections.Like;
+import com.thepapiok.multiplecard.collections.Review;
+import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.ReviewGetDTO;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
 @ActiveProfiles("test")
 public class UserRepositoryTest {
-  /*
+
   private static final String TEST_ID1 = "123456789012345678901234";
   private static final String TEST_ID2 = "123456789012345678901235";
   private static final String TEST_ID3 = "123456789012345678901236";
@@ -224,6 +240,4 @@ public class UserRepositoryTest {
   public void shouldSuccessFindReview() {
     assertEquals(reviewGetDTO2, userRepository.findReview(TEST_OBJECT_ID2));
   }
-
-   */
 }
