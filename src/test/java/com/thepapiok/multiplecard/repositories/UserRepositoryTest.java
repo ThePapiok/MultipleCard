@@ -16,11 +16,9 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.TextIndexDefinition;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
-@ActiveProfiles("test")
 public class UserRepositoryTest {
 
   private static final String TEST_ID1 = "123456789012345678901234";

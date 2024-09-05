@@ -19,10 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class CustomAuthenticationProviderTest {
   private static final String TEST_USER_TEXT = "user";

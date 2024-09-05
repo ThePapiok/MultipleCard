@@ -9,11 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
-@ActiveProfiles("test")
 public class AccountRepositoryTest {
 
   private static final String TEST_ID = "1232rfvbb";
