@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,7 +23,6 @@ public class CustomAuthenticationFailureHandlerTest {
   private static final String LOGIN_ERROR_URL = "/login?error";
 
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-  @Autowired private MongoTemplate mongoTemplate;
 
   @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private MockHttpServletRequest httpServletRequest;
