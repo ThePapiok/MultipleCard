@@ -22,10 +22,4 @@ public class MultiplecardApplication {
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
     return builder.build();
   }
-
-  @Bean
-  @Profile("test")
-  public MongoTemplate mongoTemplate(MongoClient mongoClient) {
-    return new MongoTemplate(mongoClient, "multiplecard");
-  }
 }
