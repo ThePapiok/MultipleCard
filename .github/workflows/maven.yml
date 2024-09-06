@@ -22,6 +22,10 @@ jobs:
         image: mongo:7.0.12
         ports:
           - 27018:27017
+        options: >-
+          --env MONGO_INITDB_ROOT_USERNAME=user
+          --env MONGO_INITDB_ROOT_PASSWORD=user
+          --env MONGO_INITDB_DATABASE=multipleCard
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
