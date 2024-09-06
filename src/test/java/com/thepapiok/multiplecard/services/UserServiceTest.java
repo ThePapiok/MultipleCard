@@ -10,6 +10,7 @@ import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ public class UserServiceTest {
   private static final String TEST_PHONE = "+4823423411423";
   private static final String TEST_EMAIL = "email";
   private static final String TEST_PASSWORD = "123wefasdfasd123bsedf";
-  private static final String TEST_ID = "123123dfasdf";
+  private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
 
   private UserService userService;
   @Mock private AccountRepository accountRepository;

@@ -53,6 +53,7 @@ public class AuthenticationService {
       accountRepository.save(account);
       return true;
     } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
   }

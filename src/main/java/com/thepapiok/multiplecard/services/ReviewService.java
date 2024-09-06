@@ -44,26 +44,26 @@ public class ReviewService {
     try {
       Review review = reviewConverter.getEntity(reviewDTO);
       review.setCreatedAt(LocalDateTime.now());
-      String id = accountRepository.findIdByPhone(phone).getId();
+      ObjectId id = accountRepository.findIdByPhone(phone).getId();
       Optional<User> user = userRepository.findById(id);
       if (user.isEmpty()) {
         return false;
       }
-      ObjectId objectId = new ObjectId(id);
-      Optional<Like> like = likeRepository.findByReviewUserId(objectId);
+      Optional<Like> like = likeRepository.findByReviewUserId(id);
       if (like.isPresent()) {
-        likeRepository.deleteAllByReviewUserId(objectId);
+        likeRepository.deleteAllByReviewUserId(id);
       }
       User notEmptyUser = user.get();
       notEmptyUser.setReview(review);
       userRepository.save(notEmptyUser);
     } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
     return true;
   }
 
-  public boolean addLike(String id, String phone) {
+  public boolean addLike(ObjectId id, String phone) {
     try {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
@@ -87,7 +87,7 @@ public class ReviewService {
     }
   }
 
-  public boolean deleteLike(String id, String phone) {
+  public boolean deleteLike(ObjectId id, String phone) {
     try {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
@@ -108,7 +108,7 @@ public class ReviewService {
     }
   }
 
-  private boolean atLike(String id) {
+  private boolean atLike(ObjectId id) {
     try {
       Optional<Account> reviewUser = accountRepository.findById(id);
       if (reviewUser.isEmpty()) {
@@ -121,21 +121,20 @@ public class ReviewService {
     }
   }
 
-  private List<ObjectId> getObjectId(String phone, String id) {
-    ObjectId userId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+  private List<ObjectId> getObjectId(String phone, ObjectId id) {
+    ObjectId userId = accountRepository.findIdByPhone(phone).getId();
     if (userId.toHexString().length() == 0) {
       return null;
     }
-    ObjectId reviewUserId = new ObjectId(id);
-    if (reviewUserId.toHexString().length() == 0) {
+    if (id.toHexString().length() == 0) {
       return null;
     }
-    return List.of(reviewUserId, userId);
+    return List.of(id, userId);
   }
 
-  public boolean removeReview(String id, String phone) {
+  public boolean removeReview(ObjectId id, String phone) {
     try {
-      String userId = accountRepository.findIdByPhone(phone).getId();
+      ObjectId userId = accountRepository.findIdByPhone(phone).getId();
       Optional<User> optionalUser = userRepository.findById(id);
       if (optionalUser.isEmpty()) {
         return false;
@@ -170,7 +169,7 @@ public class ReviewService {
       }
       ObjectId objectId = null;
       if (phone != null) {
-        objectId = new ObjectId(accountRepository.findIdByPhone(phone).getId());
+        objectId = accountRepository.findIdByPhone(phone).getId();
       }
       if ("".equals(text)) {
         return userRepository.findPageOfReviewWithCountAndIsAddedCheck(
@@ -218,8 +217,8 @@ public class ReviewService {
 
   public ReviewGetDTO getReview(String phone) {
     try {
-      String id = accountRepository.findIdByPhone(phone).getId();
-      return userRepository.findReview(new ObjectId(id));
+      ObjectId objectId = accountRepository.findIdByPhone(phone).getId();
+      return userRepository.findReview(objectId);
     } catch (Exception e) {
       return null;
     }

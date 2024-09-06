@@ -13,7 +13,7 @@ Aplikacja webowa pozwalająca na korzystanie z wielkrotynych kart podarunkowych.
 
 ## Zmienne Środowiskowe
 
-Aby projekt działał potrzebuje on dodania zmiennych środowiskowych:
+Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na prod:
 
 `MONGODB_HOST`
 
@@ -67,6 +67,12 @@ Uruchom kontenery
 
 Wejdź na adres **[localhost:8080](http://localhost:8080/)**
 
+Po skończeniu używania
+
+```bash
+  docker-compose down -v
+```
+
 
 
 ## Uruchomienie testów
@@ -74,7 +80,17 @@ Wejdź na adres **[localhost:8080](http://localhost:8080/)**
 Aby uruchomić testy, użyj tej komendy
 
 ```bash
+  docker-compose up db
+```
+
+```bash
   mvn test
+```
+
+Po skończeniu testów
+
+```bash
+  docker-compose down -v
 ```
 
 

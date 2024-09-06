@@ -10,6 +10,7 @@ import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
 import java.util.List;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class LandingPageControllerTest {
     ReviewGetDTO reviewGetDTO = new ReviewGetDTO();
     reviewGetDTO.setCount(0);
     reviewGetDTO.setIsAdded(0);
-    reviewGetDTO.setId("1232dfafsadfds");
+    reviewGetDTO.setId(new ObjectId("123456789012345678901244"));
     reviewGetDTO.setFirstName("Test");
     reviewGetDTO.setReview(review);
     list = List.of(reviewGetDTO);

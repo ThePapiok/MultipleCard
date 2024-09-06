@@ -46,7 +46,7 @@
                         <img class="star" src="/images/star.png" alt="star"
                              th:each="i : ${#numbers.sequence(1, yourReview.review.rating)}">
                         <img class="star" src="/images/star_empty.png" alt="emptyStar"
-                             th:if="${yourReview.review.rating} > 0"
+                             th:if="${yourReview.review.rating} < 5"
                              th:each="i : ${#numbers.sequence(1, 5 - yourReview.review.rating)}">
                     </div>
                     <img class="delete" src="/images/close.png" alt="delete"
@@ -93,7 +93,7 @@
                             <img class="star" src="/images/star.png" alt="star"
                                  th:each="i : ${#numbers.sequence(1, review.review.rating)}">
                             <img class="star" src="/images/star_empty.png" alt="emptyStar"
-                                 th:if="${review.review.rating} > 0"
+                                 th:if="${review.review.rating} < 5"
                                  th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
                         </div>
                         <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"

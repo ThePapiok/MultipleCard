@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -59,19 +60,19 @@ public class ReviewController {
   @DeleteMapping
   @ResponseBody
   public boolean removeReview(@RequestParam String id, Principal principal) {
-    return reviewService.removeReview(id, principal.getName());
+    return reviewService.removeReview(new ObjectId(id), principal.getName());
   }
 
   @PostMapping("/addLike")
   @ResponseBody
   public boolean addLike(@RequestParam String id, Principal principal) {
-    return reviewService.addLike(id, principal.getName());
+    return reviewService.addLike(new ObjectId(id), principal.getName());
   }
 
   @PostMapping("/deleteLike")
   @ResponseBody
   public boolean deleteLike(@RequestParam String id, Principal principal) {
-    return reviewService.deleteLike(id, principal.getName());
+    return reviewService.deleteLike(new ObjectId(id), principal.getName());
   }
 
   @GetMapping

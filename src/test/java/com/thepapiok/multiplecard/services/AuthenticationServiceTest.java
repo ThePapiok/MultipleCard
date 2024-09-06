@@ -18,6 +18,7 @@ import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Random;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -71,7 +72,7 @@ public class AuthenticationServiceTest {
     expectedUser2.setFirstName(registerDTO.getFirstName());
     expectedUser2.setLastName(registerDTO.getLastName());
     expectedUser2.setAddress(expectedAddress);
-    expectedUser2.setId("123dfsv231fsd");
+    expectedUser2.setId(new ObjectId("123456789012345678901234"));
     expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());

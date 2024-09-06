@@ -16,6 +16,7 @@ import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ReviewService;
 import java.util.List;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class ReviewControllerTest {
   private static final String TEST_PHONE = "12312312312";
-  private static final String TEST_ID = "dfsa132sd132123fsd";
+  private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static final String ID_PARAM = "id";
   private static final String TRUE_TEXT = "true";
   private static final String TEST_DESCRIPTION1 = "sfdafsdf test";
@@ -126,7 +127,7 @@ public class ReviewControllerTest {
     when(reviewService.addLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
-        .perform(post("/reviews/addLike").param(ID_PARAM, TEST_ID))
+        .perform(post("/reviews/addLike").param(ID_PARAM, TEST_ID.toHexString()))
         .andExpect(content().string(TRUE_TEXT));
   }
 
@@ -136,7 +137,7 @@ public class ReviewControllerTest {
     when(reviewService.deleteLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
-        .perform(post("/reviews/deleteLike").param(ID_PARAM, TEST_ID))
+        .perform(post("/reviews/deleteLike").param(ID_PARAM, TEST_ID.toHexString()))
         .andExpect(content().string(TRUE_TEXT));
   }
 
@@ -146,7 +147,7 @@ public class ReviewControllerTest {
     when(reviewService.removeReview(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
-        .perform(delete(REVIEWS_URL).param(ID_PARAM, TEST_ID))
+        .perform(delete(REVIEWS_URL).param(ID_PARAM, TEST_ID.toHexString()))
         .andExpect(content().string(TRUE_TEXT));
   }
 
