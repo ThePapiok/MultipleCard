@@ -1,39 +1,3 @@
-@font-face {
-    font-family: "Inter";
-    src: url('/fonts/Inter.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: "Inconsolata";
-    src: url('/fonts/Inconsolata.ttf') format('truetype');
-}
-
-.b1, .b2, #b5, #b6, #b7 {
-    top: 30%;
-    position: relative;
-
-}
-
-.b1 {
-    left: 79%;
-}
-
-.b2 {
-    left: 80%;
-}
-
-#b5 {
-    left: 69%;
-}
-
-#b6 {
-    left: 70%;
-}
-
-#b7 {
-    left: 71%;
-}
-
 #image {
     width: 80%;
     height: 500px;
@@ -48,110 +12,20 @@
     justify-content: center;
 }
 
-
 #recenzje {
-    letter-spacing: 5px;
+    font-family: "Inconsolata", sans-serif;
     font-size: 48px;
+    letter-spacing: 5px;
+}
+
+#recenzje, #noResults {
     margin-top: 5%;
     margin-left: 10%;
-    font-family: "Inconsolata", sans-serif;
     color: #48483A;
     font-weight: 700;
 }
 
-#reviews {
-    display: flex;
-    margin-left: 6%;
-    margin-top: 10px;
-}
-
-.review {
-    width: 420px;
-    height: 150px;
-    margin-top: 20px;
-    margin-left: 20px;
-    background-color: #FFFFFF;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), -4px 8px 20px rgba(0, 0, 0, 0.10);
-
-}
-
-.hearth {
-    height: 25px;
-    width: 25px;
-}
-
-.star {
-    height: 30px;
-    width: 30px;
-}
-
-.name {
-    font-weight: 800;
-    font-size: 16px;
-}
-
-.description {
-    word-wrap: break-word;
-}
-
-.amount {
-    color: #A29C9C;
-
-}
-
-.name, .description {
-    color: #000000;
-}
-
-.description, .amount {
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.name, .description, .amount {
-    font-family: "Inter", sans-serif;
-}
-
-.review-horizontal {
-    display: flex;
-}
-
-.review-vertical {
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-}
-
-.stars {
-    margin-left: 5%;
-}
-
-.name {
-    margin-left: 10px;
-    margin-top: 10px;
-    width: 90%;
-}
-
-.description {
-    margin-top: 5px;
-    margin-left: 10px;
-    margin-right: 10px;
-    height: 50%;
-}
-
-.amountHearths {
-    margin-top: 8px;
-    margin-left: 5%;
-}
-
-.review-vertical, .amountHearths {
-    display: flex;
-    justify-content: flex-end;
-}
-
-#b4 {
+#b2 {
     margin-left: 84%;
     margin-top: 2%;
 }
@@ -180,11 +54,10 @@
 }
 
 label {
-    display: block;
     margin-left: 5px;
 }
 
-#checked-1, #checked-2, #checked-3, #checked-4, #checked-5, label input, #check1:checked ~ #unchecked-1, #check2:checked ~ #unchecked-2, #check3:checked ~ #unchecked-3, #check4:checked ~ #unchecked-4, #check5:checked ~ #unchecked-5 {
+#checked-1, #checked-2, #checked-3, #checked-4, #checked-5 {
     display: none;
 }
 
@@ -193,45 +66,36 @@ label {
     width: 100vh;
 }
 
-#submit {
+#addOpinionButton {
     margin-left: 45px;
     margin-top: 10px;
     z-index: 1;
 }
 
-button {
-    margin-right: 0;
-}
-
-#check1:checked ~ #checked-1, #check2:checked ~ #checked-2, #check3:checked ~ #checked-3, #check4:checked ~ #checked-4, #check5:checked ~ #checked-5 {
-    display: inline;
+#noResults {
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
 }
 
 @media only screen and (max-width: 768px) {
-    .b1, .b2 {
-        left: 40%;
+    #b2 {
+        margin-left: 76%;
     }
 
     #recenzje {
         font-size: 30px;
     }
 
+    #noResults {
+        font-size: 15px;
+    }
+
     #image {
         height: 35vh;
     }
 
-    #review2, #review3 {
+    .review:not(:first-child) {
         display: none;
-    }
-
-    #review1 {
-        width: 83%;
-        height: 170px;
-        margin-bottom: 10px;
-    }
-
-    #b4 {
-        margin-left: 64%;
     }
 
     #addOpinion {
@@ -249,13 +113,9 @@ button {
         width: 40px;
     }
 
-    #submit {
+    #addOpinionButton {
         margin-left: 3%;
         margin-top: 5px;
-    }
-
-    #b3 {
-        width: 100%;
     }
 }
 

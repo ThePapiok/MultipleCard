@@ -39,24 +39,30 @@ public class AuthenticationService {
   }
 
   @Transactional
-  public void createUser(RegisterDTO register) {
-    User user = userConverter.getEntity(register);
-    user.setCard(null);
-    user.setPoints(0);
-    user.setReview(null);
-    user = userRepository.save(user);
-    Account account = accountConverter.getEntity(register);
-    account.setId(user.getId());
-    account.setRole(Role.ROLE_USER);
-    account.setActive(true);
-    accountRepository.save(account);
+  public boolean createUser(RegisterDTO register) {
+    try {
+      User user = userConverter.getEntity(register);
+      user.setCard(null);
+      user.setPoints(0);
+      user.setReview(null);
+      user = userRepository.save(user);
+      Account account = accountConverter.getEntity(register);
+      account.setId(user.getId());
+      account.setRole(Role.ROLE_USER);
+      account.setActive(true);
+      accountRepository.save(account);
+      return true;
+    } catch (Exception e) {
+      System.out.println(e);
+      return false;
+    }
   }
 
   public List<String> getPhones() {
     try {
       return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
     } catch (Exception e) {
-      return null;
+      return List.of();
     }
   }
 
@@ -64,7 +70,7 @@ public class AuthenticationService {
     try {
       return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
     } catch (Exception e) {
-      return null;
+      return List.of();
     }
   }
 

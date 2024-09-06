@@ -30,10 +30,10 @@ public class CountryService {
               "https://restcountries.com/v3.1/all?fields=idd,cca2,name,area,population",
               CountryGetDTO[].class);
     } catch (Exception e) {
-      return null;
+      return List.of();
     }
     if (countries == null) {
-      return null;
+      return List.of();
     }
     List<CountryDTO> countryDTOS =
         new ArrayList<>(

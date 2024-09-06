@@ -14,7 +14,7 @@
 <script src="/js/forms.js"></script>
 <script src="/js/registerPage.js"></script>
 <div id="header">
-    <a th:href="@{/}" id="b1">
+    <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
 </div>
@@ -245,7 +245,9 @@
             </ul>
         </div>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-        <button type="button" class="grayButton" id="nextButton" th:text="#{registerPage.button.next}"></button>
+        <a>
+            <button type="button" class="grayButton" id="nextButton" th:text="#{registerPage.button.next}"></button>
+        </a>
         <a th:href="@{/login}">
             <button type="button" class="blackButton" th:text="#{login.text}"></button>
         </a>

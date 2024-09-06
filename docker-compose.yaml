@@ -20,11 +20,14 @@ services:
     image: mongo:latest
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: user
+      MONGO_INITDB_DATABASE: multipleCard
     volumes:
       - data:/data/db
       - ./init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
+    ports:
+      - 27018:27017
 volumes:
   data:
 

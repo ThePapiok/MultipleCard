@@ -5,139 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/reviews.css">
     <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/reviews.js"></script>
 <script src="/js/landingPage.js"></script>
 <div id="header">
-    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="b1">
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h2 headerButton">
         <button class="blackButton" th:text="#{button.login}"></button>
     </a>
-    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="b2">
+    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.register}"></button>
     </a>
-    <a sec:authorize="hasRole('USER')" th:href="@{/user}" class="b1">
-        <button class="blackButton" th:text="#{landingPage.button.profile}"></button>
+    <a sec:authorize="isAuthenticated()" th:href="@{/user}" class="h2 headerButton">
+        <button class="blackButton" th:text="#{button.profile}"></button>
     </a>
-    <a sec:authorize="hasRole('USER')" th:href="@{/logout}" class="b2">
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/products}" id="b5">
-        <button class="blackButton" th:text="#{landingPage.button.products}"></button>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/products}" id="h3" class="headerButton">
+        <button class="blackButton" th:text="#{button.products}"></button>
     </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="b6">
-        <button class="blackButton" th:text="#{landingPage.button.orders}"></button>
-    </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/logout}" id="b7">
-        <button class="redButton" th:text="#{button.logout}"></button>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="h4" class="headerButton">
+        <button class="blackButton" th:text="#{button.orders}"></button>
     </a>
 </div>
 <div id="body">
     <div id="info">
         <p class="title">MultipleCard</p>
         <a th:href="@{/about}">
-            <button class="blackButton" id="b3" th:text="#{landingPage.button.about}"></button>
+            <button class="blackButton" id="b1" th:text="#{landingPage.button.about}"></button>
         </a>
         <img id="image" src="/images/holdingCard.jpg" alt="holdingCard">
     </div>
-    <span id="recenzje" th:text="#{landingPage.reviews.title}"></span>
+    <span id="recenzje" th:text="#{reviews.title}"></span>
+    <span id="noResults" th:data-review-size="${reviewsSize}" th:text="#{landingPage.review.not_found}"></span>
     <div id="reviews">
-        <div class="review" id="review1">
+        <div class="review" th:each="review : ${reviews}">
             <div class="review-vertical">
                 <div class="review-horizontal">
-                    <span class="name">Ewelina</span>
+                    <span class="name yourReview" th:text="#{yourReview.name}" th:if="${review.owner}"></span>
+                    <span class="name" th:text="${review.firstName}" th:unless="${review.owner}"></span>
                     <div class="amountHearths">
-                        <span class="amount">15</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
+                        <span class="amount isAdded" th:text="${review.count}"
+                              th:data-is-added="${review.isAdded}"></span>
+                        <img class="hearth notLoginHearth" src="/images/hearth.png" alt="hearth"
+                             th:unless="${principal}">
+                        <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
+                             th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
+                        <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                             th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
                     </div>
                 </div>
-                <span class="description">"Świetna aplikacja"</span>
-                <div class="stars">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                </div>
-            </div>
-        </div>
-        <div class="review" id="review2">
-            <div class="review-vertical">
+                <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
                 <div class="review-horizontal">
-                    <span class="name">Jakub</span>
-                    <div class="amountHearths">
-                        <span class="amount">7</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
+                    <div class="stars">
+                        <img class="star" src="/images/star.png" alt="star"
+                             th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                        <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                             th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}"
+                             th:if="${review.review.rating} < 5">
                     </div>
-                </div>
-                <span class="description">“Najgorsza aplikacja na świecie, Adrian byś się wstydził”</span>
-                <div class="stars">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                </div>
-            </div>
-        </div>
-        <div class="review" id="review3">
-            <div class="review-vertical">
-                <div class="review-horizontal">
-                    <span class="name">Adrian</span>
-                    <div class="amountHearths">
-                        <span class="amount">1</span>
-                        <img class="hearth" src="/images/hearth.png" alt="hearth">
-                    </div>
-                </div>
-                <span class="description">"Ok!"</span>
-                <div class="stars">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwizadkacala.png" alt="star">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
-                    <img class="star" src="/images/gwiazdapusta.png" alt="emptyStar">
+                    <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
+                         th:attr="onclick=|removeReview('${review.id}', this)|">
                 </div>
             </div>
         </div>
     </div>
-    <a th:href="@{/reviews}">
-        <button class="blackButton" id="b4" th:text="#{landingPage.button.more_reviews}"></button>
+    <a th:href="@{/reviews}" id="b2">
+        <button class="blackButton" th:text="#{landingPage.button.more_reviews}"></button>
     </a>
-    <form th:action="@{/review}" th:object="${review}" id="addOpinion" method="post" sec:authorize="hasRole('USER')">
+    <form th:action="@{/reviews}" th:object="${newReview}" id="addOpinion" method="post"
+          sec:authorize="hasRole('USER')">
         <label for="text"></label>
         <textarea th:field="*{description}" id="text" required th:placeholder="#{landingPage.review.placeholder}"
-                  maxlength="80"></textarea>
+                  minlength="1"
+                  maxlength="80" oninput="checkReview(this)"></textarea>
         <div id="starsAndSubmit">
             <label>
-                <input th:field="*{star1}" id="check1" type="checkbox" onclick="checkStar(this)">
-                <img class="starAtReview" id="unchecked-1" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-1" src="/images/gwizadkacala.png" alt="star">
+                <input th:field="*{rating}" hidden type="number" min="0" max="5" value="0">
             </label>
-            <label>
-                <input th:field="*{star2}" id="check2" type="checkbox" onclick="checkStar(this)">
-                <img class="starAtReview" id="unchecked-2" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-2" src="/images/gwizadkacala.png" alt="star">
+            <label onclick="setStar(1)">
+                <img class="starAtReview" id="unchecked-1" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-1" src="/images/star.png" alt="star">
             </label>
-            <label>
-                <input th:field="*{star3}" id="check3" type="checkbox" onclick="checkStar(this)">
-                <img class="starAtReview" id="unchecked-3" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-3" src="/images/gwizadkacala.png" alt="star">
+            <label onclick="setStar(2)">
+                <img class="starAtReview" id="unchecked-2" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-2" src="/images/star.png" alt="star">
             </label>
-            <label>
-                <input th:field="*{star4}" id="check4" type="checkbox" onclick="checkStar(this)">
-                <img class="starAtReview" id="unchecked-4" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-4" src="/images/gwizadkacala.png" alt="star">
+            <label onclick="setStar(3)">
+                <img class="starAtReview" id="unchecked-3" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-3" src="/images/star.png" alt="star">
             </label>
-            <label>
-                <input th:field="*{star5}" id="check5" type="checkbox" onclick="checkStar(this)">
-                <img class="starAtReview" id="unchecked-5" src="/images/gwiazdapusta.png" alt="emptyStar">
-                <img class="starAtReview" id="checked-5" src="/images/gwizadkacala.png" alt="star">
+            <label onclick="setStar(4)">
+                <img class="starAtReview" id="unchecked-4" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-4" src="/images/star.png" alt="star">
             </label>
-            <button id="submit" type="submit" class="greenButton" th:text="#{landingPage.button.send_review}"></button>
+            <label onclick="setStar(5)">
+                <img class="starAtReview" id="unchecked-5" src="/images/star_empty.png" alt="emptyStar">
+                <img class="starAtReview" id="checked-5" src="/images/star.png" alt="star">
+            </label>
+            <a>
+                <button id="addOpinionButton" type="button" class="grayButton"
+                        th:text="#{landingPage.button.send_review}"></button>
+            </a>
         </div>
-        <span th:if="${param.added}" id="success"></span>
+        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
     </form>
 </div>
 <div id="footer">

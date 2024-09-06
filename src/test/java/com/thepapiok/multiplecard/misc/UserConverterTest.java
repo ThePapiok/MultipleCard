@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class UserConverterTest {
@@ -18,12 +17,7 @@ public class UserConverterTest {
   private static final String TEST_LAST_NAME = "Last Name";
   private static final String TEST_PROVINCE = "Province";
 
-  private UserConverter userConverter;
-
-  @BeforeEach
-  public void setUp() {
-    userConverter = new UserConverter();
-  }
+  private final UserConverter userConverter = new UserConverter();
 
   @Test
   public void shouldSuccessGetEntityWithoutApartmentNumber() {

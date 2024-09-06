@@ -45,6 +45,7 @@ public class AuthenticationController {
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
   private static final String CALLING_CODES_PARAM = "callingCodes";
   private static final String CALLING_CODE_PARAM = "callingCode";
+  private static final String ERROR_UNEXPECTED = "error.unexpected";
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
   private final PasswordEncoder passwordEncoder;
@@ -137,9 +138,7 @@ public class AuthenticationController {
     if (bindingResult.hasErrors()) {
       System.out.println(bindingResult);
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.incorrect_data", null, locale);
+      message = messageSource.getMessage("validation.incorrect_data", null, locale);
     } else if (authenticationService
         .getPhones()
         .contains(register.getCallingCode() + register.getPhone())) {
@@ -259,7 +258,12 @@ public class AuthenticationController {
     try {
       if (passwordEncoder.matches(
           verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_PARAM))) {
-        authenticationService.createUser(registerDTO);
+        if (!authenticationService.createUser(registerDTO)) {
+          resetRegister(httpSession);
+          httpSession.setAttribute(
+              ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
+          return REDIRECT_LOGIN_ERROR;
+        }
       } else {
         httpSession.setAttribute(
             ERROR_MESSAGE_PARAM, messageSource.getMessage("error.bad_sms_code", null, locale));
@@ -270,7 +274,7 @@ public class AuthenticationController {
       System.out.println(e);
       resetRegister(httpSession);
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
       return REDIRECT_LOGIN_ERROR;
     }
     httpSession.setAttribute(PHONE_PARAM, registerDTO.getPhone());

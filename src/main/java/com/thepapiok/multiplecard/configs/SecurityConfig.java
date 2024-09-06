@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.misc.CustomAuthenticationFailureHandler;
 import com.thepapiok.multiplecard.misc.CustomAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,8 +20,17 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(
       HttpSecurity http, CustomAuthenticationFailureHandler customAuthenticationFailureHandler)
       throws Exception {
-    String loginUrl = "/login";
-    http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+    final String loginUrl = "/login";
+    final String roleUser = "USER";
+    http.authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers(HttpMethod.POST, "/reviews/*")
+                    .hasRole(roleUser)
+                    .requestMatchers(HttpMethod.DELETE, "/reviews")
+                    .hasRole(roleUser)
+                    .anyRequest()
+                    .permitAll())
         .formLogin(
             login ->
                 login

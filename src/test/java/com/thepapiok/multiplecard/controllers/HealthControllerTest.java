@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
-@ActiveProfiles({"test", "prod"})
+@ActiveProfiles({"prod", "test"})
 @AutoConfigureMockMvc
 public class HealthControllerTest {
   @Autowired private MockMvc mockMvc;

@@ -17,6 +17,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7.0.12
+        ports:
+          - 27018:27017
+        options: >-
+          --env MONGO_INITDB_ROOT_USERNAME=user
+          --env MONGO_INITDB_ROOT_PASSWORD=user
+          --env MONGO_INITDB_DATABASE=multipleCard
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -30,6 +39,6 @@ jobs:
     - name: Linter
       run: mvn checkstyle:check
     - name: Build and tests
-      run: mvn clean install -Dcheckstyle.skip=true
+      run: mvn clean install -Dcheckstyle.skip=true -Dspring.profiles.active=test
     
 

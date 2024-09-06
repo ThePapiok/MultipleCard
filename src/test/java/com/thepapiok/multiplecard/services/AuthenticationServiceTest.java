@@ -1,11 +1,13 @@
 package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.mongodb.MongoExecutionTimeoutException;
+import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.User;
@@ -16,6 +18,7 @@ import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Random;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -25,6 +28,10 @@ import org.springframework.context.annotation.Profile;
 @Profile("test")
 public class AuthenticationServiceTest {
   private AuthenticationService authenticationService;
+  private RegisterDTO registerDTO;
+  private User expectedUser;
+  private User expectedUser2;
+  private Account expectedAccount;
   @Mock private UserConverter userConverter;
   @Mock private UserRepository userRepository;
   @Mock private AccountConverter accountConverter;
@@ -37,12 +44,8 @@ public class AuthenticationServiceTest {
     authenticationService =
         new AuthenticationService(
             accountRepository, userRepository, userConverter, accountConverter);
-  }
-
-  @Test
-  public void shouldSuccessCreateUser() {
     final String testText = "Test";
-    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO = new RegisterDTO();
     registerDTO.setFirstName(testText);
     registerDTO.setLastName(testText);
     registerDTO.setStreet(testText);
@@ -61,25 +64,40 @@ public class AuthenticationServiceTest {
     expectedAddress.setHouseNumber(registerDTO.getHouseNumber());
     expectedAddress.setCountry(registerDTO.getCountry());
     expectedAddress.setProvince(registerDTO.getProvince());
-    User expectedUser = new User();
+    expectedUser = new User();
     expectedUser.setFirstName(registerDTO.getFirstName());
     expectedUser.setLastName(registerDTO.getLastName());
     expectedUser.setAddress(expectedAddress);
-    User expectedUser2 = new User();
+    expectedUser2 = new User();
     expectedUser2.setFirstName(registerDTO.getFirstName());
     expectedUser2.setLastName(registerDTO.getLastName());
     expectedUser2.setAddress(expectedAddress);
-    expectedUser2.setId("123dfsv231fsd");
-    Account expectedAccount = new Account();
+    expectedUser2.setId(new ObjectId("123456789012345678901234"));
+    expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
     expectedAccount.setEmail(registerDTO.getEmail());
+  }
 
+  @Test
+  public void shouldSuccessCreateUser() {
     when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
 
-    authenticationService.createUser(registerDTO);
+    assertTrue(authenticationService.createUser(registerDTO));
+    verify(userRepository).save(expectedUser);
+    verify(accountRepository).save(expectedAccount);
+  }
+
+  @Test
+  public void shouldFailCreateUser() {
+    when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
+    when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
+    when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
+    when(accountRepository.save(expectedAccount)).thenThrow(MongoWriteException.class);
+
+    assertFalse(authenticationService.createUser(registerDTO));
     verify(userRepository).save(expectedUser);
     verify(accountRepository).save(expectedAccount);
   }
@@ -102,7 +120,7 @@ public class AuthenticationServiceTest {
   public void shouldFailGetPhones() {
     when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
 
-    assertNull(authenticationService.getPhones());
+    assertEquals(List.of(), authenticationService.getPhones());
   }
 
   @Test
@@ -123,7 +141,7 @@ public class AuthenticationServiceTest {
   public void shouldFailGetEmails() {
     when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
 
-    assertNull(authenticationService.getEmails());
+    assertEquals(List.of(), authenticationService.getEmails());
   }
 
   @Test

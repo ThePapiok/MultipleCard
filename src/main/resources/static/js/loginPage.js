@@ -12,18 +12,18 @@ function checkPhone(e) {
     phoneValue = input;
     setFullPhone();
     const callingCodeLength = document.getElementById("valueCallingCode").value.length;
-    check(1, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, loginButtonId, success, false);
+    check(1, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, loginButtonId, success, true);
 }
 
 function checkPassword(e) {
     const input = e.value;
-    check(2, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, loginButtonId, success, false);
+    check(2, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, loginButtonId, success, true);
 
 }
 
 function checkCallingCode(e) {
     const input = e.value;
-    check(3, (input !== ''), ok, previous, loginButtonId, success, true);
+    check(3, (input !== ''), ok, previous, loginButtonId, success, false);
     checkPhone(document.getElementById("phoneInput"));
 }
 

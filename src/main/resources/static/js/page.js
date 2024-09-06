@@ -3,8 +3,7 @@ function checkLanguage() {
     if (is !== null && is === 'true') {
         document.getElementById("enLanguage").style.display = "none";
         document.getElementById("plLanguage").style.display = "inline";
-    }
-    else{
+    } else {
         document.getElementById("enLanguage").style.display = "inline";
         document.getElementById("plLanguage").style.display = "none";
     }

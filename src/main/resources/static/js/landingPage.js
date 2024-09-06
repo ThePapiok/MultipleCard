@@ -1,27 +1,42 @@
-function clear() {
-    document.getElementById("check1").checked = false;
-    document.getElementById("check2").checked = false;
-    document.getElementById("check3").checked = false;
-    document.getElementById("check4").checked = false;
-    document.getElementById("check5").checked = false;
-}
+let ok = [false]
+let previous = [false]
+let success = {value: false}
 
-function checkStar(e) {
-    const id = e.id.toString();
-    const index = parseInt(id.charAt(id.length - 1));
-    const next = "check" + (index + 1);
-    if (e.checked === true || document.getElementById(next).checked === true) {
-        clear();
-        e.checked = true;
-        for (let i = 1; i < index; i++) {
-            document.getElementById("check" + i).checked = true;
-        }
-    } else {
-        clear();
+function setStars(startIndex, endIndex) {
+    for (let i = startIndex; i <= endIndex; i++) {
+        document.getElementById("checked-" + i).style.display = "inline";
+        document.getElementById("unchecked-" + i).style.display = "none";
     }
 }
 
+function unsetStars(startIndex, endIndex) {
+    for (let i = startIndex; i <= endIndex; i++) {
+        document.getElementById("checked-" + i).style.display = "none";
+        document.getElementById("unchecked-" + i).style.display = "inline";
+    }
+}
+
+function setStar(index) {
+    let rating = document.getElementById("rating");
+    const ratingValue = parseInt(rating.value);
+    if (index > ratingValue) {
+        setStars(ratingValue + 1, index);
+        rating.value = index;
+    } else if (index < ratingValue) {
+        unsetStars(index + 1, ratingValue);
+        rating.value = index;
+    } else {
+        unsetStars(1, index);
+        rating.value = 0;
+    }
+}
 
 function atStart() {
     checkLanguage();
 }
+
+function checkReview(e) {
+    const input = e.value;
+    check(1, (input.length >= 1), ok, previous, "addOpinionButton", success, false);
+}
+

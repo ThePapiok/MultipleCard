@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.services;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService implements UserDetailsService {
   private final AccountRepository accountRepository;
+  private final UserRepository userRepository;
 
   @Autowired
-  public UserService(AccountRepository accountRepository) {
+  public UserService(AccountRepository accountRepository, UserRepository userRepository) {
     this.accountRepository = accountRepository;
+    this.userRepository = userRepository;
   }
 
   @Override
