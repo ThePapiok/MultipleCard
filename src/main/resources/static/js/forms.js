@@ -52,7 +52,7 @@ function activeButton(id, ok, success, isSubmit) {
         let button = document.getElementById(id);
         button.className = "greenButton";
         success.value = true;
-        if(isSubmit){
+        if (isSubmit) {
             button.type = "submit";
         }
     }
@@ -70,7 +70,7 @@ function disableButton(id, ok, success, isSubmit) {
         let button = document.getElementById(id);
         button.className = "grayButton";
         success.value = false;
-        if(isSubmit){
+        if (isSubmit) {
             button.type = "button";
         }
     }
@@ -83,6 +83,7 @@ function showOrHideSelect(cond, searchName, optionsName, upName, downName) {
     let down = document.getElementById(downName);
     if (cond) {
         search.style.display = "block";
+        search.focus();
         options.style.display = "block";
         up.style.display = "block";
         down.style.display = "none";
