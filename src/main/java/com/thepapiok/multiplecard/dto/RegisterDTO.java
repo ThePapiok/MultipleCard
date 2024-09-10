@@ -57,7 +57,10 @@ public class RegisterDTO {
 
   @NotBlank private String country;
 
-  @NotBlank private String callingCode;
+  @NotBlank
+  @Pattern(regexp = "^\\+[0-9]+")
+  @Size(max = 5)
+  private String callingCode;
 
   @NotBlank
   @Pattern(regexp = "^[1-9][0-9 ]*$")

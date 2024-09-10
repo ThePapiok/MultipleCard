@@ -3,7 +3,7 @@
     width: 40%;
 }
 
-#check1, #check2, #up1 {
+#check2, #check3, #up1 {
     display: none;
 }
 
@@ -11,7 +11,7 @@
     left: 70%;
 }
 
-#check1, #close1 {
+#check2, #close2 {
     left: 85%;
 }
 

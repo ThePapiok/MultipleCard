@@ -1,7 +1,9 @@
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
 const regPhone = new RegExp("^[1-9][0-9 ]*$")
+let country = false;
+let callingCode = false;
 
-function check(i, con, ok, previous, id, success, hasCheck) {
+function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     const previousCond = previous[i - 1];
     if (con) {
         ok[i - 1] = true;
@@ -10,7 +12,7 @@ function check(i, con, ok, previous, id, success, hasCheck) {
             document.getElementById("check" + i).style.display = "inline";
         }
         if (previousCond === false) {
-            activeButton(id, ok, success);
+            activeButton(id, ok, success, isSubmit);
             previous[i - 1] = true;
         }
     } else {
@@ -20,7 +22,7 @@ function check(i, con, ok, previous, id, success, hasCheck) {
             document.getElementById("check" + i).style.display = "none";
         }
         if (previousCond === true) {
-            disableButton(id, ok, success);
+            disableButton(id, ok, success, isSubmit);
             previous[i - 1] = false;
         }
     }
@@ -38,7 +40,7 @@ function hideValidation(e) {
     e.parentElement.nextElementSibling.style.display = "none";
 }
 
-function activeButton(id, ok, success) {
+function activeButton(id, ok, success, isSubmit) {
     let cond = true;
     for (let i = 0; i < ok.length; i++) {
         if (ok[i] === false) {
@@ -49,12 +51,14 @@ function activeButton(id, ok, success) {
     if (cond) {
         let button = document.getElementById(id);
         button.className = "greenButton";
-        button.type = "submit";
         success.value = true;
+        if(isSubmit){
+            button.type = "submit";
+        }
     }
 }
 
-function disableButton(id, ok, success) {
+function disableButton(id, ok, success, isSubmit) {
     let cond = false;
     for (let i = 0; i < ok.length; i++) {
         if (ok[i] === false) {
@@ -65,8 +69,10 @@ function disableButton(id, ok, success) {
     if (cond && success.value) {
         let button = document.getElementById(id);
         button.className = "grayButton";
-        button.type = "button";
         success.value = false;
+        if(isSubmit){
+            button.type = "button";
+        }
     }
 }
 
@@ -128,5 +134,15 @@ function searchAll(e, isCountry) {
     } else {
         nothing.style.display = "none";
     }
+}
+
+function showOrHideCountry(upName, downName) {
+    country = !country;
+    showOrHideSelect(country, "searchCountry", "optionsCountry", upName, downName)
+}
+
+function showOrHideCallingCode(upName, downName) {
+    callingCode = !callingCode;
+    showOrHideSelect(callingCode, "searchCallingCode", "optionsCallingCode", upName, downName)
 }
 

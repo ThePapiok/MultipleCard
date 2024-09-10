@@ -10,7 +10,7 @@ function deleteLike(id, e) {
     })
         .then(response => response.json())
         .then(response => {
-            if (response === true) {
+            if (response) {
                 let yourReviews = document.getElementsByClassName("yourReview");
                 let amount;
                 let hearths;
@@ -54,7 +54,7 @@ function addLike(id, e) {
     })
         .then(response => response.json())
         .then(response => {
-            if (response === true) {
+            if (response) {
                 let yourReviews = document.getElementsByClassName("yourReview");
                 let amount;
                 let hearths;
@@ -98,7 +98,7 @@ function removeReview(id, e) {
     })
         .then(response => response.json())
         .then(response => {
-            if (response === true) {
+            if (response) {
                 let yourReviews = document.getElementsByClassName("yourReview");
                 while (yourReviews.length !== 0) {
                     yourReviews[0].parentElement.parentElement.parentElement.remove();

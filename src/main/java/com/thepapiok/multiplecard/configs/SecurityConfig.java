@@ -29,6 +29,8 @@ public class SecurityConfig {
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.DELETE, "/reviews")
                     .hasRole(roleUser)
+                    .requestMatchers("/register", "/password_reset")
+                    .anonymous()
                     .anyRequest()
                     .permitAll())
         .formLogin(
@@ -40,7 +42,8 @@ public class SecurityConfig {
                     .passwordParameter("password")
                     .failureHandler(customAuthenticationFailureHandler))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl(loginUrl))
-        .csrf(AbstractHttpConfigurer::disable);
+        .csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(exception -> exception.accessDeniedPage("/"));
     return http.build();
   }
 

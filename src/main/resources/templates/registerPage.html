@@ -171,7 +171,7 @@
         <div class="block-horizontally">
             <label id="Country">
                 <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
-                       th:placeholder="#{country.text}" onclick="showOrHideCountry()" value="">
+                       th:placeholder="#{country.text}" onclick="showOrHideCountry('up1', 'down1')" value="">
                 <img id="down1" src="/images/keyboard_down.png" alt="down">
                 <img id="up1" src="/images/keyboard_up.png" alt="up">
                 <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
@@ -184,7 +184,7 @@
             </label>
             <label id="CallingCode">
                 <input th:field="*{callingCode}" id="valueCallingCode" class="valueSelect" type="text" readonly
-                       th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode()" value="">
+                       th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up2', 'down2')" value="">
                 <img id="down2" src="/images/keyboard_down.png" alt="down">
                 <img id="up2" src="/images/keyboard_up.png" alt="up">
                 <input id="searchCallingCode" class="searchSelect" type="text"
