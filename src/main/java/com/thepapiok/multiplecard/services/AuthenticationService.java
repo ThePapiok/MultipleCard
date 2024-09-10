@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class AuthenticationService {
   private final UserRepository userRepository;
   private final UserConverter userConverter;
   private final AccountConverter accountConverter;
+  private final PasswordEncoder passwordEncoder;
 
   private Random random;
 
@@ -30,11 +32,13 @@ public class AuthenticationService {
       AccountRepository accountRepository,
       UserRepository userRepository,
       UserConverter userConverter,
-      AccountConverter accountConverter) {
+      AccountConverter accountConverter,
+      PasswordEncoder passwordEncoder) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.userConverter = userConverter;
     this.accountConverter = accountConverter;
+    this.passwordEncoder = passwordEncoder;
     random = new Random();
   }
 
@@ -91,5 +95,20 @@ public class AuthenticationService {
   @Profile("test")
   public void setRandom(Random random) {
     this.random = random;
+  }
+
+  public boolean changePassword(String phone, String password) {
+    try {
+      Account account = accountRepository.findByPhone(phone);
+      account.setPassword(passwordEncoder.encode(password));
+      accountRepository.save(account);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public boolean getAccountByPhone(String phone) {
+    return accountRepository.findByPhone(phone) != null;
   }
 }

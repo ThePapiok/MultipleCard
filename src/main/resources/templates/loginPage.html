@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="/css/loginPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body onload="atStart()">
+<body onload="atStart(false)">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/loginAndResetPage.js"></script>
 <script src="/js/loginPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -26,7 +27,7 @@
         <div class="block-horizontally">
             <label id="CallingCode">
                 <input th:value="${callingCode}" id="valueCallingCode" class="valueSelect" type="text" readonly
-                       th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode()" value="">
+                       th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up1', 'down1')" value="">
                 <img id="down1" src="/images/keyboard_down.png" alt="down">
                 <img id="up1" src="/images/keyboard_up.png" alt="up">
                 <input id="searchCallingCode" class="searchSelect" type="text" oninput="searchAll(this, false)">
@@ -42,8 +43,8 @@
                 <input id="phoneInput" type="text" th:placeholder="#{phone.text}" th:value="${phone}" required
                        oninput="checkPhone(this)" minlength="7" maxlength="28" onmouseenter="showValidation(this)"
                        onmouseleave="hideValidation(this)">
-                <img id="close1" src="/images/close.png" alt="close">
-                <img id="check1" src="/images/check.png" alt="check">
+                <img id="close2" src="/images/close.png" alt="close">
+                <img id="check2" src="/images/check.png" alt="check">
             </label>
             <div class="validation">
                 <span th:text="#{phone.text} + ' ' + #{validation.text}"></span>
@@ -57,8 +58,8 @@
             <input name="password" type="password" th:placeholder="#{password.text}" required
                    oninput="checkPassword(this)"
                    minlength="6" maxlength="25" onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-            <img id="close2" src="/images/close.png" alt="close">
-            <img id="check2" src="/images/check.png" alt="check">
+            <img id="close3" src="/images/close.png" alt="close">
+            <img id="check3" src="/images/check.png" alt="check">
         </label>
         <div class="validation">
             <span th:text="#{password.text} + ' ' + #{validation.text}"></span>

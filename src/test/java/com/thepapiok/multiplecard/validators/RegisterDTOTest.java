@@ -32,6 +32,7 @@ public class RegisterDTOTest {
   private static final String CITY_FIELD = "city";
   private static final String LAST_NAME_FIELD = "lastName";
   private static final String FIRST_NAME_FIELD = "firstName";
+  private static final String CALLING_CODE_FIELD = "callingCode";
 
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
@@ -665,6 +666,56 @@ public class RegisterDTOTest {
   public void validationFalseEmail(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations =
         validator.validateProperty(registerDTO, EMAIL_FIELD);
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldSuccessAtValidationCallingCode() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setCallingCode("+48");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, CALLING_CODE_FIELD);
+
+    assertTrue(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationCallingCodeWhenNoPlus() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setCallingCode("48");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, CALLING_CODE_FIELD);
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationCallingCodeWhenContainsLetters() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setCallingCode("+48b");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, CALLING_CODE_FIELD);
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationCallingCodeWhenContainsSpecialSymbols() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setCallingCode("+48!");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, CALLING_CODE_FIELD);
+
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationCallingCodeWhenTooLong() {
+    RegisterDTO registerDTO = new RegisterDTO();
+    registerDTO.setCallingCode("+482134");
+    Set<ConstraintViolation<RegisterDTO>> violations =
+        validator.validateProperty(registerDTO, CALLING_CODE_FIELD);
+
     assertFalse(violations.isEmpty());
   }
 }

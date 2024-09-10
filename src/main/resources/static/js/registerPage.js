@@ -10,42 +10,41 @@ let previousPostalCode = "";
 let ok = [false, false, false, false, false, false, true, false, false, false, false, false, false, false];
 let previous = [false, false, false, false, false, false, true, false, false, false, false, false, false, false];
 let success = {value: false};
-let country = false;
-let callingCode = false;
+
 
 function checkFirstName(e) {
     const input = e.value;
-    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)), ok, previous, nextButtonId, success, true);
+    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkLastName(e) {
     const input = e.value;
-    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
+    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkEmail(e) {
     const input = e.value;
-    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)), ok, previous, nextButtonId, success, true);
+    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkProvince(e) {
     const input = e.value;
-    check(4, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
+    check(4, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkStreet(e) {
     const input = e.value;
-    check(5, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
+    check(5, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkHouseNumber(e) {
     const input = e.value;
-    check(6, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)), ok, previous, nextButtonId, success, true);
+    check(6, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkApartmentNumber(e) {
     const input = e.value;
-    check(7, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, nextButtonId, success, true);
+    check(7, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkPostalCode(e) {
@@ -60,32 +59,32 @@ function checkPostalCode(e) {
         input = e.value;
     }
     previousPostalCode = input;
-    check(8, (regPostalCode.test(input)), ok, previous, nextButtonId, success, true);
+    check(8, (regPostalCode.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkCity(e) {
     const input = e.value;
-    check(9, (input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true);
+    check(9, (input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkPhone(e) {
     const input = e.value.toString().replaceAll(" ", "");
     const callingCodeLength = document.getElementById("valueCallingCode").value.length;
-    check(10, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, nextButtonId, success, true);
+    check(10, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkPassword(e) {
     const input = e.value;
-    check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, nextButtonId, success, true);
+    check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkRetypedPassword(e) {
-    check(12, (e.value === document.getElementById("password").value), ok, previous, nextButtonId, success, true);
+    check(12, (e.value === document.getElementById("password").value), ok, previous, nextButtonId, success, true, true);
 }
 
 function checkSelect(e, index) {
     const input = e.value;
-    check(index, (input !== ''), ok, previous, nextButtonId, success, false);
+    check(index, (input !== ''), ok, previous, nextButtonId, success, false, true);
 }
 
 function atStart() {
@@ -104,16 +103,6 @@ function atStart() {
     document.getElementById("searchCallingCode").value = "";
     document.getElementById("searchCountry").value = "";
     checkLanguage();
-}
-
-function showOrHideCountry() {
-    country = !country;
-    showOrHideSelect(country, "searchCountry", "optionsCountry", "up1", "down1")
-}
-
-function showOrHideCallingCode() {
-    callingCode = !callingCode;
-    showOrHideSelect(callingCode, "searchCallingCode", "optionsCallingCode", "up2", "down2")
 }
 
 function setValueCountry(e) {

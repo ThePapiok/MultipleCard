@@ -36,7 +36,7 @@ public class CustomAuthenticationProviderTest {
   }
 
   @Test
-  public void shouldReturnAuthentication() {
+  public void shouldReturnAuthenticationAtAuthenticate() {
     Authentication authentication =
         new UsernamePasswordAuthenticationToken(TEST_USER_TEXT, TEST_USER_TEXT);
     User user =
@@ -52,7 +52,7 @@ public class CustomAuthenticationProviderTest {
   }
 
   @Test
-  public void shouldRedirectToLoginWhenUserNotActive() {
+  public void shouldRedirectToLoginAtAuthenticateWhenUserNotActive() {
     Authentication authentication =
         new UsernamePasswordAuthenticationToken(TEST_USER_TEXT, TEST_USER_TEXT);
 

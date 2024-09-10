@@ -22,7 +22,7 @@ public class AccountConverterTest {
   }
 
   @Test
-  public void shouldSuccessGetEntity() {
+  public void shouldSuccessAtGetEntity() {
     final String password = "Test123!";
     final String encodePassword = "123dsfavdva3312";
     final String email = "test@test";
