@@ -189,4 +189,20 @@ public class AuthenticationServiceTest {
     assertFalse(authenticationService.changePassword(TEST_PHONE, PASSWORD));
     verify(accountRepository).save(expectedAccount);
   }
+
+  @Test
+  public void shouldSuccessAtGetAccountByPhone() {
+    Account account = new Account();
+
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
+
+    assertTrue(authenticationService.getAccountByPhone(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtGetAccountByPhone() {
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(null);
+
+    assertFalse(authenticationService.getAccountByPhone(TEST_PHONE));
+  }
 }

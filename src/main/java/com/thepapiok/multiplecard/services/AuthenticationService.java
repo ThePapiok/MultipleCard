@@ -107,4 +107,8 @@ public class AuthenticationService {
       return false;
     }
   }
+
+  public boolean getAccountByPhone(String phone) {
+    return accountRepository.findByPhone(phone) != null;
+  }
 }

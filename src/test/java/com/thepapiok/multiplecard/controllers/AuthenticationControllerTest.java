@@ -913,6 +913,7 @@ public class AuthenticationControllerTest {
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
 
     mockMvc
         .perform(
@@ -923,6 +924,20 @@ public class AuthenticationControllerTest {
         .andExpect(content().string("ok"));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_RESET));
+  }
+
+  @Test
+  public void shouldReturnUserNotFoundMessageAtGetVerificationNumberWhenUserNotFound()
+      throws Exception {
+
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_NUMBER_URL)
+                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
+                .param(PHONE_PARAM, TEST_PHONE))
+        .andExpect(content().string("Nie ma takiego użytkownika"));
   }
 
   @Test
@@ -941,6 +956,8 @@ public class AuthenticationControllerTest {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxAmount);
 
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
+
     mockMvc
         .perform(
             post(GET_VERIFICATION_NUMBER_URL)
@@ -956,6 +973,7 @@ public class AuthenticationControllerTest {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
     doThrow(ApiException.class)
         .when(smsService)
         .sendSms(VERIFICATION_MESSAGE + TEST_CODE, PL_CALLING_CODE + TEST_PHONE);

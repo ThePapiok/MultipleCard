@@ -445,6 +445,9 @@ public class AuthenticationController {
         || !callingCodePattern.matcher(callingCode).matches()) {
       return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA, null, locale);
     }
+    if (!authenticationService.getAccountByPhone(callingCode + phone)) {
+      return messageSource.getMessage("resetPasswordPage.user.not_found", null, locale);
+    }
     if (codeAmount == null) {
       httpSession.setAttribute(IS_SENT_PARAM, true);
       httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
