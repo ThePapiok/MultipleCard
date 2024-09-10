@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "orders")
 public class Order {
-  @Id private String id;
+  @Id private ObjectId id;
   private ObjectId userId;
   private ObjectId productId;
   private LocalDateTime createdAt;

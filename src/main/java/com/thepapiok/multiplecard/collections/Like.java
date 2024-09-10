@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "likes")
 public class Like {
-  @Id private String id;
+  @Id private ObjectId id;
   private ObjectId reviewUserId;
   private ObjectId userId;
 }
