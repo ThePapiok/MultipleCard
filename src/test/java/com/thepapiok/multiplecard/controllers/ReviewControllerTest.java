@@ -61,7 +61,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLandingPageWithParamSuccess() throws Exception {
+  public void shouldRedirectToLandingPageAtAddReviewWithParamSuccess() throws Exception {
     final int rating = 3;
     ReviewDTO reviewDTO = new ReviewDTO();
     reviewDTO.setDescription(TEST_DESCRIPTION1);
@@ -82,7 +82,8 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLandingPageWithParamErrorWhenValidationError() throws Exception {
+  public void shouldRedirectToLandingPageAtAddReviewWithParamErrorWhenValidationError()
+      throws Exception {
     final int rating = 6;
     final String message = "Podane dane są niepoprawne";
     ReviewDTO reviewDTO = new ReviewDTO();
@@ -101,7 +102,8 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLandingPageWithParamErrorWhenErrorAtAddReview() throws Exception {
+  public void shouldRedirectToLandingPageAtAddReviewWithParamErrorWhenErrorAtAddReview()
+      throws Exception {
     final int rating = 3;
     final String message = "Nieoczekiwany błąd";
     ReviewDTO reviewDTO = new ReviewDTO();
@@ -123,7 +125,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessAddLike() throws Exception {
+  public void shouldSuccessAddLikeAtAddLike() throws Exception {
     when(reviewService.addLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -133,7 +135,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessDeleteLike() throws Exception {
+  public void shouldSuccessDeleteLikeAtDeleteReview() throws Exception {
     when(reviewService.deleteLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -143,7 +145,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessRemoveReview() throws Exception {
+  public void shouldSuccessRemoveReviewAtRemoveReview() throws Exception {
     when(reviewService.removeReview(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -153,7 +155,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessReviewPage() throws Exception {
+  public void shouldSuccessReviewPageAtReviewPage() throws Exception {
     final int count1 = 5;
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);
@@ -175,7 +177,7 @@ public class ReviewControllerTest {
   }
 
   @Test
-  public void shouldSuccessReviewPageWhenUserNoLogin() throws Exception {
+  public void shouldSuccessReviewPageAtReviewPageWhenUserNoLogin() throws Exception {
     reviewPage(null, false);
   }
 

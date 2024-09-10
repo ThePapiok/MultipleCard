@@ -41,7 +41,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldSuccessLoadUserByUsername() {
+  public void shouldSuccessAtLoadUserByUsername() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
     expectedAccount.setId(TEST_ID);
@@ -61,7 +61,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldFailLoadUserByUsernameWhenUserNotFound() {
+  public void shouldFailAtLoadUserByUsernameWhenUserNotFound() {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(null);
 
@@ -69,7 +69,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldFailLoadUserByUsernameWhenUserNotActive() {
+  public void shouldFailAtLoadUserByUsernameWhenUserNotActive() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
     expectedAccount.setId(TEST_ID);

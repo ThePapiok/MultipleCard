@@ -36,7 +36,8 @@ public class CustomAuthenticationFailureHandlerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginErrorWhenUserIsNotActive() throws IOException {
+  public void shouldRedirectToLoginErrorAtOnAuthenticationFailureWhenUserIsNotActive()
+      throws IOException {
     customAuthenticationFailureHandler.onAuthenticationFailure(
         httpServletRequest,
         httpServletResponse,
@@ -49,7 +50,8 @@ public class CustomAuthenticationFailureHandlerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginErrorWhenBadCredentials() throws IOException {
+  public void shouldRedirectToLoginErrorAtOnAuthenticationFailureWhenBadCredentials()
+      throws IOException {
     customAuthenticationFailureHandler.onAuthenticationFailure(
         httpServletRequest,
         httpServletResponse,

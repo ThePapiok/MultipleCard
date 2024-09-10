@@ -86,7 +86,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessCreateUser() {
+  public void shouldSuccessAtCreateUser() {
     when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
@@ -97,7 +97,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailCreateUser() {
+  public void shouldFailAtCreateUser() {
     when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
@@ -109,7 +109,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessGetPhones() {
+  public void shouldSuccessAtGetPhones() {
     Account account1 = new Account();
     account1.setPhone(TEST_PHONE);
     Account account2 = new Account();
@@ -123,14 +123,14 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailGetPhones() {
+  public void shouldFailAtGetPhones() {
     when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
 
     assertEquals(List.of(), authenticationService.getPhones());
   }
 
   @Test
-  public void shouldSuccessGetEmails() {
+  public void shouldSuccessAtGetEmails() {
     Account account1 = new Account();
     account1.setEmail("test1@test");
     Account account2 = new Account();
@@ -144,14 +144,14 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailGetEmails() {
+  public void shouldFailAtGetEmails() {
     when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
 
     assertEquals(List.of(), authenticationService.getEmails());
   }
 
   @Test
-  public void shouldSuccessGetVerificationNumber() {
+  public void shouldSuccessAtGetVerificationNumber() {
     authenticationService.setRandom(random);
 
     when(random.nextInt()).thenReturn(0);

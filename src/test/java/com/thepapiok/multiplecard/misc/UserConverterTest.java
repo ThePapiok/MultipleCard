@@ -20,7 +20,7 @@ public class UserConverterTest {
   private final UserConverter userConverter = new UserConverter();
 
   @Test
-  public void shouldSuccessGetEntityWithoutApartmentNumber() {
+  public void shouldSuccessAtGetEntityWithoutApartmentNumber() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setCity(TEST_CITY);
     registerDTO.setStreet(TEST_STREET);
@@ -47,7 +47,7 @@ public class UserConverterTest {
   }
 
   @Test
-  public void shouldSuccessGetEntity() {
+  public void shouldSuccessAtGetEntity() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setCity(TEST_CITY);
     registerDTO.setStreet(TEST_STREET);

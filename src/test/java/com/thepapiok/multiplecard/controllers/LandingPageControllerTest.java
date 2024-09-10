@@ -55,13 +55,13 @@ public class LandingPageControllerTest {
   }
 
   @Test
-  public void shouldReturnLandingPageWhenNoPrincipal() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWhenNoPrincipal() throws Exception {
     returnLandingPage(null, false);
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnLandingPageWithPrincipal() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWithPrincipal() throws Exception {
     returnLandingPage(TEST_PHONE, true);
   }
 
@@ -78,12 +78,13 @@ public class LandingPageControllerTest {
   }
 
   @Test
-  public void shouldReturnLandingPageWithParamErrorButNoMessage() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWithParamErrorButNoMessage() throws Exception {
     paramWithoutMessage(ERROR_PARAM);
   }
 
   @Test
-  public void shouldReturnLandingPageWithParamSuccessButNoMessage() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWithParamSuccessButNoMessage()
+      throws Exception {
     paramWithoutMessage(SUCCESS_PARAM);
   }
 
@@ -99,7 +100,7 @@ public class LandingPageControllerTest {
   }
 
   @Test
-  public void shouldReturnLandingPageWithParamError() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWithParamError() throws Exception {
     final String message = "Error";
     final String errorMessageParam = "errorMessage";
     MockHttpSession httpSession = new MockHttpSession();
@@ -108,7 +109,7 @@ public class LandingPageControllerTest {
   }
 
   @Test
-  public void shouldReturnLandingPageWithParamSuccess() throws Exception {
+  public void shouldReturnLandingPageAtGetLandingPageWithParamSuccess() throws Exception {
     final String message = "Opinia została pomyślnie dodana !";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(SUCCESS_PARAM, true);

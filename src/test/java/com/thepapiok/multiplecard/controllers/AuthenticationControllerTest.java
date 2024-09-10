@@ -159,7 +159,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPage() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -169,7 +169,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPageWhenParamSuccessButNoMessage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPageWhenParamSuccessButNoMessage() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -179,7 +179,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPageWhenParamSuccessWithMessage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPageWhenParamSuccessWithMessage() throws Exception {
     final String succesMessage = "Sukces!";
     final String phone = "23412341234";
     MockHttpSession httpSession = new MockHttpSession();
@@ -199,7 +199,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPageWhenParamErrorButNoMessage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPageWhenParamErrorButNoMessage() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -209,7 +209,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPageWhenParamErrorWithMessage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPageWhenParamErrorWithMessage() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
 
@@ -223,7 +223,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnRegisterPage() throws Exception {
+  public void shouldReturnRegisterPageAtRegisterPage() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -235,7 +235,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnRegisterPageWhenParamErrorWithMessage() throws Exception {
+  public void shouldReturnRegisterPageAtRegisterPageWhenParamErrorWithMessage() throws Exception {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setPhone("12312443");
     registerDTO.setFirstName("TestA");
@@ -256,7 +256,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToAccountVerification() throws Exception {
+  public void shouldRedirectToAccountVerificationAtCreateUser() throws Exception {
     final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_OTHER_MAIL);
 
@@ -278,7 +278,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterByValidationProblem() throws Exception {
+  public void shouldRedirectToRegisterAtCreateUserByValidationProblem() throws Exception {
     RegisterDTO expectedRegisterDTO = new RegisterDTO();
     expectedRegisterDTO.setPhone("+12312313231");
     MockHttpSession httpSession = new MockHttpSession();
@@ -288,7 +288,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterByUsersTheSameByPhone() throws Exception {
+  public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByPhone() throws Exception {
     final String errorMessage = "Użytkownik o takim numerze telefonu już istnieje";
     final List<String> phones = List.of("+48123456789", TEST_PHONE_NUMBER);
     MockHttpSession httpSession = new MockHttpSession();
@@ -299,7 +299,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterByUsersTheSameByEmail() throws Exception {
+  public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByEmail() throws Exception {
     final String errorMessage = "Użytkownik o takim emailu już istnieje";
     final List<String> phones = List.of(TEST_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_MAIL, TEST_OTHER_MAIL);
@@ -313,7 +313,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenErrorAtGetVerificationSms() throws Exception {
+  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationSms()
+      throws Exception {
     final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
@@ -335,7 +336,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenErrorAtGetVerificationEmail() throws Exception {
+  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationEmail()
+      throws Exception {
     final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
@@ -355,7 +357,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterByPasswordsNotTheSame() throws Exception {
+  public void shouldRedirectToRegisterAtCreateUserByPasswordsNotTheSame() throws Exception {
     final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
@@ -417,7 +419,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPage() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPage() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
 
@@ -427,12 +429,12 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginPageWhenNoRegisterDTOAdded() throws Exception {
+  public void shouldRedirectToLoginPageAtVerificationPageWhenNoRegisterDTOAdded() throws Exception {
     mockMvc.perform(get(VERIFICATION_URL)).andExpect(redirectedUrl(LOGIN_URL));
   }
 
   @Test
-  public void shouldReturnVerificationPageWithParamNewCodeSms() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeSms() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
@@ -445,7 +447,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationPageWhenErrorAtGetVerificationSms() throws Exception {
+  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationSms()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
@@ -462,7 +465,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPageWithParamNewCodeEmail() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeEmail()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
@@ -485,7 +489,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationPageWhenErrorAtGetVerificationEmail() throws Exception {
+  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationEmail()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
@@ -508,7 +513,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationPageWhenTooMuchCodesSms() throws Exception {
+  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesSms()
+      throws Exception {
     final int maxCodeAmount = 3;
     final String message = "Za dużo razy poprosiłeś o nowy kod sms";
     MockHttpSession httpSession = new MockHttpSession();
@@ -520,7 +526,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationPageWhenTooMuchCodesEmail() throws Exception {
+  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesEmail()
+      throws Exception {
     final int maxCodeAmount = 3;
     final String message = "Za dużo razy poprosiłeś o nowy kod email";
     MockHttpSession httpSession = new MockHttpSession();
@@ -543,7 +550,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginPageWithParamReset() throws Exception {
+  public void shouldRedirectToLoginPageAtVerificationPageWithParamReset() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
@@ -563,7 +570,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPageWithParamError() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPageWithParamError() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
@@ -575,7 +582,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLogin() throws Exception {
+  public void shouldRedirectToLoginAtVerification() throws Exception {
     final String verificationSms = "213 555";
     final String codeSms = "s23141234sdfs";
     final String message = "Pomyślnie zarejestrowano";
@@ -610,7 +617,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenTooManyAttempts() throws Exception {
+  public void shouldRedirectToVerificationAtVerificationWhenTooManyAttempts() throws Exception {
     final int maxAttempts = 3;
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
@@ -620,7 +627,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenVerificationEmailIsBad() throws Exception {
+  public void shouldRedirectToVerificationAtVerificationWhenVerificationEmailIsBad()
+      throws Exception {
     final String message = "Nieprawidłowy kod email";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
@@ -633,7 +641,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationWhenVerificationSmsIsBad() throws Exception {
+  public void shouldRedirectToVerificationAtVerificationWhenVerificationSmsIsBad()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_ENCODE_CODE);
@@ -661,7 +670,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginWhenErrorAtCreateUser() throws Exception {
+  public void shouldRedirectToLoginAtVerificationWhenErrorAtCreateUser() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_ENCODE_CODE);
@@ -695,7 +704,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnPasswordResetPage() throws Exception {
+  public void shouldReturnPasswordResetPageAtPasswordResetPage() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     setSessionAtResetPassword(httpSession);
 
@@ -712,7 +721,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnPasswordResetPageWhenErrorParamButNoMessage() throws Exception {
+  public void shouldReturnPasswordResetPageAtPasswordResetPageWhenErrorParamButNoMessage()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     setSessionAtResetPassword(httpSession);
 
@@ -728,7 +738,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnPasswordResetPageWhenErrorParamWithMessage() throws Exception {
+  public void shouldReturnPasswordResetPageAtPasswordResetPageWhenErrorParamWithMessage()
+      throws Exception {
     final int codeAmount = 2;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
@@ -751,7 +762,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginWithParamReset() throws Exception {
+  public void shouldRedirectToLoginAtPasswordResetPageWithParamReset() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     setSessionAtResetPassword(httpSession);
 
@@ -770,7 +781,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginSuccess() throws Exception {
+  public void shouldRedirectToLoginSuccessAtResetPassword() throws Exception {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);
@@ -788,7 +799,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectPasswordResetErrorWhenErrorAtValidation() throws Exception {
+  public void shouldRedirectPasswordResetErrorAtResetPasswordWhenErrorAtValidation()
+      throws Exception {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
@@ -797,7 +809,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginErrorWhenTooManyAttempts() throws Exception {
+  public void shouldRedirectToLoginErrorAtResetPasswordWhenTooManyAttempts() throws Exception {
     final int maxCodeAmount = 3;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
@@ -812,7 +824,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToPasswordResetErrorWhenBadCode() throws Exception {
+  public void shouldRedirectToPasswordResetErrorAtResetPasswordWhenBadCode() throws Exception {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);
@@ -823,7 +835,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToPasswordResetErrorWhenNotTheSamePasswords() throws Exception {
+  public void shouldRedirectToPasswordResetErrorAtResetPasswordWhenNotTheSamePasswords()
+      throws Exception {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD + "1123", 1);
@@ -853,7 +866,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginErrorWhenErrorAtChangePassword() throws Exception {
+  public void shouldRedirectToLoginErrorAtResetPasswordWhenErrorAtChangePassword()
+      throws Exception {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);

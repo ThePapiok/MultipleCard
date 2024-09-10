@@ -26,7 +26,7 @@ public class CountryServiceTest {
   }
 
   @Test
-  public void shouldSuccessGetAll() {
+  public void shouldSuccessAtGetAll() {
     final String name1 = "Polskaa";
     final String code1 = "PL";
     final String callingCode1 = "+48";
@@ -81,14 +81,14 @@ public class CountryServiceTest {
   }
 
   @Test
-  public void shouldFailGetAllWhenGetNull() {
+  public void shouldFailAtGetAllWhenGetNull() {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class)).thenReturn(null);
 
     assertEquals(List.of(), countryService.getAll());
   }
 
   @Test
-  public void shouldFailGetAllWhenGetException() {
+  public void shouldFailAtGetAllWhenGetException() {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class))
         .thenThrow(RestClientException.class);
 
