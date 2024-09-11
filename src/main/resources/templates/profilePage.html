@@ -239,6 +239,20 @@
             <button type="button" class="grayButton" id="saveButton" th:text="#{profilePage.button.save}"></button>
         </a>
     </form>
+    <p class="title" th:text="#{profilePage.2_title}"></p>
+    <div id="cardInfo">
+        <p id="nameCard" th:text="#{profilePage.card.not_found}"></p>
+        <div id="cardWithButtons">
+            <div id="card">
+                <img id="qr" src="/images/code_qr_generator.png">
+            </div>
+            <div id="cardButtons">
+                <a>
+                    <button class="blackButton" th:text="#{profilePage.card.new}"></button>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
