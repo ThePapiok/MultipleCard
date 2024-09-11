@@ -1,0 +1,44 @@
+#form {
+    height: 110%;
+    width: 90%;
+}
+
+input {
+    color: lightgray;
+}
+
+#up1, #check1, #close1, #check2, #close2, #check3, #close3, #check4, #close4, #check5, #close5, #check6, #close6, #check7, #close7, #check8, #close8 {
+    display: none;
+}
+
+.placeholderWithInput {
+    display: flex;
+    margin: 0;
+
+}
+
+.placeholderInput {
+    margin: 0;
+    display: flex;
+    width: 40%;
+    align-items: center;
+    justify-content: center;
+    background-color: #D3C0D2;
+    border: 1px solid gray;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+@media only screen and (max-width: 768px) {
+    input, .valueSelect, .searchSelect, .placeholderInput {
+        height: 50px;
+        border: 1px solid gray;
+    }
+
+    .placeholderInput {
+        font-size: 12px;
+    }
+}

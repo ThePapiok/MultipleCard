@@ -31,6 +31,8 @@ public class SecurityConfig {
                     .hasRole(roleUser)
                     .requestMatchers("/register", "/password_reset")
                     .anonymous()
+                    .requestMatchers("/user")
+                    .authenticated()
                     .anyRequest()
                     .permitAll())
         .formLogin(
