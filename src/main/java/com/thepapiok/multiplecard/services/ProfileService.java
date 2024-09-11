@@ -35,4 +35,14 @@ public class ProfileService {
       return null;
     }
   }
+
+  public boolean editProfile(ProfileDTO profileDTO, String phone) {
+    try {
+      User user = profileConverter.getEntity(profileDTO, phone);
+      userRepository.save(user);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
 }
