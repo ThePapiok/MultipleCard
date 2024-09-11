@@ -32,6 +32,10 @@ input {
     font-weight: 600;
 }
 
+#validationLastName, #validationApartmentNumber, #validationCity {
+    transform: translateX(-180%);
+}
+
 @media only screen and (max-width: 768px) {
     input, .valueSelect, .searchSelect, .placeholderInput {
         height: 50px;
