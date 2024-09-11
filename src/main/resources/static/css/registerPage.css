@@ -48,23 +48,6 @@
     display: none;
 }
 
-#up2, #down2 {
-    left: 68%;
-}
-
-#check6, #close6, #close7, #check7 {
-    left: 82%
-}
-
-#check2, #close2, #check9, #close9, #check4, #close4 {
-    left: 91%;
-}
-
-
-#check10, #close10 {
-    left: 86.6%;
-}
-
 #validationHouseNumber, #validationLastName, #validationApartmentNumber, #validationPhone, #validationCity, #validationProvince {
     transform: translateX(-100%);
 }
@@ -74,10 +57,6 @@ select:invalid {
 }
 
 @media only screen and (max-width: 768px) {
-    img, #up2, #down2, #check6, #close6, #close7, #check7, #check4, #close4, #check2, #close2, #check9, #close9, #check10, #close10 {
-        left: 82%;
-    }
-
     input, .valueSelect, .searchSelect {
         height: 50px;
         border: 1px solid gray;

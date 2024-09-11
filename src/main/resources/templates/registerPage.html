@@ -12,6 +12,7 @@
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/registerAndProfilePage.js"></script>
 <script src="/js/registerPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -23,11 +24,13 @@
     <form th:action="@{/register}" th:object="${register}" id="form" method="post">
         <div class="block-horizontally">
             <label id="FirstName">
-                <input th:field="*{firstName}" type="text" th:placeholder="#{firstName.text}" required
-                       oninput="checkFirstName(this)" minlength="2" maxlength="15"
-                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-                <img id="close1" src="/images/close.png" alt="close">
-                <img id="check1" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{firstName}" type="text" th:placeholder="#{firstName.text}" required
+                           oninput="checkFirstName(this)" minlength="2" maxlength="15"
+                           onmouseenter="showValidation(this, 'FirstName')" onmouseleave="hideValidation('FirstName')">
+                    <img id="close1" src="/images/close.png" alt="close">
+                    <img id="check1" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation">
                 <span th:text="#{firstName.text} + ' ' + #{validation.text}"></span>
@@ -38,11 +41,13 @@
                 </ul>
             </div>
             <label id="LastName">
-                <input th:field="*{lastName}" type="text" th:placeholder="#{lastName.text}" required
-                       oninput="checkLastName(this)" minlength="2" maxlength="40"
-                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-                <img id="close2" src="/images/close.png" alt="close">
-                <img id="check2" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{lastName}" type="text" th:placeholder="#{lastName.text}" required
+                           oninput="checkLastName(this)" minlength="2" maxlength="40"
+                           onmouseenter="showValidation(this, 'LastName')" onmouseleave="hideValidation('LastName')">
+                    <img id="close2" src="/images/close.png" alt="close">
+                    <img id="check2" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationLastName">
                 <span th:text="#{lastName.text} + ' ' + #{validation.text}"></span>
@@ -56,11 +61,13 @@
         </div>
         <div class="block-horizontally">
             <label id="Email">
-                <input th:field="*{email}" type="text" placeholder="Email" required oninput="checkEmail(this)"
-                       minlength="4" maxlength="30" onmouseenter="showValidation(this)"
-                       onmouseleave="hideValidation(this)">
-                <img id="close3" src="/images/close.png" alt="close">
-                <img id="check3" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{email}" type="text" placeholder="Email" required oninput="checkEmail(this)"
+                           minlength="4" maxlength="30" onmouseenter="showValidation(this, 'Email')"
+                           onmouseleave="hideValidation('Email')">
+                    <img id="close3" src="/images/close.png" alt="close">
+                    <img id="check3" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation">
                 <span th:text="'Email ' + #{validation.text}"></span>
@@ -70,11 +77,13 @@
                 </ul>
             </div>
             <label id="Province">
-                <input th:field="*{province}" type="text" th:placeholder="#{province.text}" required
-                       oninput="checkProvince(this)" minlength="2" maxlength="40"
-                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-                <img id="close4" src="/images/close.png" alt="close">
-                <img id="check4" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{province}" type="text" th:placeholder="#{province.text}" required
+                           oninput="checkProvince(this)" minlength="2" maxlength="40"
+                           onmouseenter="showValidation(this, 'Province')" onmouseleave="hideValidation('Province')">
+                    <img id="close4" src="/images/close.png" alt="close">
+                    <img id="check4" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationProvince">
                 <span th:text="#{province.text} + ' ' + #{validation.text}"></span>
@@ -88,12 +97,14 @@
         </div>
         <div class="block-horizontally">
             <label id="Street">
-                <input th:field="*{street}" type="text" th:placeholder="#{street.text}" required
-                       oninput="checkStreet(this)"
-                       minlength="2" maxlength="40" onmouseenter="showValidation(this)"
-                       onmouseleave="hideValidation(this)">
-                <img id="close5" src="/images/close.png" alt="close">
-                <img id="check5" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{street}" type="text" th:placeholder="#{street.text}" required
+                           oninput="checkStreet(this)"
+                           minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
+                           onmouseleave="hideValidation('Street')">
+                    <img id="close5" src="/images/close.png" alt="close">
+                    <img id="check5" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation">
                 <span th:text="#{street.text} + ' ' + #{validation.text}"></span>
@@ -105,11 +116,14 @@
                 </ul>
             </div>
             <label id="HouseNumber">
-                <input th:field="*{houseNumber}" type="text" th:placeholder="#{houseNumber.text}" required
-                       oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
-                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-                <img id="close6" src="/images/close.png" alt="close">
-                <img id="check6" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{houseNumber}" type="text" th:placeholder="#{houseNumber.text}" required
+                           oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
+                           onmouseenter="showValidation(this, 'HouseNumber')"
+                           onmouseleave="hideValidation('HouseNumber')">
+                    <img id="close6" src="/images/close.png" alt="close">
+                    <img id="check6" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationHouseNumber">
                 <span th:text="#{houseNumber.text} + ' ' + #{validation.text}"></span>
@@ -120,11 +134,14 @@
                 </ul>
             </div>
             <label id="ApartmentNumber">
-                <input th:field="*{apartmentNumber}" type="text" th:placeholder="#{apartmentNumber.text}"
-                       oninput="checkApartmentNumber(this)" maxlength="6" onmouseenter="showValidation(this)"
-                       onmouseleave="hideValidation(this)">
-                <img id="close7" src="/images/close.png" alt="close">
-                <img id="check7" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{apartmentNumber}" type="text" th:placeholder="#{apartmentNumber.text}"
+                           oninput="checkApartmentNumber(this)" maxlength="6"
+                           onmouseenter="showValidation(this, 'ApartmentNumber')"
+                           onmouseleave="hideValidation('ApartmentNumber')">
+                    <img id="close7" src="/images/close.png" alt="close">
+                    <img id="check7" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationApartmentNumber">
                 <span th:text="#{apartmentNumber.text} + ' ' + #{validation.text}"></span>
@@ -138,11 +155,14 @@
         </div>
         <div class="block-horizontally">
             <label id="PostalCode">
-                <input th:field="*{postalCode}" type="text" th:placeholder="#{postalCode.text}" required
-                       oninput="checkPostalCode(this)" maxlength="6" minlength="6"
-                       onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-                <img id="close8" src="/images/close.png" alt="close">
-                <img id="check8" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{postalCode}" type="text" th:placeholder="#{postalCode.text}" required
+                           oninput="checkPostalCode(this)" maxlength="6" minlength="6"
+                           onmouseenter="showValidation(this, 'PostalCode')"
+                           onmouseleave="hideValidation('PostalCode')">
+                    <img id="close8" src="/images/close.png" alt="close">
+                    <img id="check8" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation">
                 <span th:text="#{postalCode.text} + ' ' + #{validation.text}"></span>
@@ -152,11 +172,14 @@
                 </ul>
             </div>
             <label id="City">
-                <input th:field="*{city}" type="text" th:placeholder="#{city.text}" required oninput="checkCity(this)"
-                       minlength="2" maxlength="40" onmouseenter="showValidation(this)"
-                       onmouseleave="hideValidation(this)">
-                <img id="close9" src="/images/close.png" alt="close">
-                <img id="check9" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{city}" type="text" th:placeholder="#{city.text}" required
+                           oninput="checkCity(this)"
+                           minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
+                           onmouseleave="hideValidation('City')">
+                    <img id="close9" src="/images/close.png" alt="close">
+                    <img id="check9" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationCity">
                 <span th:text="#{city.text} + ' ' + #{validation.text}"></span>
@@ -170,10 +193,12 @@
         </div>
         <div class="block-horizontally">
             <label id="Country">
-                <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
-                       th:placeholder="#{country.text}" onclick="showOrHideCountry('up1', 'down1')" value="">
-                <img id="down1" src="/images/keyboard_down.png" alt="down">
-                <img id="up1" src="/images/keyboard_up.png" alt="up">
+                <label class="inputs">
+                    <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
+                           th:placeholder="#{country.text}" onclick="showOrHideCountry('up1', 'down1')" value="">
+                    <img id="down1" src="/images/keyboard_down.png" alt="down">
+                    <img id="up1" src="/images/keyboard_up.png" alt="up">
+                </label>
                 <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
                 <ul id="optionsCountry" class="optionsSelect">
                     <li class="optionSelect optionCountry" th:data-code="${country.code}"
@@ -183,10 +208,13 @@
                 </ul>
             </label>
             <label id="CallingCode">
-                <input th:field="*{callingCode}" id="valueCallingCode" class="valueSelect" type="text" readonly
-                       th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up2', 'down2')" value="">
-                <img id="down2" src="/images/keyboard_down.png" alt="down">
-                <img id="up2" src="/images/keyboard_up.png" alt="up">
+                <label class="inputs">
+                    <input th:field="*{callingCode}" id="valueCallingCode" class="valueSelect" type="text" readonly
+                           th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up2', 'down2')"
+                           value="">
+                    <img id="down2" src="/images/keyboard_down.png" alt="down">
+                    <img id="up2" src="/images/keyboard_up.png" alt="up">
+                </label>
                 <input id="searchCallingCode" class="searchSelect" type="text"
                        oninput="searchAll(this, false)">
                 <ul id="optionsCallingCode" class="optionsSelect">
@@ -198,12 +226,14 @@
                 </ul>
             </label>
             <label id="Phone">
-                <input th:field="*{phone}" type="text" th:placeholder="#{phone.text}" required
-                       oninput="checkPhone(this)"
-                       maxlength="28" minlength="7" onmouseenter="showValidation(this)"
-                       onmouseleave="hideValidation(this)">
-                <img id="close10" src="/images/close.png" alt="close">
-                <img id="check10" src="/images/check.png" alt="check">
+                <label class="inputs">
+                    <input th:field="*{phone}" type="text" th:placeholder="#{phone.text}" required
+                           oninput="checkPhone(this)"
+                           maxlength="28" minlength="7" onmouseenter="showValidation(this, 'Phone')"
+                           onmouseleave="hideValidation('Phone')">
+                    <img id="close10" src="/images/close.png" alt="close">
+                    <img id="check10" src="/images/check.png" alt="check">
+                </label>
             </label>
             <div class="validation" id="validationPhone">
                 <span th:text="#{phone.text} + ' ' + #{validation.text}"></span>
@@ -214,12 +244,14 @@
             </div>
         </div>
         <label id="Password">
-            <input th:field="*{password}" type="password" th:placeholder="#{password.text}" required
-                   oninput="checkPassword(this)"
-                   minlength="6" maxlength="25" onmouseenter="showValidation(this)"
-                   onmouseleave="hideValidation(this)">
-            <img id="close11" src="/images/close.png" alt="close">
-            <img id="check11" src="/images/check.png" alt="check">
+            <label class="inputs">
+                <input th:field="*{password}" type="password" th:placeholder="#{password.text}" required
+                       oninput="checkPassword(this)"
+                       minlength="6" maxlength="25" onmouseenter="showValidation(this, 'Password')"
+                       onmouseleave="hideValidation('Password')">
+                <img id="close11" src="/images/close.png" alt="close">
+                <img id="check11" src="/images/check.png" alt="check">
+            </label>
         </label>
         <div class="validation">
             <span th:text="#{password.text} + ' ' + #{validation.text}"></span>
@@ -232,11 +264,14 @@
             </ul>
         </div>
         <label id="RetypedPassword">
-            <input th:field="*{retypedPassword}" type="password" th:placeholder="#{retypedPassword.text}" required
-                   oninput="checkRetypedPassword(this)" minlength="6" maxlength="25"
-                   onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-            <img id="close12" src="/images/close.png" alt="close">
-            <img id="check12" src="/images/check.png" alt="check">
+            <label class="inputs">
+                <input th:field="*{retypedPassword}" type="password" th:placeholder="#{retypedPassword.text}" required
+                       oninput="checkRetypedPassword(this)" minlength="6" maxlength="25"
+                       onmouseenter="showValidation(this, 'RetypedPassword')"
+                       onmouseleave="hideValidation('RetypedPassword')">
+                <img id="close12" src="/images/close.png" alt="close">
+                <img id="check12" src="/images/check.png" alt="check">
+            </label>
         </label>
         <div class="validation">
             <span th:text="#{retypedPassword.text} + ' ' + #{validation.text}"></span>

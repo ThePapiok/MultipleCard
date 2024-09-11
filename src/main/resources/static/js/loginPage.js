@@ -1,6 +1,5 @@
 let previous = [false, false, false];
 let ok = [false, false, false];
-let success = {value: false}
 let callingCodeValue = "";
 let phoneValue = "";
 const buttonId = 'loginButton';

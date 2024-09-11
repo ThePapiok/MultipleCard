@@ -3,10 +3,6 @@
     width: 50%;
 }
 
-img {
-    left: 92%;
-}
-
 #check1, #check2 {
     display: none;
 }
@@ -20,11 +16,6 @@ img {
     #form {
         width: 90%;
     }
-
-    img {
-        left: 82%;
-    }
-
     button {
         margin-right: 5px;
     }

@@ -1,6 +1,5 @@
 let ok = [false]
 let previous = [false]
-let success = {value: false}
 
 function setStars(startIndex, endIndex) {
     for (let i = startIndex; i <= endIndex; i++) {
