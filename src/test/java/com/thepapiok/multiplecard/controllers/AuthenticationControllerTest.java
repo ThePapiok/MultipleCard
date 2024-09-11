@@ -54,6 +54,7 @@ public class AuthenticationControllerTest {
       "Za dużo razy wpisałeś niepoprawny kod";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "Podane hasła różnią się";
   private static final String ERROR_INCORRECT_DATA_MESSAGE = "Podane dane są niepoprawne";
+  private static final String ERROR_USER_NOT_FOUND_MESSAGE = "Nie ma takiego użytkownika";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
@@ -706,7 +707,7 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldReturnPasswordResetPageAtPasswordResetPage() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
-    setSessionAtResetPassword(httpSession);
+    setSessionAtResetPasswordPage(httpSession);
 
     mockMvc
         .perform(get(PASSWORD_RESET_URL).session(httpSession))
@@ -724,7 +725,7 @@ public class AuthenticationControllerTest {
   public void shouldReturnPasswordResetPageAtPasswordResetPageWhenErrorParamButNoMessage()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
-    setSessionAtResetPassword(httpSession);
+    setSessionAtResetPasswordPage(httpSession);
 
     mockMvc
         .perform(get(PASSWORD_RESET_URL).session(httpSession).param(ERROR_PARAM, ""))
@@ -743,7 +744,7 @@ public class AuthenticationControllerTest {
     final int codeAmount = 2;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
-    setSessionAtResetPassword(httpSession);
+    setSessionAtResetPasswordPage(httpSession);
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
     httpSession.setAttribute(RESET_PARAM, resetPasswordDTO);
 
@@ -764,14 +765,14 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToLoginAtPasswordResetPageWithParamReset() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
-    setSessionAtResetPassword(httpSession);
+    setSessionAtResetPasswordPage(httpSession);
 
     mockMvc
         .perform(get(PASSWORD_RESET_URL).session(httpSession).param(RESET_PARAM, ""))
         .andExpect(redirectedUrl(LOGIN_URL));
   }
 
-  private void setSessionAtResetPassword(MockHttpSession httpSession) {
+  private void setSessionAtResetPasswordPage(MockHttpSession httpSession) {
     final int codeAmount = 2;
     httpSession.setAttribute(CODE_SMS_PARAM_RESET, TEST_CODE);
     httpSession.setAttribute(IS_SENT_PARAM, true);
@@ -782,13 +783,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToLoginSuccessAtResetPassword() throws Exception {
+    final String fullPhone = PL_CALLING_CODE + TEST_PHONE;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(authenticationService.changePassword(PL_CALLING_CODE + TEST_PHONE, TEST_PASSWORD))
-        .thenReturn(true);
+    when(authenticationService.getAccountByPhone(fullPhone)).thenReturn(true);
+    when(authenticationService.changePassword(fullPhone, TEST_PASSWORD)).thenReturn(true);
 
     redirectAndResetPasswordReset(
         "Pomyślnie zresetowano hasło",
@@ -846,6 +848,18 @@ public class AuthenticationControllerTest {
     redirectPasswordResetError(resetPasswordDTO, httpSession, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE);
   }
 
+  @Test
+  public void shouldRedirectToPasswordResetErrorAtResetPasswordWhenUserNotFound() throws Exception {
+    ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+    MockHttpSession httpSession = new MockHttpSession();
+    setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
+
+    redirectPasswordResetError(resetPasswordDTO, httpSession, ERROR_USER_NOT_FOUND_MESSAGE);
+  }
+
   private void redirectPasswordResetError(
       ResetPasswordDTO resetPasswordDTO, MockHttpSession httpSession, String message)
       throws Exception {
@@ -868,13 +882,14 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToLoginErrorAtResetPasswordWhenErrorAtChangePassword()
       throws Exception {
+    final String fullPhone = PL_CALLING_CODE + TEST_PHONE;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     setResetPasswordAndSession(resetPasswordDTO, httpSession, TEST_PASSWORD, 1);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(authenticationService.changePassword(PL_CALLING_CODE + TEST_PHONE, TEST_PASSWORD))
-        .thenReturn(false);
+    when(authenticationService.getAccountByPhone(fullPhone)).thenReturn(true);
+    when(authenticationService.changePassword(fullPhone, TEST_PASSWORD)).thenReturn(false);
 
     redirectAndResetPasswordReset(
         ERROR_UNEXPECTED_MESSAGE,
@@ -951,7 +966,7 @@ public class AuthenticationControllerTest {
             post(GET_VERIFICATION_NUMBER_URL)
                 .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
                 .param(PHONE_PARAM, TEST_PHONE))
-        .andExpect(content().string("Nie ma takiego użytkownika"));
+        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
   }
 
   @Test
