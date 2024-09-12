@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,5 +30,27 @@ public class CloudinaryService {
                 "api_key", cloudinaryApiKey,
                 "api_secret", cloudinaryApiSecret,
                 "secure", true));
+  }
+
+  public String addImage(byte[] file, String name) {
+    try {
+      return (String)
+          cloudinary
+              .uploader()
+              .upload(
+                  file,
+                  ObjectUtils.asMap(
+                      "public_id", name,
+                      "unique_filename", false,
+                      "overwrite", true))
+              .get("url");
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @Profile("test")
+  public void setCloudinary(Cloudinary cloudinary) {
+    this.cloudinary = cloudinary;
   }
 }
