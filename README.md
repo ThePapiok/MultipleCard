@@ -1,15 +1,13 @@
-
 # Multiple Card
 
-Aplikacja webowa pozwalająca na korzystanie z wielkrotynych kart podarunkowych. Kartę można doładować kupując na niej jakiś produkt, a następnie w sklepie można ten produkt dostać.
-
+Aplikacja webowa pozwalająca na korzystanie z wielkrotynych kart podarunkowych. Kartę można doładować kupując na niej
+jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
 ![Logo](https://i.imgur.com/C5RsVmp.png)
 
 ## Linki
 
 - [Strona produkcyjna](https://multiplecard-neq8.onrender.com/)
-
 
 ## Zmienne Środowiskowe
 
@@ -23,18 +21,19 @@ Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustaw
 
 `MONGODB_PRE` - mongodb lub mongodb+srv
 
-`AUTH_TOKEN` - token z api twilio
+`TWILIO_AUTH_TOKEN` - token z api twilio
 
-`PHONE_NUMBER` - numer telefonu z api twilio
+`TWILIO_MESSAGING_SERVICE_SID` - messaging service sid z api twilio
 
-`ACCOUNT_SID` - account sid z api twilio
+`TWILIO_ACCOUNT_SID` - account sid z api twilio
 
 `GMAIL_APP_PASSWORD` - hasło aplikacji gmail
 
+`CLOUDINARY_CLOUD_NAME` - nazwa dysku cloudinary
 
+`CLOUDINARY_API_KEY` - api key dla cloudinary
 
-
-
+`CLOUDINARY_API_SECRET` - api secret dla cloudinary
 
 ## Uruchomienie z dockerem
 
@@ -53,10 +52,13 @@ Wejdź do uzyskanego folderu
 Dodaj zmienne środowiskowe (przykładowe)
 
 ```bash
-  export PHONE_NUMBER=+123123123123
-  export ACCOUNT_SID=accountSidTest
-  export AUTH_TOKEN=authTokenTest
+  export TWILIO_MESSAGING_SERVICE_SID=twilioServiceSidTest
+  export TWILIO_ACCOUNT_SID=twilioAccountSidTest
+  export TWILIO_AUTH_TOKEN=twilioAuthTokenTest
   export GMAIL_APP_PASSWORD=gmailAppPasswordTest
+  export CLOUDINARY_CLOUD_NAME=cloudinaryCloudNameTest
+  export CLOUDINARY_API_KEY=cloudinaryApiKeyTest
+  export CLOUDINARY_API_SECRET=cloudinaryApiSecretTest
 ```
 
 Uruchom kontenery
@@ -72,8 +74,6 @@ Po skończeniu używania
 ```bash
   docker-compose down -v
 ```
-
-
 
 ## Uruchomienie testów
 
