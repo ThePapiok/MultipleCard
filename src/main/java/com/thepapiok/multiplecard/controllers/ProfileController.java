@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.ProfileService;
 import jakarta.servlet.http.HttpSession;
@@ -27,13 +28,18 @@ public class ProfileController {
   private final ProfileService profileService;
   private final CountryService countryService;
   private final MessageSource messageSource;
+  private final CardService cardService;
 
   @Autowired
   public ProfileController(
-      ProfileService profileService, CountryService countryService, MessageSource messageSource) {
+      ProfileService profileService,
+      CountryService countryService,
+      MessageSource messageSource,
+      CardService cardService) {
     this.profileService = profileService;
     this.countryService = countryService;
     this.messageSource = messageSource;
+    this.cardService = cardService;
   }
 
   @GetMapping
@@ -44,6 +50,7 @@ public class ProfileController {
       Model model,
       HttpSession httpSession,
       Locale locale) {
+    String phone = principal.getName();
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
@@ -56,7 +63,8 @@ public class ProfileController {
           "successMessage", messageSource.getMessage("profilePage.data.updated", null, locale));
       httpSession.removeAttribute(SUCCESS_PARAM);
     }
-    model.addAttribute("profile", profileService.getProfile(principal.getName()));
+    model.addAttribute("profile", profileService.getProfile(phone));
+    model.addAttribute("card", cardService.getCard(phone));
     model.addAttribute(
         "countries",
         countryService.getAll().stream()

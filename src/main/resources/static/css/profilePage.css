@@ -32,13 +32,13 @@ input {
     font-weight: 600;
 }
 
-#qr {
+.qr {
     position: static;
     height: 60%;
     width: 40%;
 }
 
-#nameCard {
+.nameCard {
     font-weight: 800;
     font-family: "Inter", sans-serif;
 }

@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.repositories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
@@ -39,6 +40,7 @@ public class UserRepositoryTest {
   private static ReviewGetDTO reviewGetDTO1;
   private static ReviewGetDTO reviewGetDTO2;
   private static ReviewGetDTO reviewGetDTO3;
+  private static Card card;
   private static boolean firstTime;
   @Autowired private UserRepository userRepository;
   @Autowired private LikeRepository likeRepository;
@@ -82,12 +84,18 @@ public class UserRepositoryTest {
       address1.setPostalCode("p1");
       address1.setProvince("province1");
       address1.setStreet("street1");
+      card = new Card();
       User user1 = new User();
       user1.setFirstName(TEST1_TEXT);
       user1.setId(TEST_ID1);
       user1.setLastName("last1");
       user1.setAddress(address1);
       user1.setReview(review1);
+      user1.setCard(card);
+      card.setName("name");
+      card.setAttempts(0);
+      card.setPin("123sasdfaf");
+      card.setImageUrl("123asdasdasdasd");
       userRepository.save(user1);
       Review review2 = new Review();
       review2.setDescription(TEST1_TEXT);
@@ -268,5 +276,10 @@ public class UserRepositoryTest {
   @Test
   public void shouldSuccessFindReview() {
     assertEquals(reviewGetDTO2, userRepository.findReview(TEST_ID2));
+  }
+
+  @Test
+  public void shouldSuccessFindCardById() {
+    assertEquals(card, userRepository.findCardById(TEST_ID1).getCard());
   }
 }

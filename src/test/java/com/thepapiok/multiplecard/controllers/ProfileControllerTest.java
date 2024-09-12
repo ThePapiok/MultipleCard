@@ -10,9 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.ProfileService;
 import java.util.List;
@@ -48,6 +50,7 @@ public class ProfileControllerTest {
   private static final String PROFILE_PAGE = "profilePage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_PARAM = "success";
+  private static final String CARD_PARAM = "card";
   private static ProfileDTO profileDTO;
   private static List<CountryDTO> countryDTOS;
   private static List<CountryNamesDTO> countryNamesDTOS;
@@ -55,6 +58,7 @@ public class ProfileControllerTest {
   @Autowired private MockMvc mockMvc;
   @MockBean private ProfileService profileService;
   @MockBean private CountryService countryService;
+  @MockBean private CardService cardService;
 
   @BeforeAll
   public static void setUp() {
@@ -89,11 +93,15 @@ public class ProfileControllerTest {
   }
 
   private void successReturnProfilePage() throws Exception {
+    Card card = new Card();
+
+    when(cardService.getCard(TEST_PHONE)).thenReturn(card);
     when(profileService.getProfile(TEST_PHONE)).thenReturn(profileDTO);
     when(countryService.getAll()).thenReturn(countryDTOS);
 
     mockMvc
         .perform(get(USER_URL))
+        .andExpect(model().attribute(CARD_PARAM, card))
         .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(view().name(PROFILE_PAGE));
@@ -126,12 +134,15 @@ public class ProfileControllerTest {
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(httpParam, valueParam);
+    Card card = new Card();
 
+    when(cardService.getCard(TEST_PHONE)).thenReturn(card);
     when(profileService.getProfile(TEST_PHONE)).thenReturn(profileDTO);
     when(countryService.getAll()).thenReturn(countryDTOS);
 
     mockMvc
         .perform(get(USER_URL).param(param, "").session(httpSession))
+        .andExpect(model().attribute(CARD_PARAM, card))
         .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(model().attribute(messageParam, message))
@@ -141,7 +152,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserSuccess() throws Exception {
+  public void shouldRedirectToUserSuccessAtEditProfile() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
@@ -165,7 +176,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorWhenValidationProblems() throws Exception {
+  public void shouldRedirectToUserErrorAtEditProfileWhenValidationProblems() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
@@ -176,7 +187,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorWhenErrorAtEditProfile() throws Exception {
+  public void shouldRedirectToUserErrorAtEditProfileWhenErrorAtEditProfile() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(false);

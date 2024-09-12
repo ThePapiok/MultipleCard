@@ -238,17 +238,31 @@
         <a>
             <button type="button" class="grayButton" id="saveButton" th:text="#{profilePage.button.save}"></button>
         </a>
+        <a>
+            <button type="button" class="blackButton" th:text="#{password.button.change}"></button>
+        </a>
+        <a>
+            <button type="button" class="redButton" th:text="#{profilePage.delete_account}"></button>
+        </a>
     </form>
     <p class="title" th:text="#{profilePage.2_title}"></p>
     <div id="cardInfo">
-        <p id="nameCard" th:text="#{profilePage.card.not_found}"></p>
+        <p class="nameCard" th:if="${card} == null" th:text="#{profilePage.card.not_found}"></p>
+        <p class="nameCard" th:if="${card} != null" th:text="${card.name}"></p>
         <div id="cardWithButtons">
             <div id="card">
-                <img id="qr" src="/images/code_qr_generator.png">
+                <img class="qr" src="/images/code_qr_generator.png" alt="cardNotFound" th:if="${card} == null">
+                <img class="qr" th:src="${card.imageUrl}" alt="cardNotFound" th:if="${card} != null">
             </div>
             <div id="cardButtons">
                 <a>
                     <button class="blackButton" th:text="#{profilePage.card.new}"></button>
+                </a>
+                <a th:if="${card} != null">
+                    <button class="blackButton" th:text="#{profilePage.card.products}"></button>
+                </a>
+                <a th:if="${card} != null">
+                    <button class="redButton" th:text="#{profilePage.card.block}"></button>
                 </a>
             </div>
         </div>
