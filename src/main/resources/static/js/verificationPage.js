@@ -1,7 +1,6 @@
 let previousVerification = ["", ""];
 let ok = [false, false];
 let previous = [false, false];
-let success = {value: false};
 
 const regVerificationNumber = new RegExp("^[0-9]{3} [0-9]{3}$");
 const registerButtonId = "registerButton"

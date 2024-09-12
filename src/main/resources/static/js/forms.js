@@ -2,6 +2,7 @@ const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃ
 const regPhone = new RegExp("^[1-9][0-9 ]*$")
 let country = false;
 let callingCode = false;
+let success = {value: false}
 
 function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     const previousCond = previous[i - 1];
@@ -28,25 +29,32 @@ function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     }
 }
 
-function showValidation(e) {
-    let validation = e.parentElement.nextElementSibling;
+function showValidation(e, id) {
+    let validation = document.getElementById(id).nextElementSibling;
     const cord = e.getBoundingClientRect();
     validation.style.display = "inline";
     validation.style.left = cord.right + window.scrollX + 'px';
     validation.style.top = cord.top + window.scrollY + 50 + 'px';
 }
 
-function hideValidation(e) {
-    e.parentElement.nextElementSibling.style.display = "none";
+function hideValidation(id) {
+    document.getElementById(id).nextElementSibling.style.display = "none";
 }
 
 function activeButton(id, ok, success, isSubmit) {
     let cond = true;
+    let allNulls = true;
     for (let i = 0; i < ok.length; i++) {
-        if (ok[i] === false) {
-            cond = false;
-            break;
+        if (ok[i] !== null) {
+            allNulls = false;
+            if (!ok[i]) {
+                cond = false;
+                break;
+            }
         }
+    }
+    if (allNulls) {
+        cond = false;
     }
     if (cond) {
         let button = document.getElementById(id);
@@ -60,11 +68,18 @@ function activeButton(id, ok, success, isSubmit) {
 
 function disableButton(id, ok, success, isSubmit) {
     let cond = false;
+    let allNulls = true;
     for (let i = 0; i < ok.length; i++) {
-        if (ok[i] === false) {
-            cond = true;
-            break;
+        if (ok[i] !== null) {
+            allNulls = false;
+            if (!ok[i]) {
+                cond = true;
+                break;
+            }
         }
+    }
+    if (allNulls) {
+        cond = true;
     }
     if (cond && success.value) {
         let button = document.getElementById(id);

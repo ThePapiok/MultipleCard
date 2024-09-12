@@ -6,6 +6,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 public interface UserRepository extends MongoRepository<User, ObjectId> {
 
@@ -264,4 +265,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             """
       })
   ReviewGetDTO findReview(ObjectId objectId);
+
+  @Query(value = "{'_id': ?0}", fields = "{'_id': 0, 'card': 1}")
+  User findCardById(ObjectId id);
 }

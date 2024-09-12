@@ -65,12 +65,18 @@ function getForm(e) {
         })
             .then(response => response.text())
             .then(response => {
-                document.getElementById("passwordForm").dataset.isSent = "true";
                 if(response !== "ok"){
-                    document.getElementById("error").textContent = response;
+                    document.getElementById("errorBefore").textContent = response;
+                    document.getElementById("passwordForm").dataset.isSent = "false";
+                    document.getElementById("valueCallingCode").disabled = false;
+                    document.getElementById("phoneInput").disabled = false;
                 }
                 else{
+                    document.getElementById("passwordForm").dataset.isSent = "true";
                     document.getElementById("error").textContent = "";
+                    document.getElementById("errorBefore").textContent = "";
+                    document.getElementById("valueCallingCode").disabled = true;
+                    document.getElementById("phoneInput").disabled = true;
                 }
             })
             .catch(error => {

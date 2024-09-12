@@ -22,12 +22,15 @@
     <p class="title" th:text="#{verificationPage.title}"></p>
     <form th:action="@{/account_verifications}" id="form" method="post">
         <label id="VerificationEmail">
-            <input id="verificationNumberEmail" name="verificationNumberEmail" type="text"
-                   th:placeholder="#{verificationPage.codeEmail.text}"
-                   required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7"
-                   onmouseenter="showValidation(this)" onmouseleave="hideValidation(this)">
-            <img id="close1" src="/images/close.png" alt="close">
-            <img id="check1" src="/images/check.png" alt="check">
+            <label class="inputs">
+                <input id="verificationNumberEmail" name="verificationNumberEmail" type="text"
+                       th:placeholder="#{verificationPage.codeEmail.text}"
+                       required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7"
+                       onmouseenter="showValidation(this, 'VerificationEmail')"
+                       onmouseleave="hideValidation('VerificationEmail')">
+                <img id="close1" src="/images/close.png" alt="close">
+                <img id="check1" src="/images/check.png" alt="check">
+            </label>
         </label>
         <div class="validation">
             <span th:text="#{verificationPage.codeEmail.text} + ' ' + #{validation.text}"></span>
@@ -37,12 +40,16 @@
             </ul>
         </div>
         <label id="VerificationSms">
-            <input id="verificationNumberSms" name="verificationNumberSms" type="text" th:placeholder="#{codeSms.text}"
-                   required
-                   oninput="checkVerificationSms(this)" minlength="7" maxlength="7" onmouseenter="showValidation(this)"
-                   onmouseleave="hideValidation(this)">
-            <img id="close2" src="/images/close.png" alt="close">
-            <img id="check2" src="/images/check.png" alt="check">
+            <label class="inputs">
+                <input id="verificationNumberSms" name="verificationNumberSms" type="text"
+                       th:placeholder="#{codeSms.text}"
+                       required
+                       oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                       onmouseenter="showValidation(this, 'VerificationSms')"
+                       onmouseleave="hideValidation('VerificationSms')">
+                <img id="close2" src="/images/close.png" alt="close">
+                <img id="check2" src="/images/check.png" alt="check">
+            </label>
         </label>
         <div class="validation">
             <span th:text="#{codeSms.text} + ' ' + #{validation.text}"></span>

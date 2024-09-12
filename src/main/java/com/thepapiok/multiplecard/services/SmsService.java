@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsService {
 
-  @Value("${ACCOUNT_SID}")
+  @Value("${TWILIO_ACCOUNT_SID}")
   private String accountSID;
 
-  @Value("${AUTH_TOKEN}")
+  @Value("${TWILIO_AUTH_TOKEN}")
   private String authToken;
 
-  @Value("${MESSAGING_SERVICE_SID}")
+  @Value("${TWILIO_MESSAGING_SERVICE_SID}")
   private String messagingServiceSID;
 
   @PostConstruct

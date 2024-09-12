@@ -7,14 +7,6 @@
     display: none;
 }
 
-#up1, #down1 {
-    left: 70%;
-}
-
-#check2, #close2 {
-    left: 85%;
-}
-
 #CallingCode {
     width: 31%;
     height: 100%;
@@ -55,9 +47,6 @@
         width: 90%;
     }
 
-    img, #close1, #check1, #up1, #down1 {
-        left: 82%;
-    }
 }
 
 
