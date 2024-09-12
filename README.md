@@ -9,6 +9,19 @@ jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
 - [Strona produkcyjna](https://multiplecard-neq8.onrender.com/)
 
+## Technologie
+
+- Java 17
+- Spring boot 3.3.2
+- Mongodb
+- Twilio
+- Spring security
+- Spring mail
+- Spring aop
+- Thymeleaf
+- Cloudinary
+- Zxing
+
 ## Zmienne Środowiskowe
 
 Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na prod:
