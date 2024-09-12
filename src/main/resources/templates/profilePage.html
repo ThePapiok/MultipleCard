@@ -255,13 +255,13 @@
                 <img class="qr" th:src="${card.imageUrl}" alt="cardNotFound" th:if="${card} != null">
             </div>
             <div id="cardButtons">
-                <a>
+                <a class="cardButton">
                     <button class="blackButton" th:text="#{profilePage.card.new}"></button>
                 </a>
-                <a th:if="${card} != null">
+                <a th:if="${card} != null" class="cardButton">
                     <button class="blackButton" th:text="#{profilePage.card.products}"></button>
                 </a>
-                <a th:if="${card} != null">
+                <a th:if="${card} != null" class="cardButton">
                     <button class="redButton" th:text="#{profilePage.card.block}"></button>
                 </a>
             </div>
