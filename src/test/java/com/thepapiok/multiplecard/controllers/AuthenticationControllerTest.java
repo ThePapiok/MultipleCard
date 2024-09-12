@@ -51,7 +51,8 @@ public class AuthenticationControllerTest {
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "Nieprawidłowy kod sms";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
-      "Za dużo razy wpisałeś niepoprawny kod";
+      "Za dużo razy podałeś niepoprawne dane";
+  private static final String ERROR_TOO_MANY_SMS_MESSAGE = "Za dużo razy poprosiłeś o nowy kod sms";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "Podane hasła różnią się";
   private static final String ERROR_INCORRECT_DATA_MESSAGE = "Podane dane są niepoprawne";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "Nie ma takiego użytkownika";
@@ -67,6 +68,7 @@ public class AuthenticationControllerTest {
   private static final String CALLING_CODES_PARAM = "callingCodes";
   private static final String LOGIN_PAGE = "loginPage";
   private static final String SUCCESS_PARAM = "success";
+  private static final String PARAM_PARAM = "param";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String PHONE_PARAM = "phone";
   private static final String CALLING_CODE_PARAM = "callingCode";
@@ -517,13 +519,12 @@ public class AuthenticationControllerTest {
   public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesSms()
       throws Exception {
     final int maxCodeAmount = 3;
-    final String message = "Za dużo razy poprosiłeś o nowy kod sms";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxCodeAmount);
 
     redirectVerificationErrorWhenTooMuchCodes(
-        CODE_AMOUNT_SMS_PARAM, NEW_CODE_SMS_PARAM, httpSession, message);
+        CODE_AMOUNT_SMS_PARAM, NEW_CODE_SMS_PARAM, httpSession, ERROR_TOO_MANY_SMS_MESSAGE);
   }
 
   @Test
@@ -874,7 +875,7 @@ public class AuthenticationControllerTest {
                 .param(CODE_PARAM, resetPasswordDTO.getCode())
                 .session(httpSession))
         .andExpect(redirectedUrl("/password_reset?error"));
-    assertEquals(amount, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertEquals(amount, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(resetPasswordDTO, httpSession.getAttribute(RESET_PARAM));
     assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
@@ -930,7 +931,7 @@ public class AuthenticationControllerTest {
     resetPasswordDTO.setPassword(TEST_PASSWORD);
     resetPasswordDTO.setRetypedPassword(password);
     resetPasswordDTO.setCode(TEST_CODE);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, amount);
+    httpSession.setAttribute(ATTEMPTS_PARAM, amount);
     httpSession.setAttribute(CODE_SMS_PARAM_RESET, TEST_ENCODE_CODE);
     httpSession.setAttribute(IS_SENT_PARAM, true);
     httpSession.setAttribute(RESET_PARAM, resetPasswordDTO);
@@ -949,7 +950,8 @@ public class AuthenticationControllerTest {
             post(GET_VERIFICATION_NUMBER_URL)
                 .session(httpSession)
                 .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE))
+                .param(PHONE_PARAM, TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
         .andExpect(content().string("ok"));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_RESET));
@@ -965,7 +967,8 @@ public class AuthenticationControllerTest {
         .perform(
             post(GET_VERIFICATION_NUMBER_URL)
                 .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE))
+                .param(PHONE_PARAM, TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
         .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
   }
 
@@ -974,7 +977,10 @@ public class AuthenticationControllerTest {
       throws Exception {
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL).param(CALLING_CODE_PARAM, "").param(PHONE_PARAM, ""))
+            post(GET_VERIFICATION_NUMBER_URL)
+                .param(CALLING_CODE_PARAM, "")
+                .param(PHONE_PARAM, "")
+                .param(PARAM_PARAM, ""))
         .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
   }
 
@@ -992,8 +998,9 @@ public class AuthenticationControllerTest {
             post(GET_VERIFICATION_NUMBER_URL)
                 .session(httpSession)
                 .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE))
-        .andExpect(content().string(ERROR_TOO_MANY_ATTEMPTS_MESSAGE));
+                .param(PHONE_PARAM, TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
+        .andExpect(content().string(ERROR_TOO_MANY_SMS_MESSAGE));
   }
 
   @Test
@@ -1012,7 +1019,8 @@ public class AuthenticationControllerTest {
             post(GET_VERIFICATION_NUMBER_URL)
                 .session(httpSession)
                 .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE))
+                .param(PHONE_PARAM, TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
         .andExpect(content().string(ERROR_AT_SMS_SENDING_MESSAGE));
   }
 }

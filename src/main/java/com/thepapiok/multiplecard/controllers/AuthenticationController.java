@@ -32,6 +32,7 @@ public class AuthenticationController {
   private static final String SUFFIX_VERIFICATION_MESSAGE = " MultipleCard: ";
   private static final String ERROR_SEND_SMS_PARAM_MESSAGE = "error.send_sms";
   private static final String ERROR_SEND_EMAIL_PARAM_MESSAGE = "error.send_email";
+  private static final String ERROR_TOO_MANY_SMS_MESSAGE = "error.to_many_sms";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE = "error.to_many_attempts";
   private static final String ERROR_VALIDATION_INCORRECT_DATA_MESSAGE = "validation.incorrect_data";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "error.bad_sms_code";
@@ -223,7 +224,8 @@ public class AuthenticationController {
         httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmountSmsInt + 1);
       } else {
         httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM, messageSource.getMessage("error.to_many_sms", null, locale));
+            ERROR_MESSAGE_PARAM,
+            messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale));
         return REDIRECT_VERIFICATION_ERROR;
       }
 
@@ -391,7 +393,11 @@ public class AuthenticationController {
       BindingResult bindingResult,
       HttpSession httpSession,
       Locale locale) {
-    int amount = (int) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
+    Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
+    if (amount == null) {
+      httpSession.setAttribute(ATTEMPTS_PARAM, 1);
+      amount = 1;
+    }
     final String fullPhone = reset.getCallingCode() + reset.getPhone();
     final int maxAmount = 3;
     if (bindingResult.hasErrors()) {
@@ -434,7 +440,7 @@ public class AuthenticationController {
   private String redirectPasswordResetError(
       HttpSession httpSession, int amount, ResetPasswordDTO reset, String message, Locale locale) {
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, messageSource.getMessage(message, null, locale));
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, amount + 1);
+    httpSession.setAttribute(ATTEMPTS_PARAM, amount + 1);
     httpSession.setAttribute(RESET_PARAM, reset);
     return "redirect:/password_reset?error";
   }
@@ -445,16 +451,19 @@ public class AuthenticationController {
       HttpSession httpSession,
       @RequestParam String callingCode,
       @RequestParam String phone,
+      @RequestParam String param,
       Locale locale) {
     final int maxAmount = 3;
     Integer codeAmount = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
-    Pattern phonePattern = Pattern.compile("^[1-9][0-9]*$");
-    Pattern callingCodePattern = Pattern.compile("^\\+[0-9]+");
-    if (!phonePattern.matcher(phone).matches()
-        || !callingCodePattern.matcher(callingCode).matches()) {
+    String fullPhone = callingCode + phone;
+    int length = fullPhone.length();
+    final int maxLength = 16;
+    final int minLength = 9;
+    Pattern phonePattern = Pattern.compile("^\\+[0-9]+[1-9][0-9]*$");
+    if (!phonePattern.matcher(fullPhone).matches() || length > maxLength || length < minLength) {
       return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
     }
-    if (!authenticationService.getAccountByPhone(callingCode + phone)) {
+    if (!authenticationService.getAccountByPhone(fullPhone)) {
       return messageSource.getMessage(ERROR_USER_NOT_FOUND_MESSAGE, null, locale);
     }
     if (codeAmount == null) {
@@ -462,9 +471,9 @@ public class AuthenticationController {
       httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
       codeAmount = 0;
     } else if (codeAmount == maxAmount) {
-      return messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale);
+      return messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale);
     }
-    if (!getVerificationSms(httpSession, phone, callingCode, locale, CODE_SMS_PARAM_RESET)) {
+    if (!getVerificationSms(httpSession, phone, callingCode, locale, param)) {
       return messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale);
     }
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmount + 1);
@@ -475,6 +484,7 @@ public class AuthenticationController {
     httpSession.removeAttribute(CODE_SMS_PARAM_RESET);
     httpSession.removeAttribute(IS_SENT_PARAM);
     httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
+    httpSession.removeAttribute(ATTEMPTS_PARAM);
     httpSession.removeAttribute(RESET_PARAM);
   }
 }
