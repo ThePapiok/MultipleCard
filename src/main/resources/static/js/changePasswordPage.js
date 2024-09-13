@@ -34,6 +34,7 @@ function checkOldPassword(e) {
 function checkPassword(e) {
     const input = e.value;
     check(3, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, buttonId, success, true, true);
+    checkRetypedPassword(document.getElementById("retypedPassword"));
 }
 
 function checkRetypedPassword(e) {
