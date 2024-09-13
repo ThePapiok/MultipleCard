@@ -58,7 +58,6 @@ public class AuthenticationController {
   private static final String CALLING_CODES_PARAM = "callingCodes";
   private static final String CALLING_CODE_PARAM = "callingCode";
   private static final String ERROR_UNEXPECTED = "error.unexpected";
-  private static final String IS_SENT_PARAM = "isSent";
   private final CountryService countryService;
   private final AuthenticationService authenticationService;
   private final PasswordEncoder passwordEncoder;
@@ -361,7 +360,7 @@ public class AuthenticationController {
       if (message != null) {
         model.addAttribute("error", message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
-        model.addAttribute(IS_SENT_PARAM, true);
+        model.addAttribute("isSent", true);
       } else {
         resetResetPassword(httpSession);
       }
@@ -467,7 +466,6 @@ public class AuthenticationController {
       return messageSource.getMessage(ERROR_USER_NOT_FOUND_MESSAGE, null, locale);
     }
     if (codeAmount == null) {
-      httpSession.setAttribute(IS_SENT_PARAM, true);
       httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
       codeAmount = 0;
     } else if (codeAmount == maxAmount) {
@@ -482,7 +480,6 @@ public class AuthenticationController {
 
   private void resetResetPassword(HttpSession httpSession) {
     httpSession.removeAttribute(CODE_SMS_PARAM_RESET);
-    httpSession.removeAttribute(IS_SENT_PARAM);
     httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
     httpSession.removeAttribute(ATTEMPTS_PARAM);
     httpSession.removeAttribute(RESET_PARAM);

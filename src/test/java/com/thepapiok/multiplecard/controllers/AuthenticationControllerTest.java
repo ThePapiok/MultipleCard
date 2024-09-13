@@ -717,7 +717,6 @@ public class AuthenticationControllerTest {
         .andExpect(model().attribute(RESET_PARAM, new ResetPasswordDTO()))
         .andExpect(view().name(RESET_PASSWORD_PAGE));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertNull(httpSession.getAttribute(IS_SENT_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(RESET_PARAM));
   }
@@ -734,7 +733,6 @@ public class AuthenticationControllerTest {
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(view().name(RESET_PASSWORD_PAGE));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertNull(httpSession.getAttribute(IS_SENT_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(RESET_PARAM));
   }
@@ -919,7 +917,6 @@ public class AuthenticationControllerTest {
         .andExpect(redirectedUrl(redirectUrl));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_PARAM_RESET));
-    assertNull(httpSession.getAttribute(IS_SENT_PARAM));
     assertNull(httpSession.getAttribute(RESET_PARAM));
     assertEquals(message, httpSession.getAttribute(param));
   }
