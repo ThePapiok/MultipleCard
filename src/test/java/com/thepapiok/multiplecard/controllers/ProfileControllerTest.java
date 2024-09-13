@@ -11,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.dto.ChangePasswordDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.ProfileService;
@@ -25,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,13 +47,31 @@ public class ProfileControllerTest {
   private static final String CITY_PARAM = "city";
   private static final String COUNTRY_PARAM = "country";
   private static final String PROFILE_PARAM = "profile";
+  private static final String CODE_PARAM = "code";
+  private static final String RETYPED_PASSWORD_PARAM = "retypedPassword";
+  private static final String NEW_PASSWORD_PARAM = "newPassword";
+  private static final String OLD_PASSWORD_PARAM = "oldPassword";
   private static final String COUNTRIES_PARAM = "countries";
   private static final String USER_URL = "/user";
+  private static final String PASSWORD_CHANGE_URL = "/password_change";
   private static final String USER_ERROR_URL = "/user?error";
   private static final String PROFILE_PAGE = "profilePage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_PARAM = "success";
   private static final String CARD_PARAM = "card";
+  private static final String ERROR_MESSAGE = "error!";
+  private static final String ERROR_PARAM = "error";
+  private static final String ATTEMPTS_PARAM = "attempts";
+  private static final String PHONE_PARAM = "phone";
+  private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
+  private static final String CODE_SMS_CHANGE_PARAM = "codeSmsChange";
+  private static final String CHANGE_PASSWORD_PARAM = "changePassword";
+  private static final String CHANGE_PASSWORD_PAGE = "changePasswordPage";
+  private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
+  private static final String TEST_CODE = "123 123";
+  private static final String TEST_OLD_PASSWORD = "Test123!";
+  private static final String TEST_NEW_PASSWORD = "Test123!!";
+  private static final String TEST_ENCODE_CODE = "312fdasfdsaffsd";
   private static ProfileDTO profileDTO;
   private static List<CountryDTO> countryDTOS;
   private static List<CountryNamesDTO> countryNamesDTOS;
@@ -59,6 +80,8 @@ public class ProfileControllerTest {
   @MockBean private ProfileService profileService;
   @MockBean private CountryService countryService;
   @MockBean private CardService cardService;
+  @MockBean private PasswordEncoder passwordEncoder;
+  @MockBean private AuthenticationService authenticationService;
 
   @BeforeAll
   public static void setUp() {
@@ -110,9 +133,8 @@ public class ProfileControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamAndMessage() throws Exception {
-    final String message = "error!";
     returnProfilePageWithParamAndMessage(
-        ERROR_MESSAGE_PARAM, message, "error", ERROR_MESSAGE_PARAM, message);
+        ERROR_MESSAGE_PARAM, ERROR_MESSAGE, ERROR_PARAM, ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
   }
 
   @Test
@@ -182,7 +204,7 @@ public class ProfileControllerTest {
     when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
 
     mockMvc.perform(post(USER_URL).session(httpSession)).andExpect(redirectedUrl(USER_ERROR_URL));
-    assertEquals("Podane dane są niepoprawne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -207,5 +229,214 @@ public class ProfileControllerTest {
                 .session(httpSession))
         .andExpect(redirectedUrl(USER_ERROR_URL));
     assertEquals("Nieoczekiwany błąd", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnChangePasswordPageAtChangePasswordPage() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_CHANGE_PARAM, "12312sdfsdfsdf");
+
+    mockMvc
+        .perform(get(PASSWORD_CHANGE_URL).session(httpSession))
+        .andExpect(model().attribute(CHANGE_PASSWORD_PARAM, new ChangePasswordDTO()))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(CHANGE_PASSWORD_PAGE));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_CHANGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnChangePasswordPageAtChangePasswordPageWhenParamWithoutMessage()
+      throws Exception {
+    mockMvc
+        .perform(get(PASSWORD_CHANGE_URL).param(ERROR_PARAM, ""))
+        .andExpect(model().attribute(CHANGE_PASSWORD_PARAM, new ChangePasswordDTO()))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(CHANGE_PASSWORD_PAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnChangePasswordPageAtChangePasswordPageWhenParamError() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+
+    mockMvc
+        .perform(get(PASSWORD_CHANGE_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(CHANGE_PASSWORD_PARAM, new ChangePasswordDTO()))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(view().name(CHANGE_PASSWORD_PAGE));
+    assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserAtChangePasswordPageWhenParamReset() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_CHANGE_PARAM, "12312sdfsdfsdaff");
+
+    mockMvc
+        .perform(get(PASSWORD_CHANGE_URL).param("reset", "").session(httpSession))
+        .andExpect(redirectedUrl(USER_URL));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_CHANGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToLoginSuccessAtChangePassword() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
+    when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(true);
+
+    redirectUserErrorAndLoginSuccess(httpSession, "/login?success");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserErrorAtChangePasswordWhenToManyAttempts() throws Exception {
+    final int maxAttempts = 3;
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(maxAttempts, httpSession);
+
+    redirectUserErrorAndLoginSuccess(httpSession, USER_ERROR_URL);
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertEquals(
+        "Za dużo razy podałeś niepoprawne dane", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  private void redirectUserErrorAndLoginSuccess(MockHttpSession httpSession, String redirectUrl)
+      throws Exception {
+    mockMvc
+        .perform(
+            post(PASSWORD_CHANGE_URL)
+                .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
+                .param(NEW_PASSWORD_PARAM, TEST_NEW_PASSWORD)
+                .param(RETYPED_PASSWORD_PARAM, TEST_NEW_PASSWORD)
+                .param(CODE_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(redirectUrl));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToPasswordChangeErrorAtChangePasswordWhenErrorValidation()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    redirectPasswordChangeError(httpSession, ERROR_VALIDATION_MESSAGE, "", "");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToPasswordChangeErrorAtChangePasswordWhenBadCode() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
+
+    redirectPasswordChangeError(
+        httpSession, "Nieprawidłowy kod sms", TEST_NEW_PASSWORD, TEST_NEW_PASSWORD);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToPasswordChangeErrorAtChangePasswordWhenBadOldPassword()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(false);
+
+    redirectPasswordChangeError(
+        httpSession, "Podane stare hasło jest błędne", TEST_NEW_PASSWORD, TEST_NEW_PASSWORD);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToPasswordChangeErrorAtChangePasswordWhenPasswordsAreNotTheSame()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
+
+    redirectPasswordChangeError(
+        httpSession, "Podane hasła różnią się", TEST_NEW_PASSWORD, "Test123!!!");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToPasswordChangeErrorAtChangePasswordWhenPasswordsAreTheSame()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
+
+    redirectPasswordChangeError(
+        httpSession,
+        "Stare hasło i nowe hasło jest takie samo",
+        TEST_OLD_PASSWORD,
+        TEST_OLD_PASSWORD);
+  }
+
+  private void redirectPasswordChangeError(
+      MockHttpSession httpSession, String message, String newPassword, String retypedPassword)
+      throws Exception {
+    mockMvc
+        .perform(
+            post(PASSWORD_CHANGE_URL)
+                .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
+                .param(NEW_PASSWORD_PARAM, newPassword)
+                .param(RETYPED_PASSWORD_PARAM, retypedPassword)
+                .param(CODE_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl("/password_change?error"));
+    assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(2, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserErrorAtChangePasswordWhenErrorAtChangePassword()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setSession(1, httpSession);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
+    when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(false);
+
+    redirectUserErrorAndLoginSuccess(httpSession, USER_ERROR_URL);
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+  }
+
+  private void setSession(int attempts, MockHttpSession httpSession) {
+    httpSession.setAttribute(ATTEMPTS_PARAM, attempts);
+    httpSession.setAttribute(CODE_SMS_CHANGE_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
   }
 }

@@ -111,4 +111,9 @@ public class AuthenticationService {
   public boolean getAccountByPhone(String phone) {
     return accountRepository.findByPhone(phone) != null;
   }
+
+  public boolean checkPassword(String password, String phone) {
+    return passwordEncoder.matches(
+        password, accountRepository.findPasswordByPhone(phone).getPassword());
+  }
 }

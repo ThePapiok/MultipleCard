@@ -31,7 +31,7 @@ public class SecurityConfig {
                     .hasRole(roleUser)
                     .requestMatchers("/register", "/password_reset")
                     .anonymous()
-                    .requestMatchers("/user")
+                    .requestMatchers("/user", "/password_change")
                     .authenticated()
                     .anyRequest()
                     .permitAll())

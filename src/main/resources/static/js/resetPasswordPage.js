@@ -9,10 +9,6 @@ const buttonId1 = "codeButton";
 const buttonId2 = "resetButton";
 const regVerificationNumber = new RegExp("^[0-9]{3} [0-9]{3}$");
 
-function cancelForm(){
-    return false;
-}
-
 function checkCallingCode(e) {
     const input = e.value;
     check(1, (input !== ''), ok1, previous1, buttonId1, success1, false, false);
@@ -60,23 +56,19 @@ function getForm(e) {
             },
             body: new URLSearchParams({
                 "callingCode": callingCode,
-                "phone": phone
+                "phone": phone,
+                "param": "codeSmsReset"
             })
         })
             .then(response => response.text())
             .then(response => {
                 if(response !== "ok"){
                     document.getElementById("errorBefore").textContent = response;
-                    document.getElementById("passwordForm").dataset.isSent = "false";
-                    document.getElementById("valueCallingCode").disabled = false;
-                    document.getElementById("phoneInput").disabled = false;
                 }
                 else{
                     document.getElementById("passwordForm").dataset.isSent = "true";
                     document.getElementById("error").textContent = "";
                     document.getElementById("errorBefore").textContent = "";
-                    document.getElementById("valueCallingCode").disabled = true;
-                    document.getElementById("phoneInput").disabled = true;
                 }
             })
             .catch(error => {
@@ -89,6 +81,6 @@ function atStart() {
     checkCallingCode(document.getElementById("valueCallingCode"));
     document.getElementById("searchCallingCode").value = "";
     checkLanguage();
-    checkVerificationSms(document.getElementById("verificationNumberSms"));
+    document.getElementById("verificationNumberSms").value = "";
 }
 

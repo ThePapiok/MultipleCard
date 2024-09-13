@@ -69,6 +69,7 @@ function checkPhone(e) {
 function checkPassword(e) {
     const input = e.value;
     check(11, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, nextButtonId, success, true, true);
+    checkRetypedPassword(document.getElementById("retypedPassword"));
 }
 
 function checkRetypedPassword(e) {
