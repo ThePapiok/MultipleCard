@@ -21,6 +21,7 @@ public class AccountRepositoryTest {
   private static final String TEST_PHONE2 = "+76546545343";
   private static final String TEST_EMAIL1 = "email1";
   private static final String TEST_EMAIL2 = "email2";
+  private static final String TEST_PASSWORD1 = "Zasdq1!2dss";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static boolean first;
   private Account account1;
@@ -37,7 +38,7 @@ public class AccountRepositoryTest {
       account1.setPhone(TEST_PHONE1);
       account1.setEmail(TEST_EMAIL1);
       account1.setId(TEST_ID);
-      account1.setPassword("Zasdq1!2dss");
+      account1.setPassword(TEST_PASSWORD1);
       account1.setActive(true);
       account1.setRole(Role.ROLE_USER);
       account2 = new Account();
@@ -82,5 +83,13 @@ public class AccountRepositoryTest {
     expectedAccount.setId(TEST_ID);
 
     assertEquals(expectedAccount, accountRepository.findIdByPhone(TEST_PHONE1));
+  }
+
+  @Test
+  public void shouldSuccessFindPasswordByPhone() {
+    Account expecetedAccount = new Account();
+    expecetedAccount.setPassword(TEST_PASSWORD1);
+
+    assertEquals(expecetedAccount, accountRepository.findPasswordByPhone(TEST_PHONE1));
   }
 }

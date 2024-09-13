@@ -30,8 +30,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Profile("test")
 public class AuthenticationServiceTest {
   private static final String TEST_PHONE = "213442123411324";
-  private static final String PASSWORD = "password";
-  private static final String ENCODE_PASSWORD = "encodePassword";
+  private static final String TEST_PASSWORD = "password";
+  private static final String TEST_ENCODE_PASSWORD = "encodePassword";
   private AuthenticationService authenticationService;
   private RegisterDTO registerDTO;
   private User expectedUser;
@@ -165,12 +165,12 @@ public class AuthenticationServiceTest {
     account.setPhone(TEST_PHONE);
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
-    expectedAccount.setPassword(ENCODE_PASSWORD);
+    expectedAccount.setPassword(TEST_ENCODE_PASSWORD);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
-    when(passwordEncoder.encode(PASSWORD)).thenReturn(ENCODE_PASSWORD);
+    when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(TEST_ENCODE_PASSWORD);
 
-    assertTrue(authenticationService.changePassword(TEST_PHONE, PASSWORD));
+    assertTrue(authenticationService.changePassword(TEST_PHONE, TEST_PASSWORD));
     verify(accountRepository).save(expectedAccount);
   }
 
@@ -180,13 +180,13 @@ public class AuthenticationServiceTest {
     account.setPhone(TEST_PHONE);
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
-    expectedAccount.setPassword(ENCODE_PASSWORD);
+    expectedAccount.setPassword(TEST_ENCODE_PASSWORD);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
-    when(passwordEncoder.encode(PASSWORD)).thenReturn(ENCODE_PASSWORD);
+    when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(TEST_ENCODE_PASSWORD);
     doThrow(MongoWriteException.class).when(accountRepository).save(expectedAccount);
 
-    assertFalse(authenticationService.changePassword(TEST_PHONE, PASSWORD));
+    assertFalse(authenticationService.changePassword(TEST_PHONE, TEST_PASSWORD));
     verify(accountRepository).save(expectedAccount);
   }
 
@@ -204,5 +204,29 @@ public class AuthenticationServiceTest {
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(null);
 
     assertFalse(authenticationService.getAccountByPhone(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtCheckPassword() {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setPassword(TEST_ENCODE_PASSWORD);
+
+    when(accountRepository.findPasswordByPhone(TEST_PHONE)).thenReturn(account);
+    when(passwordEncoder.matches(TEST_PASSWORD, TEST_ENCODE_PASSWORD)).thenReturn(true);
+
+    assertTrue(authenticationService.checkPassword(TEST_PASSWORD, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtCheckPassword() {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setPassword(TEST_ENCODE_PASSWORD);
+
+    when(accountRepository.findPasswordByPhone(TEST_PHONE)).thenReturn(account);
+    when(passwordEncoder.matches(TEST_PASSWORD, TEST_ENCODE_PASSWORD)).thenReturn(false);
+
+    assertFalse(authenticationService.checkPassword(TEST_PASSWORD, TEST_PHONE));
   }
 }

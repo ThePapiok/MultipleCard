@@ -238,7 +238,7 @@
         <a>
             <button type="button" class="grayButton" id="saveButton" th:text="#{profilePage.button.save}"></button>
         </a>
-        <a>
+        <a th:href="@{/password_change}">
             <button type="button" class="blackButton" th:text="#{password.button.change}"></button>
         </a>
         <a>
@@ -246,7 +246,7 @@
         </a>
     </form>
     <p class="title" th:text="#{profilePage.2_title}"></p>
-    <div id="cardInfo">
+    <div id="cardInfo" sec:authorize="hasRole('USER')">
         <p class="nameCard" th:if="${card} == null" th:text="#{profilePage.card.not_found}"></p>
         <p class="nameCard" th:if="${card} != null" th:text="${card.name}"></p>
         <div id="cardWithButtons">

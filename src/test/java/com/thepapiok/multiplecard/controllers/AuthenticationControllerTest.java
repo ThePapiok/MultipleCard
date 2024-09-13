@@ -805,6 +805,7 @@ public class AuthenticationControllerTest {
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    setResetPasswordAndSession(new ResetPasswordDTO(), httpSession, TEST_PASSWORD, 1);
 
     redirectPasswordResetError(resetPasswordDTO, httpSession, ERROR_INCORRECT_DATA_MESSAGE);
   }

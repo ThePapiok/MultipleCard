@@ -394,21 +394,21 @@ public class AuthenticationController {
       Locale locale) {
     Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
     if (amount == null) {
-      httpSession.setAttribute(ATTEMPTS_PARAM, 1);
-      amount = 1;
+      httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+      amount = 0;
     }
     final String fullPhone = reset.getCallingCode() + reset.getPhone();
     final int maxAmount = 3;
-    if (bindingResult.hasErrors()) {
-      return redirectPasswordResetError(
-          httpSession, amount, reset, ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, locale);
-    }
     if (amount == maxAmount) {
       resetResetPassword(httpSession);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
       return REDIRECT_LOGIN_ERROR;
+    }
+    if (bindingResult.hasErrors()) {
+      return redirectPasswordResetError(
+          httpSession, amount, reset, ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, locale);
     }
     if (!passwordEncoder.matches(
         reset.getCode(), (String) httpSession.getAttribute(CODE_SMS_PARAM_RESET))) {
