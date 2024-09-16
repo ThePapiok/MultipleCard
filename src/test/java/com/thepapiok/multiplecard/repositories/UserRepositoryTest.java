@@ -40,16 +40,17 @@ public class UserRepositoryTest {
   private static ReviewGetDTO reviewGetDTO1;
   private static ReviewGetDTO reviewGetDTO2;
   private static ReviewGetDTO reviewGetDTO3;
-  private static Card card;
   private static boolean firstTime;
   @Autowired private UserRepository userRepository;
   @Autowired private LikeRepository likeRepository;
+  @Autowired private CardRepository cardRepository;
   @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
   public void setUp() {
     if (!firstTime) {
+      final ObjectId cardId = new ObjectId("123123123123123123123123");
       final int count1 = 2;
       final int count2 = 1;
       final int year1 = 2012;
@@ -84,18 +85,21 @@ public class UserRepositoryTest {
       address1.setPostalCode("p1");
       address1.setProvince("province1");
       address1.setStreet("street1");
-      card = new Card();
+      Card card = new Card();
+      card.setId(cardId);
+      card.setName("name");
+      card.setAttempts(0);
+      card.setPin("123sasdfaf");
+      card.setImageUrl("123asdasdasdasd");
+      card.setUserId(TEST_ID1);
+      cardRepository.save(card);
       User user1 = new User();
       user1.setFirstName(TEST1_TEXT);
       user1.setId(TEST_ID1);
       user1.setLastName("last1");
       user1.setAddress(address1);
       user1.setReview(review1);
-      user1.setCard(card);
-      card.setName("name");
-      card.setAttempts(0);
-      card.setPin("123sasdfaf");
-      card.setImageUrl("123asdasdasdasd");
+      user1.setCardId(cardId);
       userRepository.save(user1);
       Review review2 = new Review();
       review2.setDescription(TEST1_TEXT);
@@ -114,6 +118,7 @@ public class UserRepositoryTest {
       user2.setReview(review2);
       user2.setLastName("last2");
       user2.setAddress(address2);
+      user2.setCardId(null);
       userRepository.save(user2);
       Review review3 = new Review();
       review3.setDescription("b");
@@ -132,6 +137,7 @@ public class UserRepositoryTest {
       user3.setReview(review3);
       user3.setLastName("last3");
       user3.setAddress(address3);
+      user3.setCardId(null);
       userRepository.save(user3);
       Address address4 = new Address();
       address4.setCity("city4");
@@ -145,6 +151,7 @@ public class UserRepositoryTest {
       user4.setId(TEST_ID4);
       user4.setLastName("last4");
       user4.setAddress(address4);
+      user4.setCardId(null);
       userRepository.save(user4);
       Like like1 = new Like();
       like1.setReviewUserId(TEST_ID1);
@@ -276,10 +283,5 @@ public class UserRepositoryTest {
   @Test
   public void shouldSuccessFindReview() {
     assertEquals(reviewGetDTO2, userRepository.findReview(TEST_ID2));
-  }
-
-  @Test
-  public void shouldSuccessFindCardById() {
-    assertEquals(card, userRepository.findCardById(TEST_ID1).getCard());
   }
 }

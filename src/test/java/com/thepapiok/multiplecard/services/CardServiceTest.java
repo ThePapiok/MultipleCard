@@ -5,8 +5,8 @@ import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
-import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +17,13 @@ import org.mockito.MockitoAnnotations;
 public class CardServiceTest {
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
+  @Mock private CardRepository cardRepository;
   private CardService cardService;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    cardService = new CardService(accountRepository, userRepository);
+    cardService = new CardService(accountRepository, userRepository, cardRepository);
   }
 
   @Test
@@ -32,12 +33,9 @@ public class CardServiceTest {
     Account account = new Account();
     account.setId(objectId);
     Card expectedCard = new Card();
-    User user = new User();
-    user.setId(objectId);
-    user.setCard(expectedCard);
 
     when(accountRepository.findIdByPhone(phone)).thenReturn(account);
-    when(userRepository.findCardById(objectId)).thenReturn(user);
+    when(cardRepository.findCardByUserId(objectId)).thenReturn(expectedCard);
 
     assertEquals(expectedCard, cardService.getCard(phone));
   }
