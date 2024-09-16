@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 @AutoConfigureMockMvc
 public class CustomAuthenticationFailureHandlerTest {
   private static final String ERROR_USER_NOT_ACTIVE_MESSAGE = "Konto nie jest aktywowane";
-  private static final String ERROR_BAD_CREDENTIALS_MESSAGE = "Podane dane są nieprawidłowe";
+  private static final String ERROR_BAD_CREDENTIALS_MESSAGE = "Błędny login lub hasło";
   private static final String LOGIN_ERROR_URL = "/login?error";
 
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
@@ -27,11 +29,15 @@ public class CustomAuthenticationFailureHandlerTest {
   @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private MockHttpServletRequest httpServletRequest;
   private MockHttpServletResponse httpServletResponse;
+  @Autowired private MessageSource messageSource;
 
   @BeforeEach
   public void setUp() {
+    LocaleChanger localeChanger = new LocaleChanger();
+    localeChanger.setLocale(LocaleContextHolder.getLocale());
     httpServletRequest = new MockHttpServletRequest();
-    customAuthenticationFailureHandler = new CustomAuthenticationFailureHandler();
+    customAuthenticationFailureHandler =
+        new CustomAuthenticationFailureHandler(localeChanger, messageSource);
     httpServletResponse = new MockHttpServletResponse();
   }
 

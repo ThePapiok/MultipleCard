@@ -9,7 +9,7 @@ db.createCollection("accounts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "phone", "password", "email", "role", "isActive", "_class"],
+            "required": ["_id", "phone", "password", "email", "role", "isActive", "isBanned", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -35,6 +35,10 @@ db.createCollection("accounts", {
                 "isActive": {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
+                },
+                "isBanned": {
+                    "bsonType": "bool",
+                    "description": "isBanned is required and must be bool"
                 },
                 "_class": {
                     "bsonType": "string",

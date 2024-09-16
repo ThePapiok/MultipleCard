@@ -6,12 +6,11 @@ import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.exceptions.BannedException;
 import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
-import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,15 +28,11 @@ public class UserServiceTest {
 
   private UserService userService;
   @Mock private AccountRepository accountRepository;
-  @Mock private UserRepository userRepository;
-
-  @BeforeAll
-  public static void setAll() {}
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    userService = new UserService(accountRepository, userRepository);
+    userService = new UserService(accountRepository);
   }
 
   @Test
@@ -47,6 +42,7 @@ public class UserServiceTest {
     expectedAccount.setId(TEST_ID);
     expectedAccount.setEmail(TEST_EMAIL);
     expectedAccount.setActive(true);
+    expectedAccount.setBanned(false);
     expectedAccount.setRole(Role.ROLE_USER);
     expectedAccount.setPassword(TEST_PASSWORD);
     User user =
@@ -75,11 +71,28 @@ public class UserServiceTest {
     expectedAccount.setId(TEST_ID);
     expectedAccount.setEmail(TEST_EMAIL);
     expectedAccount.setActive(false);
+    expectedAccount.setBanned(false);
     expectedAccount.setRole(Role.ROLE_USER);
     expectedAccount.setPassword(TEST_PASSWORD);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(expectedAccount);
 
     assertThrows(NotActiveException.class, () -> userService.loadUserByUsername(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtLoadUserByUsernameWhenUserBanned() {
+    Account expectedAccount = new Account();
+    expectedAccount.setPhone(TEST_PHONE);
+    expectedAccount.setId(TEST_ID);
+    expectedAccount.setEmail(TEST_EMAIL);
+    expectedAccount.setActive(true);
+    expectedAccount.setBanned(true);
+    expectedAccount.setRole(Role.ROLE_USER);
+    expectedAccount.setPassword(TEST_PASSWORD);
+
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(expectedAccount);
+
+    assertThrows(BannedException.class, () -> userService.loadUserByUsername(TEST_PHONE));
   }
 }
