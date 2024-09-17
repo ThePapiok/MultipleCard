@@ -29,6 +29,8 @@ services:
     volumes:
       - data:/data/db
       - ./init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
+      - ./mongo-keyfile:/data/configdb/mongo-keyfile
+    command: mongod --replSet repl --bind_ip_all --keyFile /data/configdb/mongo-keyfile
     ports:
       - 27018:27017
 volumes:

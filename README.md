@@ -77,7 +77,8 @@ Dodaj zmienne środowiskowe (przykładowe)
 Uruchom kontenery
 
 ```bash
-  docker-compose up
+  ./startDb.sh
+  docker-compose up web
 ```
 
 Wejdź na adres **[localhost:8080](http://localhost:8080/)**
@@ -93,7 +94,7 @@ Po skończeniu używania
 Aby uruchomić testy, użyj tej komendy
 
 ```bash
-  docker-compose up db
+    ./startDb.sh
 ```
 
 ```bash
