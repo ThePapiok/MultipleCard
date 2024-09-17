@@ -11,7 +11,7 @@ public class User {
   @Id private ObjectId id;
   private String firstName;
   private String lastName;
-  private Card card;
+  private ObjectId cardId;
   private int points;
   private Review review;
   private Address address;

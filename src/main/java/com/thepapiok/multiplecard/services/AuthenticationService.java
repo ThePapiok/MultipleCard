@@ -46,7 +46,7 @@ public class AuthenticationService {
   public boolean createUser(RegisterDTO register) {
     try {
       User user = userConverter.getEntity(register);
-      user.setCard(null);
+      user.setCardId(null);
       user.setPoints(0);
       user.setReview(null);
       user = userRepository.save(user);
@@ -54,6 +54,7 @@ public class AuthenticationService {
       account.setId(user.getId());
       account.setRole(Role.ROLE_USER);
       account.setActive(true);
+      account.setBanned(false);
       accountRepository.save(account);
       return true;
     } catch (Exception e) {

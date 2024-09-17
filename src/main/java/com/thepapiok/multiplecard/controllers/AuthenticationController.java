@@ -5,6 +5,7 @@ import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
+import com.thepapiok.multiplecard.misc.LocaleChanger;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.EmailService;
@@ -64,6 +65,7 @@ public class AuthenticationController {
   private final SmsService smsService;
   private final EmailService emailService;
   private final MessageSource messageSource;
+  private final LocaleChanger localeChanger;
 
   @Autowired
   public AuthenticationController(
@@ -72,13 +74,15 @@ public class AuthenticationController {
       PasswordEncoder passwordEncoder,
       SmsService smsService,
       EmailService emailService,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      LocaleChanger localeChanger) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
     this.passwordEncoder = passwordEncoder;
     this.smsService = smsService;
     this.emailService = emailService;
     this.messageSource = messageSource;
+    this.localeChanger = localeChanger;
   }
 
   @GetMapping("/login")
@@ -86,7 +90,9 @@ public class AuthenticationController {
       @RequestParam(required = false) String success,
       @RequestParam(required = false) String error,
       Model model,
-      HttpSession httpSession) {
+      HttpSession httpSession,
+      Locale locale) {
+    localeChanger.setLocale(locale);
     if (success != null) {
       String message = (String) httpSession.getAttribute(SUCCESS_MESSAGE_PARAM);
       if (message != null) {

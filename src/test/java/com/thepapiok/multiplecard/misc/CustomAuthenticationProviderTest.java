@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.exceptions.BannedException;
 import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,10 +32,15 @@ public class CustomAuthenticationProviderTest {
   @Autowired private CustomAuthenticationProvider customAuthenticationProvider;
   @MockBean private UserService userService;
   @MockBean private PasswordEncoder passwordEncoder;
+  @Autowired private MessageSource messageSource;
 
   @BeforeEach
   public void setUp() {
-    customAuthenticationProvider = new CustomAuthenticationProvider(userService, passwordEncoder);
+    LocaleChanger localeChanger = new LocaleChanger();
+    localeChanger.setLocale(LocaleContextHolder.getLocale());
+    customAuthenticationProvider =
+        new CustomAuthenticationProvider(
+            userService, passwordEncoder, localeChanger, messageSource);
   }
 
   @Test
@@ -60,5 +68,16 @@ public class CustomAuthenticationProviderTest {
 
     assertThrows(
         NotActiveException.class, () -> customAuthenticationProvider.authenticate(authentication));
+  }
+
+  @Test
+  public void shouldRedirectToLoginAtAuthenticateWhenUserBanned() {
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(TEST_USER_TEXT, TEST_USER_TEXT);
+
+    when(userService.loadUserByUsername(TEST_USER_TEXT)).thenThrow(BannedException.class);
+
+    assertThrows(
+        BannedException.class, () -> customAuthenticationProvider.authenticate(authentication));
   }
 }

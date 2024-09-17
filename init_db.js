@@ -9,7 +9,7 @@ db.createCollection("accounts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "phone", "password", "email", "role", "isActive", "_class"],
+            "required": ["_id", "phone", "password", "email", "role", "isActive", "isBanned", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -35,6 +35,10 @@ db.createCollection("accounts", {
                 "isActive": {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
+                },
+                "isBanned": {
+                    "bsonType": "bool",
+                    "description": "isBanned is required and must be bool"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -125,7 +129,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "promotion", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -183,16 +187,16 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "userId", "productId", "createdAt", "isUsed", "amount", "_class"],
+            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "amount", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
                     "bsonType": "objectId",
                     "description": "_id is required and must be objectId"
                 },
-                "userId": {
+                "cardId": {
                     "bsonType": "objectId",
-                    "description": "userId is required and must be objectId"
+                    "description": "cardId is required and must be objectId"
                 },
                 "productId": {
                     "bsonType": "objectId",
@@ -332,30 +336,9 @@ db.createCollection("users", {
                     "description":
                         "points is required, must be int and greater or equal than 0"
                 },
-                "card":{
-                    "bsonType": ["object", "null"],
-                    "required": ["name", "imageUrl", "pin", "attempts"],
-                    "additionalProperties": false,
-                    "properties": {
-                        "name": {
-                            "bsonType": "string",
-                            "description": "name is required and must be string"
-                        },
-                        "imageUrl": {
-                            "bsonType": "string",
-                            "description": "imageUrl is required and must be string"  
-                        },
-                        "pin": {
-                            "bsonType": "string",
-                            "description": "pin is required and must be string"
-                        },
-                        "attempts": {
-                            "bsonType": "int",
-                            "minimum": 0,
-                            "maximum": 3,
-                            "description": "attempts is required and must be in [0, 3]"
-                        }
-                    }
+                "cardId":{
+                    "bsonType": ["null", "objectId"],
+                    "description": "cardId is required and must be objectId"
                 },
                 "review": {
                     "bsonType": ["object", "null"],
@@ -387,8 +370,47 @@ db.createCollection("users", {
         }
     }
 });
+db.createCollection("cards", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "userId", "name", "imageUrl", "pin", "attempts", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "name": {
+                    "bsonType": "string",
+                    "description": "name is required and must be string"
+                },
+                "imageUrl": {
+                    "bsonType": "string",
+                    "description": "imageUrl is required and must be string"
+                },
+                "pin": {
+                    "bsonType": "string",
+                    "description": "pin is required and must be string"
+                },
+                "attempts": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "description": "attempts is required and must be in [0, 3]"
+                },
+                "userId":{
+                    "bsonType": "objectId",
+                    "description": "userId is required and must be objectId"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+        }}})
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.accounts.createIndex({"email": 1}, {"unique": true});
-db.users.createIndex({"review.description": "text"}, {"default_language": "none"});
+db.users.createIndex({"review.description": "text"}, {"default_language": "none"})

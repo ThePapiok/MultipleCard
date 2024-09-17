@@ -14,4 +14,5 @@ public class Account {
   private String email;
   private Role role;
   private boolean isActive;
+  private boolean isBanned;
 }

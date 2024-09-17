@@ -6,12 +6,14 @@ import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
@@ -23,7 +25,6 @@ public class AccountRepositoryTest {
   private static final String TEST_EMAIL2 = "email2";
   private static final String TEST_PASSWORD1 = "Zasdq1!2dss";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
-  private static boolean first;
   private Account account1;
   private Account account2;
 
@@ -31,26 +32,29 @@ public class AccountRepositoryTest {
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
+  @Transactional
   public void setUp() {
-    if (!first) {
-      first = true;
-      account1 = new Account();
-      account1.setPhone(TEST_PHONE1);
-      account1.setEmail(TEST_EMAIL1);
-      account1.setId(TEST_ID);
-      account1.setPassword(TEST_PASSWORD1);
-      account1.setActive(true);
-      account1.setRole(Role.ROLE_USER);
-      account2 = new Account();
-      account2.setPhone(TEST_PHONE2);
-      account2.setEmail(TEST_EMAIL2);
-      account2.setId(new ObjectId("123456789012345678901235"));
-      account2.setPassword("asdaZ12!asd");
-      account2.setActive(true);
-      account2.setRole(Role.ROLE_USER);
-      accountRepository.save(account1);
-      accountRepository.save(account2);
-    }
+    account1 = new Account();
+    account1.setPhone(TEST_PHONE1);
+    account1.setEmail(TEST_EMAIL1);
+    account1.setId(TEST_ID);
+    account1.setPassword(TEST_PASSWORD1);
+    account1.setActive(true);
+    account1.setRole(Role.ROLE_USER);
+    account2 = new Account();
+    account2.setPhone(TEST_PHONE2);
+    account2.setEmail(TEST_EMAIL2);
+    account2.setId(new ObjectId("123456789012345678901235"));
+    account2.setPassword("asdaZ12!asd");
+    account2.setActive(true);
+    account2.setRole(Role.ROLE_USER);
+    accountRepository.save(account1);
+    accountRepository.save(account2);
+  }
+
+  @AfterEach
+  public void cleanUp() {
+    accountRepository.deleteAll();
   }
 
   @Test
