@@ -20,7 +20,9 @@ services:
     depends_on:
       - db
   db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: db.dockerfile
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: user
@@ -29,11 +31,24 @@ services:
     volumes:
       - data:/data/db
       - ./init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
-      - ./mongo-keyfile:/data/configdb/mongo-keyfile
-    command: mongod --replSet repl --bind_ip_all --keyFile /data/configdb/mongo-keyfile
+    ports:
+      - 27017:27017
+  test:
+    build:
+      context: .
+      dockerfile: db.dockerfile
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: user
+      MONGO_INITDB_DATABASE: multipleCard
+    volumes:
+      - dataTest:/data/db
+      - ./init_db.js:/docker-entrypoint-initdb.d/init_db.js:ro
     ports:
       - 27018:27017
 volumes:
   data:
+  dataTest:
 
 

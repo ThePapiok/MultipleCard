@@ -7,60 +7,70 @@ import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.misc.AccountConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
-import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class AuthenticationService {
 
   private final AccountRepository accountRepository;
-  private final UserRepository userRepository;
   private final UserConverter userConverter;
   private final AccountConverter accountConverter;
   private final PasswordEncoder passwordEncoder;
-
+  private final MongoTransactionManager mongoTransactionManager;
+  private final MongoTemplate mongoTemplate;
   private Random random;
 
   @Autowired
   public AuthenticationService(
       AccountRepository accountRepository,
-      UserRepository userRepository,
       UserConverter userConverter,
       AccountConverter accountConverter,
-      PasswordEncoder passwordEncoder) {
+      PasswordEncoder passwordEncoder,
+      MongoTransactionManager mongoTransactionManager,
+      MongoTemplate mongoTemplate) {
     this.accountRepository = accountRepository;
-    this.userRepository = userRepository;
     this.userConverter = userConverter;
     this.accountConverter = accountConverter;
     this.passwordEncoder = passwordEncoder;
+    this.mongoTransactionManager = mongoTransactionManager;
+    this.mongoTemplate = mongoTemplate;
     random = new Random();
   }
 
-  @Transactional
   public boolean createUser(RegisterDTO register) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
-      User user = userConverter.getEntity(register);
-      user.setCardId(null);
-      user.setPoints(0);
-      user.setReview(null);
-      user = userRepository.save(user);
-      Account account = accountConverter.getEntity(register);
-      account.setId(user.getId());
-      account.setRole(Role.ROLE_USER);
-      account.setActive(true);
-      account.setBanned(false);
-      accountRepository.save(account);
-      return true;
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              User user = userConverter.getEntity(register);
+              user.setCardId(null);
+              user.setPoints(0);
+              user.setReview(null);
+              user = mongoTemplate.save(user);
+              Account account = accountConverter.getEntity(register);
+              account.setId(user.getId());
+              account.setRole(Role.ROLE_USER);
+              account.setActive(true);
+              account.setBanned(false);
+              mongoTemplate.save(account);
+            }
+          });
     } catch (Exception e) {
-      System.out.println(e);
       return false;
     }
+    return true;
   }
 
   public List<String> getPhones() {

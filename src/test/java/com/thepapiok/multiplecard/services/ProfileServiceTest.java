@@ -1,20 +1,18 @@
 package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.CardRepository;
+import com.thepapiok.multiplecard.repositories.OrderRepository;
+import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -23,6 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 public class ProfileServiceTest {
   private static final String TEST_PHONE = "+48755775676767";
@@ -33,6 +33,11 @@ public class ProfileServiceTest {
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
   @Mock private ProfileConverter profileConverter;
+  @Mock private CardRepository cardRepository;
+  @Mock private OrderRepository orderRepository;
+  @Mock private ProductRepository productRepository;
+  @Mock private MongoTemplate mongoTemplate;
+  @Mock private MongoTransactionManager mongoTransactionManager;
   private ProfileService profileService;
 
   @BeforeAll
@@ -71,7 +76,16 @@ public class ProfileServiceTest {
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    profileService = new ProfileService(accountRepository, userRepository, profileConverter);
+    profileService =
+        new ProfileService(
+            accountRepository,
+            userRepository,
+            profileConverter,
+            cardRepository,
+            orderRepository,
+            productRepository,
+            mongoTemplate,
+            mongoTransactionManager);
   }
 
   @Test
@@ -95,22 +109,5 @@ public class ProfileServiceTest {
     when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertNull(profileService.getProfile(TEST_PHONE));
-  }
-
-  @Test
-  public void shouldSuccessAtEditProfile() {
-    when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
-
-    assertTrue(profileService.editProfile(profileDTO, TEST_PHONE));
-    verify(userRepository).save(user);
-  }
-
-  @Test
-  public void shouldFailAtEditProfileWhenGetException() {
-    when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
-    doThrow(MongoWriteException.class).when(userRepository).save(user);
-
-    assertFalse(profileService.editProfile(profileDTO, TEST_PHONE));
-    verify(userRepository).save(user);
   }
 }

@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 public class ReviewServiceTest {
   private static final ObjectId TEST_ID1 = new ObjectId("123456789012345678901234");
@@ -52,6 +54,8 @@ public class ReviewServiceTest {
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
   @Mock private LikeRepository likeRepository;
+  @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private MongoTemplate mongoTemplate;
   private ReviewService reviewService;
 
   @BeforeAll
@@ -64,7 +68,13 @@ public class ReviewServiceTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     reviewService =
-        new ReviewService(reviewConverter, accountRepository, userRepository, likeRepository);
+        new ReviewService(
+            reviewConverter,
+            accountRepository,
+            userRepository,
+            likeRepository,
+            mongoTransactionManager,
+            mongoTemplate);
     reviewDTO = new ReviewDTO();
     reviewDTO.setRating(TEST_RATING);
     reviewDTO.setDescription(TEST_DESCRIPTION);

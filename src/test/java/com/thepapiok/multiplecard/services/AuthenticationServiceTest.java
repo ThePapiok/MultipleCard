@@ -16,7 +16,6 @@ import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.misc.AccountConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
-import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Random;
 import org.bson.types.ObjectId;
@@ -25,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Profile("test")
@@ -38,10 +39,11 @@ public class AuthenticationServiceTest {
   private User expectedUser2;
   private Account expectedAccount;
   @Mock private UserConverter userConverter;
-  @Mock private UserRepository userRepository;
   @Mock private AccountConverter accountConverter;
   @Mock private AccountRepository accountRepository;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private MongoTemplate mongoTemplate;
   @Mock private Random random;
 
   @BeforeEach
@@ -49,7 +51,12 @@ public class AuthenticationServiceTest {
     MockitoAnnotations.openMocks(this);
     authenticationService =
         new AuthenticationService(
-            accountRepository, userRepository, userConverter, accountConverter, passwordEncoder);
+            accountRepository,
+            userConverter,
+            accountConverter,
+            passwordEncoder,
+            mongoTransactionManager,
+            mongoTemplate);
     final String testText = "Test";
     registerDTO = new RegisterDTO();
     registerDTO.setFirstName(testText);
@@ -87,25 +94,25 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldSuccessAtCreateUser() {
-    when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
+    when(mongoTemplate.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
 
     assertTrue(authenticationService.createUser(registerDTO));
-    verify(userRepository).save(expectedUser);
-    verify(accountRepository).save(expectedAccount);
+    verify(mongoTemplate).save(expectedUser);
+    verify(mongoTemplate).save(expectedAccount);
   }
 
   @Test
   public void shouldFailAtCreateUser() {
-    when(userRepository.save(expectedUser)).thenReturn(expectedUser2);
+    when(mongoTemplate.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
-    when(accountRepository.save(expectedAccount)).thenThrow(MongoWriteException.class);
+    when(mongoTemplate.save(expectedAccount)).thenThrow(MongoWriteException.class);
 
     assertFalse(authenticationService.createUser(registerDTO));
-    verify(userRepository).save(expectedUser);
-    verify(accountRepository).save(expectedAccount);
+    verify(mongoTemplate).save(expectedUser);
+    verify(mongoTemplate).save(expectedAccount);
   }
 
   @Test

@@ -35,12 +35,10 @@ public class ReviewService {
 
   @Autowired
   public ReviewService(
-      ReviewConverter reviewConverter,
-      AccountRepository accountRepository,
-      UserRepository userRepository,
-      LikeRepository likeRepository,
-      MongoTransactionManager mongoTransactionManager,
-      MongoTemplate mongoTemplate) {
+          ReviewConverter reviewConverter,
+          AccountRepository accountRepository,
+          UserRepository userRepository,
+          LikeRepository likeRepository, MongoTransactionManager mongoTransactionManager, MongoTemplate mongoTemplate) {
     this.reviewConverter = reviewConverter;
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
@@ -52,26 +50,25 @@ public class ReviewService {
   public boolean addReview(ReviewDTO reviewDTO, String phone) {
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
-      transactionTemplate.execute(
-          new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-              Review review = reviewConverter.getEntity(reviewDTO);
-              review.setCreatedAt(LocalDateTime.now());
-              ObjectId id = accountRepository.findIdByPhone(phone).getId();
-              Optional<User> user = userRepository.findById(id);
-              if (user.isEmpty()) {
-                throw new RuntimeException();
-              }
-              Optional<Like> like = likeRepository.findByReviewUserId(id);
-              if (like.isPresent()) {
-                likeRepository.deleteAllByReviewUserId(id);
-              }
-              User notEmptyUser = user.get();
-              notEmptyUser.setReview(review);
-              userRepository.save(notEmptyUser);
-            }
-          });
+      transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        @Override
+        protected void doInTransactionWithoutResult(TransactionStatus status) {
+          Review review = reviewConverter.getEntity(reviewDTO);
+          review.setCreatedAt(LocalDateTime.now());
+          ObjectId id = accountRepository.findIdByPhone(phone).getId();
+          Optional<User> user = userRepository.findById(id);
+          if (user.isEmpty()) {
+            throw new RuntimeException();
+          }
+          Optional<Like> like = likeRepository.findByReviewUserId(id);
+          if (like.isPresent()) {
+            likeRepository.deleteAllByReviewUserId(id);
+          }
+          User notEmptyUser = user.get();
+          notEmptyUser.setReview(review);
+          userRepository.save(notEmptyUser);
+        }
+      });
     } catch (Exception e) {
       return false;
     }
