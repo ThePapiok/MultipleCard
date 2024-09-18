@@ -34,19 +34,9 @@
 }
 
 @media only screen and (max-width: 768px) {
-    input, .valueSelect, .searchSelect {
-        height: 50px;
-        border: 1px solid gray;
-    }
-
     #CallingCode, #Phone, #Password {
         width: 100%;
     }
-
-    #form {
-        width: 90%;
-    }
-
 }
 
 

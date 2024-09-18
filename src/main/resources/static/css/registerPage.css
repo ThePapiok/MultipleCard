@@ -57,11 +57,6 @@ select:invalid {
 }
 
 @media only screen and (max-width: 768px) {
-    input, .valueSelect, .searchSelect {
-        height: 50px;
-        border: 1px solid gray;
-    }
-
     #FirstName, #LastName, #Email, #Province, #Street, #HouseNumber, #ApartmentNumber, #PostalCode, #City, #Country, #CallingCode, #Phone, #Password, #RetypedPassword {
         width: 100%;
     }

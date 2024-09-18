@@ -80,23 +80,21 @@ input {
 }
 
 @media only screen and (max-width: 768px) {
-    input, .valueSelect, .searchSelect, .placeholderInput {
-        height: 50px;
-        border: 1px solid gray;
-    }
-
     .placeholderInput {
         font-size: 12px;
     }
-    #cardInfo{
+
+    #cardInfo {
         width: 90%;
         left: 5%;
         height: 300px;
     }
-    #cardWithButtons{
+
+    #cardWithButtons {
         width: 100%;
     }
-    .cardButton{
+
+    .cardButton {
         width: 100%;
     }
 }
