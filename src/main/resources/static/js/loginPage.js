@@ -39,7 +39,7 @@ function setFullPhone() {
 function atStart() {
     checkCallingCode(document.getElementById("valueCallingCode"));
     document.getElementById("searchCallingCode").value = "";
-    document.getElementById("fullPhone").value = document.getElementById("valueCallingCode") + document.getElementById("phoneInput");
+    document.getElementById("fullPhone").value = document.getElementById("valueCallingCode").value + document.getElementById("phoneInput").value;
     checkLanguage();
 }
 
