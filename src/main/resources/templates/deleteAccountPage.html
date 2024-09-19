@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/deleteAccountPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/changePasswordAndDeleteAccountPage.js"></script>
+<script src="/js/deleteAccountPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body" onload="atStart()">
+    <p class="title" th:text="#{delete_account}"></p>
+    <form th:action="@{/delete_account}" id="form" method="post">
+        <div class="block-horizontally">
+            <label id="VerificationSms">
+                <label class="inputs">
+                    <input disabled  id="verificationNumberSms" name="verificationNumberSms" type="text"
+                           th:placeholder="#{codeSms.text}" required
+                           oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                           onmouseenter="showValidation(this, 'VerificationSms')"
+                           onmouseleave="hideValidation('VerificationSms')">
+                    <img id="close1" src="/images/close.png" alt="close">
+                    <img id="check1" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{codeSms.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
+                </ul>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="deleteButton"
+                    th:text="#{delete_account}"></button>
+        </a>
+        <a>
+            <button type="button" class="blackButton"
+                    th:text="#{codeSms.text}" th:attr="onclick=|getCode('${phone}', 'codeSmsDelete')|"></button>
+        </a>
+        <a th:href="@{'/delete_account?reset'}">
+            <button type="button" class="redButton" id="resetButton"
+                    th:text="#{button.reset}"></button>
+        </a>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

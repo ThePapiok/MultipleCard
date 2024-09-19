@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
@@ -29,11 +30,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ProfileController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
+  private static final String ERROR_TOO_MANY_ATTEMPTS_PARAM = "error.to_many_attempts";
+  private static final String ERROR_BAD_SMS_CODE_PARAM = "error.bad_sms_code";
+  private static final String ERROR_UNEXPECTED_PARAM = "error.unexpected";
   private static final String SUCCESS_PARAM = "success";
+  private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String ATTEMPTS_PARAM = "attempts";
+  private static final String PHONE_PARAM = "phone";
   private static final String CODE_SMS_CHANGE_PARAM = "codeSmsChange";
+  private static final String CODE_SMS_DELETE_PARAM = "codeSmsDelete";
   private static final String ERROR_VALIDATION_MESSAGE = "validation.incorrect_data";
   private static final String REDIRECT_USER_ERROR = "redirect:/user?error";
+  private static final String REDIRECT_USER = "redirect:/user";
+  private static final String REDIRECT_LOGIN_SUCCESS = "redirect:/login?success";
   private final ProfileService profileService;
   private final CountryService countryService;
   private final MessageSource messageSource;
@@ -104,7 +113,7 @@ public class ProfileController {
     }
     if (!profileService.editProfile(profile, principal.getName())) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
       return REDIRECT_USER_ERROR;
     }
     httpSession.setAttribute(SUCCESS_PARAM, true);
@@ -118,23 +127,12 @@ public class ProfileController {
       @RequestParam(required = false) String reset,
       @RequestParam(required = false) String error,
       HttpSession httpSession) {
-    if (error != null) {
-      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
-      if (message != null) {
-        model.addAttribute(ERROR_MESSAGE_PARAM, message);
-        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
-      } else {
-        resetChangePassword(httpSession);
-      }
-    } else {
-      resetChangePassword(httpSession);
-    }
-    if (reset != null) {
-      resetChangePassword(httpSession);
-      return "redirect:/user";
+    String url = resetAndErrorParams(error, reset, model, httpSession, CODE_SMS_CHANGE_PARAM);
+    if (url != null) {
+      return url;
     }
     model.addAttribute("changePassword", new ChangePasswordDTO());
-    model.addAttribute("phone", principal.getName());
+    model.addAttribute(PHONE_PARAM, principal.getName());
     return "changePasswordPage";
   }
 
@@ -148,6 +146,7 @@ public class ProfileController {
       Authentication authentication,
       HttpServletRequest request,
       HttpServletResponse response) {
+    final String redirectPasswordChangeError = "redirect:/password_change?error";
     final int maxAmount = 3;
     final String phone = principal.getName();
     final String password = change.getNewPassword();
@@ -158,50 +157,140 @@ public class ProfileController {
     }
     if (amount == maxAmount) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.to_many_attempts", null, locale));
-      resetChangePassword(httpSession);
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_PARAM, null, locale));
+      resetSession(httpSession, CODE_SMS_CHANGE_PARAM);
       return REDIRECT_USER_ERROR;
     }
     if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
-      return redirectPasswordChangeError(httpSession, amount, ERROR_VALIDATION_MESSAGE, locale);
+      return redirectErrorPage(
+          httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, redirectPasswordChangeError);
     }
     if (!passwordEncoder.matches(
         change.getCode(), (String) httpSession.getAttribute(CODE_SMS_CHANGE_PARAM))) {
-      return redirectPasswordChangeError(httpSession, amount, "error.bad_sms_code", locale);
+      return redirectErrorPage(
+          httpSession, amount, ERROR_BAD_SMS_CODE_PARAM, locale, redirectPasswordChangeError);
     }
     if (!authenticationService.checkPassword(change.getOldPassword(), phone)) {
-      return redirectPasswordChangeError(
-          httpSession, amount, "changePassword.error.old_password.incorrect", locale);
+      return redirectErrorPage(
+          httpSession,
+          amount,
+          "changePassword.error.old_password.incorrect",
+          locale,
+          redirectPasswordChangeError);
     }
     if (!password.equals(change.getRetypedPassword())) {
-      return redirectPasswordChangeError(httpSession, amount, "passwords_not_the_same", locale);
+      return redirectErrorPage(
+          httpSession, amount, "passwords_not_the_same", locale, redirectPasswordChangeError);
     }
     if (change.getOldPassword().equals(password)) {
-      return redirectPasswordChangeError(
-          httpSession, amount, "changePassword.error.passwords.the_same", locale);
+      return redirectErrorPage(
+          httpSession,
+          amount,
+          "changePassword.error.passwords.the_same",
+          locale,
+          redirectPasswordChangeError);
     }
     if (!authenticationService.changePassword(phone, password)) {
-      resetChangePassword(httpSession);
+      resetSession(httpSession, CODE_SMS_CHANGE_PARAM);
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
       return REDIRECT_USER_ERROR;
     }
-    resetChangePassword(httpSession);
+    resetSession(httpSession, CODE_SMS_CHANGE_PARAM);
     new SecurityContextLogoutHandler().logout(request, response, authentication);
-    return "redirect:/login?success";
+    return REDIRECT_LOGIN_SUCCESS;
   }
 
-  private String redirectPasswordChangeError(
-      HttpSession httpSession, int amount, String message, Locale locale) {
+  @GetMapping("/delete_account")
+  public String deleteAccountPage(
+      @RequestParam(required = false) String error,
+      @RequestParam(required = false) String reset,
+      Principal principal,
+      Model model,
+      HttpSession httpSession) {
+    String url = resetAndErrorParams(error, reset, model, httpSession, CODE_SMS_DELETE_PARAM);
+    if (url != null) {
+      return url;
+    }
+    model.addAttribute(PHONE_PARAM, principal.getName());
+    return "deleteAccountPage";
+  }
+
+  @PostMapping("/delete_account")
+  public String deleteAccount(
+      @RequestParam String verificationNumberSms,
+      Locale locale,
+      HttpSession httpSession,
+      Authentication authentication,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Principal principal) {
+    Pattern pattern = Pattern.compile("^[0-9]{3} [0-9]{3}$");
+    Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
+    final String redirectDeleteAccountError = "redirect:/delete_account?error";
+    final int maxAmount = 3;
+    if (amount == null) {
+      httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+      amount = 0;
+    }
+    if (amount == maxAmount) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_PARAM, null, locale));
+      resetSession(httpSession, CODE_SMS_DELETE_PARAM);
+      return REDIRECT_USER_ERROR;
+    }
+    if (!pattern.matcher(verificationNumberSms).matches()) {
+      return redirectErrorPage(
+          httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, redirectDeleteAccountError);
+    }
+    if (!passwordEncoder.matches(
+        verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_DELETE_PARAM))) {
+      return redirectErrorPage(
+          httpSession, amount, ERROR_BAD_SMS_CODE_PARAM, locale, redirectDeleteAccountError);
+    }
+    if (!profileService.deleteAccount(principal.getName())) {
+      resetSession(httpSession, CODE_SMS_DELETE_PARAM);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
+      return REDIRECT_USER_ERROR;
+    }
+    resetSession(httpSession, CODE_SMS_CHANGE_PARAM);
+    new SecurityContextLogoutHandler().logout(request, response, authentication);
+    return REDIRECT_LOGIN_SUCCESS;
+  }
+
+  private String resetAndErrorParams(
+      String error, String reset, Model model, HttpSession httpSession, String codeSmsParam) {
+    if (error != null) {
+      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
+      if (message != null) {
+        model.addAttribute(ERROR_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      } else {
+        resetSession(httpSession, codeSmsParam);
+      }
+    } else {
+      resetSession(httpSession, codeSmsParam);
+    }
+    if (reset != null) {
+      resetSession(httpSession, codeSmsParam);
+      return REDIRECT_USER;
+    }
+    return null;
+  }
+
+  private String redirectErrorPage(
+      HttpSession httpSession, int amount, String message, Locale locale, String redirectUrl) {
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, messageSource.getMessage(message, null, locale));
     httpSession.setAttribute(ATTEMPTS_PARAM, amount + 1);
-    return "redirect:/password_change?error";
+    return redirectUrl;
   }
 
-  private void resetChangePassword(HttpSession httpSession) {
-    httpSession.removeAttribute(CODE_SMS_CHANGE_PARAM);
+  private void resetSession(HttpSession httpSession, String param) {
+    httpSession.removeAttribute(param);
     httpSession.removeAttribute(ATTEMPTS_PARAM);
-    httpSession.removeAttribute("codeAmountSms");
+    httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
   }
 }

@@ -4,7 +4,6 @@ function checkLanguage() {
         document.getElementById("enLanguage").style.display = "none";
         document.getElementById("plLanguage").style.display = "inline";
     } else {
-        console.log("xd");
         document.getElementById("enLanguage").style.display = "inline";
         document.getElementById("plLanguage").style.display = "none";
     }

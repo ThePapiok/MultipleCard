@@ -91,7 +91,7 @@ Po skończeniu używania
 
 ## Uruchomienie testów
 
-Aby uruchomić testy, użyj tej komendy
+Aby uruchomić testy, użyj tej komendy (wymagane mongosh, docker, mvn)
 
 ```bash
     ./startTests.sh

@@ -241,8 +241,8 @@
         <a th:href="@{/password_change}">
             <button type="button" class="blackButton" th:text="#{password.button.change}"></button>
         </a>
-        <a>
-            <button type="button" class="redButton" th:text="#{profilePage.delete_account}"></button>
+        <a th:href="@{/delete_account}">
+            <button type="button" class="redButton" th:text="#{delete_account}"></button>
         </a>
     </form>
     <p class="title" th:text="#{profilePage.2_title}"></p>
