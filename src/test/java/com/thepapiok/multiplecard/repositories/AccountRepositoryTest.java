@@ -14,12 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
@@ -34,36 +30,28 @@ public class AccountRepositoryTest {
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private Account account1;
   private Account account2;
-  @Autowired private MongoTransactionManager mongoTransactionManager;
   @Autowired private AccountRepository accountRepository;
   @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
   public void setUp() {
-    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
-    transactionTemplate.execute(
-        new TransactionCallbackWithoutResult() {
-          @Override
-          protected void doInTransactionWithoutResult(TransactionStatus status) {
-            account1 = new Account();
-            account1.setPhone(TEST_PHONE1);
-            account1.setEmail(TEST_EMAIL1);
-            account1.setId(TEST_ID);
-            account1.setPassword(TEST_PASSWORD1);
-            account1.setActive(true);
-            account1.setRole(Role.ROLE_USER);
-            account2 = new Account();
-            account2.setPhone(TEST_PHONE2);
-            account2.setEmail(TEST_EMAIL2);
-            account2.setId(new ObjectId("123456789012345678901235"));
-            account2.setPassword("asdaZ12!asd");
-            account2.setActive(true);
-            account2.setRole(Role.ROLE_USER);
-            mongoTemplate.save(account1);
-            mongoTemplate.save(account2);
-          }
-        });
+    account1 = new Account();
+    account1.setPhone(TEST_PHONE1);
+    account1.setEmail(TEST_EMAIL1);
+    account1.setId(TEST_ID);
+    account1.setPassword(TEST_PASSWORD1);
+    account1.setActive(true);
+    account1.setRole(Role.ROLE_USER);
+    account2 = new Account();
+    account2.setPhone(TEST_PHONE2);
+    account2.setEmail(TEST_EMAIL2);
+    account2.setId(new ObjectId("123456789012345678901235"));
+    account2.setPassword("asdaZ12!asd");
+    account2.setActive(true);
+    account2.setRole(Role.ROLE_USER);
+    mongoTemplate.save(account1);
+    mongoTemplate.save(account2);
   }
 
   @AfterEach

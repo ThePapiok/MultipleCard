@@ -14,12 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
@@ -31,41 +27,33 @@ public class CardRepositoryTest {
   @Autowired private CardRepository cardRepository;
   @Autowired private UserRepository userRepository;
   @MockBean private RestTemplate restTemplate;
-  @Autowired private MongoTransactionManager mongoTransactionManager;
   @Autowired private MongoTemplate mongoTemplate;
   private Card expectedCard;
 
   @BeforeEach
   public void setUp() {
-    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
-    transactionTemplate.execute(
-        new TransactionCallbackWithoutResult() {
-          @Override
-          protected void doInTransactionWithoutResult(TransactionStatus status) {
-            expectedCard = new Card();
-            expectedCard.setName("Test");
-            expectedCard.setPin("123sdv");
-            expectedCard.setAttempts(0);
-            expectedCard.setImageUrl("123fdsfasdf");
-            expectedCard.setUserId(TEST_ID);
-            expectedCard = mongoTemplate.save(expectedCard);
-            Address address = new Address();
-            address.setCity("City");
-            address.setStreet("Street");
-            address.setCountry("Country");
-            address.setProvince("Province");
-            address.setPostalCode("111-11");
-            address.setHouseNumber("1");
-            User user = new User();
-            user.setId(TEST_ID);
-            user.setCardId(expectedCard.getId());
-            user.setPoints(0);
-            user.setFirstName("First");
-            user.setLastName("Last");
-            user.setAddress(address);
-            mongoTemplate.save(user);
-          }
-        });
+    expectedCard = new Card();
+    expectedCard.setName("Test");
+    expectedCard.setPin("123sdv");
+    expectedCard.setAttempts(0);
+    expectedCard.setImageUrl("123fdsfasdf");
+    expectedCard.setUserId(TEST_ID);
+    expectedCard = mongoTemplate.save(expectedCard);
+    Address address = new Address();
+    address.setCity("City");
+    address.setStreet("Street");
+    address.setCountry("Country");
+    address.setProvince("Province");
+    address.setPostalCode("111-11");
+    address.setHouseNumber("1");
+    User user = new User();
+    user.setId(TEST_ID);
+    user.setCardId(expectedCard.getId());
+    user.setPoints(0);
+    user.setFirstName("First");
+    user.setLastName("Last");
+    user.setAddress(address);
+    mongoTemplate.save(user);
   }
 
   @AfterEach
