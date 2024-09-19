@@ -86,26 +86,17 @@ Wejdź na adres **[localhost:8080](http://localhost:8080/)**
 Po skończeniu używania
 
 ```bash
-  docker-compose down -v
+  docker-compose down
 ```
 
 ## Uruchomienie testów
 
-Aby uruchomić testy, użyj tej komendy
+Aby uruchomić testy, użyj tej komendy (wymagane mongosh, docker, mvn)
 
 ```bash
-    ./startDb.sh
+    ./startTests.sh
 ```
 
-```bash
-  mvn test
-```
-
-Po skończeniu testów
-
-```bash
-  docker-compose down -v
-```
 
 
  

@@ -7,6 +7,7 @@ import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.configs.DbConfig;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
 @ActiveProfiles("test")
+@Import(DbConfig.class)
 public class UserRepositoryTest {
 
   private static final ObjectId TEST_ID1 = new ObjectId("123456789012345678901234");
@@ -90,7 +93,7 @@ public class UserRepositoryTest {
     card.setPin("123sasdfaf");
     card.setImageUrl("123asdasdasdasd");
     card.setUserId(TEST_ID1);
-    cardRepository.save(card);
+    mongoTemplate.save(card);
     User user1 = new User();
     user1.setFirstName(TEST1_TEXT);
     user1.setId(TEST_ID1);
@@ -98,7 +101,7 @@ public class UserRepositoryTest {
     user1.setAddress(address1);
     user1.setReview(review1);
     user1.setCardId(cardId);
-    userRepository.save(user1);
+    mongoTemplate.save(user1);
     Review review2 = new Review();
     review2.setDescription(TEST1_TEXT);
     review2.setCreatedAt(LocalDateTime.of(year2, month2, dayOfMonth2, hour2, minute2));
@@ -117,7 +120,7 @@ public class UserRepositoryTest {
     user2.setLastName("last2");
     user2.setAddress(address2);
     user2.setCardId(null);
-    userRepository.save(user2);
+    mongoTemplate.save(user2);
     Review review3 = new Review();
     review3.setDescription("b");
     review3.setCreatedAt(LocalDateTime.of(year3, monht3, dayOfMonth3, hour3, minute3));
@@ -136,7 +139,7 @@ public class UserRepositoryTest {
     user3.setLastName("last3");
     user3.setAddress(address3);
     user3.setCardId(null);
-    userRepository.save(user3);
+    mongoTemplate.save(user3);
     Address address4 = new Address();
     address4.setCity("city4");
     address4.setCountry("country4");
@@ -150,19 +153,19 @@ public class UserRepositoryTest {
     user4.setLastName("last4");
     user4.setAddress(address4);
     user4.setCardId(null);
-    userRepository.save(user4);
+    mongoTemplate.save(user4);
     Like like1 = new Like();
     like1.setReviewUserId(TEST_ID1);
     like1.setUserId(TEST_ID1);
-    likeRepository.save(like1);
+    mongoTemplate.save(like1);
     Like like2 = new Like();
     like2.setReviewUserId(TEST_ID1);
     like2.setUserId(TEST_ID2);
-    likeRepository.save(like2);
+    mongoTemplate.save(like2);
     Like like3 = new Like();
     like3.setReviewUserId(TEST_ID2);
     like3.setUserId(TEST_ID3);
-    likeRepository.save(like3);
+    mongoTemplate.save(like3);
     reviewGetDTO1 = new ReviewGetDTO();
     reviewGetDTO1.setFirstName(TEST1_TEXT);
     reviewGetDTO1.setCount(count1);

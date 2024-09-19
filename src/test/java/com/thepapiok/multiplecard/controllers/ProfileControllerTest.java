@@ -53,18 +53,29 @@ public class ProfileControllerTest {
   private static final String OLD_PASSWORD_PARAM = "oldPassword";
   private static final String COUNTRIES_PARAM = "countries";
   private static final String USER_URL = "/user";
+  private static final String LOGIN_SUCCESS_URL = "/login?success";
   private static final String PASSWORD_CHANGE_URL = "/password_change";
   private static final String USER_ERROR_URL = "/user?error";
+  private static final String DELETE_ACCOUNT_URL = "/delete_account";
+  private static final String DELETE_ACCOUNT_ERROR_URL = "/delete_account?error";
+  private static final String DELETE_ACCOUNT_PAGE = "deleteAccountPage";
   private static final String PROFILE_PAGE = "profilePage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_PARAM = "success";
   private static final String CARD_PARAM = "card";
   private static final String ERROR_MESSAGE = "error!";
+  private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
+  private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
+      "Za dużo razy podałeś niepoprawne dane";
+  private static final String ERROR_BAD_SMS_CODE_MESSAGE = "Nieprawidłowy kod sms";
   private static final String ERROR_PARAM = "error";
+  private static final String RESET_PARAM = "reset";
   private static final String ATTEMPTS_PARAM = "attempts";
+  private static final String VERIFICATION_NUMBER_SMS_PARAM = "verificationNumberSms";
   private static final String PHONE_PARAM = "phone";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_SMS_CHANGE_PARAM = "codeSmsChange";
+  private static final String CODE_SMS_DELETE_PARAM = "codeSmsDelete";
   private static final String CHANGE_PASSWORD_PARAM = "changePassword";
   private static final String CHANGE_PASSWORD_PAGE = "changePasswordPage";
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
@@ -228,7 +239,7 @@ public class ProfileControllerTest {
                 .param(COUNTRY_PARAM, profileDTO.getCountry())
                 .session(httpSession))
         .andExpect(redirectedUrl(USER_ERROR_URL));
-    assertEquals("Nieoczekiwany błąd", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -285,7 +296,7 @@ public class ProfileControllerTest {
     httpSession.setAttribute(CODE_SMS_CHANGE_PARAM, "12312sdfsdfsdaff");
 
     mockMvc
-        .perform(get(PASSWORD_CHANGE_URL).param("reset", "").session(httpSession))
+        .perform(get(PASSWORD_CHANGE_URL).param(RESET_PARAM, "").session(httpSession))
         .andExpect(redirectedUrl(USER_URL));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
@@ -302,7 +313,7 @@ public class ProfileControllerTest {
     when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
     when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(true);
 
-    redirectUserErrorAndLoginSuccess(httpSession, "/login?success");
+    redirectUserErrorAndLoginSuccess(httpSession, LOGIN_SUCCESS_URL);
   }
 
   @Test
@@ -316,8 +327,7 @@ public class ProfileControllerTest {
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertEquals(
-        "Za dużo razy podałeś niepoprawne dane", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   private void redirectUserErrorAndLoginSuccess(MockHttpSession httpSession, String redirectUrl)
@@ -352,7 +362,7 @@ public class ProfileControllerTest {
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
 
     redirectPasswordChangeError(
-        httpSession, "Nieprawidłowy kod sms", TEST_NEW_PASSWORD, TEST_NEW_PASSWORD);
+        httpSession, ERROR_BAD_SMS_CODE_MESSAGE, TEST_NEW_PASSWORD, TEST_NEW_PASSWORD);
   }
 
   @Test
@@ -428,7 +438,7 @@ public class ProfileControllerTest {
     when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(false);
 
     redirectUserErrorAndLoginSuccess(httpSession, USER_ERROR_URL);
-    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
@@ -438,5 +448,160 @@ public class ProfileControllerTest {
     httpSession.setAttribute(ATTEMPTS_PARAM, attempts);
     httpSession.setAttribute(CODE_SMS_CHANGE_PARAM, TEST_ENCODE_CODE);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnDeleteAccountPageAtDeleteAccountPage() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+
+    mockMvc
+        .perform(get(DELETE_ACCOUNT_URL).session(httpSession))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(DELETE_ACCOUNT_PAGE));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnDeleteAccountPageAtDeleteAccountPageWhenParamErrorButNoMessage()
+      throws Exception {
+    mockMvc
+        .perform(get(DELETE_ACCOUNT_URL).param(ERROR_PARAM, ""))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(DELETE_ACCOUNT_PAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnDeleteAccountPageAtDeleteAccountPageWhenParamErrorWithMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+
+    mockMvc
+        .perform(get(DELETE_ACCOUNT_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(view().name(DELETE_ACCOUNT_PAGE));
+    assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnDeleteAccountPageAtDeleteAccountPageWhenParamReset() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+
+    mockMvc
+        .perform(get(DELETE_ACCOUNT_URL).param(RESET_PARAM, "").session(httpSession))
+        .andExpect(redirectedUrl(USER_URL));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToLoginSuccessAtDeleteAccount() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(profileService.deleteAccount(TEST_PHONE)).thenReturn(true);
+
+    mockMvc
+        .perform(
+            post(DELETE_ACCOUNT_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(LOGIN_SUCCESS_URL));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserErrorAtDeleteAccountWhenTooManyAttempts() throws Exception {
+    final int maxAttempts = 3;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, maxAttempts);
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+
+    mockMvc
+        .perform(
+            post(DELETE_ACCOUNT_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(USER_ERROR_URL));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
+    assertEquals(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToDeleteAccountErrorAtDeleteAccountWhenErrorAtValidation()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+
+    mockMvc
+        .perform(
+            post(DELETE_ACCOUNT_URL).param(VERIFICATION_NUMBER_SMS_PARAM, "").session(httpSession))
+        .andExpect(redirectedUrl(DELETE_ACCOUNT_ERROR_URL));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToDeleteAccountErrorAtDeleteAccountWhenBadCode() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(DELETE_ACCOUNT_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(DELETE_ACCOUNT_ERROR_URL));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertEquals(ERROR_BAD_SMS_CODE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToDeleteAccountErrorAtDeleteAccountWhenErrorAtDeleteAccount()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(profileService.deleteAccount(TEST_PHONE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(DELETE_ACCOUNT_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(USER_ERROR_URL));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 }

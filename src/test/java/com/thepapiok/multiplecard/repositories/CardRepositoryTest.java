@@ -16,7 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
@@ -27,13 +26,11 @@ public class CardRepositoryTest {
 
   @Autowired private CardRepository cardRepository;
   @Autowired private UserRepository userRepository;
-  @Autowired private LikeRepository likeRepository;
-  @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
+  @Autowired private MongoTemplate mongoTemplate;
   private Card expectedCard;
 
   @BeforeEach
-  @Transactional
   public void setUp() {
     expectedCard = new Card();
     expectedCard.setName("Test");
@@ -41,7 +38,7 @@ public class CardRepositoryTest {
     expectedCard.setAttempts(0);
     expectedCard.setImageUrl("123fdsfasdf");
     expectedCard.setUserId(TEST_ID);
-    expectedCard = cardRepository.save(expectedCard);
+    expectedCard = mongoTemplate.save(expectedCard);
     Address address = new Address();
     address.setCity("City");
     address.setStreet("Street");
@@ -56,7 +53,7 @@ public class CardRepositoryTest {
     user.setFirstName("First");
     user.setLastName("Last");
     user.setAddress(address);
-    userRepository.save(user);
+    mongoTemplate.save(user);
   }
 
   @AfterEach

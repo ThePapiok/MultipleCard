@@ -13,9 +13,6 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #form {
-        width: 90%;
-    }
     button {
         margin-right: 5px;
     }

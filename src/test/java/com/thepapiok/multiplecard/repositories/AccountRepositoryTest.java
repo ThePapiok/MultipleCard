@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.configs.DbConfig;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
@@ -12,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @DataMongoTest
 @ActiveProfiles("test")
+@Import(DbConfig.class)
 public class AccountRepositoryTest {
   private static final String TEST_PHONE1 = "+21413241234";
   private static final String TEST_PHONE2 = "+76546545343";
@@ -27,12 +30,11 @@ public class AccountRepositoryTest {
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private Account account1;
   private Account account2;
-
   @Autowired private AccountRepository accountRepository;
+  @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
-  @Transactional
   public void setUp() {
     account1 = new Account();
     account1.setPhone(TEST_PHONE1);
@@ -48,8 +50,8 @@ public class AccountRepositoryTest {
     account2.setPassword("asdaZ12!asd");
     account2.setActive(true);
     account2.setRole(Role.ROLE_USER);
-    accountRepository.save(account1);
-    accountRepository.save(account2);
+    mongoTemplate.save(account1);
+    mongoTemplate.save(account2);
   }
 
   @AfterEach

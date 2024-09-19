@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "orders")
 public class Order {
   @Id private ObjectId id;
-  private ObjectId userId;
+  private ObjectId cardId;
   private ObjectId productId;
   private LocalDateTime createdAt;
   private boolean isUsed;
