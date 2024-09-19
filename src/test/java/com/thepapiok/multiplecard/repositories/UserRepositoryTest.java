@@ -187,10 +187,12 @@ public class UserRepositoryTest {
     reviewGetDTO3.setIsAdded(0);
     reviewGetDTO3.setReview(review3);
     reviewGetDTO3.setOwner(false);
-    new TextIndexDefinition.TextIndexDefinitionBuilder()
-        .onField("review.description")
-        .withDefaultLanguage("none")
-        .build();
+    TextIndexDefinition textIndex =
+        new TextIndexDefinition.TextIndexDefinitionBuilder()
+            .onField("review.description")
+            .withDefaultLanguage("none")
+            .build();
+    mongoTemplate.indexOps(User.class).ensureIndex(textIndex);
   }
 
   @AfterEach
