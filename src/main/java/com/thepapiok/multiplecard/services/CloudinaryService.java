@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.services;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,10 @@ public class CloudinaryService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public void deleteImage(String name) throws IOException {
+    cloudinary.uploader().destroy(name, ObjectUtils.emptyMap());
   }
 
   @Profile("test")

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/newCardPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/getCodeAndDisable.js"></script>
+<script src="/js/newCardPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+</div>
+<div id="body" onload="atStart()">
+    <p class="title" th:text="#{newCardPage.title}"></p>
+    <form th:action="@{/new_card}" id="form" method="post" th:object="${card}">
+        <div class="block-horizontally">
+            <label id="CardName">
+                <label class="inputs">
+                    <input th:field="*{name}" type="text" disabled
+                           th:placeholder="#{newCardPage.name_card.text}"
+                           required oninput="checkCardName(this)" minlength="4" maxlength="9"
+                           onmouseenter="showValidation(this, 'CardName')"
+                           onmouseleave="hideValidation('CardName')">
+                    <img id="close1" src="/images/close.png" alt="close">
+                    <img id="check1" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{newCardPage.name_card.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.only_letters}"></li>
+                    <li th:text="#{validation.prefix_length} + ' 4 ' + #{validation.suffix_length} + ' 9'"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="Pin">
+                <label class="inputs">
+                    <input th:field="*{pin}" type="password" disabled
+                           th:placeholder="#{newCardPage.pin.text}"
+                           required
+                           oninput="checkPin(this)" minlength="4" maxlength="4"
+                           onmouseenter="showValidation(this, 'Pin')"
+                           onmouseleave="hideValidation('Pin')">
+                    <img id="close2" src="/images/close.png" alt="close">
+                    <img id="check2" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{newCardPage.pin.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 4'"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="RetypedPin">
+                <label class="inputs">
+                    <input th:field="*{retypedPin}" type="password" disabled
+                           th:placeholder="#{newCardPage.retyped_pin.text}"
+                           required
+                           oninput="checkRetypedPin(this)" minlength="4" maxlength="4"
+                           onmouseenter="showValidation(this, 'RetypedPin')"
+                           onmouseleave="hideValidation('RetypedPin')">
+                    <img id="close3" src="/images/close.png" alt="close">
+                    <img id="check3" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{newCardPage.retyped_pin.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 4'"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="VerificationSms">
+                <label class="inputs">
+                    <input disabled  th:field="*{code}" type="text"
+                           th:placeholder="#{codeSms.text}" required
+                           oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                           onmouseenter="showValidation(this, 'VerificationSms')"
+                           onmouseleave="hideValidation('VerificationSms')">
+                    <img id="close4" src="/images/close.png" alt="close">
+                    <img id="check4" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{codeSms.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
+                </ul>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="orderButton"
+                    th:text="#{newCardPage.button.order_card}"></button>
+        </a>
+        <a>
+            <button type="button" class="blackButton"
+                    th:text="#{codeSms.text}" th:attr="onclick=|getCode('${phone}', 'codeSmsOrder')|"></button>
+        </a>
+        <a th:href="@{'/new_card?reset'}">
+            <button type="button" class="redButton" id="resetButton"
+                    th:text="#{button.reset}"></button>
+        </a>
+    </form>
+    <div id="info">
+        <p th:text="#{newCardPage.info_1}"></p>
+        <p th:text="#{newCardPage.info_2}"></p>
+        <p th:text="#{newCardPage.info_3}"></p>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

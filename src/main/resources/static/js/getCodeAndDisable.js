@@ -2,8 +2,6 @@ let disable = true;
 let previousVerification = "";
 const regVerificationNumber = new RegExp("^[0-9]{3} [0-9]{3}$");
 
-
-
 function addWhiteSpace(e, input, length) {
     let previous = previousVerification;
     if (length === 3) {

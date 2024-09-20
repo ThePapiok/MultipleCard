@@ -24,7 +24,7 @@ jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
 ## Zmienne Środowiskowe
 
-Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na prod:
+Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na dev:
 
 `MONGODB_HOST`
 

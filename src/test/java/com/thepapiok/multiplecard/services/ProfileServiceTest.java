@@ -28,6 +28,7 @@ import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,7 @@ public class ProfileServiceTest {
   @Mock private ProductRepository productRepository;
   @Mock private MongoTemplate mongoTemplate;
   @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private CloudinaryService cloudinaryService;
   private ProfileService profileService;
 
   @BeforeAll
@@ -109,7 +111,8 @@ public class ProfileServiceTest {
             orderRepository,
             productRepository,
             mongoTemplate,
-            mongoTransactionManager);
+            mongoTransactionManager,
+            cloudinaryService);
   }
 
   @Test
@@ -136,7 +139,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenNoProducts() {
+  public void shouldSuccessAtDeleteAccountRoleShopWhenNoProducts() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -147,10 +150,11 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
+    verify(cloudinaryService).deleteImage(TEST_ID.toString());
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsButNoOrders() {
+  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsButNoOrders() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -175,10 +179,14 @@ public class ProfileServiceTest {
     verify(mongoTemplate).remove(product1);
     verify(mongoTemplate).remove(product2);
     verify(mongoTemplate).remove(product3);
+    verify(cloudinaryService).deleteImage(TEST_ID.toString());
+    verify(cloudinaryService).deleteImage(product1.getId().toString());
+    verify(cloudinaryService).deleteImage(product2.getId().toString());
+    verify(cloudinaryService).deleteImage(product3.getId().toString());
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsAndSomeOrders() {
+  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsAndSomeOrders() throws IOException {
     final int centsPerZloty = 100;
     final String pointsParam = "points";
     final ObjectId cardId1 = new ObjectId("123132123312123312312579");
@@ -229,6 +237,10 @@ public class ProfileServiceTest {
     verify(mongoTemplate).remove(order1);
     verify(mongoTemplate).remove(order2);
     verify(mongoTemplate).remove(order3);
+    verify(cloudinaryService).deleteImage(TEST_ID.toString());
+    verify(cloudinaryService).deleteImage(product1.getId().toString());
+    verify(cloudinaryService).deleteImage(product2.getId().toString());
+    verify(cloudinaryService).deleteImage(product3.getId().toString());
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId1)),
@@ -276,7 +288,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleUserWithCard() {
+  public void shouldSuccessAtDeleteAccountRoleUserWithCard() throws IOException {
     final ObjectId cardId = new ObjectId("423132303311523310172599");
     Account account = new Account();
     account.setId(TEST_ID);
@@ -294,6 +306,7 @@ public class ProfileServiceTest {
     verify(mongoTemplate).remove(query(where(USER_ID_PARAM).is(TEST_ID)), Like.class);
     verify(mongoTemplate).remove(query(where(CARD_ID_PARAM).is(cardId)), Order.class);
     verify(mongoTemplate).remove(card);
+    verify(cloudinaryService).deleteImage(card.getId().toString());
   }
 
   @Test

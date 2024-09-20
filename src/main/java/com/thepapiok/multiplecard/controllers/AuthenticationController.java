@@ -349,7 +349,6 @@ public class AuthenticationController {
           locale);
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
-      System.out.println(e);
       return false;
     }
     return true;
