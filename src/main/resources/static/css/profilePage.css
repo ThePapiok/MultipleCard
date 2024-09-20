@@ -34,8 +34,10 @@ input {
 
 .qr {
     position: static;
-    height: 60%;
-    width: 40%;
+    margin-top: 5px;
+    aspect-ratio: 1 / 1;
+    height: 40%;
+    width: 1;
 }
 
 .nameCard {
@@ -66,6 +68,7 @@ input {
     justify-content: center;
     align-items: center;
     display: flex;
+    position: relative;
 }
 
 #cardInfo {
@@ -73,6 +76,12 @@ input {
     width: 50%;
     height: 350px;
     left: 20%;
+}
+
+#imageCard{
+    width: 100%;
+    height: 100%;
+    margin-top: 10px;
 }
 
 #validationLastName, #validationApartmentNumber, #validationCity {

@@ -18,6 +18,7 @@ import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -41,6 +42,7 @@ public class ProfileService {
   private final ProductRepository productRepository;
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
+  private final CloudinaryService cloudinaryService;
 
   @Autowired
   public ProfileService(
@@ -51,7 +53,8 @@ public class ProfileService {
       OrderRepository orderRepository,
       ProductRepository productRepository,
       MongoTemplate mongoTemplate,
-      MongoTransactionManager mongoTransactionManager) {
+      MongoTransactionManager mongoTransactionManager,
+      CloudinaryService cloudinaryService) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.profileConverter = profileConverter;
@@ -60,6 +63,7 @@ public class ProfileService {
     this.productRepository = productRepository;
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
+    this.cloudinaryService = cloudinaryService;
   }
 
   public ProfileDTO getProfile(String phone) {
@@ -97,6 +101,11 @@ public class ProfileService {
               Role role = account.getRole();
               mongoTemplate.remove(account);
               if (role.equals(Role.ROLE_SHOP)) {
+                try {
+                  cloudinaryService.deleteImage(id.toString());
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
                 mongoTemplate.remove(query(where(idParam).is(id)), Shop.class);
                 List<Product> products = productRepository.getAllByShopId(id);
                 for (Product product : products) {
@@ -108,6 +117,11 @@ public class ProfileService {
                         User.class);
                     mongoTemplate.remove(order);
                   }
+                  try {
+                    cloudinaryService.deleteImage(product.getId().toString());
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
                   mongoTemplate.remove(product);
                 }
               } else {
@@ -116,7 +130,11 @@ public class ProfileService {
                   mongoTemplate.remove(query(where("reviewUserId").is(id)), Like.class);
                   mongoTemplate.remove(query(where("userId").is(id)), Like.class);
                   if (card != null) {
-                    // TODO - delete from cloudinary
+                    try {
+                      cloudinaryService.deleteImage(card.getId().toString());
+                    } catch (IOException e) {
+                      throw new RuntimeException(e);
+                    }
                     mongoTemplate.remove(query(where(cardIdParam).is(card.getId())), Order.class);
                     mongoTemplate.remove(card);
                   }

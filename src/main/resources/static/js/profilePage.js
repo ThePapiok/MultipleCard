@@ -114,5 +114,8 @@ function atStart() {
     postalCode = document.getElementById("postalCode").value;
     city = document.getElementById("city").value;
     countryInput = document.getElementById("valueCountry").value;
+    if(document.getElementById("cardNotFound") !== null){
+        document.getElementById("card").style.opacity = "50%";
+    }
     checkLanguage();
 }

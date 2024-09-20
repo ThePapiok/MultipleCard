@@ -251,7 +251,8 @@
         <p class="nameCard" th:if="${card} != null" th:text="${card.name}"></p>
         <div id="cardWithButtons">
             <div id="card">
-                <img class="qr" src="/images/code_qr_generator.png" alt="cardNotFound" th:if="${card} == null">
+                <img src="/images/card.png" alt="card" id="imageCard">
+                <img class="qr" src="/images/card_not_found.png" alt="cardNotFound" th:if="${card} == null" id="cardNotFound">
                 <img class="qr" th:src="${card.imageUrl}" alt="cardNotFound" th:if="${card} != null">
             </div>
             <div id="cardButtons">
