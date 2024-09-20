@@ -33,7 +33,7 @@ public class ProfileController {
   private static final String ERROR_TOO_MANY_ATTEMPTS_PARAM = "error.to_many_attempts";
   private static final String ERROR_BAD_SMS_CODE_PARAM = "error.bad_sms_code";
   private static final String ERROR_UNEXPECTED_PARAM = "error.unexpected";
-  private static final String SUCCESS_PARAM = "success";
+  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String PHONE_PARAM = "phone";
@@ -72,8 +72,7 @@ public class ProfileController {
       @RequestParam(required = false) String success,
       Principal principal,
       Model model,
-      HttpSession httpSession,
-      Locale locale) {
+      HttpSession httpSession) {
     String phone = principal.getName();
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
@@ -82,10 +81,12 @@ public class ProfileController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
-    if (success != null && httpSession.getAttribute(SUCCESS_PARAM) != null) {
-      model.addAttribute(
-          "successMessage", messageSource.getMessage("profilePage.data.updated", null, locale));
-      httpSession.removeAttribute(SUCCESS_PARAM);
+    if (success != null) {
+      String message = (String) httpSession.getAttribute(SUCCESS_MESSAGE_PARAM);
+      if (message != null) {
+        model.addAttribute(SUCCESS_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
+      }
     }
     model.addAttribute("profile", profileService.getProfile(phone));
     model.addAttribute("card", cardService.getCard(phone));
@@ -116,7 +117,8 @@ public class ProfileController {
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
       return REDIRECT_USER_ERROR;
     }
-    httpSession.setAttribute(SUCCESS_PARAM, true);
+    httpSession.setAttribute(
+        SUCCESS_MESSAGE_PARAM, messageSource.getMessage("profilePage.data.updated", null, locale));
     return "redirect:/user?success";
   }
 

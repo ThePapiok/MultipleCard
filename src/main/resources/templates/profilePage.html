@@ -255,7 +255,7 @@
                 <img class="qr" th:src="${card.imageUrl}" alt="cardNotFound" th:if="${card} != null">
             </div>
             <div id="cardButtons">
-                <a class="cardButton">
+                <a class="cardButton" th:href="@{/new_card}">
                     <button class="blackButton" th:text="#{profilePage.card.new}"></button>
                 </a>
                 <a th:if="${card} != null" class="cardButton">

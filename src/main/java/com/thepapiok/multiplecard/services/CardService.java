@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
@@ -25,5 +26,9 @@ public class CardService {
 
   public Card getCard(String phone) {
     return cardRepository.findCardByUserId(accountRepository.findIdByPhone(phone).getId());
+  }
+
+  public boolean createCard(OrderCardDTO cardDTO, String phone) {
+    return true;
   }
 }

@@ -116,6 +116,7 @@ public class ProfileService {
                   mongoTemplate.remove(query(where("reviewUserId").is(id)), Like.class);
                   mongoTemplate.remove(query(where("userId").is(id)), Like.class);
                   if (card != null) {
+                    // TODO - delete from cloudinary
                     mongoTemplate.remove(query(where(cardIdParam).is(card.getId())), Order.class);
                     mongoTemplate.remove(card);
                   }

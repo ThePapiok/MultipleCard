@@ -331,6 +331,7 @@ public class AuthenticationController {
               + SUFFIX_VERIFICATION_MESSAGE
               + verificationNumber,
           callingCode + phone);
+      System.out.println(verificationNumber);
       httpSession.setAttribute(param, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
@@ -347,6 +348,7 @@ public class AuthenticationController {
               + verificationNumber,
           email,
           locale);
+      System.out.println(verificationNumber);
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       System.out.println(e);

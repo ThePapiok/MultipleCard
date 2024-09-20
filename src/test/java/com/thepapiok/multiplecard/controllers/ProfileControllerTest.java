@@ -2,7 +2,6 @@ package com.thepapiok.multiplecard.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,9 +60,10 @@ public class ProfileControllerTest {
   private static final String DELETE_ACCOUNT_PAGE = "deleteAccountPage";
   private static final String PROFILE_PAGE = "profilePage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-  private static final String SUCCESS_PARAM = "success";
+  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String CARD_PARAM = "card";
   private static final String ERROR_MESSAGE = "error!";
+  private static final String SUCCESS_UPDATE_MESSAGE = "Pomyślnie zaktualizowano dane";
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
       "Za dużo razy podałeś niepoprawne dane";
@@ -144,8 +144,7 @@ public class ProfileControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamAndMessage() throws Exception {
-    returnProfilePageWithParamAndMessage(
-        ERROR_MESSAGE_PARAM, ERROR_MESSAGE, ERROR_PARAM, ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+    returnProfilePageWithParamAndMessage(ERROR_PARAM, ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
   }
 
   @Test
@@ -158,15 +157,13 @@ public class ProfileControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnProfilePageWithSuccessAtGetProfileWhenParamAndMessage() throws Exception {
-    returnProfilePageWithParamAndMessage(
-        SUCCESS_PARAM, true, SUCCESS_PARAM, "successMessage", "Pomyślnie zaktualizowano dane");
+    returnProfilePageWithParamAndMessage("success", SUCCESS_MESSAGE_PARAM, SUCCESS_UPDATE_MESSAGE);
   }
 
   private void returnProfilePageWithParamAndMessage(
-      String httpParam, Object valueParam, String param, String messageParam, String message)
-      throws Exception {
+      String param, String messageParam, String message) throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(httpParam, valueParam);
+    httpSession.setAttribute(messageParam, message);
     Card card = new Card();
 
     when(cardService.getCard(TEST_PHONE)).thenReturn(card);
@@ -180,7 +177,7 @@ public class ProfileControllerTest {
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(model().attribute(messageParam, message))
         .andExpect(view().name(PROFILE_PAGE));
-    assertNull(httpSession.getAttribute(httpParam));
+    assertNull(httpSession.getAttribute(messageParam));
   }
 
   @Test
@@ -204,7 +201,7 @@ public class ProfileControllerTest {
                 .param(COUNTRY_PARAM, profileDTO.getCountry())
                 .session(httpSession))
         .andExpect(redirectedUrl("/user?success"));
-    assertTrue((Boolean) httpSession.getAttribute(SUCCESS_PARAM));
+    assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
   }
 
   @Test

@@ -1,5 +1,5 @@
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
-const regPhone = new RegExp("^[1-9][0-9 ]*$")
+const regPhone = new RegExp("^[1-9][0-9 ]*$");
 let country = false;
 let callingCode = false;
 let success = {value: false}
