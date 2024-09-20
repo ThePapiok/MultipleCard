@@ -95,6 +95,10 @@ public class CardController {
         order.getCode(), (String) httpSession.getAttribute(CODE_SMS_ORDER_PARAM))) {
       return redirectErrorPage(httpSession, amount, "error.bad_sms_code", locale, order);
     }
+    if (!order.getPin().equals(order.getRetypedPin())) {
+      return redirectErrorPage(
+          httpSession, amount, "newCardPage.error.not_the_same_pin", locale, order);
+    }
     if (!cardService.createCard(order, principal.getName())) {
       resetSession(httpSession);
       httpSession.setAttribute(

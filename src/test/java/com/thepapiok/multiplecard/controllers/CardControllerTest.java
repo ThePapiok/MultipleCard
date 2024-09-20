@@ -191,6 +191,25 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToNewCardErrorAtNewCardWhenPinsNotTheSame() throws Exception {
+    final String badPin = "0000";
+    MockHttpSession httpSession = setSessionAtNewCard();
+    OrderCardDTO expectedOrder = new OrderCardDTO();
+    expectedOrder.setCode("");
+    expectedOrder.setName(TEST_NAME);
+    expectedOrder.setPin(TEST_PIN);
+    expectedOrder.setRetypedPin(badPin);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+
+    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, badPin, TEST_CODE, NEW_CARD_ERROR_URL);
+    assertEquals("Podane PINy różnią się", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertEquals(expectedOrder, httpSession.getAttribute(ORDER_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
   public void shouldRedirectToUserErrorAtNewCardWhenErrorAtCreateCard() throws Exception {
     MockHttpSession httpSession = setSessionAtNewCard();
     OrderCardDTO orderCardDTO = new OrderCardDTO();
