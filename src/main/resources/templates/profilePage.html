@@ -262,8 +262,8 @@
                 <a th:if="${card} != null" class="cardButton">
                     <button class="blackButton" th:text="#{profilePage.card.products}"></button>
                 </a>
-                <a th:if="${card} != null" class="cardButton">
-                    <button class="redButton" th:text="#{profilePage.card.block}"></button>
+                <a th:if="${card} != null" class="cardButton" th:href="@{/block_card}">
+                    <button class="redButton" th:text="#{block_card}"></button>
                 </a>
             </div>
         </div>

@@ -1,9 +1,7 @@
 let ok = [false];
 let previous = [false];
-const buttonId = "deleteButton";
 
-
-function checkVerificationSms(e) {
+function checkVerificationSms(e, buttonId) {
     let input = e.value;
     let length = input.length;
     addWhiteSpace(e, input, length);

@@ -91,4 +91,16 @@ public class CardService {
     }
     return true;
   }
+
+  public boolean blockCard(String phone) {
+    try {
+      final int maxAttempts = 3;
+      Card card = getCard(phone);
+      card.setAttempts(maxAttempts);
+      cardRepository.save(card);
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
 }

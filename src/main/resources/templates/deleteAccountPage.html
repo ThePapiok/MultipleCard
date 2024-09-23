@@ -6,14 +6,14 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
-    <link rel="stylesheet" href="/css/deleteAccountPage.css">
+    <link rel="stylesheet" href="/css/deleteAccountPageAndBlockCardPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/getCodeAndDisable.js"></script>
-<script src="/js/deleteAccountPage.js"></script>
+<script src="/js/deleteAccountPageAndBlockCardPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
@@ -30,7 +30,7 @@
                 <label class="inputs">
                     <input disabled  id="verificationNumberSms" name="verificationNumberSms" type="text"
                            th:placeholder="#{codeSms.text}" required
-                           oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                           oninput="checkVerificationSms(this, 'deleteButton')" minlength="7" maxlength="7"
                            onmouseenter="showValidation(this, 'VerificationSms')"
                            onmouseleave="hideValidation('VerificationSms')">
                     <img id="close1" src="/images/close.png" alt="close">
