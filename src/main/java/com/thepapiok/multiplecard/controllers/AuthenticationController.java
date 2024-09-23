@@ -366,8 +366,6 @@ public class AuthenticationController {
         model.addAttribute("error", message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
         model.addAttribute("isSent", true);
-      } else {
-        resetResetPassword(httpSession);
       }
     } else {
       resetResetPassword(httpSession);
