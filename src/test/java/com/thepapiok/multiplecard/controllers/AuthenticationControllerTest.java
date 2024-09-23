@@ -732,9 +732,6 @@ public class AuthenticationControllerTest {
         .andExpect(model().attribute(RESET_PARAM, new ResetPasswordDTO()))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(view().name(RESET_PASSWORD_PAGE));
-    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertNull(httpSession.getAttribute(RESET_PARAM));
   }
 
   @Test

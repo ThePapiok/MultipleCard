@@ -107,7 +107,6 @@ public class ProfileController {
       Locale locale,
       Principal principal) {
     if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
       return REDIRECT_USER_ERROR;
@@ -270,8 +269,6 @@ public class ProfileController {
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
-      } else {
-        resetSession(httpSession, codeSmsParam);
       }
     } else {
       resetSession(httpSession, codeSmsParam);

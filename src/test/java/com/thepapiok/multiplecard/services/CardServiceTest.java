@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.zxing.WriterException;
+import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
@@ -137,5 +138,71 @@ public class CardServiceTest {
     assertTrue(cardService.createCard(orderCardDTO, TEST_PHONE));
     verify(mongoTemplate).save(expectedCard);
     verify(mongoTemplate).save(expectedCardWithIdAndImageUrl);
+  }
+
+  @Test
+  public void shouldSuccessAtBlockCard() {
+    final int maxAttempts = 3;
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    Card expectedCard = new Card();
+    expectedCard.setUserId(TEST_ID);
+    expectedCard.setAttempts(maxAttempts);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+
+    assertTrue(cardService.blockCard(TEST_PHONE));
+    verify(cardRepository).save(expectedCard);
+  }
+
+  @Test
+  public void shouldFailAtBlockCardWhenGetException() {
+    final int maxAttempts = 3;
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    Card expectedCard = new Card();
+    expectedCard.setUserId(TEST_ID);
+    expectedCard.setAttempts(maxAttempts);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+    doThrow(MongoWriteException.class).when(cardRepository).save(expectedCard);
+
+    assertFalse(cardService.blockCard(TEST_PHONE));
+    verify(cardRepository).save(expectedCard);
+  }
+
+  @Test
+  public void shouldSuccessAtIsBlocked() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    card.setAttempts(0);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+
+    assertTrue(cardService.isBlocked(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtIsBlocked() {
+    final int maxAttempts = 3;
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    card.setAttempts(maxAttempts);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+
+    assertFalse(cardService.isBlocked(TEST_PHONE));
   }
 }
