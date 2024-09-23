@@ -89,7 +89,7 @@ public class ProfileService {
   public boolean deleteAccount(String phone) {
     final String idParam = "_id";
     final String cardIdParam = "cardId";
-    final int centsPerZloty = 100;
+    final float centsPerZloty = 100;
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
       transactionTemplate.execute(
@@ -113,7 +113,7 @@ public class ProfileService {
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),
-                        new Update().inc("points", (order.getAmount() / centsPerZloty)),
+                        new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
                         User.class);
                     mongoTemplate.remove(order);
                   }
