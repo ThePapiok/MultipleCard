@@ -173,6 +173,7 @@ public class CardController {
       Principal principal) {
     Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
     Pattern pattern = Pattern.compile("^[0-9]{3} [0-9]{3}$");
+    String phone = principal.getName();
     final int maxAmount = 3;
     if (amount == null) {
       httpSession.setAttribute(ATTEMPTS_PARAM, 0);
@@ -192,7 +193,14 @@ public class CardController {
         verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_BLOCK_PARAM))) {
       return redirectErrorPage(httpSession, amount, ERROR_BAD_SMS_CODE_MESSAGE, locale, null);
     }
-    if (!cardService.blockCard(principal.getName())) {
+    if (!cardService.isBlocked(phone)) {
+      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage("blockCardPage.error.block_card.isBlocked", null, locale));
+      return REDIRECT_USER_ERROR;
+    }
+    if (!cardService.blockCard(phone)) {
       resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));

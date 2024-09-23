@@ -103,4 +103,9 @@ public class CardService {
     }
     return true;
   }
+
+  public boolean isBlocked(String phone) {
+    final int maxAttempts = 3;
+    return getCard(phone).getAttempts() != maxAttempts;
+  }
 }

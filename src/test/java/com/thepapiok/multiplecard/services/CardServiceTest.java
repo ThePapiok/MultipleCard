@@ -176,4 +176,33 @@ public class CardServiceTest {
     assertFalse(cardService.blockCard(TEST_PHONE));
     verify(cardRepository).save(expectedCard);
   }
+
+  @Test
+  public void shouldSuccessAtIsBlocked() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    card.setAttempts(0);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+
+    assertTrue(cardService.isBlocked(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtIsBlocked() {
+    final int maxAttempts = 3;
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    card.setAttempts(maxAttempts);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
+
+    assertFalse(cardService.isBlocked(TEST_PHONE));
+  }
 }

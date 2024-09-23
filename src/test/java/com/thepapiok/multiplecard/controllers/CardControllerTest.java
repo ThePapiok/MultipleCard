@@ -299,6 +299,7 @@ public class CardControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(cardService.blockCard(TEST_PHONE)).thenReturn(true);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(true);
 
     mockMvc
         .perform(
@@ -361,10 +362,29 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserErrorWhenCardIsBlocked() throws Exception {
+    MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(BLOCK_CARD_URL)
+                .session(httpSession)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE))
+        .andExpect(redirectedUrl(USER_ERROR_URL));
+    checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+    assertEquals("Karta jest już zastrzeżona", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
   public void shouldRedirectToUserErrorWhenErrorAtBlockCard() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(true);
     when(cardService.blockCard(TEST_PHONE)).thenReturn(false);
 
     mockMvc
