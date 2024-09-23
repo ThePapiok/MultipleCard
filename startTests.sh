@@ -15,6 +15,6 @@ EOF
 
 mvn test
 
-docker-compose down
+docker-compose down test
 
 docker volume rm multiple_dataTest
