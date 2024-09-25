@@ -35,8 +35,8 @@
                                oninput="checkFirstName(this)" minlength="2" maxlength="15"
                                onmouseenter="showValidation(this, 'FirstName')"
                                onmouseleave="hideValidation('FirstName')">
-                        <img id="close1" src="/images/close.png" alt="close">
-                        <img id="check1" src="/images/check.png" alt="check">
+                        <img hidden id="close1" src="/images/close.png" alt="close">
+                        <img hidden id="check1" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -58,8 +58,8 @@
                                oninput="checkLastName(this)" minlength="2" maxlength="40"
                                onmouseenter="showValidation(this, 'LastName')"
                                onmouseleave="hideValidation('LastName')">
-                        <img id="close2" src="/images/close.png" alt="close">
-                        <img id="check2" src="/images/check.png" alt="check">
+                        <img hidden id="close2" src="/images/close.png" alt="close">
+                        <img hidden id="check2" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -83,8 +83,8 @@
                                oninput="checkStreet(this)"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
                                onmouseleave="hideValidation('Street')">
-                        <img id="close3" src="/images/close.png" alt="close">
-                        <img id="check3" src="/images/check.png" alt="check">
+                        <img hidden id="close3" src="/images/close.png" alt="close">
+                        <img hidden id="check3" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -106,8 +106,8 @@
                                oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
                                onmouseenter="showValidation(this, 'HouseNumber')"
                                onmouseleave="hideValidation('HouseNumber')">
-                        <img id="close4" src="/images/close.png" alt="close">
-                        <img id="check4" src="/images/check.png" alt="check">
+                        <img hidden id="close4" src="/images/close.png" alt="close">
+                        <img hidden id="check4" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -128,8 +128,8 @@
                                oninput="checkApartmentNumber(this)" maxlength="6"
                                onmouseenter="showValidation(this, 'ApartmentNumber')"
                                onmouseleave="hideValidation('ApartmentNumber')">
-                        <img id="close5" src="/images/close.png" alt="close">
-                        <img id="check5" src="/images/check.png" alt="check">
+                        <img hidden id="close5" src="/images/close.png" alt="close">
+                        <img hidden id="check5" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -153,8 +153,8 @@
                                oninput="checkPostalCode(this)" maxlength="6" minlength="6"
                                onmouseenter="showValidation(this, 'PostalCode')"
                                onmouseleave="hideValidation('PostalCode')">
-                        <img id="close6" src="/images/close.png" alt="close">
-                        <img id="check6" src="/images/check.png" alt="check">
+                        <img hidden id="close6" src="/images/close.png" alt="close">
+                        <img hidden id="check6" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -173,8 +173,8 @@
                         <input th:field="*{city}" type="text" required oninput="checkCity(this)" th:value="*{city}"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
                                onmouseleave="hideValidation('City')">
-                        <img id="close7" src="/images/close.png" alt="close">
-                        <img id="check7" src="/images/check.png" alt="check">
+                        <img hidden id="close7" src="/images/close.png" alt="close">
+                        <img hidden id="check7" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -198,8 +198,8 @@
                                oninput="checkProvince(this)" minlength="2" maxlength="40"
                                onmouseenter="showValidation(this, 'Province')"
                                onmouseleave="hideValidation('Province')">
-                        <img id="close8" src="/images/close.png" alt="close">
-                        <img id="check8" src="/images/check.png" alt="check">
+                        <img hidden id="close8" src="/images/close.png" alt="close">
+                        <img hidden id="check8" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
@@ -219,12 +219,12 @@
                     <label class="inputs">
                         <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
                                th:value="*{country}"
-                               onclick="showOrHideCountry('up1', 'down1')">
-                        <img id="down1" src="/images/keyboard_down.png" alt="down">
-                        <img id="up1" src="/images/keyboard_up.png" alt="up">
+                               onclick="showOrHideCountry('', '1')">
+                        <img hidden id="down1" src="/images/keyboard_down.png" alt="down">
+                        <img hidden id="up1" src="/images/keyboard_up.png" alt="up">
                     </label>
                 </label>
-                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
+                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true, '')">
                 <ul id="optionsCountry" class="optionsSelect">
                     <li class="optionSelect optionCountry" th:data-code="${country.code}"
                         th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'"
@@ -252,7 +252,8 @@
         <div id="cardWithButtons">
             <div id="card">
                 <img src="/images/card.png" alt="card" id="imageCard">
-                <img class="qr" src="/images/card_not_found.png" alt="cardNotFound" th:if="${card} == null" id="cardNotFound">
+                <img class="qr" src="/images/card_not_found.png" alt="cardNotFound" th:if="${card} == null"
+                     id="cardNotFound">
                 <img class="qr" th:src="${card.imageUrl}" alt="cardNotFound" th:if="${card} != null">
             </div>
             <div id="cardButtons">

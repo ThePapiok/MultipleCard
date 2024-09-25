@@ -28,13 +28,13 @@
         <div class="block-horizontally">
             <label id="VerificationSms">
                 <label class="inputs">
-                    <input disabled  id="verificationNumberSms" name="verificationNumberSms" type="text"
+                    <input disabled id="verificationNumberSms" name="verificationNumberSms" type="text"
                            th:placeholder="#{codeSms.text}" required
                            oninput="checkVerificationSms(this, 'deleteButton')" minlength="7" maxlength="7"
                            onmouseenter="showValidation(this, 'VerificationSms')"
                            onmouseleave="hideValidation('VerificationSms')">
                     <img id="close1" src="/images/close.png" alt="close">
-                    <img id="check1" src="/images/check.png" alt="check">
+                    <img hidden id="check1" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">

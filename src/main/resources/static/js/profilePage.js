@@ -88,8 +88,8 @@ function setValueCountry(e) {
 
 function deleteCheck(i, hasCheck, e) {
     if (hasCheck) {
-        document.getElementById("close" + i).style.display = "none";
-        document.getElementById("check" + i).style.display = "none";
+        document.getElementById("close" + i).hidden = true;
+        document.getElementById("check" + i).hidden = true;
     }
     e.style.color = "lightgray";
     ok[i - 1] = null;
@@ -114,7 +114,7 @@ function atStart() {
     postalCode = document.getElementById("postalCode").value;
     city = document.getElementById("city").value;
     countryInput = document.getElementById("valueCountry").value;
-    if(document.getElementById("cardNotFound") !== null){
+    if (document.getElementById("cardNotFound") !== null) {
         document.getElementById("card").style.opacity = "50%";
     }
     checkLanguage();

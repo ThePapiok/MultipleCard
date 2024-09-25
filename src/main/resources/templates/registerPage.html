@@ -29,7 +29,7 @@
                            oninput="checkFirstName(this)" minlength="2" maxlength="15"
                            onmouseenter="showValidation(this, 'FirstName')" onmouseleave="hideValidation('FirstName')">
                     <img id="close1" src="/images/close.png" alt="close">
-                    <img id="check1" src="/images/check.png" alt="check">
+                    <img hidden id="check1" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -46,7 +46,7 @@
                            oninput="checkLastName(this)" minlength="2" maxlength="40"
                            onmouseenter="showValidation(this, 'LastName')" onmouseleave="hideValidation('LastName')">
                     <img id="close2" src="/images/close.png" alt="close">
-                    <img id="check2" src="/images/check.png" alt="check">
+                    <img hidden id="check2" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation" id="validationLastName">
@@ -66,7 +66,7 @@
                            minlength="4" maxlength="30" onmouseenter="showValidation(this, 'Email')"
                            onmouseleave="hideValidation('Email')">
                     <img id="close3" src="/images/close.png" alt="close">
-                    <img id="check3" src="/images/check.png" alt="check">
+                    <img hidden id="check3" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -82,7 +82,7 @@
                            oninput="checkProvince(this)" minlength="2" maxlength="40"
                            onmouseenter="showValidation(this, 'Province')" onmouseleave="hideValidation('Province')">
                     <img id="close4" src="/images/close.png" alt="close">
-                    <img id="check4" src="/images/check.png" alt="check">
+                    <img hidden id="check4" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation" id="validationProvince">
@@ -103,7 +103,7 @@
                            minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
                            onmouseleave="hideValidation('Street')">
                     <img id="close5" src="/images/close.png" alt="close">
-                    <img id="check5" src="/images/check.png" alt="check">
+                    <img hidden id="check5" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -122,7 +122,7 @@
                            onmouseenter="showValidation(this, 'HouseNumber')"
                            onmouseleave="hideValidation('HouseNumber')">
                     <img id="close6" src="/images/close.png" alt="close">
-                    <img id="check6" src="/images/check.png" alt="check">
+                    <img hidden id="check6" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation" id="validationHouseNumber">
@@ -139,7 +139,7 @@
                            oninput="checkApartmentNumber(this)" maxlength="6"
                            onmouseenter="showValidation(this, 'ApartmentNumber')"
                            onmouseleave="hideValidation('ApartmentNumber')">
-                    <img id="close7" src="/images/close.png" alt="close">
+                    <img hidden id="close7" src="/images/close.png" alt="close">
                     <img id="check7" src="/images/check.png" alt="check">
                 </label>
             </label>
@@ -161,7 +161,7 @@
                            onmouseenter="showValidation(this, 'PostalCode')"
                            onmouseleave="hideValidation('PostalCode')">
                     <img id="close8" src="/images/close.png" alt="close">
-                    <img id="check8" src="/images/check.png" alt="check">
+                    <img hidden id="check8" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -178,7 +178,7 @@
                            minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
                            onmouseleave="hideValidation('City')">
                     <img id="close9" src="/images/close.png" alt="close">
-                    <img id="check9" src="/images/check.png" alt="check">
+                    <img hidden id="check9" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation" id="validationCity">
@@ -195,11 +195,11 @@
             <label id="Country">
                 <label class="inputs">
                     <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
-                           th:placeholder="#{country.text}" onclick="showOrHideCountry('up1', 'down1')" value="">
+                           th:placeholder="#{country.text}" onclick="showOrHideCountry('', '1')" value="">
                     <img id="down1" src="/images/keyboard_down.png" alt="down">
-                    <img id="up1" src="/images/keyboard_up.png" alt="up">
+                    <img hidden id="up1" src="/images/keyboard_up.png" alt="up">
                 </label>
-                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true)">
+                <input id="searchCountry" class="searchSelect" type="text" oninput="searchAll(this, true, '')">
                 <ul id="optionsCountry" class="optionsSelect">
                     <li class="optionSelect optionCountry" th:data-code="${country.code}"
                         th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'"
@@ -213,7 +213,7 @@
                            th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up2', 'down2')"
                            value="">
                     <img id="down2" src="/images/keyboard_down.png" alt="down">
-                    <img id="up2" src="/images/keyboard_up.png" alt="up">
+                    <img hidden id="up2" src="/images/keyboard_up.png" alt="up">
                 </label>
                 <input id="searchCallingCode" class="searchSelect" type="text"
                        oninput="searchAll(this, false)">
@@ -232,7 +232,7 @@
                            maxlength="28" minlength="7" onmouseenter="showValidation(this, 'Phone')"
                            onmouseleave="hideValidation('Phone')">
                     <img id="close10" src="/images/close.png" alt="close">
-                    <img id="check10" src="/images/check.png" alt="check">
+                    <img hidden id="check10" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation" id="validationPhone">
@@ -250,7 +250,7 @@
                        minlength="6" maxlength="25" onmouseenter="showValidation(this, 'Password')"
                        onmouseleave="hideValidation('Password')">
                 <img id="close11" src="/images/close.png" alt="close">
-                <img id="check11" src="/images/check.png" alt="check">
+                <img hidden id="check11" src="/images/check.png" alt="check">
             </label>
         </label>
         <div class="validation">
@@ -270,7 +270,7 @@
                        onmouseenter="showValidation(this, 'RetypedPassword')"
                        onmouseleave="hideValidation('RetypedPassword')">
                 <img id="close12" src="/images/close.png" alt="close">
-                <img id="check12" src="/images/check.png" alt="check">
+                <img hidden id="check12" src="/images/check.png" alt="check">
             </label>
         </label>
         <div class="validation">

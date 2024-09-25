@@ -3,11 +3,6 @@
     width: 50%;
 }
 
-#check1, #check2 {
-    display: none;
-}
-
-
 #verificationNumberEmail, #verificationNumberSms {
     height: 50px;
 }

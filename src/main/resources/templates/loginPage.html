@@ -31,7 +31,7 @@
                            th:placeholder="#{callingCode.text}" onclick="showOrHideCallingCode('up1', 'down1')"
                            value="">
                     <img id="down1" src="/images/keyboard_down.png" alt="down">
-                    <img id="up1" src="/images/keyboard_up.png" alt="up">
+                    <img hidden id="up1" src="/images/keyboard_up.png" alt="up">
                 </label>
                 <input id="searchCallingCode" class="searchSelect" type="text" oninput="searchAll(this, false)">
                 <ul id="optionsCallingCode" class="optionsSelect">
@@ -49,7 +49,7 @@
                            onmouseenter="showValidation(this, 'Phone')"
                            onmouseleave="hideValidation('Phone')">
                     <img id="close2" src="/images/close.png" alt="close">
-                    <img id="check2" src="/images/check.png" alt="check">
+                    <img hidden id="check2" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -67,7 +67,7 @@
                        minlength="6" maxlength="25" onmouseenter="showValidation(this, 'Password')"
                        onmouseleave="hideValidation('Password')">
                 <img id="close3" src="/images/close.png" alt="close">
-                <img id="check3" src="/images/check.png" alt="check">
+                <img hidden id="check3" src="/images/check.png" alt="check">
             </label>
         </label>
         <div class="validation">
