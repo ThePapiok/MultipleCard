@@ -73,6 +73,10 @@ db.createCollection("shops", {
                     "bsonType": "string",
                     "description": "imageUrl is required and must be string"
                 },
+                "accountNumber": {
+                    "bsonType": "string",
+                    "description": "accountNumber is required and must be string"
+                },
                 "points": {
                     "bsonType": "array",
                     "minItems": 1,

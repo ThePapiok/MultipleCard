@@ -1,6 +1,7 @@
 const buttonId = "nextButton";
-let ok = [false, false, false, false, false, false, false, false, false];
-let previous = [false, false, false, false, false, false, false, false, false];
+const regAccountNumber = new RegExp("^[0-9]*$");
+let ok = [false, false, false, false, false, false, false, false, false, false];
+let previous = [false, false, false, false, false, false, false, false, false, false];
 
 function atStart() {
     checkLanguage();
@@ -11,12 +12,17 @@ function checkShopName(e) {
     check(8, (input.length >= 2 && input.length <= 30), ok, previous, buttonId, success, true, true);
 }
 
+function checkAccountNumber(e) {
+    const input = e.value;
+    check(9, (input.length === 26 && regAccountNumber.test(input)), ok, previous, buttonId, success, true, true);
+}
+
 function addPlace(e) {
     let value = parseInt(e.previousElementSibling.textContent);
     if (value < 5) {
         const indexPlace = value;
         const incValue = value + 2;
-        let index = 8 + (value * 6) + (value + 1);
+        let index = 9 + (value * 6) + (value + 1);
         let places = document.getElementById("places");
         let block = document.createElement("div");
         let placeSelect = document.createElement("div");
@@ -26,9 +32,9 @@ function addPlace(e) {
         value++;
         ok.push(false, false, true, false, false, false, false);
         previous.push(false, false, true, false, false, false, false);
-        check(9, false, ok, previous, buttonId, success, false, true);
-        ok[8] = true;
-        previous[8] = true;
+        check(10, false, ok, previous, buttonId, success, false, true);
+        ok[9] = true;
+        previous[9] = true;
         e.previousElementSibling.textContent = value.toString();
         block.className = "block-horizontally block";
         placeSelect.id = "place" + value;
@@ -207,14 +213,14 @@ function removePlace(e) {
     }
     e.remove();
     for (let i = 1; i <= 7; i++) {
-        ok.splice(8 + skip + i);
-        previous.splice(8 + skip + i);
+        ok.splice(9 + skip + i);
+        previous.splice(9 + skip + i);
     }
     if (document.getElementsByClassName("numberOfPlace").length === 0) {
-        check(9, false, ok, previous, buttonId, success, false, true);
+        check(10, false, ok, previous, buttonId, success, false, true);
     } else {
-        previous[8] = false;
-        check(9, true, ok, previous, buttonId, success, false, true);
+        previous[9] = false;
+        check(10, true, ok, previous, buttonId, success, false, true);
     }
 }
 

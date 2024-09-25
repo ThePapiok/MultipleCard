@@ -1,5 +1,5 @@
 
-#validationLastName, #validationPhone, #validationRetypedPassword, #validationCity, #validationApartmentNumber, #validationProvince {
+#validationLastName, #validationPhone, #validationRetypedPassword, #validationCity, #validationApartmentNumber, #validationProvince, #validationAccountNumber {
     transform: translateX(-100%);
 }
 
