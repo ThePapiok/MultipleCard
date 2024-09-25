@@ -8,7 +8,7 @@
     height: 100%;
 }
 
-#Phone {
+#PhoneLabel {
     width: 67%;
 }
 
@@ -30,7 +30,7 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #CallingCode, #Phone, #Password {
+    #CallingCode, #PhoneLabel, #Password {
         width: 100%;
     }
 }

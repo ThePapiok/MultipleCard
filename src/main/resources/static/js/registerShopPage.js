@@ -1,6 +1,4 @@
 const buttonId = "nextButton";
-
-let previousPostalCode = "";
 let ok = [false, false, false, false, false, false, false, false, false];
 let previous = [false, false, false, false, false, false, false, false, false];
 
@@ -8,80 +6,38 @@ function atStart() {
     checkLanguage();
 }
 
-function checkFirstName(e) {
-    const input = e.value;
-    check(1, (input.length >= 2 && input.length <= 15 && regFirstName.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkLastName(e) {
-    const input = e.value;
-    check(2, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkEmail(e) {
-    const input = e.value;
-    check(3, (input.length >= 4 && input.length <= 30 && regEmail.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkPhone(e) {
-    const input = e.value.toString().replaceAll(" ", "");
-    const callingCodeLength = document.getElementById("valueCallingCode").value.length;
-    check(5, (input.length >= 7 && input.length + callingCodeLength <= 16 && regPhone.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkPassword(e) {
-    const input = e.value;
-    check(6, (input.length >= 6 && input.length <= 25 && regPassword.test(input)), ok, previous, buttonId, success, true, true);
-    checkRetypedPassword(document.getElementById("retypedPassword"));
-}
-
-function checkRetypedPassword(e) {
-    check(7, (e.value === document.getElementById("password").value), ok, previous, buttonId, success, true, true);
-}
-
 function checkShopName(e) {
     const input = e.value;
     check(8, (input.length >= 2 && input.length <= 30), ok, previous, buttonId, success, true, true);
 }
 
-function setValueCallingCode(e) {
-    let valueSelect = document.getElementById("valueCallingCode");
-    valueSelect.value = e.dataset.value;
-    checkSelect(valueSelect, 4);
-    checkPhone(document.getElementById("phone"));
-}
-
-function checkSelect(e, index) {
-    const input = e.value;
-    check(index, (input !== ''), ok, previous, buttonId, success, false, true);
-}
-
 function addPlace(e) {
     let value = parseInt(e.previousElementSibling.textContent);
     if (value < 5) {
-        let index = 8 + (value * 6) + (value + 1);
         const indexPlace = value;
+        const incValue = value + 2;
+        let index = 8 + (value * 6) + (value + 1);
+        let places = document.getElementById("places");
+        let block = document.createElement("div");
+        let placeSelect = document.createElement("div");
+        let place = document.createElement("input");
+        let minus = document.createElement("img");
+        let form = document.createElement("div");
         value++;
-        const incValue = value + 1;
         ok.push(false, false, true, false, false, false, false);
         previous.push(false, false, true, false, false, false, false);
         check(9, false, ok, previous, buttonId, success, false, true);
         ok[8] = true;
         previous[8] = true;
         e.previousElementSibling.textContent = value.toString();
-        let places = document.getElementById("places");
-        let block = document.createElement("div");
-        let placeSelect = document.createElement("div");
         block.className = "block-horizontally block";
         placeSelect.id = "place" + value;
         placeSelect.className = "numberOfPlace";
-        let place = document.createElement("input");
         place.className = "place";
         place.value = document.getElementById("textPlace").textContent + " " + value;
         place.readOnly = true;
         place.onclick = () => showOrHideForm(form);
         block.appendChild(place);
-        let minus = document.createElement("img");
         minus.src = "/images/minus.png";
         minus.alt = "minus";
         minus.className = "minus";
@@ -89,7 +45,6 @@ function addPlace(e) {
         block.appendChild(minus);
         placeSelect.appendChild(block);
         places.appendChild(placeSelect);
-        let form = document.createElement("div");
         form.className = "formAddress";
         form.innerHTML = `
         <div class="block-horizontally">
@@ -222,8 +177,8 @@ function addPlace(e) {
     </div>
         `
         placeSelect.appendChild(form);
-        let options = document.getElementById("optionsCountry" + incValue);
         index--;
+        let options = document.getElementById("optionsCountry" + incValue);
         for (let i = 0; i < list.length; i++) {
             const country = list[i];
             let option = document.createElement("li");
@@ -238,8 +193,9 @@ function addPlace(e) {
 
 function removePlace(e) {
     const value = parseInt(document.getElementById("numberPlace").textContent);
-    document.getElementById("numberPlace").textContent = (value - 1).toString();
+    const skip = (parseInt(e.id.charAt(5)) - 1) * 7;
     let sibling = e.nextElementSibling;
+    document.getElementById("numberPlace").textContent = (value - 1).toString();
     while (sibling !== null) {
         let inputsThis = e.firstElementChild.nextElementSibling.getElementsByTagName("input");
         let inputsSibling = sibling.firstElementChild.nextElementSibling.getElementsByTagName("input");
@@ -249,7 +205,6 @@ function removePlace(e) {
         e = sibling;
         sibling = sibling.nextElementSibling;
     }
-    const skip = (parseInt(e.id.charAt(5)) - 1) * 7;
     e.remove();
     for (let i = 1; i <= 7; i++) {
         ok.splice(8 + skip + i);
@@ -257,57 +212,12 @@ function removePlace(e) {
     }
     if (document.getElementsByClassName("numberOfPlace").length === 0) {
         check(9, false, ok, previous, buttonId, success, false, true);
+    } else {
+        previous[8] = false;
+        check(9, true, ok, previous, buttonId, success, false, true);
     }
 }
 
 function showOrHideForm(e) {
     e.hidden = !e.hidden;
 }
-
-function setValueCountry(e, incValue, value) {
-    let valueSelect = document.getElementById("valueCountry" + incValue);
-    valueSelect.value = e.textContent;
-    checkSelect(valueSelect, value);
-}
-
-function checkStreet(e, value) {
-    const input = e.value;
-    check(value, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkHouseNumber(e, value) {
-    const input = e.value;
-    check(value, (input.length >= 1 && input.length <= 10 && regHouseNumber.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkApartmentNumber(e, value) {
-    const input = e.value;
-    check(value, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, buttonId, success, true, true);
-}
-
-function checkPostalCode(e, value) {
-    let input = e.value;
-    let length = input.length;
-    if (length === 2) {
-        if (previousPostalCode.charAt(previousPostalCode.length - 1) === "-") {
-            e.value = input.substring(0, length - 1);
-        } else {
-            e.value += "-";
-        }
-        input = e.value;
-    }
-    previousPostalCode = input;
-    check(value, (regPostalCode.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkCity(e, value) {
-    const input = e.value;
-    check(value, (input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-function checkProvince(e, value) {
-    const input = e.value;
-    check(value, (input.length >= 2 && input.length <= 40 && regLastNameAndCity.test(input)), ok, previous, buttonId, success, true, true);
-}
-
-

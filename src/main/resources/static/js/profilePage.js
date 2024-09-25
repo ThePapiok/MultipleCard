@@ -1,7 +1,5 @@
-let previousPostalCode = "";
 let ok = [null, null, null, null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null, null, null, null];
-let firstTime = [false, false, false, false, false, false, false, false, false];
 let firstName;
 let lastName;
 let province;
@@ -11,9 +9,7 @@ let apartmentNumber;
 let postalCode;
 let city;
 let countryInput;
-
 const buttonId = "saveButton";
-
 
 function checkOnlyIfOther(input, cond, i, startInput, hasCheck, e) {
     if (input === startInput) {

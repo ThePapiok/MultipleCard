@@ -48,7 +48,7 @@ public class ProfileControllerTest {
   private static final String PROFILE_PARAM = "profile";
   private static final String CODE_PARAM = "code";
   private static final String RETYPED_PASSWORD_PARAM = "retypedPassword";
-  private static final String NEW_PASSWORD_PARAM = "newPassword";
+  private static final String PASSWORD_PARAM = "password";
   private static final String OLD_PASSWORD_PARAM = "oldPassword";
   private static final String COUNTRIES_PARAM = "countries";
   private static final String USER_URL = "/user";
@@ -333,7 +333,7 @@ public class ProfileControllerTest {
         .perform(
             post(PASSWORD_CHANGE_URL)
                 .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
-                .param(NEW_PASSWORD_PARAM, TEST_NEW_PASSWORD)
+                .param(PASSWORD_PARAM, TEST_NEW_PASSWORD)
                 .param(RETYPED_PASSWORD_PARAM, TEST_NEW_PASSWORD)
                 .param(CODE_PARAM, TEST_CODE)
                 .session(httpSession))
@@ -414,7 +414,7 @@ public class ProfileControllerTest {
         .perform(
             post(PASSWORD_CHANGE_URL)
                 .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
-                .param(NEW_PASSWORD_PARAM, newPassword)
+                .param(PASSWORD_PARAM, newPassword)
                 .param(RETYPED_PASSWORD_PARAM, retypedPassword)
                 .param(CODE_PARAM, TEST_CODE)
                 .session(httpSession))

@@ -25,7 +25,7 @@
             <label class="inputs">
                 <input id="verificationNumberEmail" name="verificationNumberEmail" type="text"
                        th:placeholder="#{verificationPage.codeEmail.text}"
-                       required oninput="checkVerificationEmail(this)" minlength="7" maxlength="7"
+                       required oninput="checkVerificationEmail(this, 1)" minlength="7" maxlength="7"
                        onmouseenter="showValidation(this, 'VerificationEmail')"
                        onmouseleave="hideValidation('VerificationEmail')">
                 <img id="close1" src="/images/close.png" alt="close">
@@ -44,7 +44,7 @@
                 <input id="verificationNumberSms" name="verificationNumberSms" type="text"
                        th:placeholder="#{codeSms.text}"
                        required
-                       oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                       oninput="checkVerificationSms(this, 2)" minlength="7" maxlength="7"
                        onmouseenter="showValidation(this, 'VerificationSms')"
                        onmouseleave="hideValidation('VerificationSms')">
                 <img id="close2" src="/images/close.png" alt="close">

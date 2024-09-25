@@ -15,7 +15,7 @@ public class ChangePasswordDTO {
   @NotBlank
   @Pattern(regexp = "^(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*]).*$")
   @Size(min = 6, max = 25)
-  private String newPassword;
+  private String password;
 
   @NotBlank
   @Pattern(regexp = "^(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*]).*$")
