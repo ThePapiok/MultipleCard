@@ -1,5 +1,6 @@
 const regPassword = new RegExp("(?=.*[a-ząćęłńóśźż])(?=.*[A-ZĄĆĘŁŃÓŚŹŻ])(?=.*[0-9])(?=.*[!@#$%^&*])");
 const regPhone = new RegExp("^[1-9][0-9 ]*$");
+const regEmail = new RegExp("^[A-za-z0-9-._]+@[A-z0-9a-z-.]+\\.[a-zA-z]{2,4}$");
 let country = false;
 let callingCode = false;
 let success = {value: false}
@@ -9,8 +10,8 @@ function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     if (con) {
         ok[i - 1] = true;
         if (hasCheck && previousCond === false) {
-            document.getElementById("close" + i).style.display = "none";
-            document.getElementById("check" + i).style.display = "inline";
+            document.getElementById("close" + i).hidden = true;
+            document.getElementById("check" + i).hidden = false;
         }
         if (previousCond === false) {
             activeButton(id, ok, success, isSubmit);
@@ -19,8 +20,8 @@ function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     } else {
         ok[i - 1] = false;
         if (hasCheck && previousCond === true) {
-            document.getElementById("close" + i).style.display = "inline";
-            document.getElementById("check" + i).style.display = "none";
+            document.getElementById("close" + i).hidden = false;
+            document.getElementById("check" + i).hidden = true;
         }
         if (previousCond === true) {
             disableButton(id, ok, success, isSubmit);
@@ -100,24 +101,24 @@ function showOrHideSelect(cond, searchName, optionsName, upName, downName) {
         search.style.display = "block";
         search.focus();
         options.style.display = "block";
-        up.style.display = "block";
-        down.style.display = "none";
+        up.hidden = false;
+        down.hidden = true;
     } else {
         search.style.display = "none";
         options.style.display = "none";
-        up.style.display = "none";
-        down.style.display = "block";
+        up.hidden = true;
+        down.hidden = false;
     }
 }
 
-function searchAll(e, isCountry) {
+function searchAll(e, isCountry, value) {
     let optionSelect;
     let nothingSelect;
     let text;
     let char;
     if (isCountry) {
-        optionSelect = "optionCountry";
-        nothingSelect = "nothingCountry";
+        optionSelect = "optionCountry" + value;
+        nothingSelect = "nothingCountry" + value;
         text = e.value.toString().toLowerCase();
     } else {
         optionSelect = "optionCallingCode";
@@ -146,15 +147,15 @@ function searchAll(e, isCountry) {
         }
     }
     if (!isFound) {
-        nothing.style.display = "block";
+        nothing.hidden = false;
     } else {
-        nothing.style.display = "none";
+        nothing.hidden = true;
     }
 }
 
-function showOrHideCountry(upName, downName) {
+function showOrHideCountry(incValue, value) {
     country = !country;
-    showOrHideSelect(country, "searchCountry", "optionsCountry", upName, downName)
+    showOrHideSelect(country, "searchCountry" + incValue, "optionsCountry" + incValue, "up" + value, "down" + value)
 }
 
 function showOrHideCallingCode(upName, downName) {

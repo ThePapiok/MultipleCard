@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
 import com.thepapiok.multiplecard.misc.LocaleChanger;
 import com.thepapiok.multiplecard.services.AuthenticationService;
@@ -57,6 +58,7 @@ public class AuthenticationController {
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
   private static final String CALLING_CODES_PARAM = "callingCodes";
+  private static final String COUNTRIES_PARAM = "countries";
   private static final String CALLING_CODE_PARAM = "callingCode";
   private static final String ERROR_UNEXPECTED = "error.unexpected";
   private final CountryService countryService;
@@ -127,12 +129,13 @@ public class AuthenticationController {
       httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       model.addAttribute(REGISTER_PARAM, httpSession.getAttribute(REGISTER_PARAM));
       httpSession.removeAttribute(REGISTER_PARAM);
-    } else {
+    }
+    if (error == null || message == null) {
       model.addAttribute(REGISTER_PARAM, new RegisterDTO());
     }
     List<CountryDTO> countries = countryService.getAll();
     model.addAttribute(
-        "countries",
+        COUNTRIES_PARAM,
         countries.stream()
             .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
             .distinct()
@@ -486,5 +489,27 @@ public class AuthenticationController {
     httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
     httpSession.removeAttribute(ATTEMPTS_PARAM);
     httpSession.removeAttribute(RESET_PARAM);
+  }
+
+  @GetMapping("/register_shop")
+  public String registerShopPage(Model model) {
+    List<CountryDTO> countries = countryService.getAll();
+    model.addAttribute(REGISTER_PARAM, new RegisterShopDTO());
+    model.addAttribute(
+        COUNTRIES_PARAM,
+        countries.stream()
+            .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
+            .distinct()
+            .toList());
+    model.addAttribute(
+        CALLING_CODES_PARAM,
+        countries.stream().map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode())).toList());
+    return "registerShopPage";
+  }
+
+  @PostMapping("/register_shop")
+  public String registerShop(@ModelAttribute RegisterShopDTO register) {
+    System.out.println(register);
+    return REDIRECT_LOGIN;
   }
 }

@@ -1,4 +1,3 @@
-const regEmail = new RegExp("^[A-za-z0-9-._]+@[A-z0-9a-z-.]+\\.[a-zA-z]{2,4}$");
 const nextButtonId = "nextButton";
 
 let previousPostalCode = "";

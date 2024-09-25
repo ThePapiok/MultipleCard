@@ -16,6 +16,7 @@ import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -1017,5 +1018,17 @@ public class AuthenticationControllerTest {
                 .param(PHONE_PARAM, TEST_PHONE)
                 .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
         .andExpect(content().string(ERROR_AT_SMS_SENDING_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnRegisterShopPageAtRegisterShopPage() throws Exception {
+    when(countryService.getAll()).thenReturn(expectedCountries);
+
+    mockMvc
+        .perform(get("/register_shop"))
+        .andExpect(model().attribute(REGISTER_PARAM, new RegisterShopDTO()))
+        .andExpect(model().attribute(COUNTRIES_PARAM, expectedCountryNames))
+        .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
+        .andExpect(view().name("registerShopPage"));
   }
 }
