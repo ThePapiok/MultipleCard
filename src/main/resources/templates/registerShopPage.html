@@ -43,8 +43,11 @@
     <span hidden th:text="#{country.text}" id="textCountry"></span>
     <span hidden th:text="#{province.text}" id="textProvince"></span>
     <span hidden th:text="#{select.no_results}" id="textNoResults"></span>
+    <span hidden th:text="#{registerShopPage.upload_image.bad_type}" id="textBadType"></span>
+    <span hidden th:text="#{registerShopPage.upload_image.too_big}" id="textTooBig"></span>
+    <span hidden th:text="#{registerShopPage.upload_image.too_small}" id="textTooSmall"></span>
     <p class="title" th:text="#{register.text}"></p>
-    <form th:action="@{/register_shop}" th:object="${register}" id="form" method="post">
+    <form th:action="@{/register_shop}" th:object="${register}" id="form" method="post" enctype="multipart/form-data">
         <div class="block-horizontally">
             <label id="FirstName">
                 <label class="inputs">
@@ -210,6 +213,13 @@
                 </ul>
             </div>
         </div>
+        <p th:text="#{registerShopPage.upload_image.text}" id="titleUploadImage"></p>
+        <label id="uploadFile">
+            <input th:field="*{file}" type="file" oninput="setImage(this)" accept="image/png, image/jpeg">
+            <img id="noImage" src="/images/upload.png" alt="upload">
+            <img id="image" src="/images/nothing.png" alt="image">
+        </label>
+        <p id="errorFile"></p>
         <div id="formPlaces">
             <div class="block-horizontally" id="blockPlace">
                 <input disabled value="Lokale">

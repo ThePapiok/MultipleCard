@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class RegisterShopDTO {
@@ -54,4 +55,6 @@ public class RegisterShopDTO {
   @Pattern(regexp = "^[0-9]*$")
   @Size(min = 26, max = 26)
   private String accountNumber;
+
+  @NotNull private MultipartFile file;
 }

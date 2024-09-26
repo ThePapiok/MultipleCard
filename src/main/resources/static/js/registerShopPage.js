@@ -1,7 +1,7 @@
 const buttonId = "nextButton";
 const regAccountNumber = new RegExp("^[0-9]*$");
-let ok = [false, false, false, false, false, false, false, false, false, false];
-let previous = [false, false, false, false, false, false, false, false, false, false];
+let ok = [false, false, false, false, false, false, false, false, false, false, false];
+let previous = [false, false, false, false, false, false, false, false, false, false, false];
 
 function atStart() {
     checkLanguage();
@@ -22,7 +22,7 @@ function addPlace(e) {
     if (value < 5) {
         const indexPlace = value;
         const incValue = value + 2;
-        let index = 9 + (value * 6) + (value + 1);
+        let index = 10 + (value * 6) + (value + 1);
         let places = document.getElementById("places");
         let block = document.createElement("div");
         let placeSelect = document.createElement("div");
@@ -32,9 +32,9 @@ function addPlace(e) {
         value++;
         ok.push(false, false, true, false, false, false, false);
         previous.push(false, false, true, false, false, false, false);
-        check(10, false, ok, previous, buttonId, success, false, true);
-        ok[9] = true;
-        previous[9] = true;
+        check(11, false, ok, previous, buttonId, success, false, true);
+        ok[10] = true;
+        previous[10] = true;
         e.previousElementSibling.textContent = value.toString();
         block.className = "block-horizontally block";
         placeSelect.id = "place" + value;
@@ -213,17 +213,64 @@ function removePlace(e) {
     }
     e.remove();
     for (let i = 1; i <= 7; i++) {
-        ok.splice(9 + skip + i);
-        previous.splice(9 + skip + i);
+        ok.splice(10 + skip + i);
+        previous.splice(10 + skip + i);
     }
     if (document.getElementsByClassName("numberOfPlace").length === 0) {
-        check(10, false, ok, previous, buttonId, success, false, true);
+        check(11, false, ok, previous, buttonId, success, false, true);
     } else {
-        previous[9] = false;
-        check(10, true, ok, previous, buttonId, success, false, true);
+        previous[10] = false;
+        check(11, true, ok, previous, buttonId, success, false, true);
     }
 }
 
 function showOrHideForm(e) {
     e.hidden = !e.hidden;
+}
+
+function setImage(e) {
+    let upload = document.getElementById("noImage");
+    let image = e.files[0];
+    let message;
+    let error = false;
+    const reader = new FileReader();
+    const imagePreview = document.getElementById('image');
+    if (image == null) {
+        error = true;
+        message = "";
+    } else if (!image.type.startsWith("image")) {
+        error = true;
+        message = document.getElementById("textBadType").textContent;
+    } else if (image.size >= 2000000) {
+        error = true;
+        message = document.getElementById("textTooBig").textContent;
+    }
+    if (error) {
+        imagePreview.src = "/images/nothing.png";
+        upload.hidden = false;
+        check(10, false, ok, previous, buttonId, success, false, true);
+        document.getElementById("errorFile").textContent = message;
+        e.value = "";
+        return;
+    }
+    reader.readAsDataURL(image);
+    reader.onload = function (file) {
+        let img = new Image();
+        img.src = file.target.result;
+        img.onload = function () {
+            if (this.width < 450 || this.height < 450) {
+                imagePreview.src = "/images/nothing.png";
+                upload.hidden = false;
+                check(10, false, ok, previous, buttonId, success, false, true);
+                document.getElementById("errorFile").textContent = document.getElementById("textTooSmall").textContent;
+                e.value = "";
+                error = true;
+            } else {
+                imagePreview.src = img.src;
+                upload.hidden = true;
+                check(10, true, ok, previous, buttonId, success, false, true);
+                document.getElementById("errorFile").textContent = "";
+            }
+        }
+    };
 }
