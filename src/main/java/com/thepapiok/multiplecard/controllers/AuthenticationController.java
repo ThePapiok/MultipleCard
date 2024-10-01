@@ -174,12 +174,10 @@ public class AuthenticationController {
       System.out.println(bindingResult);
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
-    } else if (authenticationService
-        .getPhones()
-        .contains(register.getCallingCode() + register.getPhone())) {
+    } else if (authenticationService.phoneExists(register.getCallingCode() + register.getPhone())) {
       error = true;
       message = messageSource.getMessage(ERROR_REGISTER_SAME_PHONE_MESSAGE, null, locale);
-    } else if (authenticationService.getEmails().contains(register.getEmail())) {
+    } else if (authenticationService.emailExists(register.getEmail())) {
       error = true;
       message = messageSource.getMessage(ERROR_REGISTER_SAME_EMAIL_MESSAGE, null, locale);
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
@@ -549,12 +547,10 @@ public class AuthenticationController {
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
-    } else if (authenticationService
-        .getPhones()
-        .contains(register.getCallingCode() + register.getPhone())) {
+    } else if (authenticationService.phoneExists(register.getCallingCode() + register.getPhone())) {
       error = true;
       message = messageSource.getMessage(ERROR_REGISTER_SAME_PHONE_MESSAGE, null, locale);
-    } else if (authenticationService.getEmails().contains(register.getEmail())) {
+    } else if (authenticationService.emailExists(register.getEmail())) {
       error = true;
       message = messageSource.getMessage(ERROR_REGISTER_SAME_EMAIL_MESSAGE, null, locale);
     } else if (shopService.checkShopNameExists(register.getName())) {

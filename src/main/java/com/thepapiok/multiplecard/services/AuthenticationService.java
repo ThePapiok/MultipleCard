@@ -11,7 +11,6 @@ import com.thepapiok.multiplecard.misc.ShopConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import java.io.IOException;
-import java.util.List;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -83,21 +82,12 @@ public class AuthenticationService {
     return true;
   }
 
-  // TODO - modify getPhones and getEmails
-  public List<String> getPhones() {
-    try {
-      return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
-    } catch (Exception e) {
-      return List.of();
-    }
+  public boolean phoneExists(String phone) {
+    return accountRepository.existsByPhone(phone);
   }
 
-  public List<String> getEmails() {
-    try {
-      return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
-    } catch (Exception e) {
-      return List.of();
-    }
+  public boolean emailExists(String email) {
+    return accountRepository.existsByEmail(email);
   }
 
   public String getVerificationNumber() {

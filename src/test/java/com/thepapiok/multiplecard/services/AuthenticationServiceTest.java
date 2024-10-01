@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.mongodb.MongoExecutionTimeoutException;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
@@ -38,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Profile("test")
 public class AuthenticationServiceTest {
   private static final String TEST_PHONE = "213442123411324";
+  private static final String TEST_EMAIL = "1234213sddsdvdrw@pasf.pl";
   private static final String TEST_PASSWORD = "password";
   private static final String TEST_ENCODE_PASSWORD = "encodePassword";
   private static final String TEST_SHOP_NAME = "shopName";
@@ -131,45 +131,31 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPhones() {
-    Account account1 = new Account();
-    account1.setPhone(TEST_PHONE);
-    Account account2 = new Account();
-    account2.setPhone("4565434253245462");
-    List<Account> expectedAccountList = List.of(account1, account2);
-    List<String> expectedPhones = List.of(account1.getPhone(), account2.getPhone());
+  public void shouldSuccessAtPhoneExists() {
+    when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(true);
 
-    when(accountRepository.findAllPhones()).thenReturn(expectedAccountList);
-
-    assertEquals(expectedPhones, authenticationService.getPhones());
+    assertTrue(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldFailAtGetPhones() {
-    when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
+  public void shouldFailAtPhoneExists() {
+    when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(false);
 
-    assertEquals(List.of(), authenticationService.getPhones());
+    assertFalse(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldSuccessAtGetEmails() {
-    Account account1 = new Account();
-    account1.setEmail("test1@test");
-    Account account2 = new Account();
-    account2.setEmail("Test2@tests");
-    List<Account> expectedAccountList = List.of(account1, account2);
-    List<String> expectedEmails = List.of(account1.getEmail(), account2.getEmail());
+  public void shouldSuccessAtEmailExists() {
+    when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
 
-    when(accountRepository.findAllEmails()).thenReturn(expectedAccountList);
-
-    assertEquals(expectedEmails, authenticationService.getEmails());
+    assertTrue(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test
-  public void shouldFailAtGetEmails() {
-    when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
+  public void shouldFailAtEmailExists() {
+    when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
 
-    assertEquals(List.of(), authenticationService.getEmails());
+    assertFalse(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test

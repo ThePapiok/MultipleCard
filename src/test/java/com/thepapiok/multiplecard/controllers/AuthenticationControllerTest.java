@@ -292,12 +292,12 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToAccountVerificationAtCreateUser() throws Exception {
-    final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    final List<String> emails = List.of(TEST_OTHER_MAIL);
-
     MockHttpSession httpSession = new MockHttpSession();
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+
+    when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(false);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
 
@@ -324,10 +324,11 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByPhone() throws Exception {
-    final List<String> phones = List.of("+48123456789", TEST_PHONE_NUMBER);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(true);
 
     performPostRegisterAndRedirectRegister(
         expectedRegisterDTO, httpSession, ERROR_PHONE_THE_SAME_MESSAGE);
@@ -335,13 +336,12 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByEmail() throws Exception {
-    final List<String> phones = List.of(TEST_PHONE_NUMBER);
-    final List<String> emails = List.of(TEST_MAIL, TEST_OTHER_MAIL);
-
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(true);
 
     performPostRegisterAndRedirectRegister(
         expectedRegisterDTO, httpSession, ERROR_EMAIL_THE_SAME_MESSAGE);
@@ -350,12 +350,12 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationSms()
       throws Exception {
-    final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(smsService)
@@ -373,12 +373,12 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationEmail()
       throws Exception {
-    final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
@@ -393,8 +393,6 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterAtCreateUserByPasswordsNotTheSame() throws Exception {
-    final List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    final List<String> emails = List.of(TEST_OTHER_MAIL);
     MockHttpSession httpSession = new MockHttpSession();
     RegisterDTO expectedRegisterDTO = new RegisterDTO();
     expectedRegisterDTO.setPhone("12312313231");
@@ -411,8 +409,10 @@ public class AuthenticationControllerTest {
     expectedRegisterDTO.setPostalCode(TEST_POSTAL_CODE);
     expectedRegisterDTO.setStreet(TEST_TEXT);
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
 
     performPostRegisterAndRedirectRegister(
         expectedRegisterDTO, httpSession, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE);
@@ -1102,14 +1102,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToShopVerifications() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1140,12 +1140,13 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenPhoneExists() throws Exception {
-    List<String> phones = List.of(PL_CALLING_CODE + TEST_PHONE);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals(ERROR_PHONE_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -1153,14 +1154,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenEmailExists() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals(ERROR_EMAIL_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -1168,14 +1169,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenShopNameExists() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
@@ -1184,14 +1185,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenAccountNumberExists() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber())).thenReturn(true);
 
@@ -1203,14 +1204,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenAccountNumberBad() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1283,8 +1284,6 @@ public class AuthenticationControllerTest {
     addressDTO6.setProvince(TEST_TEXT);
     addressDTO6.setHouseNumber(TEST_HOUSE_NUMBER);
     addressDTO6.setPostalCode(TEST_POSTAL_CODE);
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     registerShopDTO.setAddress(
         List.of(
@@ -1297,8 +1296,10 @@ public class AuthenticationControllerTest {
             addressDTO6));
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1393,14 +1394,14 @@ public class AuthenticationControllerTest {
     addressDTO1.setProvince(TEST_TEXT);
     addressDTO1.setHouseNumber(TEST_HOUSE_NUMBER);
     addressDTO1.setPostalCode(TEST_POSTAL_CODE);
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     registerShopDTO.setAddress(List.of(addressDTO0, addressDTO1));
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1444,14 +1445,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenPointsExists() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1464,14 +1465,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenBadFile() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1485,14 +1486,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenExceptionAtSmsSending() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
@@ -1512,14 +1513,14 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterShopErrorWhenExceptionAtEmailSending() throws Exception {
-    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
-    List<String> emails = List.of(TEST_OTHER_MAIL);
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(authenticationService.getPhones()).thenReturn(phones);
-    when(authenticationService.getEmails()).thenReturn(emails);
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
     when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
