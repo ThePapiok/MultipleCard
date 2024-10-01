@@ -13,5 +13,6 @@ public class Shop {
   private String name;
   private Long totalAmount;
   private String imageUrl;
+  private String accountNumber;
   private List<Address> points;
 }
