@@ -1,6 +1,6 @@
 # Multiple Card
 
-Aplikacja webowa pozwalająca na korzystanie z wielkrotynych kart podarunkowych. Kartę można doładować kupując na niej
+Aplikacja webowa pozwalająca na korzystanie z wielokrotnych kart podarunkowych. Kartę można doładować, kupując na niej
 jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
 ![Logo](https://i.imgur.com/C5RsVmp.png)
@@ -21,10 +21,11 @@ jakiś produkt, a następnie w sklepie można ten produkt dostać.
 - Thymeleaf
 - Cloudinary
 - Zxing
+- IbanApi
 
 ## Zmienne Środowiskowe
 
-Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na dev:
+Aby projekt działał, potrzebuje on dodania zmiennych środowiskowych oraz ustawić profil na dev:
 
 `MONGODB_HOST`
 
@@ -47,6 +48,8 @@ Aby projekt działał potrzebuje on dodania zmiennych środowiskowych oraz ustaw
 `CLOUDINARY_API_KEY` - api key dla cloudinary
 
 `CLOUDINARY_API_SECRET` - api secret dla cloudinary
+
+`IBANAPI_API_KEY` - api key dla ibanapi
 
 ## Uruchomienie z dockerem
 
@@ -72,6 +75,7 @@ Dodaj zmienne środowiskowe (przykładowe)
   export CLOUDINARY_CLOUD_NAME=cloudinaryCloudNameTest
   export CLOUDINARY_API_KEY=cloudinaryApiKeyTest
   export CLOUDINARY_API_SECRET=cloudinaryApiSecretTest
+  export IBANAPI_API_KEY=ibanapiApiKeyTest
 ```
 
 Uruchom kontenery
