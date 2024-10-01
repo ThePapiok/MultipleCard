@@ -10,18 +10,20 @@ function atStart() {
     checkCallingCode(document.getElementById("valueCallingCode"), 4);
     checkShopName(document.getElementById("name"));
     checkAccountNumber(document.getElementById("accountNumber"));
-    for(let i = 0; i < points.length; i++){
-        let index = 12 + 7 * i;
-        let address = points[i];
-        let prefixAddress = "address[" + i + "].";
-        addPlace(document.getElementById("plus"), address.street, address.houseNumber, address.apartmentNumber, address.postalCode, address.city, address.country, address.province);
-        checkStreet(document.getElementsByName(prefixAddress + "street")[0], index++);
-        checkHouseNumber(document.getElementsByName(prefixAddress + "houseNumber")[0], index++);
-        checkApartmentNumber(document.getElementsByName(prefixAddress + "apartmentNumber")[0], index++);
-        checkPostalCode(document.getElementsByName(prefixAddress + "postalCode")[0], index++);
-        checkCity(document.getElementsByName(prefixAddress + "city")[0], index++);
-        checkSelect(document.getElementsByName(prefixAddress + "country")[0], index++);
-        checkProvince(document.getElementsByName(prefixAddress + "province")[0], index++);
+    if (points != null) {
+        for (let i = 0; i < points.length; i++) {
+            let index = 12 + 7 * i;
+            let address = points[i];
+            let prefixAddress = "address[" + i + "].";
+            addPlace(document.getElementById("plus"), address.street, address.houseNumber, address.apartmentNumber, address.postalCode, address.city, address.country, address.province);
+            checkStreet(document.getElementsByName(prefixAddress + "street")[0], index++);
+            checkHouseNumber(document.getElementsByName(prefixAddress + "houseNumber")[0], index++);
+            checkApartmentNumber(document.getElementsByName(prefixAddress + "apartmentNumber")[0], index++);
+            checkPostalCode(document.getElementsByName(prefixAddress + "postalCode")[0], index++);
+            checkCity(document.getElementsByName(prefixAddress + "city")[0], index++);
+            checkSelect(document.getElementsByName(prefixAddress + "country")[0], index++);
+            checkProvince(document.getElementsByName(prefixAddress + "province")[0], index++);
+        }
     }
     checkLanguage();
 }
@@ -78,7 +80,7 @@ function addPlace(e, streetValue, houseNumberValue, apartmentNumberValue, postal
           <input name="address[` + indexPlace + `].street" type="text" placeholder="` + document.getElementById("textStreet").textContent + `
            " required oninput="checkStreet(this, ` + ++index + `)"
                  minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
-                 onmouseleave="hideValidation('Street')" value="` + streetValue +`">
+                 onmouseleave="hideValidation('Street')" value="` + streetValue + `">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>

@@ -169,10 +169,8 @@ public class AuthenticationController {
     boolean error = false;
     String message = null;
     String redirect = "redirect:/register?error";
-    System.out.println(register);
     httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
     } else if (authenticationService.phoneExists(register.getCallingCode() + register.getPhone())) {

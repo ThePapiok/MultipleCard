@@ -218,17 +218,27 @@
         </div>
         <p th:text="#{registerShopPage.upload_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this)" accept="image/png, image/jpeg">
+            <input th:field="*{file}" type="file" oninput="setImage(this)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
+                   onmouseleave="hideValidation('uploadFile')">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" src="/images/nothing.png" alt="image">
         </label>
+        <div class="validation">
+            <span th:text="#{registerShopPage.upload_image.text} + ' ' + #{validation.text}"></span>
+            <ul>
+                <li th:text="#{registerShopPage.upload_image.validation1}"></li>
+                <li th:text="#{registerShopPage.upload_image.validation2}"></li>
+                <li th:text="#{registerShopPage.upload_image.validation3}"></li>
+            </ul>
+        </div>
         <p id="errorFile"></p>
         <div id="formPlaces">
             <div class="block-horizontally" id="blockPlace">
                 <input disabled th:value="#{registerShopPage.places.text}">
                 <div id="numberPlaces">
                     <span id="numberPlace">0</span>
-                    <img id="plus" src="/images/plus.png" alt="plus" onclick="addPlace(this, '', '', '', '', '', '', '')">
+                    <img id="plus" src="/images/plus.png" alt="plus"
+                         onclick="addPlace(this, '', '', '', '', '', '', '')">
                 </div>
             </div>
             <div id="places">
