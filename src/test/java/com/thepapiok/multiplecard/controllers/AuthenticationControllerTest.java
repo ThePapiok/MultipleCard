@@ -3,15 +3,20 @@ package com.thepapiok.multiplecard.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.mongodb.MongoWriteException;
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
@@ -21,6 +26,7 @@ import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.ShopService;
 import com.thepapiok.multiplecard.services.SmsService;
 import com.twilio.exception.ApiException;
 import java.util.List;
@@ -33,6 +39,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -51,6 +58,10 @@ public class AuthenticationControllerTest {
   private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "Nieprawidłowy kod sms";
+  private static final String ERROR_PHONE_THE_SAME_MESSAGE =
+      "Użytkownik o takim numerze telefonu już istnieje";
+  private static final String ERROR_EMAIL_THE_SAME_MESSAGE =
+      "Użytkownik o takim emailu już istnieje";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
       "Za dużo razy podałeś niepoprawne dane";
   private static final String ERROR_TOO_MANY_SMS_MESSAGE = "Za dużo razy poprosiłeś o nowy kod sms";
@@ -73,6 +84,18 @@ public class AuthenticationControllerTest {
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String PHONE_PARAM = "phone";
   private static final String CALLING_CODE_PARAM = "callingCode";
+  private static final String FIRST_NAME_PARAM = "firstName";
+  private static final String LAST_NAME_PARAM = "lastName";
+  private static final String PROVINCE_PARAM = "province";
+  private static final String EMAIL_PARAM = "email";
+  private static final String STREET_PARAM = "street";
+  private static final String HOUSE_NUMBER_PARAM = "houseNumber";
+  private static final String APARTMENT_NUMBER_PARAM = "apartmentNumber";
+  private static final String CITY_PARAM = "city";
+  private static final String COUNTRY_PARAM = "country";
+  private static final String POSTAL_CODE_PARAM = "postalCode";
+  private static final String SHOP_NAME_PARAM = "name";
+  private static final String ACCOUNT_NUMBER_PARAM = "accountNumber";
   private static final String ERROR_PARAM = "error";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String REGISTER_URL = "/register";
@@ -84,6 +107,7 @@ public class AuthenticationControllerTest {
   private static final String TEST_CODE = "123 456";
   private static final String TEST_ENCODE_CODE = "sad8h121231z#$2";
   private static final String TEST_PHONE_NUMBER = "+1212345673123";
+  private static final String TEST_APARTMENT_NUMBER = "2";
   private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard: ";
   private static final String REDIRECT_VERIFICATION_ERROR = "/account_verifications?error";
   private static final String VERIFICATION_PAGE = "verificationPage";
@@ -99,6 +123,10 @@ public class AuthenticationControllerTest {
   private static final String TEST_OTHER_PHONE_NUMBER = "+34234234234";
   private static final String TEST_PHONE = "1231231231234";
   private static final String VERIFICATION_URL = "/account_verifications";
+  private static final String VERIFICATION_SHOP_ERROR_URL = "/shop_verifications?error";
+  private static final String REGISTER_SHOP_ERROR_URL = "/register_shop?error";
+  private static final String REGISTER_SHOP_URL = "/register_shop";
+  private static final String REGISTER_SHOP_PAGE = "registerShopPage";
   private static final String GET_VERIFICATION_NUMBER_URL = "/get_verification_number";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
@@ -112,6 +140,8 @@ public class AuthenticationControllerTest {
   private static final String CODE_SMS_PARAM_RESET = "codeSmsReset";
   private static final String RESET_PARAM = "reset";
   private static final String IS_SENT_PARAM = "isSent";
+  private static final String PARAM_ADDRESS_PREFIX0 = "address[0].";
+  private static final String PARAM_ADDRESS_PREFIX1 = "address[1].";
 
   @Autowired private MockMvc mockMvc;
   @MockBean private CountryService countryService;
@@ -119,6 +149,7 @@ public class AuthenticationControllerTest {
   @MockBean private PasswordEncoder passwordEncoder;
   @MockBean private SmsService smsService;
   @MockBean private EmailService emailService;
+  @MockBean private ShopService shopService;
 
   @BeforeAll
   public static void setUp() {
@@ -293,18 +324,17 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByPhone() throws Exception {
-    final String errorMessage = "Użytkownik o takim numerze telefonu już istnieje";
     final List<String> phones = List.of("+48123456789", TEST_PHONE_NUMBER);
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.getPhones()).thenReturn(phones);
 
-    performPostRegisterAndRedirectRegister(expectedRegisterDTO, httpSession, errorMessage);
+    performPostRegisterAndRedirectRegister(
+        expectedRegisterDTO, httpSession, ERROR_PHONE_THE_SAME_MESSAGE);
   }
 
   @Test
   public void shouldRedirectToRegisterAtCreateUserByUsersTheSameByEmail() throws Exception {
-    final String errorMessage = "Użytkownik o takim emailu już istnieje";
     final List<String> phones = List.of(TEST_PHONE_NUMBER);
     final List<String> emails = List.of(TEST_MAIL, TEST_OTHER_MAIL);
 
@@ -313,7 +343,8 @@ public class AuthenticationControllerTest {
     when(authenticationService.getPhones()).thenReturn(phones);
     when(authenticationService.getEmails()).thenReturn(emails);
 
-    performPostRegisterAndRedirectRegister(expectedRegisterDTO, httpSession, errorMessage);
+    performPostRegisterAndRedirectRegister(
+        expectedRegisterDTO, httpSession, ERROR_EMAIL_THE_SAME_MESSAGE);
   }
 
   @Test
@@ -403,16 +434,16 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(
             post(REGISTER_URL)
-                .param("firstName", expectedRegisterDTO.getFirstName())
-                .param("lastName", expectedRegisterDTO.getLastName())
-                .param("email", expectedRegisterDTO.getEmail())
-                .param("province", expectedRegisterDTO.getProvince())
-                .param("street", expectedRegisterDTO.getStreet())
-                .param("houseNumber", expectedRegisterDTO.getHouseNumber())
-                .param("apartmentNumber", expectedRegisterDTO.getApartmentNumber())
-                .param("postalCode", expectedRegisterDTO.getPostalCode())
-                .param("city", expectedRegisterDTO.getCity())
-                .param("country", expectedRegisterDTO.getCountry())
+                .param(FIRST_NAME_PARAM, expectedRegisterDTO.getFirstName())
+                .param(LAST_NAME_PARAM, expectedRegisterDTO.getLastName())
+                .param(EMAIL_PARAM, expectedRegisterDTO.getEmail())
+                .param(PROVINCE_PARAM, expectedRegisterDTO.getProvince())
+                .param(STREET_PARAM, expectedRegisterDTO.getStreet())
+                .param(HOUSE_NUMBER_PARAM, expectedRegisterDTO.getHouseNumber())
+                .param(APARTMENT_NUMBER_PARAM, expectedRegisterDTO.getApartmentNumber())
+                .param(POSTAL_CODE_PARAM, expectedRegisterDTO.getPostalCode())
+                .param(CITY_PARAM, expectedRegisterDTO.getCity())
+                .param(COUNTRY_PARAM, expectedRegisterDTO.getCountry())
                 .param(CALLING_CODE_PARAM, expectedRegisterDTO.getCallingCode())
                 .param(PHONE_PARAM, expectedRegisterDTO.getPhone())
                 .param(PASSWORD_PARAM, expectedRegisterDTO.getPassword())
@@ -1025,10 +1056,542 @@ public class AuthenticationControllerTest {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
-        .perform(get("/register_shop"))
+        .perform(get(REGISTER_SHOP_URL))
         .andExpect(model().attribute(REGISTER_PARAM, new RegisterShopDTO()))
         .andExpect(model().attribute(COUNTRIES_PARAM, expectedCountryNames))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
-        .andExpect(view().name("registerShopPage"));
+        .andExpect(view().name(REGISTER_SHOP_PAGE));
+  }
+
+  @Test
+  public void shouldReturnRegisterShopPageAtRegisterShopPageWhenParamErrorWithoutMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(countryService.getAll()).thenReturn(expectedCountries);
+
+    mockMvc
+        .perform(get(REGISTER_SHOP_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(REGISTER_PARAM, new RegisterShopDTO()))
+        .andExpect(model().attribute(COUNTRIES_PARAM, expectedCountryNames))
+        .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
+        .andExpect(view().name(REGISTER_SHOP_PAGE));
+  }
+
+  @Test
+  public void shouldReturnRegisterShopPageAtRegisterShopPageWhenParamErrorWithMessage()
+      throws Exception {
+    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
+    registerShopDTO.setName(SHOP_NAME_PARAM);
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+    httpSession.setAttribute(REGISTER_PARAM, registerShopDTO);
+
+    when(countryService.getAll()).thenReturn(expectedCountries);
+
+    mockMvc
+        .perform(get(REGISTER_SHOP_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(REGISTER_PARAM, registerShopDTO))
+        .andExpect(model().attribute(COUNTRIES_PARAM, expectedCountryNames))
+        .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(view().name(REGISTER_SHOP_PAGE));
+    assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(REGISTER_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerifications() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(true);
+    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, "/shop_verifications");
+    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertEquals(0, httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
+    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute("codeSmsRegisterShop"));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenErrorAtValidation() throws Exception {
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    registerShopDTO.setFirstName(registerShopDTO.getFirstName() + "!");
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals(ERROR_INCORRECT_DATA_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenPhoneExists() throws Exception {
+    List<String> phones = List.of(PL_CALLING_CODE + TEST_PHONE);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals(ERROR_PHONE_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenEmailExists() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals(ERROR_EMAIL_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenShopNameExists() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(true);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals("Taka nazwa lokalu już istnieje", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenAccountNumberExists() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber())).thenReturn(true);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals(
+        "Taki numer rachunku bankowego już istnieje",
+        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenAccountNumberBad() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(false);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals("Zły numer rachunku bankowego", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenBadSize() throws Exception {
+    final String prefixAddress2 = "address[2].";
+    final String prefixAddress3 = "address[3].";
+    final String prefixAddress4 = "address[4].";
+    final String prefixAddress5 = "address[5].";
+    final String prefixAddress6 = "address[6].";
+    AddressDTO addressDTO0 = new AddressDTO();
+    addressDTO0.setCountry(TEST_TEXT);
+    addressDTO0.setCity(TEST_TEXT);
+    addressDTO0.setApartmentNumber(TEST_APARTMENT_NUMBER);
+    addressDTO0.setStreet(TEST_TEXT);
+    addressDTO0.setProvince(TEST_TEXT);
+    addressDTO0.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO0.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO1 = new AddressDTO();
+    addressDTO1.setCountry(TEST_TEXT);
+    addressDTO1.setCity(TEST_TEXT);
+    addressDTO1.setApartmentNumber("3");
+    addressDTO1.setStreet(TEST_TEXT);
+    addressDTO1.setProvince(TEST_TEXT);
+    addressDTO1.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO1.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO2 = new AddressDTO();
+    addressDTO2.setCountry(TEST_TEXT);
+    addressDTO2.setCity(TEST_TEXT);
+    addressDTO2.setApartmentNumber("4");
+    addressDTO2.setStreet(TEST_TEXT);
+    addressDTO2.setProvince(TEST_TEXT);
+    addressDTO2.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO2.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO3 = new AddressDTO();
+    addressDTO3.setCountry(TEST_TEXT);
+    addressDTO3.setCity(TEST_TEXT);
+    addressDTO3.setApartmentNumber("5");
+    addressDTO3.setStreet(TEST_TEXT);
+    addressDTO3.setProvince(TEST_TEXT);
+    addressDTO3.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO3.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO4 = new AddressDTO();
+    addressDTO4.setCountry(TEST_TEXT);
+    addressDTO4.setCity(TEST_TEXT);
+    addressDTO4.setApartmentNumber("6");
+    addressDTO4.setStreet(TEST_TEXT);
+    addressDTO4.setProvince(TEST_TEXT);
+    addressDTO4.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO4.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO5 = new AddressDTO();
+    addressDTO5.setCountry(TEST_TEXT);
+    addressDTO5.setCity(TEST_TEXT);
+    addressDTO5.setApartmentNumber("7");
+    addressDTO5.setStreet(TEST_TEXT);
+    addressDTO5.setProvince(TEST_TEXT);
+    addressDTO5.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO5.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO6 = new AddressDTO();
+    addressDTO6.setCountry(TEST_TEXT);
+    addressDTO6.setCity(TEST_TEXT);
+    addressDTO6.setApartmentNumber("8");
+    addressDTO6.setStreet(TEST_TEXT);
+    addressDTO6.setProvince(TEST_TEXT);
+    addressDTO6.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO6.setPostalCode(TEST_POSTAL_CODE);
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    registerShopDTO.setAddress(
+        List.of(
+            addressDTO0,
+            addressDTO1,
+            addressDTO2,
+            addressDTO3,
+            addressDTO4,
+            addressDTO5,
+            addressDTO6));
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+
+    mockMvc
+        .perform(
+            multipart(REGISTER_SHOP_URL)
+                .file((MockMultipartFile) registerShopDTO.getFile())
+                .session(httpSession)
+                .param(FIRST_NAME_PARAM, registerShopDTO.getFirstName())
+                .param(LAST_NAME_PARAM, registerShopDTO.getLastName())
+                .param(EMAIL_PARAM, registerShopDTO.getEmail())
+                .param(CALLING_CODE_PARAM, registerShopDTO.getCallingCode())
+                .param(PHONE_PARAM, registerShopDTO.getPhone())
+                .param(PASSWORD_PARAM, registerShopDTO.getPassword())
+                .param(RETYPED_PASSWORD_PARAM, registerShopDTO.getRetypedPassword())
+                .param(SHOP_NAME_PARAM, registerShopDTO.getName())
+                .param(ACCOUNT_NUMBER_PARAM, registerShopDTO.getAccountNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + COUNTRY_PARAM, addressDTO0.getCountry())
+                .param(PARAM_ADDRESS_PREFIX0 + CITY_PARAM, addressDTO0.getCity())
+                .param(PARAM_ADDRESS_PREFIX0 + POSTAL_CODE_PARAM, addressDTO0.getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX0 + STREET_PARAM, addressDTO0.getStreet())
+                .param(PARAM_ADDRESS_PREFIX0 + HOUSE_NUMBER_PARAM, addressDTO0.getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX0 + APARTMENT_NUMBER_PARAM,
+                    addressDTO0.getApartmentNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + PROVINCE_PARAM, addressDTO0.getProvince())
+                .param(PARAM_ADDRESS_PREFIX1 + COUNTRY_PARAM, addressDTO1.getCountry())
+                .param(PARAM_ADDRESS_PREFIX1 + CITY_PARAM, addressDTO1.getCity())
+                .param(PARAM_ADDRESS_PREFIX1 + POSTAL_CODE_PARAM, addressDTO1.getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX1 + STREET_PARAM, addressDTO1.getStreet())
+                .param(PARAM_ADDRESS_PREFIX1 + HOUSE_NUMBER_PARAM, addressDTO1.getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX1 + APARTMENT_NUMBER_PARAM,
+                    addressDTO1.getApartmentNumber())
+                .param(PARAM_ADDRESS_PREFIX1 + PROVINCE_PARAM, addressDTO1.getProvince())
+                .param(prefixAddress2 + COUNTRY_PARAM, addressDTO2.getCountry())
+                .param(prefixAddress2 + CITY_PARAM, addressDTO2.getCity())
+                .param(prefixAddress2 + POSTAL_CODE_PARAM, addressDTO2.getPostalCode())
+                .param(prefixAddress2 + STREET_PARAM, addressDTO2.getStreet())
+                .param(prefixAddress2 + HOUSE_NUMBER_PARAM, addressDTO2.getHouseNumber())
+                .param(prefixAddress2 + APARTMENT_NUMBER_PARAM, addressDTO2.getApartmentNumber())
+                .param(prefixAddress2 + PROVINCE_PARAM, addressDTO2.getProvince())
+                .param(prefixAddress3 + COUNTRY_PARAM, addressDTO3.getCountry())
+                .param(prefixAddress3 + CITY_PARAM, addressDTO3.getCity())
+                .param(prefixAddress3 + POSTAL_CODE_PARAM, addressDTO3.getPostalCode())
+                .param(prefixAddress3 + STREET_PARAM, addressDTO3.getStreet())
+                .param(prefixAddress3 + HOUSE_NUMBER_PARAM, addressDTO3.getHouseNumber())
+                .param(prefixAddress3 + APARTMENT_NUMBER_PARAM, addressDTO3.getApartmentNumber())
+                .param(prefixAddress3 + PROVINCE_PARAM, addressDTO3.getProvince())
+                .param(prefixAddress4 + COUNTRY_PARAM, addressDTO4.getCountry())
+                .param(prefixAddress4 + CITY_PARAM, addressDTO4.getCity())
+                .param(prefixAddress4 + POSTAL_CODE_PARAM, addressDTO4.getPostalCode())
+                .param(prefixAddress4 + STREET_PARAM, addressDTO4.getStreet())
+                .param(prefixAddress4 + HOUSE_NUMBER_PARAM, addressDTO4.getHouseNumber())
+                .param(prefixAddress4 + APARTMENT_NUMBER_PARAM, addressDTO4.getApartmentNumber())
+                .param(prefixAddress4 + PROVINCE_PARAM, addressDTO4.getProvince())
+                .param(prefixAddress5 + COUNTRY_PARAM, addressDTO5.getCountry())
+                .param(prefixAddress5 + CITY_PARAM, addressDTO5.getCity())
+                .param(prefixAddress5 + POSTAL_CODE_PARAM, addressDTO5.getPostalCode())
+                .param(prefixAddress5 + STREET_PARAM, addressDTO5.getStreet())
+                .param(prefixAddress5 + HOUSE_NUMBER_PARAM, addressDTO5.getHouseNumber())
+                .param(prefixAddress5 + APARTMENT_NUMBER_PARAM, addressDTO5.getApartmentNumber())
+                .param(prefixAddress5 + PROVINCE_PARAM, addressDTO5.getProvince())
+                .param(prefixAddress6 + COUNTRY_PARAM, addressDTO6.getCountry())
+                .param(prefixAddress6 + CITY_PARAM, addressDTO6.getCity())
+                .param(prefixAddress6 + POSTAL_CODE_PARAM, addressDTO6.getPostalCode())
+                .param(prefixAddress6 + STREET_PARAM, addressDTO6.getStreet())
+                .param(prefixAddress6 + HOUSE_NUMBER_PARAM, addressDTO6.getHouseNumber())
+                .param(prefixAddress6 + APARTMENT_NUMBER_PARAM, addressDTO6.getApartmentNumber())
+                .param(prefixAddress6 + PROVINCE_PARAM, addressDTO6.getProvince()))
+        .andExpect(redirectedUrl(REGISTER_SHOP_ERROR_URL));
+    assertEquals("Nieprawidłowa ilość lokali", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenNotUnique() throws Exception {
+    AddressDTO addressDTO0 = new AddressDTO();
+    addressDTO0.setCountry(TEST_TEXT);
+    addressDTO0.setCity(TEST_TEXT);
+    addressDTO0.setApartmentNumber(TEST_APARTMENT_NUMBER);
+    addressDTO0.setStreet(TEST_TEXT);
+    addressDTO0.setProvince(TEST_TEXT);
+    addressDTO0.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO0.setPostalCode(TEST_POSTAL_CODE);
+    AddressDTO addressDTO1 = new AddressDTO();
+    addressDTO1.setCountry(TEST_TEXT);
+    addressDTO1.setCity(TEST_TEXT);
+    addressDTO1.setApartmentNumber(TEST_APARTMENT_NUMBER);
+    addressDTO1.setStreet(TEST_TEXT);
+    addressDTO1.setProvince(TEST_TEXT);
+    addressDTO1.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO1.setPostalCode(TEST_POSTAL_CODE);
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    registerShopDTO.setAddress(List.of(addressDTO0, addressDTO1));
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+
+    mockMvc
+        .perform(
+            multipart(REGISTER_SHOP_URL)
+                .file((MockMultipartFile) registerShopDTO.getFile())
+                .session(httpSession)
+                .param(FIRST_NAME_PARAM, registerShopDTO.getFirstName())
+                .param(LAST_NAME_PARAM, registerShopDTO.getLastName())
+                .param(EMAIL_PARAM, registerShopDTO.getEmail())
+                .param(CALLING_CODE_PARAM, registerShopDTO.getCallingCode())
+                .param(PHONE_PARAM, registerShopDTO.getPhone())
+                .param(PASSWORD_PARAM, registerShopDTO.getPassword())
+                .param(RETYPED_PASSWORD_PARAM, registerShopDTO.getRetypedPassword())
+                .param(SHOP_NAME_PARAM, registerShopDTO.getName())
+                .param(ACCOUNT_NUMBER_PARAM, registerShopDTO.getAccountNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + COUNTRY_PARAM, addressDTO0.getCountry())
+                .param(PARAM_ADDRESS_PREFIX0 + CITY_PARAM, addressDTO0.getCity())
+                .param(PARAM_ADDRESS_PREFIX0 + POSTAL_CODE_PARAM, addressDTO0.getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX0 + STREET_PARAM, addressDTO0.getStreet())
+                .param(PARAM_ADDRESS_PREFIX0 + HOUSE_NUMBER_PARAM, addressDTO0.getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX0 + APARTMENT_NUMBER_PARAM,
+                    addressDTO0.getApartmentNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + PROVINCE_PARAM, addressDTO0.getProvince())
+                .param(PARAM_ADDRESS_PREFIX1 + COUNTRY_PARAM, addressDTO1.getCountry())
+                .param(PARAM_ADDRESS_PREFIX1 + CITY_PARAM, addressDTO1.getCity())
+                .param(PARAM_ADDRESS_PREFIX1 + POSTAL_CODE_PARAM, addressDTO1.getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX1 + STREET_PARAM, addressDTO1.getStreet())
+                .param(PARAM_ADDRESS_PREFIX1 + HOUSE_NUMBER_PARAM, addressDTO1.getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX1 + APARTMENT_NUMBER_PARAM,
+                    addressDTO1.getApartmentNumber())
+                .param(PARAM_ADDRESS_PREFIX1 + PROVINCE_PARAM, addressDTO1.getProvince()))
+        .andExpect(redirectedUrl(REGISTER_SHOP_ERROR_URL));
+    assertEquals("Lokale muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenPointsExists() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals("Takie lokale już istnieją", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenBadFile() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
+    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(false);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals("Niepoprawny plik", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenExceptionAtSmsSending() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
+    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    doThrow(MongoWriteException.class)
+        .when(smsService)
+        .sendSms(
+            VERIFICATION_MESSAGE + TEST_CODE,
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone());
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, VERIFICATION_SHOP_ERROR_URL);
+    assertEquals(ERROR_AT_SMS_SENDING_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorWhenExceptionAtEmailSending() throws Exception {
+    List<String> phones = List.of(TEST_OTHER_PHONE_NUMBER);
+    List<String> emails = List.of(TEST_OTHER_MAIL);
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.getPhones()).thenReturn(phones);
+    when(authenticationService.getEmails()).thenReturn(emails);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
+    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    doThrow(MongoWriteException.class)
+        .when(emailService)
+        .sendEmail(eq(VERIFICATION_MESSAGE + TEST_CODE), eq(registerShopDTO.getEmail()), any());
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, VERIFICATION_SHOP_ERROR_URL);
+    assertEquals(ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  private RegisterShopDTO setRegisterShopDTO() {
+    final String shopName = "shop";
+    final String accountNumber = "12342314321142312434324444";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCountry(TEST_TEXT);
+    addressDTO.setCity(TEST_TEXT);
+    addressDTO.setApartmentNumber(TEST_APARTMENT_NUMBER);
+    addressDTO.setStreet(TEST_TEXT);
+    addressDTO.setProvince(TEST_TEXT);
+    addressDTO.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO.setPostalCode(TEST_POSTAL_CODE);
+    MockMultipartFile multipartFile = new MockMultipartFile("file", new byte[0]);
+    List<AddressDTO> addressDTOList = List.of(addressDTO);
+    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
+    registerShopDTO.setPassword(TEST_PASSWORD);
+    registerShopDTO.setAccountNumber(accountNumber);
+    registerShopDTO.setEmail(TEST_MAIL);
+    registerShopDTO.setPhone(TEST_PHONE);
+    registerShopDTO.setCallingCode(PL_CALLING_CODE);
+    registerShopDTO.setRetypedPassword(TEST_PASSWORD);
+    registerShopDTO.setFirstName(TEST_TEXT);
+    registerShopDTO.setLastName(TEST_TEXT);
+    registerShopDTO.setFile(multipartFile);
+    registerShopDTO.setAddress(addressDTOList);
+    registerShopDTO.setName(shopName);
+    return registerShopDTO;
+  }
+
+  private void performPostRegisterShop(
+      RegisterShopDTO registerShopDTO,
+      AddressDTO addressDTO,
+      MockHttpSession httpSession,
+      String redirectUrl)
+      throws Exception {
+
+    mockMvc
+        .perform(
+            multipart(REGISTER_SHOP_URL)
+                .file((MockMultipartFile) registerShopDTO.getFile())
+                .session(httpSession)
+                .param(FIRST_NAME_PARAM, registerShopDTO.getFirstName())
+                .param(LAST_NAME_PARAM, registerShopDTO.getLastName())
+                .param(EMAIL_PARAM, registerShopDTO.getEmail())
+                .param(CALLING_CODE_PARAM, registerShopDTO.getCallingCode())
+                .param(PHONE_PARAM, registerShopDTO.getPhone())
+                .param(PASSWORD_PARAM, registerShopDTO.getPassword())
+                .param(RETYPED_PASSWORD_PARAM, registerShopDTO.getRetypedPassword())
+                .param(SHOP_NAME_PARAM, registerShopDTO.getName())
+                .param(ACCOUNT_NUMBER_PARAM, registerShopDTO.getAccountNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + COUNTRY_PARAM, addressDTO.getCountry())
+                .param(PARAM_ADDRESS_PREFIX0 + CITY_PARAM, addressDTO.getCity())
+                .param(PARAM_ADDRESS_PREFIX0 + POSTAL_CODE_PARAM, addressDTO.getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX0 + STREET_PARAM, addressDTO.getStreet())
+                .param(PARAM_ADDRESS_PREFIX0 + HOUSE_NUMBER_PARAM, addressDTO.getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX0 + APARTMENT_NUMBER_PARAM, addressDTO.getApartmentNumber())
+                .param(PARAM_ADDRESS_PREFIX0 + PROVINCE_PARAM, addressDTO.getProvince()))
+        .andExpect(redirectedUrl(redirectUrl));
   }
 }

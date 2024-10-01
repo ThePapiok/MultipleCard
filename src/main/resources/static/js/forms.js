@@ -296,3 +296,10 @@ function checkVerificationEmail(e, value) {
     addWhiteSpace(e, 0, input, length);
     check(value, length === 7 && regVerificationNumber.test(input), ok, previous, buttonId, success, true, true);
 }
+
+function checkCallingCode(e, value) {
+    const input = e.value;
+    callingCodeValue = input;
+    check(value, (input !== ''), ok, previous, buttonId, success, false, true);
+    checkPhone(document.getElementById("phone"), value + 1);
+}

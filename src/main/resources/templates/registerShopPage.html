@@ -15,6 +15,9 @@
 <script th:inline="javascript">
     const list = /*[[${countries}]]*/ [];
 </script>
+<script th:inline="javascript">
+    const points = /*[[${register.address}]]*/ [];
+</script>
 <script src="/js/registerShopPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -222,10 +225,10 @@
         <p id="errorFile"></p>
         <div id="formPlaces">
             <div class="block-horizontally" id="blockPlace">
-                <input disabled value="Lokale">
+                <input disabled th:value="#{registerShopPage.places.text}">
                 <div id="numberPlaces">
                     <span id="numberPlace">0</span>
-                    <img id="plus" src="/images/plus.png" alt="plus" onclick="addPlace(this)">
+                    <img id="plus" src="/images/plus.png" alt="plus" onclick="addPlace(this, '', '', '', '', '', '', '')">
                 </div>
             </div>
             <div id="places">

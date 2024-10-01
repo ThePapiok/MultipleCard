@@ -4,6 +4,25 @@ let ok = [false, false, false, false, false, false, false, false, false, false, 
 let previous = [false, false, false, false, false, false, false, false, false, false, false];
 
 function atStart() {
+    checkFirstName(document.getElementById("firstName"), 1);
+    checkLastName(document.getElementById("lastName"), 2);
+    checkEmail(document.getElementById("email"), 3);
+    checkCallingCode(document.getElementById("valueCallingCode"), 4);
+    checkShopName(document.getElementById("name"));
+    checkAccountNumber(document.getElementById("accountNumber"));
+    for(let i = 0; i < points.length; i++){
+        let index = 12 + 7 * i;
+        let address = points[i];
+        let prefixAddress = "address[" + i + "].";
+        addPlace(document.getElementById("plus"), address.street, address.houseNumber, address.apartmentNumber, address.postalCode, address.city, address.country, address.province);
+        checkStreet(document.getElementsByName(prefixAddress + "street")[0], index++);
+        checkHouseNumber(document.getElementsByName(prefixAddress + "houseNumber")[0], index++);
+        checkApartmentNumber(document.getElementsByName(prefixAddress + "apartmentNumber")[0], index++);
+        checkPostalCode(document.getElementsByName(prefixAddress + "postalCode")[0], index++);
+        checkCity(document.getElementsByName(prefixAddress + "city")[0], index++);
+        checkSelect(document.getElementsByName(prefixAddress + "country")[0], index++);
+        checkProvince(document.getElementsByName(prefixAddress + "province")[0], index++);
+    }
     checkLanguage();
 }
 
@@ -17,7 +36,7 @@ function checkAccountNumber(e) {
     check(9, (input.length === 26 && regAccountNumber.test(input)), ok, previous, buttonId, success, true, true);
 }
 
-function addPlace(e) {
+function addPlace(e, streetValue, houseNumberValue, apartmentNumberValue, postalCodeValue, cityValue, countryValue, provinceValue) {
     let value = parseInt(e.previousElementSibling.textContent);
     if (value < 5) {
         const indexPlace = value;
@@ -59,7 +78,7 @@ function addPlace(e) {
           <input name="address[` + indexPlace + `].street" type="text" placeholder="` + document.getElementById("textStreet").textContent + `
            " required oninput="checkStreet(this, ` + ++index + `)"
                  minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
-                 onmouseleave="hideValidation('Street')">
+                 onmouseleave="hideValidation('Street')" value="` + streetValue +`">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>
@@ -78,7 +97,7 @@ function addPlace(e) {
           <input name="address[` + indexPlace + `].houseNumber" type="text" placeholder="` + document.getElementById("textHouseNumber").textContent + `" required
                  oninput="checkHouseNumber(this, ` + ++index + `)" minlength="1" maxlength="10"
                  onmouseenter="showValidation(this, 'HouseNumber')"
-                 onmouseleave="hideValidation('HouseNumber')">
+                 onmouseleave="hideValidation('HouseNumber')" value="` + houseNumberValue + `">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>
@@ -96,7 +115,7 @@ function addPlace(e) {
           <input name="address[` + indexPlace + `].apartmentNumber" type="text" placeholder="` + document.getElementById("textApartmentNumber").textContent + `"
                  oninput="checkApartmentNumber(this, ` + ++index + `)" maxlength="6"
                  onmouseenter="showValidation(this, 'ApartmentNumber')"
-                 onmouseleave="hideValidation('ApartmentNumber')">
+                 onmouseleave="hideValidation('ApartmentNumber')" value="` + apartmentNumberValue + `">
           <img hidden id="close` + index + `" src="/images/close.png" alt="close">
           <img id="check` + index + `" src="/images/check.png" alt="check">
         </label>
@@ -117,7 +136,7 @@ function addPlace(e) {
           <input name="address[` + indexPlace + `].postalCode" type="text" placeholder="` + document.getElementById("textPostalCode").textContent + `" required
                  oninput="checkPostalCode(this, ` + ++index + `)" maxlength="6" minlength="6"
                  onmouseenter="showValidation(this, 'PostalCode')"
-                 onmouseleave="hideValidation('PostalCode')">
+                 onmouseleave="hideValidation('PostalCode')" value="` + postalCodeValue + `">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>
@@ -134,7 +153,7 @@ function addPlace(e) {
           <input name="address[` + indexPlace + `].city" type="text" placeholder="` + document.getElementById("textCity").textContent + `" required
                  oninput="checkCity(this, ` + ++index + `)"
                  minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
-                 onmouseleave="hideValidation('City')">
+                 onmouseleave="hideValidation('City')" value="` + cityValue + `">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>
@@ -153,7 +172,7 @@ function addPlace(e) {
       <label id="Country">
         <label class="inputs">
           <input name="address[` + indexPlace + `].country" type="text" id="valueCountry` + incValue + `" class="valueSelect" type="text" readonly
-                 placeholder="` + document.getElementById("textCountry").textContent + `" onclick="showOrHideCountry(` + incValue + `, ` + ++index + `)" value="">
+                 placeholder="` + document.getElementById("textCountry").textContent + `" onclick="showOrHideCountry(` + incValue + `, ` + ++index + `)" value="` + countryValue + `">
           <img id="down` + index + `" src="/images/keyboard_down.png" alt="down">
           <img hidden id="up` + index + `" src="/images/keyboard_up.png" alt="up">
         </label>
@@ -166,7 +185,7 @@ function addPlace(e) {
         <label class="inputs">
           <input name="address[` + indexPlace + `].province" type="text" placeholder="` + document.getElementById("textProvince").textContent + `" required
                  oninput="checkProvince(this, ` + ++index + `)" minlength="2" maxlength="40"
-                 onmouseenter="showValidation(this, 'Province')" onmouseleave="hideValidation('Province')">
+                 onmouseenter="showValidation(this, 'Province')" onmouseleave="hideValidation('Province')" value="` + provinceValue + `">
           <img id="close` + index + `" src="/images/close.png" alt="close">
           <img hidden id="check` + index + `" src="/images/check.png" alt="check">
         </label>
