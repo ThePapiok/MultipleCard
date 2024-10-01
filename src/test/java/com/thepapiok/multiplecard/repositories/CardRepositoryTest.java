@@ -58,8 +58,6 @@ public class CardRepositoryTest {
 
   @AfterEach
   public void cleanUp() {
-    System.out.println(userRepository.findAll());
-    System.out.println(cardRepository.findAll());
     userRepository.deleteAll();
     cardRepository.deleteAll();
   }

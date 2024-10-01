@@ -21,4 +21,8 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
 
   @Query(value = "{'phone': ?0}", fields = "{'_id': 0, 'password': 1}")
   Account findPasswordByPhone(String phone);
+
+  boolean existsByPhone(String phone);
+
+  boolean existsByEmail(String email);
 }

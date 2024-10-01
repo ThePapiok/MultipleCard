@@ -1,7 +1,5 @@
-let previousPostalCode = "";
 let ok = [null, null, null, null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null, null, null, null];
-let firstTime = [false, false, false, false, false, false, false, false, false];
 let firstName;
 let lastName;
 let province;
@@ -11,9 +9,7 @@ let apartmentNumber;
 let postalCode;
 let city;
 let countryInput;
-
 const buttonId = "saveButton";
-
 
 function checkOnlyIfOther(input, cond, i, startInput, hasCheck, e) {
     if (input === startInput) {
@@ -88,8 +84,8 @@ function setValueCountry(e) {
 
 function deleteCheck(i, hasCheck, e) {
     if (hasCheck) {
-        document.getElementById("close" + i).style.display = "none";
-        document.getElementById("check" + i).style.display = "none";
+        document.getElementById("close" + i).hidden = true;
+        document.getElementById("check" + i).hidden = true;
     }
     e.style.color = "lightgray";
     ok[i - 1] = null;
@@ -107,14 +103,14 @@ function deleteCheck(i, hasCheck, e) {
 function atStart() {
     firstName = document.getElementById("firstName").value;
     lastName = document.getElementById("lastName").value;
-    province = document.getElementById("province").value;
-    street = document.getElementById("street").value;
-    houseNumber = document.getElementById("houseNumber").value;
-    apartmentNumber = document.getElementById("apartmentNumber").value;
-    postalCode = document.getElementById("postalCode").value;
-    city = document.getElementById("city").value;
+    province = document.getElementById("provinceInput").value;
+    street = document.getElementById("streetInput").value;
+    houseNumber = document.getElementById("houseNumberInput").value;
+    apartmentNumber = document.getElementById("apartmentNumberInput").value;
+    postalCode = document.getElementById("postalCodeInput").value;
+    city = document.getElementById("cityInput").value;
     countryInput = document.getElementById("valueCountry").value;
-    if(document.getElementById("cardNotFound") !== null){
+    if (document.getElementById("cardNotFound") !== null) {
         document.getElementById("card").style.opacity = "50%";
     }
     checkLanguage();

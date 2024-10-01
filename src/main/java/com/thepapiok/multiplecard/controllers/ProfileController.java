@@ -150,7 +150,7 @@ public class ProfileController {
     final String redirectPasswordChangeError = "redirect:/password_change?error";
     final int maxAmount = 3;
     final String phone = principal.getName();
-    final String password = change.getNewPassword();
+    final String password = change.getPassword();
     Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
     if (amount == null) {
       httpSession.setAttribute(ATTEMPTS_PARAM, 0);

@@ -2,12 +2,15 @@ package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.misc.AccountConverter;
+import com.thepapiok.multiplecard.misc.ShopConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
-import java.util.List;
+import java.io.IOException;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -28,6 +31,8 @@ public class AuthenticationService {
   private final PasswordEncoder passwordEncoder;
   private final MongoTransactionManager mongoTransactionManager;
   private final MongoTemplate mongoTemplate;
+  private final ShopConverter shopConverter;
+  private final CloudinaryService cloudinaryService;
   private Random random;
 
   @Autowired
@@ -37,13 +42,17 @@ public class AuthenticationService {
       AccountConverter accountConverter,
       PasswordEncoder passwordEncoder,
       MongoTransactionManager mongoTransactionManager,
-      MongoTemplate mongoTemplate) {
+      MongoTemplate mongoTemplate,
+      ShopConverter shopConverter,
+      CloudinaryService cloudinaryService) {
     this.accountRepository = accountRepository;
     this.userConverter = userConverter;
     this.accountConverter = accountConverter;
     this.passwordEncoder = passwordEncoder;
     this.mongoTransactionManager = mongoTransactionManager;
     this.mongoTemplate = mongoTemplate;
+    this.shopConverter = shopConverter;
+    this.cloudinaryService = cloudinaryService;
     random = new Random();
   }
 
@@ -73,20 +82,12 @@ public class AuthenticationService {
     return true;
   }
 
-  public List<String> getPhones() {
-    try {
-      return accountRepository.findAllPhones().stream().map(Account::getPhone).toList();
-    } catch (Exception e) {
-      return List.of();
-    }
+  public boolean phoneExists(String phone) {
+    return accountRepository.existsByPhone(phone);
   }
 
-  public List<String> getEmails() {
-    try {
-      return accountRepository.findAllEmails().stream().map(Account::getEmail).toList();
-    } catch (Exception e) {
-      return List.of();
-    }
+  public boolean emailExists(String email) {
+    return accountRepository.existsByEmail(email);
   }
 
   public String getVerificationNumber() {
@@ -126,5 +127,37 @@ public class AuthenticationService {
   public boolean checkPassword(String password, String phone) {
     return passwordEncoder.matches(
         password, accountRepository.findPasswordByPhone(phone).getPassword());
+  }
+
+  public boolean createShop(RegisterShopDTO registerShopDTO) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              Shop shop = shopConverter.getEntity(registerShopDTO);
+              shop.setTotalAmount(0L);
+              shop = mongoTemplate.save(shop);
+              try {
+                shop.setImageUrl(
+                    cloudinaryService.addImage(
+                        registerShopDTO.getFile().getBytes(), shop.getId().toString()));
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+              mongoTemplate.save(shop);
+              Account account = accountConverter.getEntity(registerShopDTO);
+              account.setId(shop.getId());
+              account.setRole(Role.ROLE_SHOP);
+              account.setActive(false);
+              account.setBanned(false);
+              mongoTemplate.save(account);
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

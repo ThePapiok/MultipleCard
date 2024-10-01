@@ -31,7 +31,7 @@
                            onmouseenter="showValidation(this, 'CardName')"
                            onmouseleave="hideValidation('CardName')">
                     <img id="close1" src="/images/close.png" alt="close">
-                    <img id="check1" src="/images/check.png" alt="check">
+                    <img hidden id="check1" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -53,7 +53,7 @@
                            onmouseenter="showValidation(this, 'Pin')"
                            onmouseleave="hideValidation('Pin')">
                     <img id="close2" src="/images/close.png" alt="close">
-                    <img id="check2" src="/images/check.png" alt="check">
+                    <img hidden id="check2" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -74,7 +74,7 @@
                            onmouseenter="showValidation(this, 'RetypedPin')"
                            onmouseleave="hideValidation('RetypedPin')">
                     <img id="close3" src="/images/close.png" alt="close">
-                    <img id="check3" src="/images/check.png" alt="check">
+                    <img hidden id="check3" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
@@ -88,13 +88,13 @@
         <div class="block-horizontally">
             <label id="VerificationSms">
                 <label class="inputs">
-                    <input disabled  th:field="*{code}" type="text"
+                    <input disabled th:field="*{code}" type="text"
                            th:placeholder="#{codeSms.text}" required
-                           oninput="checkVerificationSms(this)" minlength="7" maxlength="7"
+                           oninput="checkVerificationSms(this, 4)" minlength="7" maxlength="7"
                            onmouseenter="showValidation(this, 'VerificationSms')"
                            onmouseleave="hideValidation('VerificationSms')">
                     <img id="close4" src="/images/close.png" alt="close">
-                    <img id="check4" src="/images/check.png" alt="check">
+                    <img hidden id="check4" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">

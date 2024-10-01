@@ -73,6 +73,10 @@ db.createCollection("shops", {
                     "bsonType": "string",
                     "description": "imageUrl is required and must be string"
                 },
+                "accountNumber": {
+                    "bsonType": "string",
+                    "description": "accountNumber is required and must be string"
+                },
                 "points": {
                     "bsonType": "array",
                     "minItems": 1,
@@ -414,3 +418,5 @@ db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.accounts.createIndex({"email": 1}, {"unique": true});
 db.users.createIndex({"review.description": "text"}, {"default_language": "none"})
+db.shops.createIndex({"name": 1}, {"unique": true});
+db.shops.createIndex({"accountNumber": 1}, {"unique": true});

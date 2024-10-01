@@ -7,15 +7,20 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.mongodb.MongoExecutionTimeoutException;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.misc.AccountConverter;
+import com.thepapiok.multiplecard.misc.ShopConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.bson.types.ObjectId;
@@ -26,13 +31,20 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 @Profile("test")
 public class AuthenticationServiceTest {
   private static final String TEST_PHONE = "213442123411324";
+  private static final String TEST_EMAIL = "1234213sddsdvdrw@pasf.pl";
   private static final String TEST_PASSWORD = "password";
   private static final String TEST_ENCODE_PASSWORD = "encodePassword";
+  private static final String TEST_SHOP_NAME = "shopName";
+  private static final String TEST_ACCOUNT_NUMBER = "12342132134132443212314431224323414132";
+  private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
+
   private AuthenticationService authenticationService;
   private RegisterDTO registerDTO;
   private User expectedUser;
@@ -45,6 +57,8 @@ public class AuthenticationServiceTest {
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private MongoTemplate mongoTemplate;
   @Mock private Random random;
+  @Mock private ShopConverter shopConverter;
+  @Mock private CloudinaryService cloudinaryService;
 
   @BeforeEach
   public void setUp() {
@@ -56,27 +70,32 @@ public class AuthenticationServiceTest {
             accountConverter,
             passwordEncoder,
             mongoTransactionManager,
-            mongoTemplate);
+            mongoTemplate,
+            shopConverter,
+            cloudinaryService);
     final String testText = "Test";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setStreet(testText);
+    addressDTO.setCity(testText);
+    addressDTO.setCountry("Polska");
+    addressDTO.setHouseNumber("1");
+    addressDTO.setProvince(testText);
+    addressDTO.setPostalCode(testText);
     registerDTO = new RegisterDTO();
     registerDTO.setFirstName(testText);
     registerDTO.setLastName(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setCountry("Polska");
-    registerDTO.setPostalCode("+48");
+    registerDTO.setCallingCode("+48");
     registerDTO.setPhone("12312312321");
     registerDTO.setPassword("Test123!");
-    registerDTO.setHouseNumber("1");
     registerDTO.setEmail("test@test");
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
     Address expectedAddress = new Address();
-    expectedAddress.setCity(registerDTO.getCity());
-    expectedAddress.setStreet(registerDTO.getStreet());
-    expectedAddress.setPostalCode(registerDTO.getPostalCode());
-    expectedAddress.setHouseNumber(registerDTO.getHouseNumber());
-    expectedAddress.setCountry(registerDTO.getCountry());
-    expectedAddress.setProvince(registerDTO.getProvince());
+    expectedAddress.setCity(addressDTO.getCity());
+    expectedAddress.setStreet(addressDTO.getStreet());
+    expectedAddress.setPostalCode(addressDTO.getPostalCode());
+    expectedAddress.setHouseNumber(addressDTO.getHouseNumber());
+    expectedAddress.setCountry(addressDTO.getCountry());
+    expectedAddress.setProvince(addressDTO.getProvince());
     expectedUser = new User();
     expectedUser.setFirstName(registerDTO.getFirstName());
     expectedUser.setLastName(registerDTO.getLastName());
@@ -85,7 +104,7 @@ public class AuthenticationServiceTest {
     expectedUser2.setFirstName(registerDTO.getFirstName());
     expectedUser2.setLastName(registerDTO.getLastName());
     expectedUser2.setAddress(expectedAddress);
-    expectedUser2.setId(new ObjectId("123456789012345678901234"));
+    expectedUser2.setId(TEST_ID);
     expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());
@@ -116,45 +135,31 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPhones() {
-    Account account1 = new Account();
-    account1.setPhone(TEST_PHONE);
-    Account account2 = new Account();
-    account2.setPhone("4565434253245462");
-    List<Account> expectedAccountList = List.of(account1, account2);
-    List<String> expectedPhones = List.of(account1.getPhone(), account2.getPhone());
+  public void shouldSuccessAtPhoneExists() {
+    when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(true);
 
-    when(accountRepository.findAllPhones()).thenReturn(expectedAccountList);
-
-    assertEquals(expectedPhones, authenticationService.getPhones());
+    assertTrue(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldFailAtGetPhones() {
-    when(accountRepository.findAllPhones()).thenThrow(MongoExecutionTimeoutException.class);
+  public void shouldFailAtPhoneExists() {
+    when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(false);
 
-    assertEquals(List.of(), authenticationService.getPhones());
+    assertFalse(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldSuccessAtGetEmails() {
-    Account account1 = new Account();
-    account1.setEmail("test1@test");
-    Account account2 = new Account();
-    account2.setEmail("Test2@tests");
-    List<Account> expectedAccountList = List.of(account1, account2);
-    List<String> expectedEmails = List.of(account1.getEmail(), account2.getEmail());
+  public void shouldSuccessAtEmailExists() {
+    when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
 
-    when(accountRepository.findAllEmails()).thenReturn(expectedAccountList);
-
-    assertEquals(expectedEmails, authenticationService.getEmails());
+    assertTrue(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test
-  public void shouldFailAtGetEmails() {
-    when(accountRepository.findAllEmails()).thenThrow(MongoExecutionTimeoutException.class);
+  public void shouldFailAtEmailExists() {
+    when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
 
-    assertEquals(List.of(), authenticationService.getEmails());
+    assertFalse(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test
@@ -235,5 +240,101 @@ public class AuthenticationServiceTest {
     when(passwordEncoder.matches(TEST_PASSWORD, TEST_ENCODE_PASSWORD)).thenReturn(false);
 
     assertFalse(authenticationService.checkPassword(TEST_PASSWORD, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtCreateShop() {
+    final String url = "fasdfds123123sads";
+    final String email = "email@email";
+    Address address1 = new Address();
+    Address address2 = new Address();
+    List<Address> addresses = new ArrayList<>();
+    addresses.add(address1);
+    addresses.add(address2);
+    byte[] bytes = new byte[0];
+    MultipartFile multipartFile = new MockMultipartFile("file", bytes);
+    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
+    registerShopDTO.setName(TEST_SHOP_NAME);
+    registerShopDTO.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    registerShopDTO.setFile(multipartFile);
+    registerShopDTO.setEmail(email);
+    registerShopDTO.setPassword(TEST_PASSWORD);
+    registerShopDTO.setPhone(TEST_PHONE);
+    Shop shop = new Shop();
+    shop.setName(TEST_SHOP_NAME);
+    shop.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    shop.setImageUrl("");
+    shop.setPoints(addresses);
+    Shop expectedShop = new Shop();
+    expectedShop.setName(TEST_SHOP_NAME);
+    expectedShop.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    expectedShop.setImageUrl("");
+    expectedShop.setPoints(addresses);
+    expectedShop.setTotalAmount(0L);
+    Shop expectedShopWithId = new Shop();
+    expectedShopWithId.setId(TEST_ID);
+    expectedShopWithId.setName(TEST_SHOP_NAME);
+    expectedShopWithId.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    expectedShopWithId.setImageUrl("");
+    expectedShopWithId.setPoints(addresses);
+    expectedShopWithId.setTotalAmount(0L);
+    Shop expectedShopWithIdAndUrl = new Shop();
+    expectedShopWithIdAndUrl.setId(TEST_ID);
+    expectedShopWithIdAndUrl.setImageUrl(url);
+    expectedShopWithIdAndUrl.setName(TEST_SHOP_NAME);
+    expectedShopWithIdAndUrl.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    expectedShopWithIdAndUrl.setPoints(addresses);
+    expectedShopWithIdAndUrl.setTotalAmount(0L);
+    Account account = new Account();
+    account.setPassword(TEST_ENCODE_PASSWORD);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(email);
+    Account expectedAccount = new Account();
+    expectedAccount.setPassword(TEST_ENCODE_PASSWORD);
+    expectedAccount.setPhone(TEST_PHONE);
+    expectedAccount.setEmail(email);
+    expectedAccount.setId(TEST_ID);
+    expectedAccount.setRole(Role.ROLE_SHOP);
+    expectedAccount.setActive(false);
+    expectedAccount.setBanned(false);
+
+    when(shopConverter.getEntity(registerShopDTO)).thenReturn(shop);
+    when(mongoTemplate.save(expectedShop)).thenReturn(expectedShopWithId);
+    when(cloudinaryService.addImage(bytes, TEST_ID.toString())).thenReturn(url);
+    when(accountConverter.getEntity(registerShopDTO)).thenReturn(account);
+
+    assertTrue(authenticationService.createShop(registerShopDTO));
+    verify(mongoTemplate).save(expectedShop);
+    verify(mongoTemplate).save(expectedShopWithIdAndUrl);
+    verify(mongoTemplate).save(expectedAccount);
+  }
+
+  @Test
+  public void shouldFailAtCreateShopWhenGetException() {
+    Address address1 = new Address();
+    Address address2 = new Address();
+    List<Address> addresses = new ArrayList<>();
+    addresses.add(address1);
+    addresses.add(address2);
+    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
+    registerShopDTO.setName(TEST_SHOP_NAME);
+    registerShopDTO.setAccountNumber(TEST_SHOP_NAME);
+    Shop shop = new Shop();
+    shop.setName(TEST_SHOP_NAME);
+    shop.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    shop.setImageUrl("");
+    shop.setPoints(addresses);
+    Shop expectedShopWithId = new Shop();
+    expectedShopWithId.setId(TEST_ID);
+    expectedShopWithId.setName(TEST_SHOP_NAME);
+    expectedShopWithId.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    expectedShopWithId.setImageUrl("");
+    expectedShopWithId.setPoints(addresses);
+    expectedShopWithId.setTotalAmount(0L);
+
+    when(shopConverter.getEntity(registerShopDTO)).thenReturn(shop);
+    when(mongoTemplate.save(expectedShopWithId)).thenThrow(MongoWriteException.class);
+
+    assertFalse(authenticationService.createShop(registerShopDTO));
   }
 }

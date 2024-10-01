@@ -1,17 +1,21 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.CallingCodeDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
 import com.thepapiok.multiplecard.misc.LocaleChanger;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
 import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.ShopService;
 import com.thepapiok.multiplecard.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class AuthenticationController {
@@ -36,6 +41,10 @@ public class AuthenticationController {
   private static final String ERROR_TOO_MANY_SMS_MESSAGE = "error.to_many_sms";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE = "error.to_many_attempts";
   private static final String ERROR_VALIDATION_INCORRECT_DATA_MESSAGE = "validation.incorrect_data";
+  private static final String ERROR_REGISTER_SAME_PHONE_MESSAGE =
+      "authenticationController.register.same_phone";
+  private static final String ERROR_REGISTER_SAME_EMAIL_MESSAGE =
+      "authenticationController.register.same_email";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "error.bad_sms_code";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "passwords_not_the_same";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "resetPasswordPage.user.not_found";
@@ -50,13 +59,17 @@ public class AuthenticationController {
   private static final String RESET_PARAM = "reset";
   private static final String PHONE_PARAM = "phone";
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
+  private static final String CODE_SMS_PARAM_REGISTER_SHOP = "codeSmsRegisterShop";
   private static final String CODE_SMS_PARAM_RESET = "codeSmsReset";
   private static final String CODE_EMAIL_PARAM = "codeEmail";
   private static final String REDIRECT_VERIFICATION_ERROR = "redirect:/account_verifications?error";
+  private static final String REDIRECT_SHOP_VERIFICATION_ERROR =
+      "redirect:/shop_verifications?error";
   private static final String REDIRECT_LOGIN = "redirect:/login";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
   private static final String CALLING_CODES_PARAM = "callingCodes";
+  private static final String COUNTRIES_PARAM = "countries";
   private static final String CALLING_CODE_PARAM = "callingCode";
   private static final String ERROR_UNEXPECTED = "error.unexpected";
   private final CountryService countryService;
@@ -66,6 +79,7 @@ public class AuthenticationController {
   private final EmailService emailService;
   private final MessageSource messageSource;
   private final LocaleChanger localeChanger;
+  private final ShopService shopService;
 
   @Autowired
   public AuthenticationController(
@@ -75,7 +89,8 @@ public class AuthenticationController {
       SmsService smsService,
       EmailService emailService,
       MessageSource messageSource,
-      LocaleChanger localeChanger) {
+      LocaleChanger localeChanger,
+      ShopService shopService) {
     this.countryService = countryService;
     this.authenticationService = authenticationService;
     this.passwordEncoder = passwordEncoder;
@@ -83,6 +98,7 @@ public class AuthenticationController {
     this.emailService = emailService;
     this.messageSource = messageSource;
     this.localeChanger = localeChanger;
+    this.shopService = shopService;
   }
 
   @GetMapping("/login")
@@ -127,12 +143,13 @@ public class AuthenticationController {
       httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       model.addAttribute(REGISTER_PARAM, httpSession.getAttribute(REGISTER_PARAM));
       httpSession.removeAttribute(REGISTER_PARAM);
-    } else {
+    }
+    if (error == null || message == null) {
       model.addAttribute(REGISTER_PARAM, new RegisterDTO());
     }
     List<CountryDTO> countries = countryService.getAll();
     model.addAttribute(
-        "countries",
+        COUNTRIES_PARAM,
         countries.stream()
             .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
             .distinct()
@@ -154,19 +171,14 @@ public class AuthenticationController {
     String redirect = "redirect:/register?error";
     httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
-    } else if (authenticationService
-        .getPhones()
-        .contains(register.getCallingCode() + register.getPhone())) {
+    } else if (authenticationService.phoneExists(register.getCallingCode() + register.getPhone())) {
       error = true;
-      message =
-          messageSource.getMessage("authenticationController.register.same_phone", null, locale);
-    } else if (authenticationService.getEmails().contains(register.getEmail())) {
+      message = messageSource.getMessage(ERROR_REGISTER_SAME_PHONE_MESSAGE, null, locale);
+    } else if (authenticationService.emailExists(register.getEmail())) {
       error = true;
-      message =
-          messageSource.getMessage("authenticationController.register.same_email", null, locale);
+      message = messageSource.getMessage(ERROR_REGISTER_SAME_EMAIL_MESSAGE, null, locale);
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
       error = true;
       message = messageSource.getMessage(ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE, null, locale);
@@ -486,5 +498,120 @@ public class AuthenticationController {
     httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
     httpSession.removeAttribute(ATTEMPTS_PARAM);
     httpSession.removeAttribute(RESET_PARAM);
+  }
+
+  @GetMapping("/register_shop")
+  public String registerShopPage(
+      @RequestParam(required = false) String error, Model model, HttpSession httpSession) {
+    if (error != null) {
+      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
+      if (message != null) {
+        model.addAttribute(ERROR_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      }
+    }
+    RegisterShopDTO registerShopDTO = (RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM);
+    if (registerShopDTO == null) {
+      registerShopDTO = new RegisterShopDTO();
+    } else {
+      httpSession.removeAttribute(REGISTER_PARAM);
+    }
+    List<CountryDTO> countries = countryService.getAll();
+    model.addAttribute(REGISTER_PARAM, registerShopDTO);
+    model.addAttribute(
+        COUNTRIES_PARAM,
+        countries.stream()
+            .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
+            .distinct()
+            .toList());
+    model.addAttribute(
+        CALLING_CODES_PARAM,
+        countries.stream().map(e -> new CallingCodeDTO(e.getCallingCode(), e.getCode())).toList());
+    return "registerShopPage";
+  }
+
+  @PostMapping("/register_shop")
+  public String registerShop(
+      @ModelAttribute @Valid RegisterShopDTO register,
+      BindingResult bindingResult,
+      HttpSession httpSession,
+      Locale locale) {
+    final MultipartFile file = register.getFile();
+    final String accountNumber = register.getAccountNumber();
+    final List<AddressDTO> points = register.getAddress();
+    final int maxListSize = 5;
+    boolean error = false;
+    String message = "";
+    httpSession.setAttribute(REGISTER_PARAM, register);
+    if (bindingResult.hasErrors()) {
+      error = true;
+      message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
+    } else if (authenticationService.phoneExists(register.getCallingCode() + register.getPhone())) {
+      error = true;
+      message = messageSource.getMessage(ERROR_REGISTER_SAME_PHONE_MESSAGE, null, locale);
+    } else if (authenticationService.emailExists(register.getEmail())) {
+      error = true;
+      message = messageSource.getMessage(ERROR_REGISTER_SAME_EMAIL_MESSAGE, null, locale);
+    } else if (shopService.checkShopNameExists(register.getName())) {
+      error = true;
+      message =
+          messageSource.getMessage("authenticationController.register.same_name", null, locale);
+    } else if (shopService.checkAccountNumberExists(accountNumber)) {
+      error = true;
+      message =
+          messageSource.getMessage(
+              "authenticationController.register.same_account_number", null, locale);
+    } else if (!register.getPassword().equals(register.getRetypedPassword())) {
+      error = true;
+      message = messageSource.getMessage(ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE, null, locale);
+    } else if (!shopService.checkAccountNumber(accountNumber)) {
+      error = true;
+      message =
+          messageSource.getMessage(
+              "authenticationController.register.bad_account_number", null, locale);
+    } else if (points.size() == 0 || points.size() > maxListSize) {
+      error = true;
+      message =
+          messageSource.getMessage(
+              "authenticationController.register.bad_size_points", null, locale);
+    } else if (new HashSet<>(points).size() != points.size()) {
+      error = true;
+      message =
+          messageSource.getMessage("authenticationController.register.same_points", null, locale);
+    } else if (!shopService.checkPointsExists(points)) {
+      error = true;
+      message =
+          messageSource.getMessage(
+              "authenticationController.register.same_other_points", null, locale);
+    } else if (!shopService.checkFile(file)) {
+      error = true;
+      message =
+          messageSource.getMessage("authenticationController.register.bad_file", null, locale);
+    }
+    if (error) {
+      httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
+      return "redirect:/register_shop?error";
+    }
+    if (!getVerificationSms(
+        httpSession,
+        register.getPhone(),
+        register.getCallingCode(),
+        locale,
+        CODE_SMS_PARAM_REGISTER_SHOP)) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    }
+    if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    }
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    return "redirect:/shop_verifications";
   }
 }

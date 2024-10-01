@@ -21,4 +21,3 @@ function setLanguage() {
         sessionStorage.setItem('isEn', "true");
     }
 }
-

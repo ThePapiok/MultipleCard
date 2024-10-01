@@ -7,9 +7,6 @@ input {
     color: lightgray;
 }
 
-#up1, #check1, #close1, #check2, #close2, #check3, #close3, #check4, #close4, #check5, #close5, #check6, #close6, #check7, #close7, #check8, #close8 {
-    display: none;
-}
 
 .placeholderWithInput {
     display: flex;
@@ -37,7 +34,7 @@ input {
     margin-top: 5px;
     aspect-ratio: 1 / 1;
     height: 40%;
-    width: 1;
+    width: auto;
 }
 
 .nameCard {
@@ -78,7 +75,7 @@ input {
     left: 20%;
 }
 
-#imageCard{
+#imageCard {
     width: 100%;
     height: 100%;
     margin-top: 10px;

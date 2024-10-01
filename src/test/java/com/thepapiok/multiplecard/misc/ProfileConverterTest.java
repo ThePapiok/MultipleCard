@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
@@ -23,10 +24,12 @@ public class ProfileConverterTest {
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
 
   private static Address address;
+  private static AddressDTO addressDTO;
   private static User user;
   private static ProfileDTO profileDTO;
   @Mock private UserRepository userRepository;
   @Mock private AccountRepository accountRepository;
+  @Mock private AddressConverter addressConverter;
   private ProfileConverter profileConverter;
 
   @BeforeAll
@@ -50,14 +53,16 @@ public class ProfileConverterTest {
     user.setAddress(address);
     user.setFirstName(firstName);
     user.setLastName(lastName);
+    addressDTO = new AddressDTO();
+    addressDTO.setPostalCode(postalCode);
+    addressDTO.setApartmentNumber("");
+    addressDTO.setCountry(country);
+    addressDTO.setCity(city);
+    addressDTO.setStreet(street);
+    addressDTO.setProvince(province);
+    addressDTO.setHouseNumber(houseNumber);
     profileDTO = new ProfileDTO();
-    profileDTO.setPostalCode(postalCode);
-    profileDTO.setApartmentNumber("");
-    profileDTO.setCountry(country);
-    profileDTO.setCity(city);
-    profileDTO.setStreet(street);
-    profileDTO.setProvince(province);
-    profileDTO.setHouseNumber(houseNumber);
+    profileDTO.setAddress(addressDTO);
     profileDTO.setFirstName(firstName);
     profileDTO.setLastName(lastName);
   }
@@ -65,11 +70,13 @@ public class ProfileConverterTest {
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    profileConverter = new ProfileConverter(userRepository, accountRepository);
+    profileConverter = new ProfileConverter(userRepository, accountRepository, addressConverter);
   }
 
   @Test
   public void shouldSuccessAtGetDTO() {
+    when(addressConverter.getDTO(address)).thenReturn(addressDTO);
+
     assertEquals(profileDTO, profileConverter.getDTO(user));
   }
 
@@ -80,6 +87,7 @@ public class ProfileConverterTest {
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(userRepository.findById(TEST_ID)).thenReturn(Optional.ofNullable(user));
+    when(addressConverter.getEntity(addressDTO)).thenReturn(address);
 
     assertEquals(user, profileConverter.getEntity(profileDTO, TEST_PHONE));
   }
