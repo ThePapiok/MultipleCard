@@ -103,12 +103,12 @@ function deleteCheck(i, hasCheck, e) {
 function atStart() {
     firstName = document.getElementById("firstName").value;
     lastName = document.getElementById("lastName").value;
-    province = document.getElementById("province").value;
-    street = document.getElementById("street").value;
-    houseNumber = document.getElementById("houseNumber").value;
-    apartmentNumber = document.getElementById("apartmentNumber").value;
-    postalCode = document.getElementById("postalCode").value;
-    city = document.getElementById("city").value;
+    province = document.getElementById("provinceInput").value;
+    street = document.getElementById("streetInput").value;
+    houseNumber = document.getElementById("houseNumberInput").value;
+    apartmentNumber = document.getElementById("apartmentNumberInput").value;
+    postalCode = document.getElementById("postalCodeInput").value;
+    city = document.getElementById("cityInput").value;
     countryInput = document.getElementById("valueCountry").value;
     if (document.getElementById("cardNotFound") !== null) {
         document.getElementById("card").style.opacity = "50%";

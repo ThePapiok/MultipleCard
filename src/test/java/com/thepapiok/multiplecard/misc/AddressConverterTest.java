@@ -41,12 +41,17 @@ public class AddressConverterTest {
   }
 
   @Test
+  public void shouldSuccessAtGetDTO() {
+    assertEquals(TEST_ADDRESS_DTO, addressConverter.getDTO(TEST_ADDRESS));
+  }
+
+  @Test
   public void shouldSuccessAtGetEntity() {
     assertEquals(TEST_ADDRESS, addressConverter.getEntity(TEST_ADDRESS_DTO));
   }
 
   @Test
-  public void shouldSuccessAtGenEntities() {
+  public void shouldSuccessAtGetEntities() {
     final String province = "province2";
     final String city = "city2";
     final String street = "street2";

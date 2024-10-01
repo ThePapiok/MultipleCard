@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ChangePasswordDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
@@ -83,6 +84,7 @@ public class ProfileControllerTest {
   private static final String TEST_OLD_PASSWORD = "Test123!";
   private static final String TEST_NEW_PASSWORD = "Test123!!";
   private static final String TEST_ENCODE_CODE = "312fdasfdsaffsd";
+  private static final String PARAM_ADDRESS_PREFIX = "address.";
   private static ProfileDTO profileDTO;
   private static List<CountryDTO> countryDTOS;
   private static List<CountryNamesDTO> countryNamesDTOS;
@@ -100,14 +102,16 @@ public class ProfileControllerTest {
     final String countryName2 = "sdfsdf";
     final String countryCode1 = "PL";
     final String countryCode2 = "ds";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("11-111");
+    addressDTO.setApartmentNumber("2");
+    addressDTO.setCity("City");
+    addressDTO.setCountry("Country");
+    addressDTO.setStreet("Street");
+    addressDTO.setProvince("Province");
+    addressDTO.setHouseNumber("1");
     profileDTO = new ProfileDTO();
-    profileDTO.setPostalCode("11-111");
-    profileDTO.setApartmentNumber("2");
-    profileDTO.setCountry("Country");
-    profileDTO.setCity("City");
-    profileDTO.setStreet("Street");
-    profileDTO.setProvince("Province");
-    profileDTO.setHouseNumber("1");
+    profileDTO.setAddress(addressDTO);
     profileDTO.setFirstName("Firstname");
     profileDTO.setLastName("Last Name");
     countryDTOS =
@@ -192,13 +196,19 @@ public class ProfileControllerTest {
             post(USER_URL)
                 .param(FIRST_NAME_PARAM, profileDTO.getFirstName())
                 .param(LAST_NAME_PARAM, profileDTO.getLastName())
-                .param(PROVINCE_PARAM, profileDTO.getProvince())
-                .param(STREET_PARAM, profileDTO.getStreet())
-                .param(HOUSE_NUMBER_PARAM, profileDTO.getHouseNumber())
-                .param(APARTMENT_NUMBER_PARAM, profileDTO.getApartmentNumber())
-                .param(POSTAL_CODE_PARAM, profileDTO.getPostalCode())
-                .param(CITY_PARAM, profileDTO.getCity())
-                .param(COUNTRY_PARAM, profileDTO.getCountry())
+                .param(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM, profileDTO.getAddress().getProvince())
+                .param(PARAM_ADDRESS_PREFIX + STREET_PARAM, profileDTO.getAddress().getStreet())
+                .param(
+                    PARAM_ADDRESS_PREFIX + HOUSE_NUMBER_PARAM,
+                    profileDTO.getAddress().getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + APARTMENT_NUMBER_PARAM,
+                    profileDTO.getAddress().getApartmentNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + POSTAL_CODE_PARAM,
+                    profileDTO.getAddress().getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX + CITY_PARAM, profileDTO.getAddress().getCity())
+                .param(PARAM_ADDRESS_PREFIX + COUNTRY_PARAM, profileDTO.getAddress().getCountry())
                 .session(httpSession))
         .andExpect(redirectedUrl("/user?success"));
     assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
@@ -227,13 +237,19 @@ public class ProfileControllerTest {
             post(USER_URL)
                 .param(FIRST_NAME_PARAM, profileDTO.getFirstName())
                 .param(LAST_NAME_PARAM, profileDTO.getLastName())
-                .param(PROVINCE_PARAM, profileDTO.getProvince())
-                .param(STREET_PARAM, profileDTO.getStreet())
-                .param(HOUSE_NUMBER_PARAM, profileDTO.getHouseNumber())
-                .param(APARTMENT_NUMBER_PARAM, profileDTO.getApartmentNumber())
-                .param(POSTAL_CODE_PARAM, profileDTO.getPostalCode())
-                .param(CITY_PARAM, profileDTO.getCity())
-                .param(COUNTRY_PARAM, profileDTO.getCountry())
+                .param(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM, profileDTO.getAddress().getProvince())
+                .param(PARAM_ADDRESS_PREFIX + STREET_PARAM, profileDTO.getAddress().getStreet())
+                .param(
+                    PARAM_ADDRESS_PREFIX + HOUSE_NUMBER_PARAM,
+                    profileDTO.getAddress().getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + APARTMENT_NUMBER_PARAM,
+                    profileDTO.getAddress().getApartmentNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + POSTAL_CODE_PARAM,
+                    profileDTO.getAddress().getPostalCode())
+                .param(PARAM_ADDRESS_PREFIX + CITY_PARAM, profileDTO.getAddress().getCity())
+                .param(PARAM_ADDRESS_PREFIX + COUNTRY_PARAM, profileDTO.getAddress().getCountry())
                 .session(httpSession))
         .andExpect(redirectedUrl(USER_ERROR_URL));
     assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));

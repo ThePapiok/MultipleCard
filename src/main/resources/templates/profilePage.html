@@ -78,7 +78,7 @@
                     <label class="placeholderInput" th:text="#{street.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{street}" type="text" required th:value="*{street}"
+                        <input name="address.street" id="streetInput" type="text" required th:value="*{address.street}"
                                oninput="checkStreet(this)"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
                                onmouseleave="hideValidation('Street')">
@@ -101,7 +101,7 @@
                     <label class="placeholderInput" th:text="#{houseNumber.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{houseNumber}" type="text" required th:value="*{houseNumber}"
+                        <input name="address.houseNumber" id="houseNumberInput" type="text" required th:value="*{address.houseNumber}"
                                oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
                                onmouseenter="showValidation(this, 'HouseNumber')"
                                onmouseleave="hideValidation('HouseNumber')">
@@ -123,7 +123,7 @@
                     <label class="placeholderInput" th:text="#{apartmentNumber.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{apartmentNumber}" type="text" th:value="*{apartmentNumber}"
+                        <input name="address.apartmentNumber" id="apartmentNumberInput" type="text" th:value="*{address.apartmentNumber}"
                                oninput="checkApartmentNumber(this)" maxlength="6"
                                onmouseenter="showValidation(this, 'ApartmentNumber')"
                                onmouseleave="hideValidation('ApartmentNumber')">
@@ -148,7 +148,7 @@
                     <label class="placeholderInput" th:text="#{postalCode.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{postalCode}" type="text" required th:value="*{postalCode}"
+                        <input name="address.postalCode" id="postalCodeInput" type="text" required th:value="*{address.postalCode}"
                                oninput="checkPostalCode(this)" maxlength="6" minlength="6"
                                onmouseenter="showValidation(this, 'PostalCode')"
                                onmouseleave="hideValidation('PostalCode')">
@@ -169,7 +169,7 @@
                     <label class="placeholderInput" th:text="#{city.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{city}" type="text" required oninput="checkCity(this)" th:value="*{city}"
+                        <input name="address.city" id="cityInput" type="text" required oninput="checkCity(this)" th:value="*{address.city}"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
                                onmouseleave="hideValidation('City')">
                         <img hidden id="close7" src="/images/close.png" alt="close">
@@ -193,7 +193,7 @@
                     <label class="placeholderInput" th:text="#{province.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{province}" type="text" required th:value="*{province}"
+                        <input name="address.province" id="provinceInput" type="text" required th:value="*{address.province}"
                                oninput="checkProvince(this)" minlength="2" maxlength="40"
                                onmouseenter="showValidation(this, 'Province')"
                                onmouseleave="hideValidation('Province')">
@@ -216,8 +216,8 @@
                     <label class="placeholderInput" th:text="#{country.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{country}" id="valueCountry" class="valueSelect" type="text" readonly
-                               th:value="*{country}"
+                        <input name="address.country" id="valueCountry" class="valueSelect" type="text" readonly
+                               th:value="*{address.country}"
                                onclick="showOrHideCountry('', '1')">
                         <img hidden id="down1" src="/images/keyboard_down.png" alt="down">
                         <img hidden id="up1" src="/images/keyboard_up.png" alt="up">

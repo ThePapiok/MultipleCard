@@ -169,6 +169,7 @@ public class AuthenticationController {
     boolean error = false;
     String message = null;
     String redirect = "redirect:/register?error";
+    System.out.println(register);
     httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
       System.out.println(bindingResult);

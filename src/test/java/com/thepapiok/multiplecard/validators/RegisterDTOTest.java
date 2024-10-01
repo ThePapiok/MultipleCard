@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.validators;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -99,22 +100,26 @@ public class RegisterDTOTest {
 
   @Test
   public void shouldSuccessAtValidationLastNameCityStreetAndProvince() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(TEST_TEXT);
+    addressDTO.setStreet(TEST_TEXT);
+    addressDTO.setProvince(TEST_TEXT);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(TEST_TEXT);
-    registerDTO.setCity(TEST_TEXT);
-    registerDTO.setStreet(TEST_TEXT);
-    registerDTO.setProvince(TEST_TEXT);
+    registerDTO.setAddress(addressDTO);
 
     validationTrueLastNameCityStreetAndProvince(registerDTO);
   }
 
   @Test
   public void shouldSuccessAtValidationLastNameCityStreetAndProvinceWithTwoParts1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(TEST_TEXT_TWO_PARTS);
+    addressDTO.setStreet(TEST_TEXT_TWO_PARTS);
+    addressDTO.setProvince(TEST_TEXT_TWO_PARTS);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(TEST_TEXT_TWO_PARTS);
-    registerDTO.setCity(TEST_TEXT_TWO_PARTS);
-    registerDTO.setStreet(TEST_TEXT_TWO_PARTS);
-    registerDTO.setProvince(TEST_TEXT_TWO_PARTS);
+    registerDTO.setAddress(addressDTO);
 
     validationTrueLastNameCityStreetAndProvince(registerDTO);
   }
@@ -122,35 +127,41 @@ public class RegisterDTOTest {
   @Test
   public void shouldSuccessAtValidationLastNameCityStreetAndProvinceWithTwoParts2() {
     final String testText = "Test-Test";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationTrueLastNameCityStreetAndProvince(registerDTO);
   }
 
   private void validationTrueLastNameCityStreetAndProvince(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations;
+    Set<ConstraintViolation<AddressDTO>> violationsAddress;
+    AddressDTO addressDTO = registerDTO.getAddress();
 
     violations = validator.validateProperty(registerDTO, LAST_NAME_FIELD);
     assertTrue(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, CITY_FIELD);
-    assertTrue(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, STREET_FIELD);
-    assertTrue(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, PROVINCE_FIELD);
-    assertTrue(violations.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, CITY_FIELD);
+    assertTrue(violationsAddress.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, STREET_FIELD);
+    assertTrue(violationsAddress.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, PROVINCE_FIELD);
+    assertTrue(violationsAddress.isEmpty());
   }
 
   @Test
   public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenNoStartWithUpperCase() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(TEST_TEXT_LOWER_CASE);
+    addressDTO.setStreet(TEST_TEXT_LOWER_CASE);
+    addressDTO.setProvince(TEST_TEXT_LOWER_CASE);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(TEST_TEXT_LOWER_CASE);
-    registerDTO.setCity(TEST_TEXT_LOWER_CASE);
-    registerDTO.setStreet(TEST_TEXT_LOWER_CASE);
-    registerDTO.setProvince(TEST_TEXT_LOWER_CASE);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -158,11 +169,13 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenContainsDigits() {
     final String testText = "Te1st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -170,11 +183,13 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenContainsSpecialSymbols() {
     final String testText = "Te@st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -183,11 +198,13 @@ public class RegisterDTOTest {
   public void
       shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartNoStartWithUpperCase1() {
     final String testText = "Test test";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -196,11 +213,13 @@ public class RegisterDTOTest {
   public void
       shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartNoStartWithUpperCase2() {
     final String testText = "Test-test";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -208,11 +227,13 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsDigits1() {
     final String testText = "Test Te1st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -220,11 +241,13 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsDigits2() {
     final String testText = "Test-Te1st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -233,11 +256,13 @@ public class RegisterDTOTest {
   public void
       shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsSpecialSymbols1() {
     final String testText = "Test Te!st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
@@ -246,248 +271,301 @@ public class RegisterDTOTest {
   public void
       shouldFailAtValidationLastNameCityStreetAndProvinceWhenSecondPartContainsSpecialSymbols2() {
     final String testText = "Test-Te!st";
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCity(testText);
+    addressDTO.setStreet(testText);
+    addressDTO.setProvince(testText);
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setLastName(testText);
-    registerDTO.setCity(testText);
-    registerDTO.setStreet(testText);
-    registerDTO.setProvince(testText);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseLastNameCityStreetAndProvince(registerDTO);
   }
 
   private void validationFalseLastNameCityStreetAndProvince(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations;
+    Set<ConstraintViolation<AddressDTO>> violationsAddress;
+    AddressDTO addressDTO = registerDTO.getAddress();
+
     violations = validator.validateProperty(registerDTO, LAST_NAME_FIELD);
     assertFalse(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, CITY_FIELD);
-    assertFalse(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, STREET_FIELD);
-    assertFalse(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, PROVINCE_FIELD);
-    assertFalse(violations.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, CITY_FIELD);
+    assertFalse(violationsAddress.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, STREET_FIELD);
+    assertFalse(violationsAddress.isEmpty());
+    violationsAddress = validator.validateProperty(addressDTO, PROVINCE_FIELD);
+    assertFalse(violationsAddress.isEmpty());
   }
 
   @Test
   public void shouldSuccessAtValidationHouseNumber1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1");
+    registerDTO.setAddress(addressDTO);
 
     validationTrueHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldSuccessAtValidationHouseNumber2() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
+    registerDTO.setAddress(addressDTO);
 
     validationTrueHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldSuccessAtValidationHouseNumber3() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1/2");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1/2");
+    registerDTO.setAddress(addressDTO);
 
     validationTrueHouseNumber(registerDTO);
   }
 
   public void validationTrueHouseNumber(RegisterDTO registerDTO) {
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, HOUSE_NUMBER_FIELD);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), HOUSE_NUMBER_FIELD);
     assertTrue(violations.isEmpty());
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenLetterIsNotAtEnd() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("B1");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("B1");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSpecialSymbols() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSlashButNoNumberAtEnd1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1/");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1/");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSlashButNoNumberAtEnd2() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1//");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1//");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSlashButNoNumberAtEnd3() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1/!");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1/!");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSlashButNoNumberAtEnd4() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1/B");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1/B");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsMoreThanTwoParts1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1/111/11");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1/111/11");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsMoreThanTwoParts2() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setHouseNumber("1B111C");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setHouseNumber("1B111C");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseHouseNumber(registerDTO);
   }
 
   public void validationFalseHouseNumber(RegisterDTO registerDTO) {
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, HOUSE_NUMBER_FIELD);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), HOUSE_NUMBER_FIELD);
     assertFalse(violations.isEmpty());
   }
 
   @Test
   public void shouldSuccessAtValidationApartmentNumber1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber("156");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber("156");
+    registerDTO.setAddress(addressDTO);
 
     validationTrueApartmentNumber(registerDTO);
   }
 
   @Test
   public void shouldSuccessAtValidationApartmentNumber2() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber("");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber("");
+    registerDTO.setAddress(addressDTO);
 
     validationTrueApartmentNumber(registerDTO);
   }
 
   public void validationTrueApartmentNumber(RegisterDTO registerDTO) {
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, APARTMENT_NUMBER_FIELD);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), APARTMENT_NUMBER_FIELD);
     assertTrue(violations.isEmpty());
   }
 
   @Test
   public void shouldFailAtValidationApartmentNumberWhenStartWith0() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber("01");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber("01");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseApartmentNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationApartmentNumberWhenContainsLetters() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseApartmentNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationApartmentNumberWhenContainsSpecialSymbols() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
+    registerDTO.setAddress(addressDTO);
 
     validationFalseApartmentNumber(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationApartmentNumberWhenMoreThanOnePart() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setApartmentNumber("1 1");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setApartmentNumber("1 1");
+    registerDTO.setAddress(addressDTO);
 
     validationFalseApartmentNumber(registerDTO);
   }
 
   public void validationFalseApartmentNumber(RegisterDTO registerDTO) {
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, APARTMENT_NUMBER_FIELD);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), APARTMENT_NUMBER_FIELD);
     assertFalse(violations.isEmpty());
   }
 
   @Test
   public void shouldSuccessAtValidationPostalCode() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("01-432");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("01-432");
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, POSTAL_CODE_FIELD);
+    registerDTO.setAddress(addressDTO);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), POSTAL_CODE_FIELD);
 
     assertTrue(violations.isEmpty());
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenNotContainsMinusAt3Char1() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("01 432");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("01 432");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenNotContainsMinusAt3Char2() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("011432");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("011432");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenNotContainsMinusAt3Char3() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("0-1432");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("0-1432");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenContainsLetters() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("01-B32");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("01-B32");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenContainsSpecialSymbols() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("01-!32");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("01-!32");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   @Test
   public void shouldFailAtValidationPostalCodeWhenToLessSize() {
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setPostalCode("01-32");
     RegisterDTO registerDTO = new RegisterDTO();
-    registerDTO.setPostalCode("01-32");
+    registerDTO.setAddress(addressDTO);
 
     validationFalsePostalCode(registerDTO);
   }
 
   public void validationFalsePostalCode(RegisterDTO registerDTO) {
-    Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, POSTAL_CODE_FIELD);
+    Set<ConstraintViolation<AddressDTO>> violations =
+        validator.validateProperty(registerDTO.getAddress(), POSTAL_CODE_FIELD);
     assertFalse(violations.isEmpty());
   }
 

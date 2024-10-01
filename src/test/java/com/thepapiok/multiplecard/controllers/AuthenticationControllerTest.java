@@ -142,6 +142,7 @@ public class AuthenticationControllerTest {
   private static final String IS_SENT_PARAM = "isSent";
   private static final String PARAM_ADDRESS_PREFIX0 = "address[0].";
   private static final String PARAM_ADDRESS_PREFIX1 = "address[1].";
+  private static final String PARAM_ADDRESS_PREFIX = "address.";
 
   @Autowired private MockMvc mockMvc;
   @MockBean private CountryService countryService;
@@ -175,18 +176,20 @@ public class AuthenticationControllerTest {
             new CountryNamesDTO(PL_NAME, plCode),
             new CountryNamesDTO(deName, deCode),
             new CountryNamesDTO(frName, frCode));
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCountry(PL_NAME);
+    addressDTO.setCity(TEST_TEXT);
+    addressDTO.setStreet(TEST_TEXT);
+    addressDTO.setProvince(TEST_TEXT);
+    addressDTO.setApartmentNumber(null);
+    addressDTO.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO.setPostalCode(TEST_POSTAL_CODE);
     expectedRegisterDTO =
         new RegisterDTO(
             TEST_TEXT,
             TEST_TEXT,
             TEST_MAIL,
-            TEST_TEXT,
-            TEST_TEXT,
-            TEST_HOUSE_NUMBER,
-            null,
-            TEST_POSTAL_CODE,
-            TEST_TEXT,
-            PL_NAME,
+            addressDTO,
             PL_CALLING_CODE,
             "123456789",
             TEST_PASSWORD,
@@ -316,6 +319,7 @@ public class AuthenticationControllerTest {
   public void shouldRedirectToRegisterAtCreateUserByValidationProblem() throws Exception {
     RegisterDTO expectedRegisterDTO = new RegisterDTO();
     expectedRegisterDTO.setPhone("+12312313231");
+    expectedRegisterDTO.setAddress(new AddressDTO());
     MockHttpSession httpSession = new MockHttpSession();
 
     performPostRegisterAndRedirectRegister(
@@ -394,20 +398,22 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToRegisterAtCreateUserByPasswordsNotTheSame() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
+    AddressDTO addressDTO = new AddressDTO();
+    addressDTO.setCountry(PL_NAME);
+    addressDTO.setProvince(TEST_TEXT);
+    addressDTO.setCity(TEST_TEXT);
+    addressDTO.setHouseNumber(TEST_HOUSE_NUMBER);
+    addressDTO.setPostalCode(TEST_POSTAL_CODE);
+    addressDTO.setStreet(TEST_TEXT);
     RegisterDTO expectedRegisterDTO = new RegisterDTO();
     expectedRegisterDTO.setPhone("12312313231");
     expectedRegisterDTO.setPassword(TEST_PASSWORD);
     expectedRegisterDTO.setRetypedPassword("Werfadsf!1");
-    expectedRegisterDTO.setCountry(PL_NAME);
     expectedRegisterDTO.setFirstName(TEST_TEXT);
     expectedRegisterDTO.setLastName(TEST_TEXT);
     expectedRegisterDTO.setEmail("email@email.com");
-    expectedRegisterDTO.setProvince(TEST_TEXT);
-    expectedRegisterDTO.setCity(TEST_TEXT);
-    expectedRegisterDTO.setHouseNumber(TEST_HOUSE_NUMBER);
     expectedRegisterDTO.setCallingCode(PL_CALLING_CODE);
-    expectedRegisterDTO.setPostalCode(TEST_POSTAL_CODE);
-    expectedRegisterDTO.setStreet(TEST_TEXT);
+    expectedRegisterDTO.setAddress(addressDTO);
 
     when(authenticationService.phoneExists(
             expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
@@ -423,27 +429,41 @@ public class AuthenticationControllerTest {
       throws Exception {
     performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_REGISTER_ERROR);
     assertEquals(
-        expectedRegisterDTO.toString(),
-        Objects.requireNonNull(httpSession.getAttribute(REGISTER_PARAM)).toString());
+        expectedRegisterDTO, Objects.requireNonNull(httpSession.getAttribute(REGISTER_PARAM)));
     assertEquals(errorMessage, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   private void performPostRegister(
       RegisterDTO expectedRegisterDTO, MockHttpSession httpSession, String redirectUrl)
       throws Exception {
+    System.out.println(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM);
+    System.out.println(expectedRegisterDTO.getAddress().getStreet());
     mockMvc
         .perform(
             post(REGISTER_URL)
                 .param(FIRST_NAME_PARAM, expectedRegisterDTO.getFirstName())
                 .param(LAST_NAME_PARAM, expectedRegisterDTO.getLastName())
                 .param(EMAIL_PARAM, expectedRegisterDTO.getEmail())
-                .param(PROVINCE_PARAM, expectedRegisterDTO.getProvince())
-                .param(STREET_PARAM, expectedRegisterDTO.getStreet())
-                .param(HOUSE_NUMBER_PARAM, expectedRegisterDTO.getHouseNumber())
-                .param(APARTMENT_NUMBER_PARAM, expectedRegisterDTO.getApartmentNumber())
-                .param(POSTAL_CODE_PARAM, expectedRegisterDTO.getPostalCode())
-                .param(CITY_PARAM, expectedRegisterDTO.getCity())
-                .param(COUNTRY_PARAM, expectedRegisterDTO.getCountry())
+                .param(
+                    PARAM_ADDRESS_PREFIX + PROVINCE_PARAM,
+                    expectedRegisterDTO.getAddress().getProvince())
+                .param(
+                    PARAM_ADDRESS_PREFIX + STREET_PARAM,
+                    expectedRegisterDTO.getAddress().getStreet())
+                .param(
+                    PARAM_ADDRESS_PREFIX + HOUSE_NUMBER_PARAM,
+                    expectedRegisterDTO.getAddress().getHouseNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + APARTMENT_NUMBER_PARAM,
+                    expectedRegisterDTO.getAddress().getApartmentNumber())
+                .param(
+                    PARAM_ADDRESS_PREFIX + POSTAL_CODE_PARAM,
+                    expectedRegisterDTO.getAddress().getPostalCode())
+                .param(
+                    PARAM_ADDRESS_PREFIX + CITY_PARAM, expectedRegisterDTO.getAddress().getCity())
+                .param(
+                    PARAM_ADDRESS_PREFIX + COUNTRY_PARAM,
+                    expectedRegisterDTO.getAddress().getCountry())
                 .param(CALLING_CODE_PARAM, expectedRegisterDTO.getCallingCode())
                 .param(PHONE_PARAM, expectedRegisterDTO.getPhone())
                 .param(PASSWORD_PARAM, expectedRegisterDTO.getPassword())
