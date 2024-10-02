@@ -7,6 +7,7 @@ import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
+import com.thepapiok.multiplecard.dto.TestDTO;
 import com.thepapiok.multiplecard.misc.LocaleChanger;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -613,5 +614,16 @@ public class AuthenticationController {
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
     return "redirect:/shop_verifications";
+  }
+
+  @GetMapping("/shop_verifications")
+  public String verificationShopPage() {
+    return "verificationShopPage";
+  }
+
+  @PostMapping("/shop_verifications")
+  public String verificationShop(@ModelAttribute TestDTO test) {
+    System.out.println(test);
+    return "redirect:/login";
   }
 }
