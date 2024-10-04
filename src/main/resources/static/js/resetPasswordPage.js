@@ -47,15 +47,15 @@ function getForm(e) {
     if (e.classList.contains("greenButton")) {
         const callingCode = document.getElementById("valueCallingCode").value;
         const phone = document.getElementById("phone").value;
-        fetch("/get_verification_number", {
+        fetch("/get_verification_sms", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
-                "callingCode": callingCode,
-                "phone": phone,
-                "param": "codeSmsReset"
+                "phone": callingCode + phone,
+                "param": "codeSmsReset",
+                "newUser": false
             })
         })
             .then(response => response.text())

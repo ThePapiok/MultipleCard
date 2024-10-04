@@ -308,3 +308,49 @@ function checkCallingCode(e, value) {
 function pressedCorrectButton(){
     buttons = true;
 }
+
+function getSmsCode(phone, param, newUser) {
+    fetch("/get_verification_sms", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "phone": phone,
+            "param": param,
+            "newUser": newUser
+        })
+    })
+        .then(response => response.text())
+        .then(response => {
+            if (response !== "ok") {
+                document.getElementById("error").textContent = response;
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    buttons = false;
+}
+
+function getEmailCode(email) {
+    fetch("/get_verification_email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "email": email
+        })
+    })
+        .then(response => response.text())
+        .then(response => {
+            if (response !== "ok") {
+                document.getElementById("error").textContent = response;
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    buttons = false;
+}

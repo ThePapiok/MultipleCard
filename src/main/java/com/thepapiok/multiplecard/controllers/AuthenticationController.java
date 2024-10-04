@@ -53,6 +53,7 @@ public class AuthenticationController {
   private static final String ERROR_BAD_EMAIL_CODE_MESSAGE = "error.bad_email_code";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "passwords_not_the_same";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "resetPasswordPage.user.not_found";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
   private static final String MESSAGE_VERIFICATION_CODE_PARAM_MESSAGES =
       "message.verification_code";
   private static final String SUFFIX_VERIFICATION_MESSAGE = " MultipleCard: ";
@@ -64,6 +65,7 @@ public class AuthenticationController {
   private static final String REGISTER_PARAM = "register";
   private static final String RESET_PARAM = "reset";
   private static final String PHONE_PARAM = "phone";
+  private static final String EMAIL_PARAM = "email";
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
   private static final String CODE_SMS_PARAM_REGISTER_SHOP = "codeSmsRegisterShop";
   private static final String CODE_SMS_PARAM_RESET = "codeSmsReset";
@@ -194,7 +196,7 @@ public class AuthenticationController {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
       return redirect;
     }
-    if (!getVerificationSms(
+    if (!generateVerificationSms(
         httpSession,
         register.getPhone(),
         register.getCallingCode(),
@@ -204,7 +206,7 @@ public class AuthenticationController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
       return REDIRECT_VERIFICATION_ERROR;
-    } else if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
+    } else if (!generateVerificationEmail(httpSession, register.getEmail(), locale)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
@@ -218,56 +220,13 @@ public class AuthenticationController {
 
   @GetMapping("/account_verifications")
   public String verificationPage(
-      @RequestParam(required = false) String newCodeSms,
-      @RequestParam(required = false) String newCodeEmail,
       @RequestParam(required = false) String reset,
       @RequestParam(required = false) String error,
       Model model,
-      HttpSession httpSession,
-      Locale locale) {
-    final int maxAmount = 3;
+      HttpSession httpSession) {
     RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(REGISTER_PARAM);
     if (registerDTO == null) {
       return REDIRECT_LOGIN;
-    } else if (newCodeSms != null) {
-      Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
-      if (codeAmountSmsInt != maxAmount) {
-        if (!getVerificationSms(
-            httpSession,
-            registerDTO.getPhone(),
-            registerDTO.getCallingCode(),
-            locale,
-            CODE_SMS_PARAM_REGISTER)) {
-          httpSession.setAttribute(
-              ERROR_MESSAGE_PARAM,
-              messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
-          return REDIRECT_VERIFICATION_ERROR;
-        }
-        httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmountSmsInt + 1);
-      } else {
-        httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM,
-            messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale));
-        return REDIRECT_VERIFICATION_ERROR;
-      }
-
-    } else if (newCodeEmail != null) {
-      Integer codeAmountEmailInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM);
-      if (codeAmountEmailInt != maxAmount) {
-        if (!getVerificationEmail(httpSession, registerDTO.getEmail(), locale)) {
-          httpSession.setAttribute(
-              ERROR_MESSAGE_PARAM,
-              messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
-          return REDIRECT_VERIFICATION_ERROR;
-        }
-        httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmountEmailInt + 1);
-      } else {
-        httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM,
-            messageSource.getMessage(ERROR_TOO_MANY_EMAIL_MESSAGE, null, locale));
-        return REDIRECT_VERIFICATION_ERROR;
-      }
-
     } else if (reset != null) {
       resetSession(httpSession, CODE_SMS_PARAM_REGISTER, REGISTER_PARAM);
       return REDIRECT_LOGIN;
@@ -278,6 +237,8 @@ public class AuthenticationController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
+    model.addAttribute(PHONE_PARAM, registerDTO.getCallingCode() + registerDTO.getPhone());
+    model.addAttribute(EMAIL_PARAM, registerDTO.getEmail());
     return "verificationPage";
   }
 
@@ -348,7 +309,7 @@ public class AuthenticationController {
     }
   }
 
-  private boolean getVerificationSms(
+  private boolean generateVerificationSms(
       HttpSession httpSession, String phone, String callingCode, Locale locale, String param) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
@@ -365,7 +326,7 @@ public class AuthenticationController {
     return true;
   }
 
-  private boolean getVerificationEmail(HttpSession httpSession, String email, Locale locale) {
+  private boolean generateVerificationEmail(HttpSession httpSession, String email, Locale locale) {
     try {
       String verificationNumber = authenticationService.getVerificationNumber();
       emailService.sendEmail(
@@ -469,18 +430,17 @@ public class AuthenticationController {
     return "redirect:/password_reset?error";
   }
 
-  @PostMapping("/get_verification_number")
+  @PostMapping("/get_verification_sms")
   @ResponseBody
-  public String getVerificationNumber(
+  public String getVerificationSms(
       HttpSession httpSession,
-      @RequestParam String callingCode,
       @RequestParam String phone,
       @RequestParam String param,
+      @RequestParam Boolean newUser,
       Locale locale) {
     final int maxAmount = 3;
     Integer codeAmount = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
-    String fullPhone = callingCode + phone;
-    int length = fullPhone.length();
+    int length = phone.length();
     final int maxLength = 16;
     final int minLength = 9;
     Pattern phonePattern = Pattern.compile("^\\+[0-9]+[1-9][0-9]*$");
@@ -490,17 +450,40 @@ public class AuthenticationController {
     }
     if (codeAmount == maxAmount) {
       return messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale);
-    } else if (!phonePattern.matcher(fullPhone).matches()
-        || length > maxLength
-        || length < minLength) {
+    } else if (!phonePattern.matcher(phone).matches() || length > maxLength || length < minLength) {
       return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
-    } else if (!authenticationService.getAccountByPhone(fullPhone)) {
+    } else if (!newUser && !authenticationService.getAccountByPhone(phone)) {
       return messageSource.getMessage(ERROR_USER_NOT_FOUND_MESSAGE, null, locale);
-    } else if (!getVerificationSms(httpSession, phone, callingCode, locale, param)) {
+    } else if (!generateVerificationSms(httpSession, phone, "", locale, param)) {
       return messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale);
     }
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmount + 1);
-    return "ok";
+    return SUCCESS_OK_MESSAGE;
+  }
+
+  @PostMapping("/get_verification_email")
+  @ResponseBody
+  public String getVerificationEmail(
+      HttpSession httpSession, @RequestParam String email, Locale locale) {
+    final int maxAmount = 3;
+    final int length = email.length();
+    Integer codeAmount = (Integer) httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM);
+    final int maxLength = 30;
+    final int minLength = 4;
+    Pattern emailPattern = Pattern.compile("^[A-za-z0-9-._]+@[A-z0-9a-z-.]+\\.[a-zA-z]{2,4}$");
+    if (codeAmount == null) {
+      httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+      codeAmount = 0;
+    }
+    if (codeAmount == maxAmount) {
+      return messageSource.getMessage(ERROR_TOO_MANY_EMAIL_MESSAGE, null, locale);
+    } else if (!emailPattern.matcher(email).matches() || length > maxLength || length < minLength) {
+      return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
+    } else if (!generateVerificationEmail(httpSession, email, locale)) {
+      return messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale);
+    }
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmount + 1);
+    return SUCCESS_OK_MESSAGE;
   }
 
   @GetMapping("/register_shop")
@@ -601,7 +584,7 @@ public class AuthenticationController {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
       return REDIRECT_LOGIN_ERROR;
-    } else if (!getVerificationSms(
+    } else if (!generateVerificationSms(
         httpSession,
         register.getPhone(),
         register.getCallingCode(),
@@ -611,7 +594,7 @@ public class AuthenticationController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
       return REDIRECT_SHOP_VERIFICATION_ERROR;
-    } else if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
+    } else if (!generateVerificationEmail(httpSession, register.getEmail(), locale)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
@@ -626,56 +609,13 @@ public class AuthenticationController {
 
   @GetMapping("/shop_verifications")
   public String verificationShopPage(
-      @RequestParam(required = false) String newCodeSms,
-      @RequestParam(required = false) String newCodeEmail,
       @RequestParam(required = false) String reset,
       @RequestParam(required = false) String error,
       Model model,
-      HttpSession httpSession,
-      Locale locale) {
-    final int maxAmount = 3;
+      HttpSession httpSession) {
     RegisterShopDTO registerShopDTO = (RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM);
     if (registerShopDTO == null) {
       return REDIRECT_LOGIN;
-    } else if (newCodeSms != null) {
-      Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
-      if (codeAmountSmsInt != maxAmount) {
-        if (!getVerificationSms(
-            httpSession,
-            registerShopDTO.getPhone(),
-            registerShopDTO.getCallingCode(),
-            locale,
-            CODE_SMS_PARAM_REGISTER_SHOP)) {
-          httpSession.setAttribute(
-              ERROR_MESSAGE_PARAM,
-              messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
-          return REDIRECT_SHOP_VERIFICATION_ERROR;
-        }
-        httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmountSmsInt + 1);
-      } else {
-        httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM,
-            messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale));
-        return REDIRECT_SHOP_VERIFICATION_ERROR;
-      }
-
-    } else if (newCodeEmail != null) {
-      Integer codeAmountEmailInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM);
-      if (codeAmountEmailInt != maxAmount) {
-        if (!getVerificationEmail(httpSession, registerShopDTO.getEmail(), locale)) {
-          httpSession.setAttribute(
-              ERROR_MESSAGE_PARAM,
-              messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
-          return REDIRECT_SHOP_VERIFICATION_ERROR;
-        }
-        httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmountEmailInt + 1);
-      } else {
-        httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM,
-            messageSource.getMessage(ERROR_TOO_MANY_EMAIL_MESSAGE, null, locale));
-        return REDIRECT_SHOP_VERIFICATION_ERROR;
-      }
-
     } else if (reset != null) {
       resetSession(httpSession, CODE_SMS_PARAM_REGISTER_SHOP, REGISTER_PARAM);
       return REDIRECT_LOGIN;
@@ -686,6 +626,8 @@ public class AuthenticationController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
+    model.addAttribute(PHONE_PARAM, registerShopDTO.getCallingCode() + registerShopDTO.getPhone());
+    model.addAttribute(EMAIL_PARAM, registerShopDTO.getEmail());
     return "verificationShopPage";
   }
 

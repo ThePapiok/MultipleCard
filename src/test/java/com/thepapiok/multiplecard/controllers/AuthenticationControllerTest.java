@@ -77,6 +77,7 @@ public class AuthenticationControllerTest {
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "Podane hasła różnią się";
   private static final String ERROR_INCORRECT_DATA_MESSAGE = "Podane dane są niepoprawne";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "Nie ma takiego użytkownika";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
@@ -98,6 +99,8 @@ public class AuthenticationControllerTest {
   private static final String LOGIN_PAGE = "loginPage";
   private static final String SUCCESS_PARAM = "success";
   private static final String PARAM_PARAM = "param";
+  private static final String NEW_USER_PARAM = "newUser";
+  private static final String TEST_NEW_USER = "false";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String PHONE_PARAM = "phone";
   private static final String CALLING_CODE_PARAM = "callingCode";
@@ -146,7 +149,8 @@ public class AuthenticationControllerTest {
   private static final String REGISTER_SHOP_URL = "/register_shop";
   private static final String REGISTER_SHOP_PAGE = "registerShopPage";
   private static final String VERIFICATION_SHOP_PAGE = "verificationShopPage";
-  private static final String GET_VERIFICATION_NUMBER_URL = "/get_verification_number";
+  private static final String GET_VERIFICATION_SMS_URL = "/get_verification_sms";
+  private static final String GET_VERIFICATION_EMAIL_URL = "/get_verification_email";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
@@ -372,7 +376,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationSms()
+  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGenerateVerificationSms()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
@@ -506,120 +510,6 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToLoginPageAtVerificationPageWhenNoRegisterDTOAdded() throws Exception {
     mockMvc.perform(get(VERIFICATION_URL)).andExpect(redirectedUrl(LOGIN_URL));
-  }
-
-  @Test
-  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeSms() throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    returnVerificationWithParamCode(
-        NEW_CODE_SMS_PARAM, CODE_AMOUNT_SMS_PARAM, CODE_SMS_PARAM_REGISTER, httpSession);
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationSms()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(smsService)
-        .sendSms(
-            VERIFICATION_MESSAGE + TEST_CODE,
-            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone());
-
-    redirectVerificationErrorWhenErrorAtVerification(
-        NEW_CODE_SMS_PARAM, ERROR_AT_SMS_SENDING_MESSAGE, httpSession);
-  }
-
-  @Test
-  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeEmail()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    returnVerificationWithParamCode(
-        NEW_CODE_EMAIL_PARAM, CODE_AMOUNT_EMAIL_PARAM, CODE_EMAIL_PARAM, httpSession);
-  }
-
-  private void returnVerificationWithParamCode(
-      String paramCode, String paramAmount, String paramEncode, MockHttpSession httpSession)
-      throws Exception {
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(view().name(VERIFICATION_PAGE));
-    assertEquals(1, httpSession.getAttribute(paramAmount));
-    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(paramEncode));
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationEmail()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
-
-    redirectVerificationErrorWhenErrorAtVerification(
-        NEW_CODE_EMAIL_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession);
-  }
-
-  private void redirectVerificationErrorWhenErrorAtVerification(
-      String paramCode, String paramError, MockHttpSession httpSession) throws Exception {
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
-    assertEquals(paramError, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesSms()
-      throws Exception {
-    final int maxCodeAmount = 3;
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxCodeAmount);
-
-    redirectVerificationErrorWhenTooMuchCodes(
-        CODE_AMOUNT_SMS_PARAM, NEW_CODE_SMS_PARAM, httpSession, ERROR_TOO_MANY_SMS_MESSAGE);
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesEmail()
-      throws Exception {
-    final int maxCodeAmount = 3;
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, maxCodeAmount);
-
-    redirectVerificationErrorWhenTooMuchCodes(
-        CODE_AMOUNT_EMAIL_PARAM, NEW_CODE_EMAIL_PARAM, httpSession, ERROR_TOO_MANY_EMAIL_MESSAGE);
-  }
-
-  private void redirectVerificationErrorWhenTooMuchCodes(
-      String paramAmount, String paramCode, MockHttpSession httpSession, String message)
-      throws Exception {
-    final int maxCodeAmount = 3;
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
-    assertEquals(maxCodeAmount, httpSession.getAttribute(paramAmount));
-    assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -1015,7 +905,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnOkAtGetVerificationNumber() throws Exception {
+  public void shouldReturnOkAtGetVerificationSms() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
@@ -1024,66 +914,72 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
-        .andExpect(content().string("ok"));
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_RESET));
   }
 
   @Test
-  public void shouldReturnUserNotFoundMessageAtGetVerificationNumberWhenUserNotFound()
-      throws Exception {
-
-    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
-
-    mockMvc
-        .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
-        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
-  }
-
-  @Test
-  public void shouldReturnValidationMessageAtGetVerificationNumberWhenGetErrorValidation()
-      throws Exception {
-    mockMvc
-        .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
-                .param(CALLING_CODE_PARAM, "")
-                .param(PHONE_PARAM, "")
-                .param(PARAM_PARAM, ""))
-        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
-  }
-
-  @Test
-  public void shouldReturnTooManyAttemptsMessageAtGetVerificationNumberWhenTooManyAttempts()
+  public void shouldReturnTooManyAttemptsMessageAtGetVerificationSmsWhenTooManyAttempts()
       throws Exception {
     final int maxAmount = 3;
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxAmount);
 
-    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
-
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
         .andExpect(content().string(ERROR_TOO_MANY_SMS_MESSAGE));
   }
 
   @Test
-  public void shouldReturnSendSmsErrorMessageAtGetVerificationNumberWhenErrorAtSendSms()
+  public void shouldReturnValidationMessageAtGetVerificationSmsWhenGetErrorValidation()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_SMS_URL)
+                .param(PHONE_PARAM, "")
+                .param(PARAM_PARAM, "")
+                .param(NEW_USER_PARAM, TEST_NEW_USER)
+                .session(httpSession))
+        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnUserNotFoundMessageAtGetVerificationSmsWhenUserNotFound()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_SMS_URL)
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER)
+                .session(httpSession))
+        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnSendSmsErrorMessageAtGetVerificationSmsWhenErrorAtSendSms()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
@@ -1093,12 +989,69 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
         .andExpect(content().string(ERROR_AT_SMS_SENDING_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnTooManyAttemptsMessageAtGetVerificationEmailWhenTooManyAttempts()
+      throws Exception {
+    final int maxAmount = 3;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, maxAmount);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(ERROR_TOO_MANY_EMAIL_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnValidationMessageAtGetVerificationEmailWhenErrorAtValidation()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    mockMvc
+        .perform(post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, "a"))
+        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnSendEmailErrorMessageAtGetVerificationEmailWhenErrorAtSendingEmail()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    doThrow(ApiException.class)
+        .when(emailService)
+        .sendEmail(eq(VERIFICATION_MESSAGE + TEST_CODE), eq(TEST_MAIL), any());
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(ERROR_AT_EMAIL_SENDING_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnOkMessageAtGetVerificationEmail() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
   }
 
   @Test
@@ -1690,117 +1643,6 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToLoginAtVerificationShopPageWhenNoRegisterShopPage() throws Exception {
     mockMvc.perform(get(SHOP_VERIFICATIONS_URL)).andExpect(redirectedUrl(LOGIN_URL));
-  }
-
-  @Test
-  public void shouldReturnVerificationShopPageAtVerificationShopPageWhenParamNewCodeSms()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_SMS_PARAM, "").session(httpSession))
-        .andExpect(view().name(VERIFICATION_SHOP_PAGE));
-    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
-    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
-  }
-
-  @Test
-  public void
-      shouldRedirectToVerificationShopPageErrorAtVerificationShopPageWhenParamNewCodeSmsButMaxAttempts()
-          throws Exception {
-    final int maxAttempts = 3;
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxAttempts);
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_SMS_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(VERIFICATION_SHOP_ERROR_URL));
-    assertEquals(ERROR_TOO_MANY_SMS_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void
-      shouldRedirectToVerificationShopPageErrorAtVerificationShopPageWhenParamNewCodeSmsButGetErrorAtSmsSending()
-          throws Exception {
-    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
-    registerShopDTO.setPhone(TEST_PHONE);
-    registerShopDTO.setCallingCode(PL_CALLING_CODE);
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, registerShopDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(smsService)
-        .sendSms(
-            VERIFICATION_MESSAGE + TEST_CODE,
-            registerShopDTO.getCallingCode() + registerShopDTO.getPhone());
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_SMS_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(VERIFICATION_SHOP_ERROR_URL));
-    assertEquals(ERROR_AT_SMS_SENDING_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void shouldReturnVerificationShopPageAtVerificationShopPageWhenParamNewCodeEmail()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_EMAIL_PARAM, "").session(httpSession))
-        .andExpect(view().name(VERIFICATION_SHOP_PAGE));
-    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
-    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
-  }
-
-  @Test
-  public void
-      shouldRedirectToVerificationShopPageErrorAtVerificationShopPageWhenParamNewCodeEmailButMaxAttempts()
-          throws Exception {
-    final int maxAttempts = 3;
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, maxAttempts);
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_EMAIL_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(VERIFICATION_SHOP_ERROR_URL));
-    assertEquals(ERROR_TOO_MANY_EMAIL_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void
-      shouldRedirectToVerificationShopPageErrorAtVerificationShopPageWhenParamNewCodeEmailButGetErrorAtSmsSending()
-          throws Exception {
-    RegisterShopDTO registerShopDTO = new RegisterShopDTO();
-    registerShopDTO.setPhone(TEST_PHONE);
-    registerShopDTO.setCallingCode(PL_CALLING_CODE);
-    registerShopDTO.setEmail(TEST_MAIL);
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, registerShopDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(emailService)
-        .sendEmail(eq(VERIFICATION_MESSAGE + TEST_CODE), eq(registerShopDTO.getEmail()), any());
-
-    mockMvc
-        .perform(get(SHOP_VERIFICATIONS_URL).param(NEW_CODE_EMAIL_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(VERIFICATION_SHOP_ERROR_URL));
-    assertEquals(ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
