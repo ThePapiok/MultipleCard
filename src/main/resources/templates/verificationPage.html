@@ -60,17 +60,17 @@
         </div>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}"></button>
+            <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/account_verifications?newCodeSms'}">
-            <button type="button" class="blackButton" th:text="#{button.newCode_sms}"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_sms}" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/account_verifications?newCodeEmail'}">
-            <button type="button" class="blackButton" th:text="#{button.newCode_email}"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_email}" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/account_verifications?reset'}">
             <button type="button" class="redButton" id="resetButton"
-                    th:text="#{button.reset}"></button>
+                    th:text="#{button.reset}" onmousedown="pressedCorrectButton()"></button>
         </a>
     </form>
 </div>

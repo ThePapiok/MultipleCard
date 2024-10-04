@@ -71,5 +71,5 @@ public interface ShopRepository extends MongoRepository<Shop, ObjectId> {
             }
             """
       })
-  boolean existsByPoint(Address address);
+  Boolean existsByPoint(Address address);
 }

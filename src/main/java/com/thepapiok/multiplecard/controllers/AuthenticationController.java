@@ -7,7 +7,7 @@ import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.RegisterDTO;
 import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import com.thepapiok.multiplecard.dto.ResetPasswordDTO;
-import com.thepapiok.multiplecard.dto.TestDTO;
+import com.thepapiok.multiplecard.dto.VerificationShopDTO;
 import com.thepapiok.multiplecard.misc.LocaleChanger;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -16,6 +16,9 @@ import com.thepapiok.multiplecard.services.ShopService;
 import com.thepapiok.multiplecard.services.SmsService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -36,10 +39,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 public class AuthenticationController {
 
-  private static final String SUFFIX_VERIFICATION_MESSAGE = " MultipleCard: ";
   private static final String ERROR_SEND_SMS_PARAM_MESSAGE = "error.send_sms";
   private static final String ERROR_SEND_EMAIL_PARAM_MESSAGE = "error.send_email";
   private static final String ERROR_TOO_MANY_SMS_MESSAGE = "error.to_many_sms";
+  private static final String ERROR_TOO_MANY_EMAIL_MESSAGE = "error.to_many_email";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE = "error.to_many_attempts";
   private static final String ERROR_VALIDATION_INCORRECT_DATA_MESSAGE = "validation.incorrect_data";
   private static final String ERROR_REGISTER_SAME_PHONE_MESSAGE =
@@ -47,10 +50,12 @@ public class AuthenticationController {
   private static final String ERROR_REGISTER_SAME_EMAIL_MESSAGE =
       "authenticationController.register.same_email";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "error.bad_sms_code";
+  private static final String ERROR_BAD_EMAIL_CODE_MESSAGE = "error.bad_email_code";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "passwords_not_the_same";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "resetPasswordPage.user.not_found";
   private static final String MESSAGE_VERIFICATION_CODE_PARAM_MESSAGES =
       "message.verification_code";
+  private static final String SUFFIX_VERIFICATION_MESSAGE = " MultipleCard: ";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String REDIRECT_LOGIN_ERROR = "redirect:/login?error";
   private static final String REDIRECT_LOGIN_SUCCESS = "redirect:/login?success";
@@ -63,6 +68,7 @@ public class AuthenticationController {
   private static final String CODE_SMS_PARAM_REGISTER_SHOP = "codeSmsRegisterShop";
   private static final String CODE_SMS_PARAM_RESET = "codeSmsReset";
   private static final String CODE_EMAIL_PARAM = "codeEmail";
+  private static final String FILE_PATH_PARAM = "filePath";
   private static final String REDIRECT_VERIFICATION_ERROR = "redirect:/account_verifications?error";
   private static final String REDIRECT_SHOP_VERIFICATION_ERROR =
       "redirect:/shop_verifications?error";
@@ -198,8 +204,7 @@ public class AuthenticationController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
       return REDIRECT_VERIFICATION_ERROR;
-    }
-    if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
+    } else if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
@@ -224,8 +229,7 @@ public class AuthenticationController {
     RegisterDTO registerDTO = (RegisterDTO) httpSession.getAttribute(REGISTER_PARAM);
     if (registerDTO == null) {
       return REDIRECT_LOGIN;
-    }
-    if (newCodeSms != null) {
+    } else if (newCodeSms != null) {
       Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
       if (codeAmountSmsInt != maxAmount) {
         if (!getVerificationSms(
@@ -259,16 +263,20 @@ public class AuthenticationController {
         httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmountEmailInt + 1);
       } else {
         httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM, messageSource.getMessage("error.to_many_email", null, locale));
+            ERROR_MESSAGE_PARAM,
+            messageSource.getMessage(ERROR_TOO_MANY_EMAIL_MESSAGE, null, locale));
         return REDIRECT_VERIFICATION_ERROR;
       }
 
     } else if (reset != null) {
-      resetRegister(httpSession);
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER, REGISTER_PARAM);
       return REDIRECT_LOGIN;
     } else if (error != null) {
-      model.addAttribute(ERROR_MESSAGE_PARAM, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-      httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
+      if (message != null) {
+        model.addAttribute(ERROR_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      }
     }
     return "verificationPage";
   }
@@ -283,7 +291,7 @@ public class AuthenticationController {
     Integer attempts = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
     final int maxAmount = 3;
     if (attempts == maxAmount) {
-      resetRegister(httpSession);
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER, REGISTER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
@@ -292,47 +300,52 @@ public class AuthenticationController {
         verificationNumberEmail, (String) httpSession.getAttribute(CODE_EMAIL_PARAM))) {
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.bad_email_code", null, locale));
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_BAD_EMAIL_CODE_MESSAGE, null, locale));
       return REDIRECT_VERIFICATION_ERROR;
-    }
-    try {
-      if (passwordEncoder.matches(
-          verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_PARAM_REGISTER))) {
-        if (!authenticationService.createUser(registerDTO)) {
-          resetRegister(httpSession);
-          httpSession.setAttribute(
-              ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
-          return REDIRECT_LOGIN_ERROR;
-        }
-      } else {
-        httpSession.setAttribute(
-            ERROR_MESSAGE_PARAM,
-            messageSource.getMessage(ERROR_BAD_SMS_CODE_MESSAGE, null, locale));
-        httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
-        return REDIRECT_VERIFICATION_ERROR;
-      }
-    } catch (Exception e) {
-      System.out.println(e);
-      resetRegister(httpSession);
+    } else if (!passwordEncoder.matches(
+        verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_PARAM_REGISTER))) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_BAD_SMS_CODE_MESSAGE, null, locale));
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      return REDIRECT_VERIFICATION_ERROR;
+    } else if (!authenticationService.createUser(registerDTO)) {
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER, REGISTER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
       return REDIRECT_LOGIN_ERROR;
     }
     httpSession.setAttribute(PHONE_PARAM, registerDTO.getPhone());
     httpSession.setAttribute(CALLING_CODE_PARAM, registerDTO.getCallingCode());
-    resetRegister(httpSession);
+    resetSession(httpSession, CODE_SMS_PARAM_REGISTER, REGISTER_PARAM);
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM, messageSource.getMessage("success.register", null, locale));
     return REDIRECT_LOGIN_SUCCESS;
   }
 
-  private void resetRegister(HttpSession httpSession) {
-    httpSession.removeAttribute(REGISTER_PARAM);
-    httpSession.removeAttribute(CODE_SMS_PARAM_REGISTER);
+  @PostMapping("/reset_session")
+  @ResponseBody
+  public void resetSession(
+      HttpSession httpSession,
+      @RequestParam String codeSmsParam,
+      @RequestParam(required = false) String formObjectParam) {
+    if (formObjectParam != null) {
+      httpSession.removeAttribute(formObjectParam);
+    }
+    httpSession.removeAttribute(codeSmsParam);
     httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
     httpSession.removeAttribute(CODE_EMAIL_PARAM);
     httpSession.removeAttribute(CODE_AMOUNT_EMAIL_PARAM);
     httpSession.removeAttribute(ATTEMPTS_PARAM);
+    if (CODE_SMS_PARAM_REGISTER_SHOP.equals(codeSmsParam)) {
+      String filePath = (String) httpSession.getAttribute(FILE_PATH_PARAM);
+      try {
+        Files.deleteIfExists(Path.of(filePath));
+      } catch (IOException ignored) {
+
+      }
+      httpSession.removeAttribute(FILE_PATH_PARAM);
+    }
   }
 
   private boolean getVerificationSms(
@@ -344,6 +357,7 @@ public class AuthenticationController {
               + SUFFIX_VERIFICATION_MESSAGE
               + verificationNumber,
           callingCode + phone);
+      System.out.println(verificationNumber);
       httpSession.setAttribute(param, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
@@ -360,6 +374,7 @@ public class AuthenticationController {
               + verificationNumber,
           email,
           locale);
+      System.out.println(verificationNumber);
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
@@ -380,12 +395,11 @@ public class AuthenticationController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
         model.addAttribute("isSent", true);
       }
-    } else {
-      resetResetPassword(httpSession);
-    }
-    if (reset != null) {
-      resetResetPassword(httpSession);
+    } else if (reset != null) {
+      resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
       return REDIRECT_LOGIN;
+    } else {
+      resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
     }
     ResetPasswordDTO resetPasswordDTO = (ResetPasswordDTO) httpSession.getAttribute(RESET_PARAM);
     if (resetPasswordDTO != null) {
@@ -408,44 +422,39 @@ public class AuthenticationController {
       BindingResult bindingResult,
       HttpSession httpSession,
       Locale locale) {
+    final String fullPhone = reset.getCallingCode() + reset.getPhone();
+    final int maxAmount = 3;
     Integer amount = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
     if (amount == null) {
       httpSession.setAttribute(ATTEMPTS_PARAM, 0);
       amount = 0;
     }
-    final String fullPhone = reset.getCallingCode() + reset.getPhone();
-    final int maxAmount = 3;
     if (amount == maxAmount) {
-      resetResetPassword(httpSession);
+      resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
       return REDIRECT_LOGIN_ERROR;
-    }
-    if (bindingResult.hasErrors()) {
+    } else if (bindingResult.hasErrors()) {
       return redirectPasswordResetError(
           httpSession, amount, reset, ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, locale);
-    }
-    if (!passwordEncoder.matches(
+    } else if (!passwordEncoder.matches(
         reset.getCode(), (String) httpSession.getAttribute(CODE_SMS_PARAM_RESET))) {
       return redirectPasswordResetError(
           httpSession, amount, reset, ERROR_BAD_SMS_CODE_MESSAGE, locale);
-    }
-    if (!reset.getRetypedPassword().equals(reset.getPassword())) {
+    } else if (!reset.getRetypedPassword().equals(reset.getPassword())) {
       return redirectPasswordResetError(
           httpSession, amount, reset, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE, locale);
-    }
-    if (!authenticationService.getAccountByPhone(fullPhone)) {
+    } else if (!authenticationService.getAccountByPhone(fullPhone)) {
       return redirectPasswordResetError(
           httpSession, amount, reset, ERROR_USER_NOT_FOUND_MESSAGE, locale);
-    }
-    if (!authenticationService.changePassword(fullPhone, reset.getPassword())) {
-      resetResetPassword(httpSession);
+    } else if (!authenticationService.changePassword(fullPhone, reset.getPassword())) {
+      resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
       return REDIRECT_LOGIN_ERROR;
     }
-    resetResetPassword(httpSession);
+    resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("resetPasswordPage.success.reset_password", null, locale));
@@ -475,30 +484,23 @@ public class AuthenticationController {
     final int maxLength = 16;
     final int minLength = 9;
     Pattern phonePattern = Pattern.compile("^\\+[0-9]+[1-9][0-9]*$");
-    if (!phonePattern.matcher(fullPhone).matches() || length > maxLength || length < minLength) {
-      return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
-    }
-    if (!authenticationService.getAccountByPhone(fullPhone)) {
-      return messageSource.getMessage(ERROR_USER_NOT_FOUND_MESSAGE, null, locale);
-    }
     if (codeAmount == null) {
       httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
       codeAmount = 0;
-    } else if (codeAmount == maxAmount) {
-      return messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale);
     }
-    if (!getVerificationSms(httpSession, phone, callingCode, locale, param)) {
+    if (codeAmount == maxAmount) {
+      return messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale);
+    } else if (!phonePattern.matcher(fullPhone).matches()
+        || length > maxLength
+        || length < minLength) {
+      return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
+    } else if (!authenticationService.getAccountByPhone(fullPhone)) {
+      return messageSource.getMessage(ERROR_USER_NOT_FOUND_MESSAGE, null, locale);
+    } else if (!getVerificationSms(httpSession, phone, callingCode, locale, param)) {
       return messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale);
     }
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmount + 1);
     return "ok";
-  }
-
-  private void resetResetPassword(HttpSession httpSession) {
-    httpSession.removeAttribute(CODE_SMS_PARAM_RESET);
-    httpSession.removeAttribute(CODE_AMOUNT_SMS_PARAM);
-    httpSession.removeAttribute(ATTEMPTS_PARAM);
-    httpSession.removeAttribute(RESET_PARAM);
   }
 
   @GetMapping("/register_shop")
@@ -579,12 +581,13 @@ public class AuthenticationController {
       error = true;
       message =
           messageSource.getMessage("authenticationController.register.same_points", null, locale);
-    } else if (!shopService.checkPointsExists(points)) {
+    } else if (shopService.checkPointsExists(points)) {
+      System.out.println("xd");
       error = true;
       message =
           messageSource.getMessage(
               "authenticationController.register.same_other_points", null, locale);
-    } else if (!shopService.checkFile(file)) {
+    } else if (!shopService.checkImage(file)) {
       error = true;
       message =
           messageSource.getMessage("authenticationController.register.bad_file", null, locale);
@@ -593,7 +596,12 @@ public class AuthenticationController {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
       return "redirect:/register_shop?error";
     }
-    if (!getVerificationSms(
+    String filePath = shopService.saveTempFile(file);
+    if (filePath == null) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
+      return REDIRECT_LOGIN_ERROR;
+    } else if (!getVerificationSms(
         httpSession,
         register.getPhone(),
         register.getCallingCode(),
@@ -603,13 +611,13 @@ public class AuthenticationController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
       return REDIRECT_SHOP_VERIFICATION_ERROR;
-    }
-    if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
+    } else if (!getVerificationEmail(httpSession, register.getEmail(), locale)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
       return REDIRECT_SHOP_VERIFICATION_ERROR;
     }
+    httpSession.setAttribute(FILE_PATH_PARAM, filePath);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
@@ -617,13 +625,137 @@ public class AuthenticationController {
   }
 
   @GetMapping("/shop_verifications")
-  public String verificationShopPage() {
+  public String verificationShopPage(
+      @RequestParam(required = false) String newCodeSms,
+      @RequestParam(required = false) String newCodeEmail,
+      @RequestParam(required = false) String reset,
+      @RequestParam(required = false) String error,
+      Model model,
+      HttpSession httpSession,
+      Locale locale) {
+    final int maxAmount = 3;
+    RegisterShopDTO registerShopDTO = (RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM);
+    if (registerShopDTO == null) {
+      return REDIRECT_LOGIN;
+    } else if (newCodeSms != null) {
+      Integer codeAmountSmsInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM);
+      if (codeAmountSmsInt != maxAmount) {
+        if (!getVerificationSms(
+            httpSession,
+            registerShopDTO.getPhone(),
+            registerShopDTO.getCallingCode(),
+            locale,
+            CODE_SMS_PARAM_REGISTER_SHOP)) {
+          httpSession.setAttribute(
+              ERROR_MESSAGE_PARAM,
+              messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale));
+          return REDIRECT_SHOP_VERIFICATION_ERROR;
+        }
+        httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, codeAmountSmsInt + 1);
+      } else {
+        httpSession.setAttribute(
+            ERROR_MESSAGE_PARAM,
+            messageSource.getMessage(ERROR_TOO_MANY_SMS_MESSAGE, null, locale));
+        return REDIRECT_SHOP_VERIFICATION_ERROR;
+      }
+
+    } else if (newCodeEmail != null) {
+      Integer codeAmountEmailInt = (Integer) httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM);
+      if (codeAmountEmailInt != maxAmount) {
+        if (!getVerificationEmail(httpSession, registerShopDTO.getEmail(), locale)) {
+          httpSession.setAttribute(
+              ERROR_MESSAGE_PARAM,
+              messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
+          return REDIRECT_SHOP_VERIFICATION_ERROR;
+        }
+        httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, codeAmountEmailInt + 1);
+      } else {
+        httpSession.setAttribute(
+            ERROR_MESSAGE_PARAM,
+            messageSource.getMessage(ERROR_TOO_MANY_EMAIL_MESSAGE, null, locale));
+        return REDIRECT_SHOP_VERIFICATION_ERROR;
+      }
+
+    } else if (reset != null) {
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER_SHOP, REGISTER_PARAM);
+      return REDIRECT_LOGIN;
+    } else if (error != null) {
+      String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
+      if (message != null) {
+        model.addAttribute(ERROR_MESSAGE_PARAM, message);
+        httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+      }
+    }
     return "verificationShopPage";
   }
 
   @PostMapping("/shop_verifications")
-  public String verificationShop(@ModelAttribute TestDTO test) {
-    System.out.println(test);
-    return "redirect:/login";
+  public String verificationShop(
+      @Valid @ModelAttribute VerificationShopDTO verificationShopDTO,
+      BindingResult bindingResult,
+      HttpSession httpSession,
+      Locale locale) {
+    List<MultipartFile> fileList = verificationShopDTO.getFile();
+    RegisterShopDTO registerShopDTO = (RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM);
+    Integer attempts = (Integer) httpSession.getAttribute(ATTEMPTS_PARAM);
+    final int maxAmount = 3;
+    final int maxSize = 9;
+    if (attempts == maxAmount) {
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER_SHOP, REGISTER_PARAM);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
+      return REDIRECT_LOGIN_ERROR;
+    } else if (bindingResult.hasErrors()) {
+      System.out.println(bindingResult);
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale));
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    } else if (!passwordEncoder.matches(
+        verificationShopDTO.getVerificationNumberEmail(),
+        (String) httpSession.getAttribute(CODE_EMAIL_PARAM))) {
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage(ERROR_BAD_EMAIL_CODE_MESSAGE, null, locale));
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    } else if (!passwordEncoder.matches(
+        verificationShopDTO.getVerificationNumberSms(),
+        (String) httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP))) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_BAD_SMS_CODE_MESSAGE, null, locale));
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    } else if (fileList.size() <= 1 || fileList.size() >= maxSize) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage("verificationShopPage.error.bad_size", null, locale));
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    } else if (!shopService.checkFiles(fileList)) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage("verificationShopPage.error.bad_files", null, locale));
+      httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
+      return REDIRECT_SHOP_VERIFICATION_ERROR;
+    } else if (!authenticationService.createShop(
+        registerShopDTO,
+        (String) httpSession.getAttribute(FILE_PATH_PARAM),
+        verificationShopDTO.getFile(),
+        locale)) {
+      resetSession(httpSession, CODE_SMS_PARAM_REGISTER_SHOP, REGISTER_PARAM);
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
+      return REDIRECT_LOGIN_ERROR;
+    }
+    httpSession.setAttribute(PHONE_PARAM, registerShopDTO.getPhone());
+    httpSession.setAttribute(CALLING_CODE_PARAM, registerShopDTO.getCallingCode());
+    resetSession(httpSession, CODE_SMS_PARAM_REGISTER_SHOP, REGISTER_PARAM);
+    httpSession.setAttribute(
+        SUCCESS_MESSAGE_PARAM,
+        messageSource.getMessage("verificationShopPage.success_register", null, locale));
+    return REDIRECT_LOGIN_SUCCESS;
   }
 }

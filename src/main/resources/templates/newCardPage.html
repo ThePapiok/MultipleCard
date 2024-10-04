@@ -108,15 +108,15 @@
         <p id="error" th:text="${errorMessage}"></p>
         <a>
             <button type="button" class="grayButton" id="orderButton"
-                    th:text="#{newCardPage.button.order_card}"></button>
+                    th:text="#{newCardPage.button.order_card}" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
             <button type="button" class="blackButton"
-                    th:text="#{codeSms.text}" th:attr="onclick=|getCode('${phone}', 'codeSmsOrder')|"></button>
+                    th:text="#{codeSms.text}" th:attr="onclick=|getCode('${phone}', 'codeSmsOrder')|" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/new_card?reset'}">
             <button type="button" class="redButton" id="resetButton"
-                    th:text="#{button.reset}"></button>
+                    th:text="#{button.reset}" onmousedown="pressedCorrectButton()"></button>
         </a>
     </form>
     <div id="info">

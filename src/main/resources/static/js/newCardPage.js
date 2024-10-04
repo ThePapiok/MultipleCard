@@ -19,3 +19,25 @@ function checkPin(e) {
 function checkRetypedPin(e) {
     check(3, (e.value === document.getElementById("pin").value), ok, previous, buttonId, success, true, true);
 }
+
+window.addEventListener('beforeunload', function (event) {
+    if (buttons) {
+        buttons = false;
+        return;
+    }
+    event.preventDefault();
+    event.returnValue = '';
+    fetch("/reset_session", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "codeSmsParam": "codeSmsOrder",
+            "formObjectParam": "order"
+        })
+    }).catch((error) => {
+        console.error(error);
+    });
+});
+

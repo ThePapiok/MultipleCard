@@ -13,6 +13,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
@@ -34,7 +36,12 @@ public class ShopServiceTest {
   private static final String TEST_SHOP_NAME = "test";
   private static final String TEST_CONTENT_TYPE = "image/png";
   private static final String TEST_FILE_NAME = "file";
+  private static final String TEST_FILE1_NAME = "file1";
+  private static final String TEST_FILE2_NAME = "file2";
+  private static final String TEST_FILE3_NAME = "file3";
+  private static final String TEST_FILE4_NAME = "file4";
   private static final String TEST_FORMAT_NAME = "png";
+  private static final String TEST_OTHER_CONTENT_TYPE = "application/pdf";
   private static final String IBAN_API_URL =
       "https://api.ibanapi.com/v1/validate-basic/PL12312312312312312312312?api_key=null";
   @Mock private ShopRepository shopRepository;
@@ -49,44 +56,44 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckFile() throws IOException {
+  public void shouldSuccessAtCheckImage() throws IOException {
     final int goodWidth = 460;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, goodWidth, goodHeight);
 
-    assertTrue(shopService.checkFile(multipartFile));
+    assertTrue(shopService.checkImage(multipartFile));
   }
 
   @Test
-  public void shouldFailAtCheckFileWhenEmptyFile() {
-    assertFalse(shopService.checkFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0])));
+  public void shouldFailAtCheckImageWhenEmptyFile() {
+    assertFalse(shopService.checkImage(new MockMultipartFile(TEST_FILE_NAME, new byte[0])));
   }
 
   @Test
-  public void shouldFailAtCheckFileWhenToLowHeight() throws IOException {
+  public void shouldFailAtCheckImageWhenToLowHeight() throws IOException {
     final int goodWidth = 460;
     final int badHeight = 410;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, goodWidth, badHeight);
 
-    assertFalse(shopService.checkFile(multipartFile));
+    assertFalse(shopService.checkImage(multipartFile));
   }
 
   @Test
-  public void shouldFailAtCheckFileWhenToLowWidth() throws IOException {
+  public void shouldFailAtCheckImageWhenToLowWidth() throws IOException {
     final int badWidth = 410;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, badWidth, goodHeight);
 
-    assertFalse(shopService.checkFile(multipartFile));
+    assertFalse(shopService.checkImage(multipartFile));
   }
 
   @Test
-  public void shouldFailAtCheckFileWhenBadType() throws IOException {
+  public void shouldFailAtCheckImageWhenBadType() throws IOException {
     final int goodWidth = 460;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile("pdf", goodWidth, goodHeight);
 
-    assertFalse(shopService.checkFile(multipartFile));
+    assertFalse(shopService.checkImage(multipartFile));
   }
 
   private MultipartFile setFile(String contentType, int width, int height) throws IOException {
@@ -98,7 +105,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckFileWhenTooMuchSize() throws IOException {
+  public void shouldFailAtCheckImageWhenTooMuchSize() throws IOException {
     final int width = 1000;
     final int height = 1000;
     final int maxRGB = 256;
@@ -121,7 +128,7 @@ public class ShopServiceTest {
         new MockMultipartFile(
             TEST_FILE_NAME, TEST_FILE_NAME, TEST_CONTENT_TYPE, byteArrayOutputStream.toByteArray());
 
-    assertFalse(shopService.checkFile(multipartFile));
+    assertFalse(shopService.checkImage(multipartFile));
   }
 
   @Test
@@ -198,5 +205,84 @@ public class ShopServiceTest {
     when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
 
     assertFalse(shopService.checkPointsExists(addressDTOList));
+  }
+
+  @Test
+  public void shouldFailAtCheckPointExistsWhenGetNull() {
+    AddressDTO addressDTO1 = new AddressDTO();
+    AddressDTO addressDTO2 = new AddressDTO();
+    List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
+    Address address1 = new Address();
+    Address address2 = new Address();
+    List<Address> addresses = List.of(address1, address2);
+
+    when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
+    when(shopRepository.existsByPoint(address1)).thenReturn(null);
+
+    assertFalse(shopService.checkPointsExists(addressDTOList));
+  }
+
+  @Test
+  public void shouldSuccessAtSaveTempFile() throws IOException {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+
+    String filePath = shopService.saveTempFile(multipartFile);
+    System.out.println(filePath);
+    assertTrue(filePath.contains("upload_"));
+    assertTrue(filePath.contains(".tmp"));
+
+    Path path = Path.of(filePath);
+    Files.deleteIfExists(path);
+  }
+
+  @Test
+  public void shouldSuccessAtCheckFiles() {
+    MockMultipartFile multipartFile1 =
+        new MockMultipartFile(
+            TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile2 =
+        new MockMultipartFile(
+            TEST_FILE2_NAME, TEST_FILE2_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile3 =
+        new MockMultipartFile(
+            TEST_FILE3_NAME, TEST_FILE3_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile4 = new MockMultipartFile(TEST_FILE4_NAME, new byte[0]);
+    List<MultipartFile> list =
+        List.of(multipartFile1, multipartFile2, multipartFile3, multipartFile4);
+
+    assertTrue(shopService.checkFiles(list));
+  }
+
+  @Test
+  public void shouldFailAtCheckFilesWhenNoPdf() {
+    MockMultipartFile multipartFile1 =
+        new MockMultipartFile(
+            TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile2 =
+        new MockMultipartFile(TEST_FILE2_NAME, TEST_FILE2_NAME, "application/cos", new byte[1]);
+    MockMultipartFile multipartFile3 =
+        new MockMultipartFile(
+            TEST_FILE3_NAME, TEST_FILE3_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile4 = new MockMultipartFile(TEST_FILE4_NAME, new byte[0]);
+    List<MultipartFile> list =
+        List.of(multipartFile1, multipartFile2, multipartFile3, multipartFile4);
+
+    assertFalse(shopService.checkFiles(list));
+  }
+
+  @Test
+  public void shouldFailAtCheckFilesWhenTooManyEmptyFiles() {
+    MockMultipartFile multipartFile1 =
+        new MockMultipartFile(
+            TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile2 =
+        new MockMultipartFile(
+            TEST_FILE2_NAME, TEST_FILE2_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
+    MockMultipartFile multipartFile3 = new MockMultipartFile(TEST_FILE3_NAME, new byte[0]);
+    MockMultipartFile multipartFile4 = new MockMultipartFile(TEST_FILE4_NAME, new byte[0]);
+    List<MultipartFile> list =
+        List.of(multipartFile1, multipartFile2, multipartFile3, multipartFile4);
+
+    assertFalse(shopService.checkFiles(list));
   }
 }

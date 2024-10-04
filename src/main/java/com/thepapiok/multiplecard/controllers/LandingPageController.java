@@ -43,8 +43,8 @@ public class LandingPageController {
         session.removeAttribute(errorMessageParam);
       }
     } else if (success != null) {
-      Boolean successSesion = (Boolean) session.getAttribute(successParam);
-      if (successSesion != null) {
+      Boolean successSession = (Boolean) session.getAttribute(successParam);
+      if (successSession != null) {
         model.addAttribute(
             "successMessage",
             messageSource.getMessage("landingPage.review.success_added", null, locale));

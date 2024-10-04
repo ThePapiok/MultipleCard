@@ -20,8 +20,12 @@ import com.thepapiok.multiplecard.misc.AccountConverter;
 import com.thepapiok.multiplecard.misc.ShopConverter;
 import com.thepapiok.multiplecard.misc.UserConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +63,7 @@ public class AuthenticationServiceTest {
   @Mock private Random random;
   @Mock private ShopConverter shopConverter;
   @Mock private CloudinaryService cloudinaryService;
+  @Mock private EmailService emailService;
 
   @BeforeEach
   public void setUp() {
@@ -72,7 +77,8 @@ public class AuthenticationServiceTest {
             mongoTransactionManager,
             mongoTemplate,
             shopConverter,
-            cloudinaryService);
+            cloudinaryService,
+            emailService);
     final String testText = "Test";
     AddressDTO addressDTO = new AddressDTO();
     addressDTO.setStreet(testText);
@@ -243,9 +249,10 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCreateShop() {
+  public void shouldSuccessAtCreateShop() throws IOException {
     final String url = "fasdfds123123sads";
     final String email = "email@email";
+    Locale locale = Locale.UK;
     Address address1 = new Address();
     Address address2 = new Address();
     List<Address> addresses = new ArrayList<>();
@@ -253,6 +260,7 @@ public class AuthenticationServiceTest {
     addresses.add(address2);
     byte[] bytes = new byte[0];
     MultipartFile multipartFile = new MockMultipartFile("file", bytes);
+    Path path = Files.createTempFile("upload_", ".tmp");
     RegisterShopDTO registerShopDTO = new RegisterShopDTO();
     registerShopDTO.setName(TEST_SHOP_NAME);
     registerShopDTO.setAccountNumber(TEST_ACCOUNT_NUMBER);
@@ -303,7 +311,9 @@ public class AuthenticationServiceTest {
     when(cloudinaryService.addImage(bytes, TEST_ID.toString())).thenReturn(url);
     when(accountConverter.getEntity(registerShopDTO)).thenReturn(account);
 
-    assertTrue(authenticationService.createShop(registerShopDTO));
+    assertTrue(
+        authenticationService.createShop(
+            registerShopDTO, path.toString(), List.of(multipartFile), locale));
     verify(mongoTemplate).save(expectedShop);
     verify(mongoTemplate).save(expectedShopWithIdAndUrl);
     verify(mongoTemplate).save(expectedAccount);
@@ -311,6 +321,9 @@ public class AuthenticationServiceTest {
 
   @Test
   public void shouldFailAtCreateShopWhenGetException() {
+    final String filePath = "safdfdas12312";
+    Locale locale = Locale.UK;
+    List<MultipartFile> list = List.of();
     Address address1 = new Address();
     Address address2 = new Address();
     List<Address> addresses = new ArrayList<>();
@@ -335,6 +348,6 @@ public class AuthenticationServiceTest {
     when(shopConverter.getEntity(registerShopDTO)).thenReturn(shop);
     when(mongoTemplate.save(expectedShopWithId)).thenThrow(MongoWriteException.class);
 
-    assertFalse(authenticationService.createShop(registerShopDTO));
+    assertFalse(authenticationService.createShop(registerShopDTO, filePath, list, locale));
   }
 }

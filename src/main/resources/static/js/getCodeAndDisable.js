@@ -41,4 +41,5 @@ function getCode(phone, param) {
         .catch(error => {
             console.error(error);
         });
+    buttons = false;
 }

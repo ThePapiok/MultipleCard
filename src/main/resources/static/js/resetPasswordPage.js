@@ -80,3 +80,25 @@ function atStart() {
     checkLanguage();
     document.getElementById("verificationNumberSms").value = "";
 }
+
+window.addEventListener('beforeunload', function (event) {
+    if (buttons) {
+        buttons = false;
+        return;
+    }
+    event.preventDefault();
+    event.returnValue = '';
+    fetch("/reset_session", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "codeSmsParam": "codeSmsReset",
+            "formObjectParam": "reset"
+        })
+    }).catch((error) => {
+        console.error(error);
+    });
+});
+

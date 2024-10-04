@@ -76,7 +76,6 @@ function setFile(e) {
             }
         } else {
             document.getElementById("errorFile").textContent = document.getElementById("textTooMany").textContent;
-            ;
             e.value = "";
         }
     }
@@ -99,3 +98,30 @@ function deleteFiles(e, index) {
         check(1, false, ok, previous, buttonId, success, false, true);
     }
 }
+
+function changeCursor(e){
+    if(e.type === "submit"){
+        e.style.cursor = "wait";
+    }
+}
+
+window.addEventListener('beforeunload', function (event) {
+    if (buttons) {
+        buttons = false;
+        return;
+    }
+    event.preventDefault();
+    event.returnValue = '';
+    fetch("/reset_session", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "codeSmsParam": "codeSmsRegisterShop",
+            "formObjectParam": "register"
+        })
+    }).catch((error) => {
+        console.error(error);
+    });
+});

@@ -14,6 +14,7 @@ let success = {value: false}
 let previousVerification = ["", ""];
 let callingCodeValue = "";
 let phoneValue = "";
+let buttons = false;
 
 function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     const previousCond = previous[i - 1];
@@ -302,4 +303,8 @@ function checkCallingCode(e, value) {
     callingCodeValue = input;
     check(value, (input !== ''), ok, previous, buttonId, success, false, true);
     checkPhone(document.getElementById("phone"), value + 1);
+}
+
+function pressedCorrectButton(){
+    buttons = true;
 }
