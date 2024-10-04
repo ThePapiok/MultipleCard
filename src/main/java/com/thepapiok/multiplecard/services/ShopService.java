@@ -6,6 +6,9 @@ import com.thepapiok.multiplecard.misc.AddressConverter;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,7 @@ public class ShopService {
     this.restTemplate = restTemplate;
   }
 
-  public boolean checkFile(MultipartFile file) {
+  public boolean checkImage(MultipartFile file) {
     final int maxSize = 2000000;
     final int minWidth = 450;
     final int minHeight = 450;
@@ -72,10 +75,36 @@ public class ShopService {
   public boolean checkPointsExists(List<AddressDTO> points) {
     boolean found = false;
     for (Address address : addressConverter.getEntities(points)) {
-      if (shopRepository.existsByPoint(address)) {
+      Boolean exists = shopRepository.existsByPoint(address);
+      if (exists != null && exists) {
         found = true;
       }
     }
     return found;
+  }
+
+  public String saveTempFile(MultipartFile multipartFile) {
+    Path path;
+    try {
+      path = Files.createTempFile("upload_", ".tmp");
+      Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+      return path.toString();
+    } catch (IOException e) {
+      return null;
+    }
+  }
+
+  public boolean checkFiles(List<MultipartFile> files) {
+    final int maxSize = 5000000;
+    int emptyFiles = 0;
+    for (MultipartFile multipartFile : files) {
+      if (multipartFile.isEmpty()) {
+        emptyFiles++;
+      } else if (!"application/pdf".equals(multipartFile.getContentType())
+          || multipartFile.getSize() >= maxSize) {
+        return false;
+      }
+    }
+    return emptyFiles == 1;
   }
 }

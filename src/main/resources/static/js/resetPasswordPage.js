@@ -47,15 +47,15 @@ function getForm(e) {
     if (e.classList.contains("greenButton")) {
         const callingCode = document.getElementById("valueCallingCode").value;
         const phone = document.getElementById("phone").value;
-        fetch("/get_verification_number", {
+        fetch("/get_verification_sms", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
-                "callingCode": callingCode,
-                "phone": phone,
-                "param": "codeSmsReset"
+                "phone": callingCode + phone,
+                "param": "codeSmsReset",
+                "newUser": false
             })
         })
             .then(response => response.text())
@@ -80,3 +80,25 @@ function atStart() {
     checkLanguage();
     document.getElementById("verificationNumberSms").value = "";
 }
+
+window.addEventListener('beforeunload', function (event) {
+    if (buttons) {
+        buttons = false;
+        return;
+    }
+    event.preventDefault();
+    event.returnValue = '';
+    fetch("/reset_session", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "codeSmsParam": "codeSmsReset",
+            "formObjectParam": "reset"
+        })
+    }).catch((error) => {
+        console.error(error);
+    });
+});
+

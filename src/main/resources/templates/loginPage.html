@@ -45,8 +45,8 @@
                 <label class="inputs">
                     <input id="phone" type="text" th:placeholder="#{phone.text}" th:value="${phone}" required
                            oninput="checkPhone(this, 2)" minlength="7" maxlength="28"
-                           onmouseenter="showValidation(this, 'Phone')"
-                           onmouseleave="hideValidation('Phone')">
+                           onmouseenter="showValidation(this, 'PhoneLabel')"
+                           onmouseleave="hideValidation('PhoneLabel')">
                     <img id="close2" src="/images/close.png" alt="close">
                     <img hidden id="check2" src="/images/check.png" alt="check">
                 </label>

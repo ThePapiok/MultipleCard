@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,10 @@ import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.ShopService;
 import com.thepapiok.multiplecard.services.SmsService;
 import com.twilio.exception.ApiException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -43,6 +48,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -58,6 +64,7 @@ public class AuthenticationControllerTest {
   private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "Nieprawidłowy kod sms";
+  private static final String ERROR_BAD_EMAIL_CODE_MESSAGE = "Nieprawidłowy kod email";
   private static final String ERROR_PHONE_THE_SAME_MESSAGE =
       "Użytkownik o takim numerze telefonu już istnieje";
   private static final String ERROR_EMAIL_THE_SAME_MESSAGE =
@@ -65,22 +72,35 @@ public class AuthenticationControllerTest {
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
       "Za dużo razy podałeś niepoprawne dane";
   private static final String ERROR_TOO_MANY_SMS_MESSAGE = "Za dużo razy poprosiłeś o nowy kod sms";
+  private static final String ERROR_TOO_MANY_EMAIL_MESSAGE =
+      "Za dużo razy poprosiłeś o nowy kod email";
   private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "Podane hasła różnią się";
   private static final String ERROR_INCORRECT_DATA_MESSAGE = "Podane dane są niepoprawne";
   private static final String ERROR_USER_NOT_FOUND_MESSAGE = "Nie ma takiego użytkownika";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
   private static final String TEST_TEXT = "Test";
+  private static final String TEST_SUFFIX_FILE = ".tmp";
+  private static final String TEST_FILE_NAME = "file";
+  private static final String TEST_FILE1_NAME = "file1";
+  private static final String TEST_FILE2_NAME = "file2";
+  private static final String TEST_FILE3_NAME = "file3";
+  private static final String FILE0_PARAM = "file[0]";
+  private static final String FILE1_PARAM = "file[1]";
   private static final String TEST_MAIL = "Test@Test.pl";
   private static final String TEST_HOUSE_NUMBER = "1";
   private static final String TEST_POSTAL_CODE = "00-000";
   private static final String TEST_PASSWORD = "Test1!";
   private static final String LOGIN_URL = "/login";
+  private static final String SHOP_VERIFICATIONS_URL = "/shop_verifications";
   private static final String CALLING_CODES_PARAM = "callingCodes";
   private static final String LOGIN_PAGE = "loginPage";
   private static final String SUCCESS_PARAM = "success";
   private static final String PARAM_PARAM = "param";
+  private static final String NEW_USER_PARAM = "newUser";
+  private static final String TEST_NEW_USER = "false";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String PHONE_PARAM = "phone";
   private static final String CALLING_CODE_PARAM = "callingCode";
@@ -112,6 +132,7 @@ public class AuthenticationControllerTest {
   private static final String REDIRECT_VERIFICATION_ERROR = "/account_verifications?error";
   private static final String VERIFICATION_PAGE = "verificationPage";
   private static final String NEW_CODE_SMS_PARAM = "newCodeSms";
+  private static final String FILE_PATH_PARAM = "filePath";
   private static final String NEW_CODE_EMAIL_PARAM = "newCodeEmail";
   private static final String VERIFICATION_NUMBER_EMAIL_PARAM = "verificationNumberEmail";
   private static final String VERIFICATION_NUMBER_SMS_PARAM = "verificationNumberSms";
@@ -127,7 +148,9 @@ public class AuthenticationControllerTest {
   private static final String REGISTER_SHOP_ERROR_URL = "/register_shop?error";
   private static final String REGISTER_SHOP_URL = "/register_shop";
   private static final String REGISTER_SHOP_PAGE = "registerShopPage";
-  private static final String GET_VERIFICATION_NUMBER_URL = "/get_verification_number";
+  private static final String VERIFICATION_SHOP_PAGE = "verificationShopPage";
+  private static final String GET_VERIFICATION_SMS_URL = "/get_verification_sms";
+  private static final String GET_VERIFICATION_EMAIL_URL = "/get_verification_email";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
@@ -143,6 +166,7 @@ public class AuthenticationControllerTest {
   private static final String PARAM_ADDRESS_PREFIX0 = "address[0].";
   private static final String PARAM_ADDRESS_PREFIX1 = "address[1].";
   private static final String PARAM_ADDRESS_PREFIX = "address.";
+  private static final String CODE_SMS_PARAM_REGISTER_SHOP = "codeSmsRegisterShop";
 
   @Autowired private MockMvc mockMvc;
   @MockBean private CountryService countryService;
@@ -352,7 +376,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGetVerificationSms()
+  public void shouldRedirectToVerificationAtCreateUserWhenErrorAtGenerateVerificationSms()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
@@ -489,121 +513,6 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeSms() throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    returnVerificationWithParamCode(
-        NEW_CODE_SMS_PARAM, CODE_AMOUNT_SMS_PARAM, CODE_SMS_PARAM_REGISTER, httpSession);
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationSms()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(smsService)
-        .sendSms(
-            VERIFICATION_MESSAGE + TEST_CODE,
-            expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone());
-
-    redirectVerificationErrorWhenErrorAtVerification(
-        NEW_CODE_SMS_PARAM, ERROR_AT_SMS_SENDING_MESSAGE, httpSession);
-  }
-
-  @Test
-  public void shouldReturnVerificationPageAtVerificationPageWithParamNewCodeEmail()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
-
-    returnVerificationWithParamCode(
-        NEW_CODE_EMAIL_PARAM, CODE_AMOUNT_EMAIL_PARAM, CODE_EMAIL_PARAM, httpSession);
-  }
-
-  private void returnVerificationWithParamCode(
-      String paramCode, String paramAmount, String paramEncode, MockHttpSession httpSession)
-      throws Exception {
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(view().name(VERIFICATION_PAGE));
-    assertEquals(1, httpSession.getAttribute(paramAmount));
-    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(paramEncode));
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenErrorAtGetVerificationEmail()
-      throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
-
-    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
-    doThrow(ApiException.class)
-        .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
-
-    redirectVerificationErrorWhenErrorAtVerification(
-        NEW_CODE_EMAIL_PARAM, ERROR_AT_EMAIL_SENDING_MESSAGE, httpSession);
-  }
-
-  private void redirectVerificationErrorWhenErrorAtVerification(
-      String paramCode, String paramError, MockHttpSession httpSession) throws Exception {
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
-    assertEquals(paramError, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesSms()
-      throws Exception {
-    final int maxCodeAmount = 3;
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxCodeAmount);
-
-    redirectVerificationErrorWhenTooMuchCodes(
-        CODE_AMOUNT_SMS_PARAM, NEW_CODE_SMS_PARAM, httpSession, ERROR_TOO_MANY_SMS_MESSAGE);
-  }
-
-  @Test
-  public void shouldRedirectToVerificationPageAtVerificationPageWhenTooMuchCodesEmail()
-      throws Exception {
-    final int maxCodeAmount = 3;
-    final String message = "Za dużo razy poprosiłeś o nowy kod email";
-    MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
-    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, maxCodeAmount);
-
-    redirectVerificationErrorWhenTooMuchCodes(
-        CODE_AMOUNT_EMAIL_PARAM, NEW_CODE_EMAIL_PARAM, httpSession, message);
-  }
-
-  private void redirectVerificationErrorWhenTooMuchCodes(
-      String paramAmount, String paramCode, MockHttpSession httpSession, String message)
-      throws Exception {
-    final int maxCodeAmount = 3;
-    mockMvc
-        .perform(get(VERIFICATION_URL).param(paramCode, "").session(httpSession).locale(LOCALE))
-        .andExpect(redirectedUrl(REDIRECT_VERIFICATION_ERROR));
-    assertEquals(maxCodeAmount, httpSession.getAttribute(paramAmount));
-    assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
   public void shouldRedirectToLoginPageAtVerificationPageWithParamReset() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
@@ -624,7 +533,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPageAtVerificationPageWithParamError() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPageWithParamErrorWithMessage()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
@@ -632,6 +542,17 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession).locale(LOCALE))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(view().name(VERIFICATION_PAGE));
+  }
+
+  @Test
+  public void shouldReturnVerificationPageAtVerificationPageWithParamErrorWithoutMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
+
+    mockMvc
+        .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession).locale(LOCALE))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
 
@@ -683,7 +604,6 @@ public class AuthenticationControllerTest {
   @Test
   public void shouldRedirectToVerificationAtVerificationWhenVerificationEmailIsBad()
       throws Exception {
-    final String message = "Nieprawidłowy kod email";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
     httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_ENCODE_CODE);
@@ -691,7 +611,7 @@ public class AuthenticationControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
 
-    redirectVerificationErrorWhenVerificationNumberIsBad(httpSession, message);
+    redirectVerificationErrorWhenVerificationNumberIsBad(httpSession, ERROR_BAD_EMAIL_CODE_MESSAGE);
   }
 
   @Test
@@ -985,7 +905,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnOkAtGetVerificationNumber() throws Exception {
+  public void shouldReturnOkAtGetVerificationSms() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
@@ -994,66 +914,72 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
-        .andExpect(content().string("ok"));
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_RESET));
   }
 
   @Test
-  public void shouldReturnUserNotFoundMessageAtGetVerificationNumberWhenUserNotFound()
-      throws Exception {
-
-    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
-
-    mockMvc
-        .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
-        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
-  }
-
-  @Test
-  public void shouldReturnValidationMessageAtGetVerificationNumberWhenGetErrorValidation()
-      throws Exception {
-    mockMvc
-        .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
-                .param(CALLING_CODE_PARAM, "")
-                .param(PHONE_PARAM, "")
-                .param(PARAM_PARAM, ""))
-        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
-  }
-
-  @Test
-  public void shouldReturnTooManyAttemptsMessageAtGetVerificationNumberWhenTooManyAttempts()
+  public void shouldReturnTooManyAttemptsMessageAtGetVerificationSmsWhenTooManyAttempts()
       throws Exception {
     final int maxAmount = 3;
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, maxAmount);
 
-    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
-
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
         .andExpect(content().string(ERROR_TOO_MANY_SMS_MESSAGE));
   }
 
   @Test
-  public void shouldReturnSendSmsErrorMessageAtGetVerificationNumberWhenErrorAtSendSms()
+  public void shouldReturnValidationMessageAtGetVerificationSmsWhenGetErrorValidation()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_SMS_URL)
+                .param(PHONE_PARAM, "")
+                .param(PARAM_PARAM, "")
+                .param(NEW_USER_PARAM, TEST_NEW_USER)
+                .session(httpSession))
+        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnUserNotFoundMessageAtGetVerificationSmsWhenUserNotFound()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_SMS_URL)
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER)
+                .session(httpSession))
+        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnSendSmsErrorMessageAtGetVerificationSmsWhenErrorAtSendSms()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(true);
@@ -1063,12 +989,69 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(
-            post(GET_VERIFICATION_NUMBER_URL)
+            post(GET_VERIFICATION_SMS_URL)
                 .session(httpSession)
-                .param(CALLING_CODE_PARAM, PL_CALLING_CODE)
-                .param(PHONE_PARAM, TEST_PHONE)
-                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET))
+                .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
+                .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
+                .param(NEW_USER_PARAM, TEST_NEW_USER))
         .andExpect(content().string(ERROR_AT_SMS_SENDING_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnTooManyAttemptsMessageAtGetVerificationEmailWhenTooManyAttempts()
+      throws Exception {
+    final int maxAmount = 3;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, maxAmount);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(ERROR_TOO_MANY_EMAIL_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnValidationMessageAtGetVerificationEmailWhenErrorAtValidation()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    mockMvc
+        .perform(post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, "a"))
+        .andExpect(content().string(ERROR_INCORRECT_DATA_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnSendEmailErrorMessageAtGetVerificationEmailWhenErrorAtSendingEmail()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    doThrow(ApiException.class)
+        .when(emailService)
+        .sendEmail(eq(VERIFICATION_MESSAGE + TEST_CODE), eq(TEST_MAIL), any());
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(ERROR_AT_EMAIL_SENDING_MESSAGE));
+  }
+
+  @Test
+  public void shouldReturnOkMessageAtGetVerificationEmail() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
+
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+
+    mockMvc
+        .perform(
+            post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+    assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
   }
 
   @Test
@@ -1121,7 +1104,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToShopVerifications() throws Exception {
+  public void shouldRedirectToShopVerificationsAtRegisterShop() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1134,21 +1117,23 @@ public class AuthenticationControllerTest {
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(true);
-    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(false);
+    when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+    when(shopService.saveTempFile(registerShopDTO.getFile())).thenReturn(FILE_PATH_PARAM);
 
-    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, "/shop_verifications");
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, SHOP_VERIFICATIONS_URL);
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
     assertEquals(0, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
-    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute("codeSmsRegisterShop"));
+    assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenErrorAtValidation() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenErrorAtValidation()
+      throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     registerShopDTO.setFirstName(registerShopDTO.getFirstName() + "!");
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
@@ -1159,7 +1144,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenPhoneExists() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenPhoneExists() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1173,7 +1158,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenEmailExists() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenEmailExists() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1188,7 +1173,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenShopNameExists() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenShopNameExists() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1204,7 +1189,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenAccountNumberExists() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenAccountNumberExists()
+      throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1223,7 +1209,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenAccountNumberBad() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenAccountNumberBad()
+      throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1242,7 +1229,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenBadSize() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenBadSize() throws Exception {
     final String prefixAddress2 = "address[2].";
     final String prefixAddress3 = "address[3].";
     final String prefixAddress4 = "address[4].";
@@ -1397,7 +1384,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenNotUnique() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenNotUnique() throws Exception {
     AddressDTO addressDTO0 = new AddressDTO();
     addressDTO0.setCountry(TEST_TEXT);
     addressDTO0.setCity(TEST_TEXT);
@@ -1464,7 +1451,27 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenPointsExists() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenPointsExists() throws Exception {
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
+    assertEquals("Takie lokale już istnieją", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenBadFile() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1478,34 +1485,14 @@ public class AuthenticationControllerTest {
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
     when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
-
-    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
-    assertEquals("Takie lokale już istnieją", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  public void shouldRedirectToRegisterShopErrorWhenBadFile() throws Exception {
-    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
-    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
-    MockHttpSession httpSession = new MockHttpSession();
-
-    when(authenticationService.phoneExists(
-            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
-        .thenReturn(false);
-    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
-        .thenReturn(false);
-    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
-    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(false);
+    when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(false);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals("Niepoprawny plik", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenExceptionAtSmsSending() throws Exception {
+  public void shouldRedirectToLoginErrorAtRegisterShopWhenErrorAtSaveTempFile() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1518,8 +1505,33 @@ public class AuthenticationControllerTest {
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
-    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(false);
+    when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
+    when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
+    when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
+
+    performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REDIRECT_LOGIN_ERROR);
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenExceptionAtSmsSending()
+      throws Exception {
+    RegisterShopDTO registerShopDTO = setRegisterShopDTO();
+    AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(authenticationService.phoneExists(
+            registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
+        .thenReturn(false);
+    when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
+    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+        .thenReturn(false);
+    when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+    when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
+    when(shopService.saveTempFile(registerShopDTO.getFile())).thenReturn(FILE_PATH_PARAM);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(MongoWriteException.class)
         .when(smsService)
@@ -1532,7 +1544,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToRegisterShopErrorWhenExceptionAtEmailSending() throws Exception {
+  public void shouldRedirectToRegisterShopErrorAtRegisterShopWhenExceptionAtEmailSending()
+      throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1545,8 +1558,9 @@ public class AuthenticationControllerTest {
     when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
-    when(shopService.checkFile(registerShopDTO.getFile())).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+    when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
+    when(shopService.saveTempFile(registerShopDTO.getFile())).thenReturn(FILE_PATH_PARAM);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(MongoWriteException.class)
         .when(emailService)
@@ -1567,7 +1581,7 @@ public class AuthenticationControllerTest {
     addressDTO.setProvince(TEST_TEXT);
     addressDTO.setHouseNumber(TEST_HOUSE_NUMBER);
     addressDTO.setPostalCode(TEST_POSTAL_CODE);
-    MockMultipartFile multipartFile = new MockMultipartFile("file", new byte[0]);
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
     List<AddressDTO> addressDTOList = List.of(addressDTO);
     RegisterShopDTO registerShopDTO = new RegisterShopDTO();
     registerShopDTO.setPassword(TEST_PASSWORD);
@@ -1614,5 +1628,290 @@ public class AuthenticationControllerTest {
                     PARAM_ADDRESS_PREFIX0 + APARTMENT_NUMBER_PARAM, addressDTO.getApartmentNumber())
                 .param(PARAM_ADDRESS_PREFIX0 + PROVINCE_PARAM, addressDTO.getProvince()))
         .andExpect(redirectedUrl(redirectUrl));
+  }
+
+  @Test
+  public void shouldReturnVerificationShopPageAtVerificationShopPage() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
+
+    mockMvc
+        .perform(get(SHOP_VERIFICATIONS_URL).session(httpSession))
+        .andExpect(view().name(VERIFICATION_SHOP_PAGE));
+  }
+
+  @Test
+  public void shouldRedirectToLoginAtVerificationShopPageWhenNoRegisterShopPage() throws Exception {
+    mockMvc.perform(get(SHOP_VERIFICATIONS_URL)).andExpect(redirectedUrl(LOGIN_URL));
+  }
+
+  @Test
+  public void shouldRedirectToLoginAtVerificationShopPageWhenParamReset() throws Exception {
+    MultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    Path path = Files.createTempFile("_upload", TEST_SUFFIX_FILE);
+    Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(FILE_PATH_PARAM, path.toString());
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_SMS_PARAM_REGISTER_SHOP, TEST_ENCODE_CODE);
+    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
+
+    mockMvc
+        .perform(get(SHOP_VERIFICATIONS_URL).param(RESET_PARAM, "").session(httpSession))
+        .andExpect(redirectedUrl(LOGIN_URL));
+    assertNull(httpSession.getAttribute(FILE_PATH_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
+  }
+
+  @Test
+  public void shouldReturnVerificationShopPageAtVerificationShopPageWhenParamErrorWithMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+
+    mockMvc
+        .perform(get(SHOP_VERIFICATIONS_URL).session(httpSession).param(ERROR_PARAM, ""))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(view().name(VERIFICATION_SHOP_PAGE));
+  }
+
+  @Test
+  public void shouldReturnVerificationShopPageAtVerificationShopPageWhenParamErrorWithoutMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
+
+    mockMvc
+        .perform(get(SHOP_VERIFICATIONS_URL).session(httpSession).param(ERROR_PARAM, ""))
+        .andExpect(view().name(VERIFICATION_SHOP_PAGE));
+  }
+
+  @Test
+  public void shouldRedirectToLoginErrorAtVerificationShopWhenTooManyAttempts() throws Exception {
+    final int maxAttempts = 3;
+    MockHttpSession httpSession = setSessionAtVerificationShop(maxAttempts);
+
+    performPostAtVerificationShop(
+        httpSession,
+        ERROR_TOO_MANY_ATTEMPTS_MESSAGE,
+        REDIRECT_LOGIN_ERROR,
+        TEST_CODE,
+        ERROR_MESSAGE_PARAM);
+    assertNull(httpSession.getAttribute(REGISTER_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(FILE_PATH_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerificationErrorAtVerificationShopWhenErrorAtValidation()
+      throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    performPostAtVerificationShop(
+        httpSession,
+        ERROR_INCORRECT_DATA_MESSAGE,
+        VERIFICATION_SHOP_ERROR_URL,
+        "10",
+        ERROR_MESSAGE_PARAM);
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerificationErrorAtVerificationShopWhenBadSmsCode()
+      throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(false);
+
+    performPostAtVerificationShop(
+        httpSession,
+        ERROR_BAD_EMAIL_CODE_MESSAGE,
+        VERIFICATION_SHOP_ERROR_URL,
+        TEST_CODE,
+        ERROR_MESSAGE_PARAM);
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerificationErrorAtVerificationShopWhenBadEmailCode()
+      throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
+
+    performPostAtVerificationShop(
+        httpSession,
+        ERROR_BAD_SMS_CODE_MESSAGE,
+        VERIFICATION_SHOP_ERROR_URL,
+        TEST_CODE,
+        ERROR_MESSAGE_PARAM);
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerificationErrorAtVerificationShopWhenBadSize()
+      throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+
+    MockMultipartFile multipartFile1 = new MockMultipartFile(TEST_FILE1_NAME, new byte[0]);
+    MockMultipartFile multipartFile2 = new MockMultipartFile(TEST_FILE2_NAME, new byte[0]);
+    MockMultipartFile multipartFile3 = new MockMultipartFile(TEST_FILE3_NAME, new byte[0]);
+    MockMultipartFile multipartFile4 = new MockMultipartFile("file4", new byte[0]);
+    MockMultipartFile multipartFile5 = new MockMultipartFile("file5", new byte[0]);
+    MockMultipartFile multipartFile6 = new MockMultipartFile("file6", new byte[0]);
+    MockMultipartFile multipartFile7 = new MockMultipartFile("file7", new byte[0]);
+    MockMultipartFile multipartFile8 = new MockMultipartFile("file8", new byte[0]);
+    MockMultipartFile multipartFile9 = new MockMultipartFile("file9", new byte[0]);
+    MockMultipartFile multipartFile10 = new MockMultipartFile("file10", new byte[0]);
+
+    mockMvc
+        .perform(
+            multipart(SHOP_VERIFICATIONS_URL)
+                .file(FILE0_PARAM, multipartFile1.getBytes())
+                .file(FILE1_PARAM, multipartFile2.getBytes())
+                .file("file[2]", multipartFile3.getBytes())
+                .file("file[3]", multipartFile4.getBytes())
+                .file("file[4]", multipartFile5.getBytes())
+                .file("file[5]", multipartFile6.getBytes())
+                .file("file[6]", multipartFile7.getBytes())
+                .file("file[7]", multipartFile8.getBytes())
+                .file("file[8]", multipartFile9.getBytes())
+                .file("file[9]", multipartFile10.getBytes())
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_OTHER_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(VERIFICATION_SHOP_ERROR_URL));
+    assertEquals(
+        "Nieprawidłowa ilość przesłanych plików", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToShopVerificationErrorAtVerificationShopWhenErrorAtCheckFiles()
+      throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(shopService.checkFiles(any())).thenReturn(false);
+
+    performPostAtVerificationShop(
+        httpSession,
+        "Nieprawidłowe pliki",
+        VERIFICATION_SHOP_ERROR_URL,
+        TEST_CODE,
+        ERROR_MESSAGE_PARAM);
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToLoginErrorAtVerificationShopWhenErrorAtCreateShop() throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(shopService.checkFiles(any())).thenReturn(true);
+    when(authenticationService.createShop(
+            eq((RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM)),
+            eq((String) httpSession.getAttribute(FILE_PATH_PARAM)),
+            anyList(),
+            any()))
+        .thenReturn(false);
+
+    performPostAtVerificationShop(
+        httpSession,
+        ERROR_UNEXPECTED_MESSAGE,
+        REDIRECT_LOGIN_ERROR,
+        TEST_CODE,
+        ERROR_MESSAGE_PARAM);
+    assertNull(httpSession.getAttribute(REGISTER_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(FILE_PATH_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToLoginSuccessAtVerificationShop() throws Exception {
+    MockHttpSession httpSession = setSessionAtVerificationShop(0);
+
+    when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(shopService.checkFiles(any())).thenReturn(true);
+    when(authenticationService.createShop(
+            eq((RegisterShopDTO) httpSession.getAttribute(REGISTER_PARAM)),
+            eq((String) httpSession.getAttribute(FILE_PATH_PARAM)),
+            anyList(),
+            any()))
+        .thenReturn(true);
+
+    performPostAtVerificationShop(
+        httpSession,
+        "Powiadomimy cię o pomyślnej weryfikacji lub ewentualnych błędach",
+        REDIRECT_LOGIN_SUCCESS,
+        TEST_CODE,
+        SUCCESS_MESSAGE_PARAM);
+    assertNull(httpSession.getAttribute(REGISTER_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_PARAM_REGISTER_SHOP));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
+    assertNull(httpSession.getAttribute(FILE_PATH_PARAM));
+  }
+
+  private MockHttpSession setSessionAtVerificationShop(int attempts) throws IOException {
+    MockMultipartFile multipartFile3 = new MockMultipartFile(TEST_FILE3_NAME, new byte[0]);
+    Path path = Files.createTempFile("upload_", TEST_SUFFIX_FILE);
+    Files.copy(multipartFile3.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
+    httpSession.setAttribute(ATTEMPTS_PARAM, attempts);
+    httpSession.setAttribute(CODE_EMAIL_PARAM, TEST_OTHER_ENCODE_CODE);
+    httpSession.setAttribute(CODE_SMS_PARAM_REGISTER_SHOP, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
+    httpSession.setAttribute(FILE_PATH_PARAM, path.toString());
+    return httpSession;
+  }
+
+  private void performPostAtVerificationShop(
+      MockHttpSession httpSession,
+      String message,
+      String redirectUrl,
+      String codeSms,
+      String messageParam)
+      throws Exception {
+    MockMultipartFile multipartFile1 = new MockMultipartFile(TEST_FILE1_NAME, new byte[0]);
+    MockMultipartFile multipartFile2 = new MockMultipartFile(TEST_FILE2_NAME, new byte[0]);
+
+    mockMvc
+        .perform(
+            multipart(SHOP_VERIFICATIONS_URL)
+                .file(FILE0_PARAM, multipartFile1.getBytes())
+                .file(FILE1_PARAM, multipartFile2.getBytes())
+                .param(VERIFICATION_NUMBER_SMS_PARAM, codeSms)
+                .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_OTHER_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(redirectUrl));
+    assertEquals(message, httpSession.getAttribute(messageParam));
   }
 }

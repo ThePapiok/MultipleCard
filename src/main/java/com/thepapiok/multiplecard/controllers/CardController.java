@@ -37,13 +37,18 @@ public class CardController {
   private final PasswordEncoder passwordEncoder;
   private final MessageSource messageSource;
   private final CardService cardService;
+  private final AuthenticationController authenticationController;
 
   @Autowired
   public CardController(
-      PasswordEncoder passwordEncoder, MessageSource messageSource, CardService cardService) {
+      PasswordEncoder passwordEncoder,
+      MessageSource messageSource,
+      CardService cardService,
+      AuthenticationController authenticationController) {
     this.passwordEncoder = passwordEncoder;
     this.messageSource = messageSource;
     this.cardService = cardService;
+    this.authenticationController = authenticationController;
   }
 
   @GetMapping("/new_card")
@@ -59,12 +64,11 @@ public class CardController {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
-    } else {
-      resetSession(httpSession, CODE_SMS_ORDER_PARAM);
-    }
-    if (reset != null) {
-      resetSession(httpSession, CODE_SMS_ORDER_PARAM);
+    } else if (reset != null) {
+      authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
       return REDIRECT_USER;
+    } else {
+      authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
     }
     model.addAttribute(PHONE_PARAM, principal.getName());
     OrderCardDTO order = (OrderCardDTO) httpSession.getAttribute(ORDER_PARAM);
@@ -94,27 +98,23 @@ public class CardController {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
-      resetSession(httpSession, CODE_SMS_ORDER_PARAM);
+      authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
       return REDIRECT_USER_ERROR;
-    }
-    if (bindingResult.hasErrors()) {
+    } else if (bindingResult.hasErrors()) {
       return redirectErrorPage(httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, order);
-    }
-    if (!passwordEncoder.matches(
+    } else if (!passwordEncoder.matches(
         order.getCode(), (String) httpSession.getAttribute(CODE_SMS_ORDER_PARAM))) {
       return redirectErrorPage(httpSession, amount, ERROR_BAD_SMS_CODE_MESSAGE, locale, order);
-    }
-    if (!order.getPin().equals(order.getRetypedPin())) {
+    } else if (!order.getPin().equals(order.getRetypedPin())) {
       return redirectErrorPage(
           httpSession, amount, "newCardPage.error.not_the_same_pin", locale, order);
-    }
-    if (!cardService.createCard(order, principal.getName())) {
-      resetSession(httpSession, CODE_SMS_ORDER_PARAM);
+    } else if (!cardService.createCard(order, principal.getName())) {
+      authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
       return REDIRECT_USER_ERROR;
     }
-    resetSession(httpSession, CODE_SMS_ORDER_PARAM);
+    authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("newCardPage.success.create_new_card", null, locale));
@@ -134,13 +134,6 @@ public class CardController {
     }
   }
 
-  private void resetSession(HttpSession httpSession, String param) {
-    httpSession.removeAttribute(param);
-    httpSession.removeAttribute(ATTEMPTS_PARAM);
-    httpSession.removeAttribute("codeAmountSms");
-    httpSession.removeAttribute(ORDER_PARAM);
-  }
-
   @GetMapping("/block_card")
   public String blockCardPage(
       @RequestParam(required = false) String error,
@@ -154,12 +147,11 @@ public class CardController {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
-    } else {
-      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
-    }
-    if (reset != null) {
-      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+    } else if (reset != null) {
+      authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       return REDIRECT_USER;
+    } else {
+      authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
     }
     model.addAttribute(PHONE_PARAM, principal.getName());
     return "blockCardPage";
@@ -183,30 +175,26 @@ public class CardController {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
-      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+      authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       return REDIRECT_USER_ERROR;
-    }
-    if (!pattern.matcher(verificationNumberSms).matches()) {
+    } else if (!pattern.matcher(verificationNumberSms).matches()) {
       return redirectErrorPage(httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, null);
-    }
-    if (!passwordEncoder.matches(
+    } else if (!passwordEncoder.matches(
         verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_BLOCK_PARAM))) {
       return redirectErrorPage(httpSession, amount, ERROR_BAD_SMS_CODE_MESSAGE, locale, null);
-    }
-    if (!cardService.isBlocked(phone)) {
-      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+    } else if (!cardService.isBlocked(phone)) {
+      authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage("blockCardPage.error.block_card.isBlocked", null, locale));
       return REDIRECT_USER_ERROR;
-    }
-    if (!cardService.blockCard(phone)) {
-      resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+    } else if (!cardService.blockCard(phone)) {
+      authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
       return REDIRECT_USER_ERROR;
     }
-    resetSession(httpSession, CODE_SMS_BLOCK_PARAM);
+    authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("blockCardPage.success.block_card", null, locale));
