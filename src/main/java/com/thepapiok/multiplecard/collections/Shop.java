@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 public class Shop {
   @Id private ObjectId id;
+  private String firstName;
+  private String lastName;
   private String name;
   private Long totalAmount;
   private String imageUrl;

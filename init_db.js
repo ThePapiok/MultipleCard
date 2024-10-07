@@ -53,12 +53,20 @@ db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "totalAmount", "imageUrl", "points", "_class"],
+            "required": ["_id", "firstName", "lastName", "name", "totalAmount", "imageUrl", "points", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
                     "bsonType": "objectId",
                     "description": "_id is required and must be objectId"
+                },
+                "firstName": {
+                    "bsonType": "string",
+                    "description": "firstName is required and must be string"
+                },
+                "lastName": {
+                    "bsonType": "string",
+                    "description": "lastName is required and must be string"
                 },
                 "name": {
                     "bsonType": "string",
