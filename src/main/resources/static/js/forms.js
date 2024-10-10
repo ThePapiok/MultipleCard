@@ -310,7 +310,10 @@ function pressedCorrectButton() {
     buttons = true;
 }
 
-function getSmsCode(phone, param, newUser) {
+function getSmsCode(phone, param, newUser, enable) {
+    if(enable){
+        enableInputs();
+    }
     fetch("/get_verification_sms", {
         method: "POST",
         headers: {

@@ -63,7 +63,7 @@
             <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
-            <button type="button" class="blackButton" th:text="#{button.newCode_sms}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegister', true)|" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_sms}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegister', true, false)|" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
             <button type="button" class="blackButton" th:text="#{button.newCode_email}" th:attr="onclick=|getEmailCode('${email}')|" onmousedown="pressedCorrectButton()"></button>

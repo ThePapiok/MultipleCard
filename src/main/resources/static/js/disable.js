@@ -9,6 +9,7 @@ function atStart() {
 }
 
 function enableInputs() {
+    console.log("xd");
     if (disable) {
         disable = false;
         let inputs = document.getElementsByTagName("input");

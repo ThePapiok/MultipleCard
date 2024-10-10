@@ -1,6 +1,6 @@
 let ok = [false];
 let previous = [false];
-const buttonId = "deleteButton";
+const buttonId = "saveButton";
 
 window.addEventListener('beforeunload', function (event) {
     if (buttons) {
@@ -15,8 +15,8 @@ window.addEventListener('beforeunload', function (event) {
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: new URLSearchParams({
-            "codeSmsParam": "codeSmsChange",
-            "formObjectParam": null
+            "codeSmsParam": "codeSmsEdit",
+            "formObjectParam": "edit"
         })
     }).catch((error) => {
         console.error(error);

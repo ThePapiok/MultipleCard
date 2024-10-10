@@ -85,7 +85,6 @@ function deleteFiles(e, index) {
     e.remove();
     for (let i = index + 1; i <= size + 1; i++) {
         let uploadFile = document.getElementById("file" + i);
-        console.log(uploadFile);
         uploadFile.id = "file" + (i - 1);
         uploadFile.firstElementChild.name = "file[" + (i - 2) + "]";
         let deleteFile = uploadFile.getElementsByClassName("deleteFile")[0];

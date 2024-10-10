@@ -21,6 +21,7 @@ public class SecurityConfig {
       HttpSecurity http, CustomAuthenticationFailureHandler customAuthenticationFailureHandler)
       throws Exception {
     final String loginUrl = "/login";
+    final String userUrl = "/user";
     final String roleUser = "USER";
     http.authorizeHttpRequests(
             authorize ->
@@ -29,11 +30,15 @@ public class SecurityConfig {
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.DELETE, "/reviews")
                     .hasRole(roleUser)
-                    .requestMatchers("/new_card", "/block_card")
+                    .requestMatchers("/new_card", "/block_card", "/edit_profile")
                     .hasRole(roleUser)
+                    .requestMatchers(HttpMethod.POST, userUrl)
+                    .hasAnyRole(roleUser, "ADMIN")
                     .requestMatchers("/register", "/password_reset", "/register_shop")
                     .anonymous()
-                    .requestMatchers("/user", "/password_change", "/delete_account")
+                    .requestMatchers("/password_change", "/delete_account")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.GET, userUrl)
                     .authenticated()
                     .anyRequest()
                     .permitAll())

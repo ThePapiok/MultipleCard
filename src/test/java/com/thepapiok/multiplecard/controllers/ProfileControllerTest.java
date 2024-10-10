@@ -57,14 +57,18 @@ public class ProfileControllerTest {
   private static final String USER_URL = "/user";
   private static final String LOGIN_SUCCESS_URL = "/login?success";
   private static final String PASSWORD_CHANGE_URL = "/password_change";
+  private static final String EDIT_PROFILE_URL = "/edit_profile";
+  private static final String EDIT_PROFILE_ERROR_URL = "/edit_profile?error";
   private static final String USER_ERROR_URL = "/user?error";
   private static final String DELETE_ACCOUNT_URL = "/delete_account";
   private static final String DELETE_ACCOUNT_ERROR_URL = "/delete_account?error";
   private static final String DELETE_ACCOUNT_PAGE = "deleteAccountPage";
   private static final String PROFILE_PAGE = "profilePage";
+  private static final String EDIT_PROFILE_PAGE = "editProfilePage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String CARD_PARAM = "card";
+  private static final String EDIT_PARAM = "edit";
   private static final String ERROR_MESSAGE = "error!";
   private static final String SUCCESS_UPDATE_MESSAGE = "Pomyślnie zaktualizowano dane";
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
@@ -79,6 +83,7 @@ public class ProfileControllerTest {
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   private static final String CODE_SMS_CHANGE_PARAM = "codeSmsChange";
   private static final String CODE_SMS_DELETE_PARAM = "codeSmsDelete";
+  private static final String CODE_SMS_EDIT_PARAM = "codeSmsEdit";
   private static final String CHANGE_PASSWORD_PARAM = "changePassword";
   private static final String CHANGE_PASSWORD_PAGE = "changePasswordPage";
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
@@ -205,10 +210,8 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserSuccessAtEditProfile() throws Exception {
+  public void shouldRedirectToEditProfileAtEditProfile() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
-
-    when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
 
     mockMvc
         .perform(
@@ -229,8 +232,8 @@ public class ProfileControllerTest {
                 .param(PARAM_ADDRESS_PREFIX + CITY_PARAM, profileDTO.getAddress().getCity())
                 .param(PARAM_ADDRESS_PREFIX + COUNTRY_PARAM, profileDTO.getAddress().getCountry())
                 .session(httpSession))
-        .andExpect(redirectedUrl("/user?success"));
-    assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+        .andExpect(redirectedUrl(EDIT_PROFILE_URL));
+    assertEquals(profileDTO, httpSession.getAttribute(EDIT_PARAM));
   }
 
   @Test
@@ -238,40 +241,182 @@ public class ProfileControllerTest {
   public void shouldRedirectToUserErrorAtEditProfileWhenValidationProblems() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
-    when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
-
     mockMvc.perform(post(USER_URL).session(httpSession)).andExpect(redirectedUrl(USER_ERROR_URL));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorAtEditProfileWhenErrorAtEditProfile() throws Exception {
-    MockHttpSession httpSession = new MockHttpSession();
+  public void shouldRedirectUserAtVerificationEditProfilePageWhenNoEditParam() throws Exception {
+    mockMvc.perform(get(EDIT_PROFILE_URL)).andExpect(redirectedUrl(USER_URL));
+  }
 
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnEditProfilePageAtVerificationEditProfilePageWhenErrorParamWithoutMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+
+    mockMvc
+        .perform(get(EDIT_PROFILE_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(EDIT_PROFILE_PAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnEditProfilePageAtVerificationEditProfilePageWhenErrorParamWithMessage()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+
+    mockMvc
+        .perform(get(EDIT_PROFILE_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(EDIT_PROFILE_PAGE));
+    assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectUserAtVerificationEditProfilePageWhenResetParam() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+    httpSession.setAttribute(CODE_SMS_EDIT_PARAM, TEST_ENCODE_CODE);
+
+    mockMvc
+        .perform(get(EDIT_PROFILE_URL).param(RESET_PARAM, "").session(httpSession))
+        .andExpect(redirectedUrl(USER_URL));
+    assertNull(httpSession.getAttribute(EDIT_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_EDIT_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnEditProfilePageAtVerificationEditProfilePage() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+
+    mockMvc
+        .perform(get(EDIT_PROFILE_URL).session(httpSession))
+        .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
+        .andExpect(view().name(EDIT_PROFILE_PAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectUserErrorAtVerificationEditProfileWhenTooManyAttempts()
+      throws Exception {
+    final int maxAttempts = 3;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, maxAttempts);
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+    httpSession.setAttribute(CODE_SMS_EDIT_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
+
+    mockMvc
+        .perform(
+            post(EDIT_PROFILE_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(USER_ERROR_URL));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(EDIT_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_EDIT_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectEditProfileErrorAtVerificationEditProfileWhenErrorAtValidation()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+
+    mockMvc
+        .perform(
+            post(EDIT_PROFILE_URL).param(VERIFICATION_NUMBER_SMS_PARAM, "").session(httpSession))
+        .andExpect(redirectedUrl(EDIT_PROFILE_ERROR_URL));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectEditProfileErrorAtVerificationEditProfileWhenBadCode()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_EDIT_PARAM, TEST_ENCODE_CODE);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(EDIT_PROFILE_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl(EDIT_PROFILE_ERROR_URL));
+    assertEquals(ERROR_BAD_SMS_CODE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserSuccessAtVerificationEditProfile() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_EDIT_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(true);
+
+    mockMvc
+        .perform(
+            post(EDIT_PROFILE_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
+                .session(httpSession))
+        .andExpect(redirectedUrl("/user?success"));
+    assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(EDIT_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_EDIT_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserErrorAtVerificationEditProfileWhenErrorAtEditProfile()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ATTEMPTS_PARAM, 0);
+    httpSession.setAttribute(CODE_SMS_EDIT_PARAM, TEST_ENCODE_CODE);
+    httpSession.setAttribute(EDIT_PARAM, profileDTO);
+    httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(profileService.editProfile(profileDTO, TEST_PHONE)).thenReturn(false);
 
     mockMvc
         .perform(
-            post(USER_URL)
-                .param(FIRST_NAME_PARAM, profileDTO.getFirstName())
-                .param(LAST_NAME_PARAM, profileDTO.getLastName())
-                .param(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM, profileDTO.getAddress().getProvince())
-                .param(PARAM_ADDRESS_PREFIX + STREET_PARAM, profileDTO.getAddress().getStreet())
-                .param(
-                    PARAM_ADDRESS_PREFIX + HOUSE_NUMBER_PARAM,
-                    profileDTO.getAddress().getHouseNumber())
-                .param(
-                    PARAM_ADDRESS_PREFIX + APARTMENT_NUMBER_PARAM,
-                    profileDTO.getAddress().getApartmentNumber())
-                .param(
-                    PARAM_ADDRESS_PREFIX + POSTAL_CODE_PARAM,
-                    profileDTO.getAddress().getPostalCode())
-                .param(PARAM_ADDRESS_PREFIX + CITY_PARAM, profileDTO.getAddress().getCity())
-                .param(PARAM_ADDRESS_PREFIX + COUNTRY_PARAM, profileDTO.getAddress().getCountry())
+            post(EDIT_PROFILE_URL)
+                .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
         .andExpect(redirectedUrl(USER_ERROR_URL));
     assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
+    assertNull(httpSession.getAttribute(EDIT_PARAM));
+    assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
+    assertNull(httpSession.getAttribute(CODE_SMS_EDIT_PARAM));
   }
 
   @Test
