@@ -5,20 +5,3 @@
 #validationProvince {
     transform: translateX(-100%);
 }
-
-#TotalAmount {
-    width: 30%;
-    margin-left: 3%;
-}
-
-#placeholderTotalAmount {
-    width: 50%;
-}
-
-#inputTotalAmount {
-    width: 50%;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid gray;
-    font-family: "Inter", sans-serif;
-}

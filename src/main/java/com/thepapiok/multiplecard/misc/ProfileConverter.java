@@ -33,6 +33,7 @@ public class ProfileConverter {
     ProfileDTO profileDTO = new ProfileDTO();
     profileDTO.setFirstName(user.getFirstName());
     profileDTO.setLastName(user.getLastName());
+    profileDTO.setPoints(user.getPoints());
     profileDTO.setAddress(addressConverter.getDTO(address));
     return profileDTO;
   }

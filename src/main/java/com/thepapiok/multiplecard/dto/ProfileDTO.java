@@ -19,4 +19,5 @@ public class ProfileDTO {
   private String lastName;
 
   @NotNull private AddressDTO address;
+  private int points;
 }
