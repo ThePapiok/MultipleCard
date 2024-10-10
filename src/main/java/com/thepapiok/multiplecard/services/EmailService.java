@@ -74,15 +74,15 @@ public class EmailService {
                 + colon
                 + registerShopDTO.getName()
                 + newLine
-                + messageSource.getMessage("registerShopPage.account_number.text", null, locale)
+                + messageSource.getMessage("account_number.text", null, locale)
                 + colon
                 + registerShopDTO.getAccountNumber()
                 + newLine
-                + messageSource.getMessage("registerShopPage.upload_image.text", null, locale)
+                + messageSource.getMessage("upload_image.text", null, locale)
                 + colon
                 + url);
     int index = 1;
-    String placeLocale = messageSource.getMessage("registerShopPage.place.text", null, locale);
+    String placeLocale = messageSource.getMessage("place.text", null, locale);
     String cityLocale = messageSource.getMessage("city.text", null, locale);
     String postalCodeLocale = messageSource.getMessage("postalCode.text", null, locale);
     String streetLocale = messageSource.getMessage("street.text", null, locale);

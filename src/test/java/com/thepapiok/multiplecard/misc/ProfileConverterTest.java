@@ -6,11 +6,14 @@ import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,6 +24,8 @@ import org.mockito.MockitoAnnotations;
 
 public class ProfileConverterTest {
   private static final String TEST_PHONE = "+14234234123412";
+  private static final String TEST_FIRST_NAME = "firstName";
+  private static final String TEST_LAST_NAME = "lastName";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
 
   private static Address address;
@@ -40,8 +45,6 @@ public class ProfileConverterTest {
     final String province = "province";
     final String houseNumber = "1";
     final String postalCode = "postalCode";
-    final String firstName = "firstName";
-    final String lastName = "lastName";
     address = new Address();
     address.setStreet(street);
     address.setCity(city);
@@ -51,8 +54,8 @@ public class ProfileConverterTest {
     address.setPostalCode(postalCode);
     user = new User();
     user.setAddress(address);
-    user.setFirstName(firstName);
-    user.setLastName(lastName);
+    user.setFirstName(TEST_FIRST_NAME);
+    user.setLastName(TEST_LAST_NAME);
     addressDTO = new AddressDTO();
     addressDTO.setPostalCode(postalCode);
     addressDTO.setApartmentNumber("");
@@ -63,8 +66,8 @@ public class ProfileConverterTest {
     addressDTO.setHouseNumber(houseNumber);
     profileDTO = new ProfileDTO();
     profileDTO.setAddress(addressDTO);
-    profileDTO.setFirstName(firstName);
-    profileDTO.setLastName(lastName);
+    profileDTO.setFirstName(TEST_FIRST_NAME);
+    profileDTO.setLastName(TEST_LAST_NAME);
   }
 
   @BeforeEach
@@ -74,7 +77,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetDTO() {
+  public void shouldSuccessAtGetDTOUser() {
     when(addressConverter.getDTO(address)).thenReturn(addressDTO);
 
     assertEquals(profileDTO, profileConverter.getDTO(user));
@@ -101,5 +104,34 @@ public class ProfileConverterTest {
     when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertNull(profileConverter.getEntity(profileDTO, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtGetDTOShop() {
+    final long totalAmount = 3000;
+    final float centsPerZloty = 100.0F;
+    final String shopNameTest = "name";
+    final String accountNumberTest = "accountNumber";
+    final String imageUrlTest = "imageUrl";
+    Shop shop = new Shop();
+    shop.setFirstName(TEST_FIRST_NAME);
+    shop.setLastName(TEST_LAST_NAME);
+    shop.setName(shopNameTest);
+    shop.setAccountNumber(accountNumberTest);
+    shop.setImageUrl(imageUrlTest);
+    shop.setTotalAmount(totalAmount);
+    shop.setPoints(List.of(address));
+    ProfileShopDTO expectedProfileShopDTO = new ProfileShopDTO();
+    expectedProfileShopDTO.setFirstName(TEST_FIRST_NAME);
+    expectedProfileShopDTO.setLastName(TEST_LAST_NAME);
+    expectedProfileShopDTO.setName(shopNameTest);
+    expectedProfileShopDTO.setAccountNumber(accountNumberTest);
+    expectedProfileShopDTO.setImageUrl(imageUrlTest);
+    expectedProfileShopDTO.setTotalAmount(String.valueOf(totalAmount / centsPerZloty));
+    expectedProfileShopDTO.setAddresses(List.of(addressDTO));
+
+    when(addressConverter.getDTOs(List.of(address))).thenReturn(List.of(addressDTO));
+
+    assertEquals(expectedProfileShopDTO, profileConverter.getDTO(shop));
   }
 }

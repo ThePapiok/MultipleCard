@@ -1,6 +1,9 @@
 package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
@@ -97,5 +100,20 @@ public class AccountRepositoryTest {
     expecetedAccount.setPassword(TEST_PASSWORD1);
 
     assertEquals(expecetedAccount, accountRepository.findPasswordByPhone(TEST_PHONE1));
+  }
+
+  @Test
+  public void shouldSuccessAtHasRole() {
+    assertTrue(accountRepository.hasRole(TEST_PHONE1, Role.ROLE_USER));
+  }
+
+  @Test
+  public void shouldFailAtHasRoleWhenBadRole() {
+    assertFalse(accountRepository.hasRole(TEST_PHONE1, Role.ROLE_SHOP));
+  }
+
+  @Test
+  public void shouldFailAtHasRoleWhenUserNotFound() {
+    assertNull(accountRepository.hasRole("+48123123321312213", Role.ROLE_SHOP));
   }
 }

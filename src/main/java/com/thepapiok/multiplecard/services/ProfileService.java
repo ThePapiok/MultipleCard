@@ -12,11 +12,13 @@ import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
 import java.util.List;
@@ -43,6 +45,7 @@ public class ProfileService {
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
   private final CloudinaryService cloudinaryService;
+  private final ShopRepository shopRepository;
 
   @Autowired
   public ProfileService(
@@ -54,7 +57,8 @@ public class ProfileService {
       ProductRepository productRepository,
       MongoTemplate mongoTemplate,
       MongoTransactionManager mongoTransactionManager,
-      CloudinaryService cloudinaryService) {
+      CloudinaryService cloudinaryService,
+      ShopRepository shopRepository) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.profileConverter = profileConverter;
@@ -64,6 +68,7 @@ public class ProfileService {
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
     this.cloudinaryService = cloudinaryService;
+    this.shopRepository = shopRepository;
   }
 
   public ProfileDTO getProfile(String phone) {
@@ -147,5 +152,20 @@ public class ProfileService {
       return false;
     }
     return true;
+  }
+
+  public boolean checkRole(String phone, Role role) {
+    Boolean isFound = accountRepository.hasRole(phone, role);
+    return isFound != null && isFound;
+  }
+
+  public ProfileShopDTO getShop(String phone) {
+    Optional<Shop> optionalShop =
+        shopRepository.findById(accountRepository.findIdByPhone(phone).getId());
+    if (optionalShop.isPresent()) {
+      return profileConverter.getDTO(optionalShop.get());
+    } else {
+      return null;
+    }
   }
 }

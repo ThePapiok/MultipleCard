@@ -6,6 +6,7 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="/css/registerShopPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
@@ -18,6 +19,7 @@
 <script th:inline="javascript">
     const points = /*[[${register.address}]]*/ [];
 </script>
+<script src="/js/shop.js"></script>
 <script src="/js/registerShopPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -25,7 +27,7 @@
     </a>
 </div>
 <div id="body">
-    <span hidden th:text="#{registerShopPage.place.text}" id="textPlace"></span>
+    <span hidden th:text="#{place.text}" id="textPlace"></span>
     <span hidden th:text="#{street.text}" id="textStreet"></span>
     <span hidden th:text="#{validation.text}" id="textValidation"></span>
     <span hidden th:text="#{validation.each_part_uppercase}" id="textValidationPartUppercase"></span>
@@ -46,9 +48,9 @@
     <span hidden th:text="#{country.text}" id="textCountry"></span>
     <span hidden th:text="#{province.text}" id="textProvince"></span>
     <span hidden th:text="#{select.no_results}" id="textNoResults"></span>
-    <span hidden th:text="#{registerShopPage.upload_image.bad_type}" id="textBadType"></span>
+    <span hidden th:text="#{upload_image.bad_type}" id="textBadType"></span>
     <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
-    <span hidden th:text="#{registerShopPage.upload_image.too_small}" id="textTooSmall"></span>
+    <span hidden th:text="#{upload_image.too_small}" id="textTooSmall"></span>
     <p class="title" th:text="#{register.text}"></p>
     <form th:action="@{/register_shop}" th:object="${register}" id="form" method="post" enctype="multipart/form-data">
         <div class="block-horizontally">
@@ -200,7 +202,7 @@
             <label id="AccountNumber">
                 <label class="inputs">
                     <input th:field="*{accountNumber}" type="text"
-                           th:placeholder="#{registerShopPage.account_number.text}" required
+                           th:placeholder="#{account_number.text}" required
                            oninput="checkAccountNumber(this)" minlength="26" maxlength="26"
                            onmouseenter="showValidation(this, 'AccountNumber')"
                            onmouseleave="hideValidation('AccountNumber')">
@@ -209,36 +211,36 @@
                 </label>
             </label>
             <div class="validation" id="validationAccountNumber">
-                <span th:text="#{registerShopPage.account_number.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{account_number.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.only_digits}"></li>
                     <li th:text="#{validation.prefix_length_is} + ' 26'"></li>
                 </ul>
             </div>
         </div>
-        <p th:text="#{registerShopPage.upload_image.text}" id="titleUploadImage"></p>
+        <p th:text="#{upload_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
+            <input th:field="*{file}" type="file" oninput="setImage(this, false)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
                    onmouseleave="hideValidation('uploadFile')">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" src="/images/nothing.png" alt="image">
         </label>
         <div class="validation">
-            <span th:text="#{registerShopPage.upload_image.text} + ' ' + #{validation.text}"></span>
+            <span th:text="#{upload_image.text} + ' ' + #{validation.text}"></span>
             <ul>
-                <li th:text="#{registerShopPage.upload_image.validation1}"></li>
-                <li th:text="#{registerShopPage.upload_image.validation2}"></li>
-                <li th:text="#{registerShopPage.upload_image.validation3}"></li>
+                <li th:text="#{upload_image.validation1}"></li>
+                <li th:text="#{upload_image.validation2}"></li>
+                <li th:text="#{upload_image.validation3}"></li>
             </ul>
         </div>
         <p id="errorFile"></p>
         <div id="formPlaces">
             <div class="block-horizontally" id="blockPlace">
-                <input disabled th:value="#{registerShopPage.places.text}">
+                <input disabled th:value="#{places.text}">
                 <div id="numberPlaces">
                     <span id="numberPlace">0</span>
                     <img id="plus" src="/images/plus.png" alt="plus"
-                         onclick="addPlace(this, '', '', '', '', '', '', '')">
+                         onclick="addPlace(this, '', '', '', '', '', '', '', 0)">
                 </div>
             </div>
             <div id="places">

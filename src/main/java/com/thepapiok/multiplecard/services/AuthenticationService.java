@@ -160,7 +160,6 @@ public class AuthenticationService {
                         Files.readAllBytes(path), shop.getId().toHexString()));
                 Files.deleteIfExists(path);
               } catch (IOException e) {
-                System.out.println(e);
                 throw new RuntimeException(e);
               }
               mongoTemplate.save(shop);
@@ -182,8 +181,7 @@ public class AuthenticationService {
     } catch (Exception e) {
       try {
         cloudinaryService.deleteImage(id[0]);
-      } catch (IOException ex) {
-        throw new RuntimeException(ex);
+      } catch (IOException ignored) {
       }
       return false;
     }

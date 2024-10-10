@@ -23,11 +23,13 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,6 +67,7 @@ public class ProfileServiceTest {
   @Mock private MongoTemplate mongoTemplate;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private CloudinaryService cloudinaryService;
+  @Mock private ShopRepository shopRepository;
   private ProfileService profileService;
 
   @BeforeAll
@@ -115,7 +118,8 @@ public class ProfileServiceTest {
             productRepository,
             mongoTemplate,
             mongoTransactionManager,
-            cloudinaryService);
+            cloudinaryService,
+            shopRepository);
   }
 
   @Test
@@ -322,5 +326,54 @@ public class ProfileServiceTest {
     doThrow(MongoWriteException.class).when(mongoTemplate).remove(account);
 
     assertFalse(profileService.deleteAccount(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtCheckRole() {
+    when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(true);
+
+    assertTrue(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
+  }
+
+  @Test
+  public void shouldFailAtCheckRoleWhenBadRole() {
+    when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(false);
+
+    assertFalse(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
+  }
+
+  @Test
+  public void shouldFailAtCheckRoleWhenUserNotFound() {
+    when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(null);
+
+    assertFalse(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
+  }
+
+  @Test
+  public void shouldSuccessAtGetShop() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Shop shop = new Shop();
+    shop.setId(TEST_ID);
+    ProfileShopDTO expectedProfileShopDTO = new ProfileShopDTO();
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(shopRepository.findById(TEST_ID)).thenReturn(Optional.of(shop));
+    when(profileConverter.getDTO(shop)).thenReturn(expectedProfileShopDTO);
+
+    assertEquals(expectedProfileShopDTO, profileService.getShop(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailAtGetShopWhenShopNotFound() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Shop shop = new Shop();
+    shop.setId(TEST_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(shopRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+
+    assertNull(profileService.getShop(TEST_PHONE));
   }
 }

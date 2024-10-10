@@ -10,11 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ChangePasswordDTO;
 import com.thepapiok.multiplecard.dto.CountryDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -113,7 +115,7 @@ public class ProfileControllerTest {
     profileDTO = new ProfileDTO();
     profileDTO.setAddress(addressDTO);
     profileDTO.setFirstName("Firstname");
-    profileDTO.setLastName("Last Name");
+    profileDTO.setLastName("Lastname");
     countryDTOS =
         List.of(
             new CountryDTO(countryName1, countryCode1, "+48"),
@@ -126,13 +128,14 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnProfilePageAtGetProfile() throws Exception {
+  public void shouldReturnProfilePageAtGetProfileUser() throws Exception {
     successReturnProfilePage();
   }
 
   private void successReturnProfilePage() throws Exception {
     Card card = new Card();
 
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(false);
     when(cardService.getCard(TEST_PHONE)).thenReturn(card);
     when(profileService.getProfile(TEST_PHONE)).thenReturn(profileDTO);
     when(countryService.getAll()).thenReturn(countryDTOS);
@@ -143,6 +146,22 @@ public class ProfileControllerTest {
         .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(view().name(PROFILE_PAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void successReturnProfileShopPage() throws Exception {
+    ProfileShopDTO profileShopDTO = new ProfileShopDTO();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
+    when(profileService.getShop(TEST_PHONE)).thenReturn(profileShopDTO);
+    when(countryService.getAll()).thenReturn(countryDTOS);
+
+    mockMvc
+        .perform(get(USER_URL))
+        .andExpect(model().attribute("profileShop", profileShopDTO))
+        .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
+        .andExpect(view().name("profileShopPage"));
   }
 
   @Test

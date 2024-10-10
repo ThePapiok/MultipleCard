@@ -1,8 +1,10 @@
 package com.thepapiok.multiplecard.repositories;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Role;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -25,4 +27,32 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
   boolean existsByPhone(String phone);
 
   boolean existsByEmail(String email);
+
+  @Aggregation(
+      pipeline = {
+        """
+                    {
+                      $match: {
+                      "phone": "?0"
+                      }
+                    }
+                  """,
+        """
+                    {
+                      $project: {
+                        "_id": 0,
+                        "isFound": {
+                          $cond: {
+                            if: {
+                              $eq: ["$role", "?1"]
+                              },
+                            then: true,
+                            else: false
+                          }
+                        }
+                      }
+                    }
+                  """
+      })
+  Boolean hasRole(String phone, Role role);
 }

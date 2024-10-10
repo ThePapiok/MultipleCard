@@ -44,6 +44,8 @@ public class ShopRepositoryTest {
     address1.setHouseNumber(TEST_HOUSE_NUMBER);
     address1.setApartmentNumber(1);
     Shop shop1 = new Shop();
+    shop1.setFirstName("firstName1");
+    shop1.setLastName("lastName1");
     shop1.setId(new ObjectId("123456789012345678901234"));
     shop1.setName("shop1");
     shop1.setTotalAmount(0L);
@@ -61,6 +63,8 @@ public class ShopRepositoryTest {
     address2.setApartmentNumber(1);
     Shop shop2 = new Shop();
     shop2.setId(new ObjectId("123456789012345678901235"));
+    shop2.setFirstName("firstName2");
+    shop2.setLastName("lastName2");
     shop2.setName("shop2");
     shop2.setTotalAmount(0L);
     shop2.setImageUrl("safddb123vberewrr");

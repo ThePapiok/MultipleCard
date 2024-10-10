@@ -1,8 +1,10 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.ChangePasswordDTO;
 import com.thepapiok.multiplecard.dto.CountryNamesDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.services.AuthenticationService;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.CountryService;
@@ -75,6 +77,7 @@ public class ProfileController {
       Principal principal,
       Model model,
       HttpSession httpSession) {
+    final String countriesParam = "countries";
     String phone = principal.getName();
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
@@ -89,15 +92,29 @@ public class ProfileController {
         httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
       }
     }
-    model.addAttribute("profile", profileService.getProfile(phone));
-    model.addAttribute("card", cardService.getCard(phone));
     model.addAttribute(
-        "countries",
+        countriesParam,
         countryService.getAll().stream()
             .map(e -> new CountryNamesDTO(e.getName(), e.getCode()))
             .distinct()
             .toList());
-    return "profilePage";
+    if (profileService.checkRole(phone, Role.ROLE_SHOP)) {
+      model.addAttribute("profileShop", profileService.getShop(phone));
+      return "profileShopPage";
+    } else {
+      model.addAttribute("profile", profileService.getProfile(phone));
+      model.addAttribute("card", cardService.getCard(phone));
+      return "profilePage";
+    }
+  }
+
+  @PostMapping("/shop")
+  public String editProfileShop(
+      @Valid @ModelAttribute ProfileShopDTO profileShop,
+      BindingResult bindingResult,
+      HttpSession httpSession) {
+    System.out.println(profileShop);
+    return "redirect:/login";
   }
 
   @PostMapping("/user")

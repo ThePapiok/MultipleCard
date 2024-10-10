@@ -1,6 +1,6 @@
 function checkLanguage() {
     const is = sessionStorage.getItem("isEn");
-    if (is !== null && is === 'true') {
+    if (is != null && is === 'true') {
         document.getElementById("enLanguage").style.display = "none";
         document.getElementById("plLanguage").style.display = "inline";
     } else {
@@ -11,7 +11,7 @@ function checkLanguage() {
 
 function setLanguage() {
     const is = sessionStorage.getItem("isEn");
-    if (is !== null) {
+    if (is != null) {
         if (is === 'true') {
             sessionStorage.setItem('isEn', 'false');
         } else {

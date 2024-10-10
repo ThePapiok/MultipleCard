@@ -12,6 +12,7 @@
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/profile.js"></script>
 <script src="/js/profilePage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -31,7 +32,7 @@
                     </label>
                     <label class="inputs">
                         <input th:field="*{firstName}" type="text" required th:value="*{firstName}"
-                               oninput="checkFirstName(this)" minlength="2" maxlength="15"
+                               oninput="checkFirstName(this, 1)" minlength="2" maxlength="15"
                                onmouseenter="showValidation(this, 'FirstName')"
                                onmouseleave="hideValidation('FirstName')">
                         <img hidden id="close1" src="/images/close.png" alt="close">
@@ -49,12 +50,11 @@
             </div>
             <label id="LastName">
                 <label class="placeholderWithInput">
-
                     <label class="placeholderInput" th:text="#{lastName.text}">
                     </label>
                     <label class="inputs">
                         <input th:field="*{lastName}" type="text" required th:value="*{lastName}"
-                               oninput="checkLastName(this)" minlength="2" maxlength="40"
+                               oninput="checkLastName(this, 2)" minlength="2" maxlength="40"
                                onmouseenter="showValidation(this, 'LastName')"
                                onmouseleave="hideValidation('LastName')">
                         <img hidden id="close2" src="/images/close.png" alt="close">
@@ -78,8 +78,9 @@
                     <label class="placeholderInput" th:text="#{street.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.street" id="streetInput" type="text" required th:value="*{address.street}"
-                               oninput="checkStreet(this)"
+                        <input name="address.street" id="streetInput" type="text" required
+                               th:value="*{address.street}"
+                               oninput="checkStreet(this, 3, 0)"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'Street')"
                                onmouseleave="hideValidation('Street')">
                         <img hidden id="close3" src="/images/close.png" alt="close">
@@ -101,8 +102,9 @@
                     <label class="placeholderInput" th:text="#{houseNumber.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.houseNumber" id="houseNumberInput" type="text" required th:value="*{address.houseNumber}"
-                               oninput="checkHouseNumber(this)" minlength="1" maxlength="10"
+                        <input name="address.houseNumber" id="houseNumberInput" type="text" required
+                               th:value="*{address.houseNumber}"
+                               oninput="checkHouseNumber(this, 4, 0)" minlength="1" maxlength="10"
                                onmouseenter="showValidation(this, 'HouseNumber')"
                                onmouseleave="hideValidation('HouseNumber')">
                         <img hidden id="close4" src="/images/close.png" alt="close">
@@ -123,8 +125,9 @@
                     <label class="placeholderInput" th:text="#{apartmentNumber.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.apartmentNumber" id="apartmentNumberInput" type="text" th:value="*{address.apartmentNumber}"
-                               oninput="checkApartmentNumber(this)" maxlength="6"
+                        <input name="address.apartmentNumber" id="apartmentNumberInput" type="text"
+                               th:value="*{address.apartmentNumber}"
+                               oninput="checkApartmentNumber(this, 5, 0)" maxlength="6"
                                onmouseenter="showValidation(this, 'ApartmentNumber')"
                                onmouseleave="hideValidation('ApartmentNumber')">
                         <img hidden id="close5" src="/images/close.png" alt="close">
@@ -148,8 +151,9 @@
                     <label class="placeholderInput" th:text="#{postalCode.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.postalCode" id="postalCodeInput" type="text" required th:value="*{address.postalCode}"
-                               oninput="checkPostalCode(this)" maxlength="6" minlength="6"
+                        <input name="address.postalCode" id="postalCodeInput" type="text" required
+                               th:value="*{address.postalCode}"
+                               oninput="checkPostalCode(this, 6, 0)" maxlength="6" minlength="6"
                                onmouseenter="showValidation(this, 'PostalCode')"
                                onmouseleave="hideValidation('PostalCode')">
                         <img hidden id="close6" src="/images/close.png" alt="close">
@@ -169,7 +173,8 @@
                     <label class="placeholderInput" th:text="#{city.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.city" id="cityInput" type="text" required oninput="checkCity(this)" th:value="*{address.city}"
+                        <input name="address.city" id="cityInput" type="text" required oninput="checkCity(this, 7, 0)"
+                               th:value="*{address.city}"
                                minlength="2" maxlength="40" onmouseenter="showValidation(this, 'City')"
                                onmouseleave="hideValidation('City')">
                         <img hidden id="close7" src="/images/close.png" alt="close">
@@ -193,8 +198,9 @@
                     <label class="placeholderInput" th:text="#{province.text}">
                     </label>
                     <label class="inputs">
-                        <input name="address.province" id="provinceInput" type="text" required th:value="*{address.province}"
-                               oninput="checkProvince(this)" minlength="2" maxlength="40"
+                        <input name="address.province" id="provinceInput" type="text" required
+                               th:value="*{address.province}"
+                               oninput="checkProvince(this, 8, 0)" minlength="2" maxlength="40"
                                onmouseenter="showValidation(this, 'Province')"
                                onmouseleave="hideValidation('Province')">
                         <img hidden id="close8" src="/images/close.png" alt="close">
@@ -227,7 +233,7 @@
                 <ul id="optionsCountry" class="optionsSelect">
                     <li class="optionSelect optionCountry" th:data-code="${country.code}"
                         th:each="country : ${countries}" th:text="${country.name} + ' (' + ${country.code} + ')'"
-                        onclick="setValueCountry(this)"></li>
+                        onclick="setValueCountry(this, 9, 0)"></li>
                     <li id="nothingCountry" th:text="#{select.no_results}"></li>
                 </ul>
             </label>
@@ -235,7 +241,7 @@
         <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="saveButton" th:text="#{profilePage.button.save}"></button>
+            <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"></button>
         </a>
         <a th:href="@{/password_change}">
             <button type="button" class="blackButton" th:text="#{password.button.change}"></button>
@@ -244,7 +250,7 @@
             <button type="button" class="redButton" th:text="#{delete_account}"></button>
         </a>
     </form>
-    <p class="title" th:text="#{profilePage.2_title}"></p>
+    <p class="title" th:text="#{profilePage.2_title}" sec:authorize="hasRole('USER')"></p>
     <div id="cardInfo" sec:authorize="hasRole('USER')">
         <p class="nameCard" th:if="${card} == null" th:text="#{profilePage.card.not_found}"></p>
         <p class="nameCard" th:if="${card} != null" th:text="${card.name}"></p>

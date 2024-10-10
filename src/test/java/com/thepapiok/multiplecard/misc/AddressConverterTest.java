@@ -11,33 +11,57 @@ import org.junit.jupiter.api.Test;
 public class AddressConverterTest {
 
   private static AddressDTO TEST_ADDRESS_DTO;
+  private static AddressDTO TEST_OTHER_ADDRESS_DTO;
   private static Address TEST_ADDRESS;
+  private static Address TEST_OTHER_ADDRESS;
   private final AddressConverter addressConverter = new AddressConverter();
 
   @BeforeAll
   public static void setUp() {
-    final String province = "province1";
-    final String city = "city1";
-    final String street = "street1";
-    final String postalCode = "postalCode1";
-    final String houseNumber = "houseNumber1";
-    final String country = "country1";
+    final String provinceTest1 = "province1";
+    final String cityTest1 = "city1";
+    final String streetTest1 = "street1";
+    final String postalCodeTest1 = "postalCode1";
+    final String houseNumberTest1 = "houseNumber1";
+    final String countryTest1 = "country1";
+    final String provinceTest2 = "province2";
+    final String cityTest2 = "city2";
+    final String streetTest2 = "street2";
+    final String postalCodeTest2 = "postalCode2";
+    final String houseNumberTest2 = "houseNumber2";
+    final String countryTest2 = "country2";
     TEST_ADDRESS_DTO = new AddressDTO();
-    TEST_ADDRESS_DTO.setProvince(province);
-    TEST_ADDRESS_DTO.setCity(city);
-    TEST_ADDRESS_DTO.setStreet(street);
-    TEST_ADDRESS_DTO.setPostalCode(postalCode);
-    TEST_ADDRESS_DTO.setHouseNumber(houseNumber);
+    TEST_ADDRESS_DTO.setProvince(provinceTest1);
+    TEST_ADDRESS_DTO.setCity(cityTest1);
+    TEST_ADDRESS_DTO.setStreet(streetTest1);
+    TEST_ADDRESS_DTO.setPostalCode(postalCodeTest1);
+    TEST_ADDRESS_DTO.setHouseNumber(houseNumberTest1);
     TEST_ADDRESS_DTO.setApartmentNumber("1");
-    TEST_ADDRESS_DTO.setCountry(country);
+    TEST_ADDRESS_DTO.setCountry(countryTest1);
     TEST_ADDRESS = new Address();
-    TEST_ADDRESS.setProvince(province);
-    TEST_ADDRESS.setCity(city);
-    TEST_ADDRESS.setStreet(street);
-    TEST_ADDRESS.setPostalCode(postalCode);
-    TEST_ADDRESS.setHouseNumber(houseNumber);
+    TEST_ADDRESS.setProvince(provinceTest1);
+    TEST_ADDRESS.setCity(cityTest1);
+    TEST_ADDRESS.setStreet(streetTest1);
+    TEST_ADDRESS.setPostalCode(postalCodeTest1);
+    TEST_ADDRESS.setHouseNumber(houseNumberTest1);
     TEST_ADDRESS.setApartmentNumber(1);
-    TEST_ADDRESS.setCountry(country);
+    TEST_ADDRESS.setCountry(countryTest1);
+    TEST_OTHER_ADDRESS_DTO = new AddressDTO();
+    TEST_OTHER_ADDRESS_DTO.setProvince(provinceTest2);
+    TEST_OTHER_ADDRESS_DTO.setCity(cityTest2);
+    TEST_OTHER_ADDRESS_DTO.setStreet(streetTest2);
+    TEST_OTHER_ADDRESS_DTO.setPostalCode(postalCodeTest2);
+    TEST_OTHER_ADDRESS_DTO.setHouseNumber(houseNumberTest2);
+    TEST_OTHER_ADDRESS_DTO.setApartmentNumber("2");
+    TEST_OTHER_ADDRESS_DTO.setCountry(countryTest2);
+    TEST_OTHER_ADDRESS = new Address();
+    TEST_OTHER_ADDRESS.setProvince(provinceTest2);
+    TEST_OTHER_ADDRESS.setCity(cityTest2);
+    TEST_OTHER_ADDRESS.setStreet(streetTest2);
+    TEST_OTHER_ADDRESS.setPostalCode(postalCodeTest2);
+    TEST_OTHER_ADDRESS.setHouseNumber(houseNumberTest2);
+    TEST_OTHER_ADDRESS.setApartmentNumber(2);
+    TEST_OTHER_ADDRESS.setCountry(countryTest2);
   }
 
   @Test
@@ -52,31 +76,15 @@ public class AddressConverterTest {
 
   @Test
   public void shouldSuccessAtGetEntities() {
-    final String province = "province2";
-    final String city = "city2";
-    final String street = "street2";
-    final String postalCode = "postalCode2";
-    final String houseNumber = "houseNumber2";
-    final String country = "country2";
-    AddressDTO addressDTO = new AddressDTO();
-    addressDTO.setProvince(province);
-    addressDTO.setCity(city);
-    addressDTO.setStreet(street);
-    addressDTO.setPostalCode(postalCode);
-    addressDTO.setHouseNumber(houseNumber);
-    addressDTO.setApartmentNumber("2");
-    addressDTO.setCountry(country);
-    Address address = new Address();
-    address.setProvince(province);
-    address.setCity(city);
-    address.setStreet(street);
-    address.setPostalCode(postalCode);
-    address.setHouseNumber(houseNumber);
-    address.setApartmentNumber(2);
-    address.setCountry(country);
-
     assertEquals(
-        List.of(TEST_ADDRESS, address),
-        addressConverter.getEntities(List.of(TEST_ADDRESS_DTO, addressDTO)));
+        List.of(TEST_ADDRESS, TEST_OTHER_ADDRESS),
+        addressConverter.getEntities(List.of(TEST_ADDRESS_DTO, TEST_OTHER_ADDRESS_DTO)));
+  }
+
+  @Test
+  public void shouldSuccessAtGetDTOs() {
+    assertEquals(
+        List.of(TEST_ADDRESS_DTO, TEST_OTHER_ADDRESS_DTO),
+        addressConverter.getDTOs(List.of(TEST_ADDRESS, TEST_OTHER_ADDRESS)));
   }
 }

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <script th:inline="javascript">
+        const list = /*[[${countries}]]*/ [];
+    </script>
+    <script th:inline="javascript">
+        const points = /*[[${profileShop.addresses}]]*/ [];
+    </script>
+    <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <link rel="stylesheet" href="/css/profileShopPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/shop.js"></script>
+<script src="/js/profile.js"></script>
+<script src="/js/profileShopPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="#{place.text}" id="textPlace"></span>
+    <span hidden th:text="#{street.text}" id="textStreet"></span>
+    <span hidden th:text="#{validation.text}" id="textValidation"></span>
+    <span hidden th:text="#{validation.each_part_uppercase}" id="textValidationPartUppercase"></span>
+    <span hidden th:text="#{validation.only_letters}" id="textValidationOnlyLetters"></span>
+    <span hidden th:text="#{validation.max_2_parts}" id="textValidationMax2Parts"></span>
+    <span hidden th:text="#{validation.prefix_length}" id="textValidationPrefixLength"></span>
+    <span hidden th:text="#{validation.prefix_length_is}" id="textValidationPrefixLengthIs"></span>
+    <span hidden th:text="#{validation.suffix_length}" id="textValidationSuffixLength"></span>
+    <span hidden th:text="#{houseNumber.text}" id="textHouseNumber"></span>
+    <span hidden th:text="#{houseNumber.validation.1_condition}" id="textHouseNumberValidation1"></span>
+    <span hidden th:text="#{houseNumber.validation.2_condition}" id="textHouseNumberValidation2"></span>
+    <span hidden th:text="#{apartmentNumber.text}" id="textApartmentNumber"></span>
+    <span hidden th:text="#{apartmentNumber.validation.1_condition}" id="textApartmentNumberValidation1"></span>
+    <span hidden th:text="#{apartmentNumber.validation.2_condition}" id="textApartmentNumberValidation2"></span>
+    <span hidden th:text="#{validation.only_digits}" id="textValidationOnlyDigits"></span>
+    <span hidden th:text="#{postalCode.text}" id="textPostalCode"></span>
+    <span hidden th:text="#{city.text}" id="textCity"></span>
+    <span hidden th:text="#{country.text}" id="textCountry"></span>
+    <span hidden th:text="#{province.text}" id="textProvince"></span>
+    <span hidden th:text="#{select.no_results}" id="textNoResults"></span>
+    <span hidden th:text="#{upload_image.bad_type}" id="textBadType"></span>
+    <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
+    <span hidden th:text="#{upload_image.too_small}" id="textTooSmall"></span>
+    <p class="title" th:text="#{profilePage.1_title}"></p>
+    <div class="block-horizontally" id="TotalAmount">
+        <label>
+            <label class="placeholderWithInput">
+                <label class="placeholderInput" th:text="#{profileShopPage.total_amount.text}"
+                       id="placeholderTotalAmount">
+                </label>
+                <label class="inputs" id="inputTotalAmount">
+                    <span th:text="${profileShop.totalAmount} + ' zł'"></span>
+                </label>
+            </label>
+        </label>
+    </div>
+    <form th:action="@{/shop}" th:object="${profileShop}" id="form" method="post" enctype="multipart/form-data">
+        <div class="block-horizontally">
+            <label id="FirstName">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{firstName.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{firstName}" type="text" required th:value="*{firstName}"
+                               oninput="checkFirstName(this, 1)" minlength="2" maxlength="15"
+                               onmouseenter="showValidation(this, 'FirstName')"
+                               onmouseleave="hideValidation('FirstName')">
+                        <img hidden id="close1" src="/images/close.png" alt="close">
+                        <img hidden id="check1" src="/images/check.png" alt="check">
+                    </label>
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{firstName.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.starts_uppercase}"></li>
+                    <li th:text="#{validation.only_letters}"></li>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 15'"></li>
+                </ul>
+            </div>
+            <label id="LastName">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{lastName.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{lastName}" type="text" required th:value="*{lastName}"
+                               oninput="checkLastName(this, 2)" minlength="2" maxlength="40"
+                               onmouseenter="showValidation(this, 'LastName')"
+                               onmouseleave="hideValidation('LastName')">
+                        <img hidden id="close2" src="/images/close.png" alt="close">
+                        <img hidden id="check2" src="/images/check.png" alt="check">
+                    </label>
+                </label>
+            </label>
+            <div class="validation" id="validationLastName">
+                <span th:text="#{lastName.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.max_2_parts}"></li>
+                    <li th:text="#{validation.each_part_uppercase}"></li>
+                    <li th:text="#{validation.only_letters}"></li>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 40'"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="Name">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{shop_name.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{name}" id="nameInput" type="text" required
+                               th:value="*{name}"
+                               oninput="checkShopName(this)"
+                               minlength="2" maxlength="20" onmouseenter="showValidation(this, 'Name')"
+                               onmouseleave="hideValidation('Name')">
+                        <img hidden id="close3" src="/images/close.png" alt="close">
+                        <img hidden id="check3" src="/images/check.png" alt="check">
+                    </label>
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{shop_name.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 20'"></li>
+                </ul>
+            </div>
+            <label id="AccountNumber">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{account_number.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{accountNumber}" id="accountNumberInput" type="text" required
+                               th:value="*{accountNumber}"
+                               oninput="checkAccountNumber(this)" minlength="26" maxlength="26"
+                               onmouseenter="showValidation(this, 'AccountNumber')"
+                               onmouseleave="hideValidation('AccountNumber')">
+                        <img hidden id="close4" src="/images/close.png" alt="close">
+                        <img hidden id="check4" src="/images/check.png" alt="check">
+                    </label>
+                </label>
+            </label>
+            <div class="validation" id="validationAccountNumber">
+                <span th:text="#{account_number.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 26'"></li>
+                </ul>
+            </div>
+        </div>
+        <p th:text="#{upload_image.text}" id="titleUploadImage"></p>
+        <label id="uploadFile">
+            <input th:field="*{file}" type="file" oninput="setImage(this, true)" accept="image/png, image/jpeg"
+                   onmouseenter="showValidation(this, 'uploadFile')"
+                   onmouseleave="hideValidation('uploadFile')">
+            <img hidden id="noImage" src="/images/upload.png" alt="upload">
+            <img id="image" th:src="*{imageUrl}" alt="image">
+        </label>
+        <div class="validation">
+            <span th:text="#{upload_image.text} + ' ' + #{validation.text}"></span>
+            <ul>
+                <li th:text="#{upload_image.validation1}"></li>
+                <li th:text="#{upload_image.validation2}"></li>
+                <li th:text="#{upload_image.validation3}"></li>
+            </ul>
+        </div>
+        <p id="errorFile"></p>
+        <div id="formPlaces">
+            <div class="block-horizontally" id="blockPlace">
+                <input disabled th:value="#{places.text}" id="textPlaces">
+                <div id="numberPlaces">
+                    <span id="numberPlace">0</span>
+                    <img id="plus" src="/images/plus.png" alt="plus"
+                         onclick="addPlace(this, '', '', '', '', '', '', '', 2)">
+                </div>
+            </div>
+            <div id="places">
+            </div>
+        </div>
+        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
+        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"></button>
+        </a>
+        <a th:href="@{/password_change}">
+            <button type="button" class="blackButton" th:text="#{password.button.change}"></button>
+        </a>
+        <a th:href="@{/delete_account}">
+            <button type="button" class="redButton" th:text="#{delete_account}"></button>
+        </a>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>
