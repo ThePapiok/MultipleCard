@@ -21,7 +21,7 @@
     <a sec:authorize="isAnonymous()" th:href="@{/register}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.register}"></button>
     </a>
-    <a sec:authorize="isAuthenticated()" th:href="@{/user}" class="h2 headerButton">
+    <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="h2 headerButton">
         <button class="blackButton" th:text="#{button.profile}"></button>
     </a>
     <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">

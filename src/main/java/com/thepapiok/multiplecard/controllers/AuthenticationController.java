@@ -318,7 +318,6 @@ public class AuthenticationController {
               + SUFFIX_VERIFICATION_MESSAGE
               + verificationNumber,
           callingCode + phone);
-      System.out.println(verificationNumber);
       httpSession.setAttribute(param, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
@@ -335,7 +334,6 @@ public class AuthenticationController {
               + verificationNumber,
           email,
           locale);
-      System.out.println(verificationNumber);
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;
@@ -528,7 +526,6 @@ public class AuthenticationController {
     final int maxListSize = 5;
     boolean error = false;
     String message = "";
-    httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
@@ -538,42 +535,30 @@ public class AuthenticationController {
     } else if (authenticationService.emailExists(register.getEmail())) {
       error = true;
       message = messageSource.getMessage(ERROR_REGISTER_SAME_EMAIL_MESSAGE, null, locale);
-    } else if (shopService.checkShopNameExists(register.getName())) {
+    } else if (shopService.checkShopNameExists(register.getName(), null)) {
       error = true;
-      message =
-          messageSource.getMessage("authenticationController.register.same_name", null, locale);
-    } else if (shopService.checkAccountNumberExists(accountNumber)) {
+      message = messageSource.getMessage("error.same_name", null, locale);
+    } else if (shopService.checkAccountNumberExists(accountNumber, null)) {
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.same_account_number", null, locale);
+      message = messageSource.getMessage("error.same_account_number", null, locale);
     } else if (!register.getPassword().equals(register.getRetypedPassword())) {
       error = true;
       message = messageSource.getMessage(ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE, null, locale);
     } else if (!shopService.checkAccountNumber(accountNumber)) {
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.bad_account_number", null, locale);
+      message = messageSource.getMessage("error.bad_account_number", null, locale);
     } else if (points.size() == 0 || points.size() > maxListSize) {
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.bad_size_points", null, locale);
+      message = messageSource.getMessage("error.bad_size_points", null, locale);
     } else if (new HashSet<>(points).size() != points.size()) {
       error = true;
-      message =
-          messageSource.getMessage("authenticationController.register.same_points", null, locale);
-    } else if (shopService.checkPointsExists(points)) {
-      System.out.println("xd");
+      message = messageSource.getMessage("error.same_points", null, locale);
+    } else if (shopService.checkPointsExists(points, null)) {
       error = true;
-      message =
-          messageSource.getMessage(
-              "authenticationController.register.same_other_points", null, locale);
+      message = messageSource.getMessage("error.same_other_points", null, locale);
     } else if (!shopService.checkImage(file)) {
       error = true;
-      message =
-          messageSource.getMessage("authenticationController.register.bad_file", null, locale);
+      message = messageSource.getMessage("error.bad_file", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
@@ -584,7 +569,10 @@ public class AuthenticationController {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED, null, locale));
       return REDIRECT_LOGIN_ERROR;
-    } else if (!generateVerificationSms(
+    } else {
+      httpSession.setAttribute(FILE_PATH_PARAM, filePath);
+    }
+    if (!generateVerificationSms(
         httpSession,
         register.getPhone(),
         register.getCallingCode(),
@@ -600,7 +588,7 @@ public class AuthenticationController {
           messageSource.getMessage(ERROR_SEND_EMAIL_PARAM_MESSAGE, null, locale));
       return REDIRECT_SHOP_VERIFICATION_ERROR;
     }
-    httpSession.setAttribute(FILE_PATH_PARAM, filePath);
+    httpSession.setAttribute(REGISTER_PARAM, register);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 1);
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
@@ -649,7 +637,6 @@ public class AuthenticationController {
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
       return REDIRECT_LOGIN_ERROR;
     } else if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
@@ -672,14 +659,12 @@ public class AuthenticationController {
       return REDIRECT_SHOP_VERIFICATION_ERROR;
     } else if (fileList.size() <= 1 || fileList.size() >= maxSize) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM,
-          messageSource.getMessage("verificationShopPage.error.bad_size", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.bad_size", null, locale));
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       return REDIRECT_SHOP_VERIFICATION_ERROR;
     } else if (!shopService.checkFiles(fileList)) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM,
-          messageSource.getMessage("verificationShopPage.error.bad_files", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.bad_files", null, locale));
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       return REDIRECT_SHOP_VERIFICATION_ERROR;
     } else if (!authenticationService.createShop(

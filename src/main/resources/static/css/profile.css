@@ -7,6 +7,7 @@ input {
     color: lightgray;
 }
 
+
 .placeholderWithInput {
     display: flex;
     margin: 0;
@@ -84,6 +85,24 @@ input {
     transform: translateX(-100%);
 }
 
+#TotalAmount {
+    width: 30%;
+    margin-left: 3%;
+}
+
+#placeholderTotalAmount {
+    width: 50%;
+}
+
+#inputTotalAmount {
+    padding: 5px;
+    width: 50%;
+    justify-content: flex-end;
+    align-items: center;
+    border: 1px solid gray;
+    font-family: "Inter", sans-serif;
+}
+
 @media only screen and (max-width: 768px) {
     .placeholderInput {
         font-size: 12px;
@@ -101,5 +120,15 @@ input {
 
     .cardButton {
         width: 100%;
+    }
+
+    .placeholderWithInput {
+        height: 50px;
+        margin: 10px !important;
+    }
+
+    #TotalAmount {
+        width: 90%;
+        display: block;
     }
 }

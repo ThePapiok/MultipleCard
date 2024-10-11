@@ -7,6 +7,7 @@ const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńó�
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
 const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
+const regAccountNumber = new RegExp("^[0-9]*$");
 let previousPostalCode = "";
 let country = false;
 let callingCode = false;
@@ -57,7 +58,7 @@ function activeButton(id, ok, success, isSubmit) {
     let cond = true;
     let allNulls = true;
     for (let i = 0; i < ok.length; i++) {
-        if (ok[i] !== null) {
+        if (ok[i] != null) {
             allNulls = false;
             if (!ok[i]) {
                 cond = false;
@@ -82,7 +83,7 @@ function disableButton(id, ok, success, isSubmit) {
     let cond = false;
     let allNulls = true;
     for (let i = 0; i < ok.length; i++) {
-        if (ok[i] !== null) {
+        if (ok[i] != null) {
             allNulls = false;
             if (!ok[i]) {
                 cond = true;
@@ -272,7 +273,7 @@ function checkVerificationSms(e, value) {
 
 function setFullPhone() {
     let fullPhone = document.getElementById("fullPhone");
-    if (fullPhone !== null) {
+    if (fullPhone != null) {
         fullPhone.value = callingCodeValue + phoneValue;
     }
 }
@@ -305,11 +306,14 @@ function checkCallingCode(e, value) {
     checkPhone(document.getElementById("phone"), value + 1);
 }
 
-function pressedCorrectButton(){
+function pressedCorrectButton() {
     buttons = true;
 }
 
-function getSmsCode(phone, param, newUser) {
+function getSmsCode(phone, param, newUser, enable) {
+    if(enable){
+        enableInputs();
+    }
     fetch("/get_verification_sms", {
         method: "POST",
         headers: {

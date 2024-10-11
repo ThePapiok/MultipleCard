@@ -44,4 +44,8 @@ public class AddressConverter {
   public List<Address> getEntities(List<AddressDTO> list) {
     return list.stream().map(this::getEntity).toList();
   }
+
+  public List<AddressDTO> getDTOs(List<Address> list) {
+    return list.stream().map(this::getDTO).toList();
+  }
 }

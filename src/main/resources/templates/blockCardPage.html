@@ -11,8 +11,8 @@
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
-<script src="/js/forms.js"></script>
 <script src="/js/disable.js"></script>
+<script src="/js/forms.js"></script>
 <script src="/js/blockCardPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -52,7 +52,7 @@
         </a>
         <a>
             <button type="button" class="blackButton"
-                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsBlock', false)|" onmousedown="pressedCorrectButton()" onclick="enableInputs()"></button>
+                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsBlock', false, true)|" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/block_card?reset'}">
             <button type="button" class="redButton" id="resetButton"

@@ -1,10 +1,6 @@
-let ok = [false, false, false];
-let previous = [false, false, false];
-const buttonId = "registerButton";
-
-function atStart() {
-    checkLanguage();
-}
+let ok = [false];
+let previous = [false];
+const buttonId = "saveButton";
 
 window.addEventListener('beforeunload', function (event) {
     if (buttons) {
@@ -19,8 +15,8 @@ window.addEventListener('beforeunload', function (event) {
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: new URLSearchParams({
-            "codeSmsParam": "codeSmsRegisterShop",
-            "formObjectParam": "register"
+            "codeSmsParam": "codeSmsEdit",
+            "formObjectParam": "edit"
         })
     }).catch((error) => {
         console.error(error);

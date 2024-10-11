@@ -3,12 +3,10 @@ let previous = [false];
 const buttonId = "deleteButton";
 
 window.addEventListener('beforeunload', function (event) {
-    console.log("haha");
     if (buttons) {
         buttons = false;
         return;
     }
-    console.log("haha2");
     event.preventDefault();
     event.returnValue = '';
     fetch("/reset_session", {

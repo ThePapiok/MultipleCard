@@ -17,6 +17,8 @@ public class ShopConverter {
 
   public Shop getEntity(RegisterShopDTO registerShopDTO) {
     Shop shop = new Shop();
+    shop.setFirstName(registerShopDTO.getFirstName());
+    shop.setLastName(registerShopDTO.getLastName());
     shop.setName(registerShopDTO.getName());
     shop.setAccountNumber(registerShopDTO.getAccountNumber());
     shop.setImageUrl("");

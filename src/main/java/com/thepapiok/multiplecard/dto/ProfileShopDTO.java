@@ -5,10 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class ProfileDTO {
+public class ProfileShopDTO {
   @NotBlank
   @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$")
   @Size(min = 2, max = 15)
@@ -19,6 +21,17 @@ public class ProfileDTO {
   @Size(min = 2, max = 40)
   private String lastName;
 
-  @Valid @NotNull private AddressDTO address;
-  private int points;
+  @NotBlank
+  @Size(min = 2, max = 20)
+  private String name;
+
+  @NotBlank
+  @Pattern(regexp = "^[0-9]*$")
+  @Size(min = 26, max = 26)
+  private String accountNumber;
+
+  @Valid @NotNull private List<AddressDTO> address;
+  private String imageUrl;
+  private String totalAmount;
+  private MultipartFile file;
 }

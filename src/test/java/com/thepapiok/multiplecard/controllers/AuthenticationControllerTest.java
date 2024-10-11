@@ -460,8 +460,6 @@ public class AuthenticationControllerTest {
   private void performPostRegister(
       RegisterDTO expectedRegisterDTO, MockHttpSession httpSession, String redirectUrl)
       throws Exception {
-    System.out.println(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM);
-    System.out.println(expectedRegisterDTO.getAddress().getStreet());
     mockMvc
         .perform(
             post(REGISTER_URL)
@@ -1113,11 +1111,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(false);
+    when(shopService.checkPointsExists(registerShopDTO.getAddress(), null)).thenReturn(false);
     when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
@@ -1182,7 +1180,7 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(true);
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals("Taka nazwa lokalu już istnieje", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -1199,8 +1197,9 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber())).thenReturn(true);
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
+        .thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals(
@@ -1219,8 +1218,8 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(false);
 
@@ -1307,8 +1306,8 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
 
@@ -1409,8 +1408,8 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
 
@@ -1460,11 +1459,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(true);
+    when(shopService.checkPointsExists(List.of(addressDTO), null)).thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
     assertEquals("Takie lokale już istnieją", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -1480,11 +1479,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+    when(shopService.checkPointsExists(List.of(addressDTO), null)).thenReturn(false);
     when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(false);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
@@ -1501,11 +1500,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(registerShopDTO.getAddress())).thenReturn(false);
+    when(shopService.checkPointsExists(registerShopDTO.getAddress(), null)).thenReturn(false);
     when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     when(passwordEncoder.encode(TEST_CODE)).thenReturn(TEST_ENCODE_CODE);
@@ -1525,11 +1524,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+    when(shopService.checkPointsExists(List.of(addressDTO), null)).thenReturn(false);
     when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
     when(shopService.saveTempFile(registerShopDTO.getFile())).thenReturn(FILE_PATH_PARAM);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
@@ -1554,11 +1553,11 @@ public class AuthenticationControllerTest {
             registerShopDTO.getCallingCode() + registerShopDTO.getPhone()))
         .thenReturn(false);
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(false);
-    when(shopService.checkShopNameExists(registerShopDTO.getName())).thenReturn(false);
-    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber()))
+    when(shopService.checkShopNameExists(registerShopDTO.getName(), null)).thenReturn(false);
+    when(shopService.checkAccountNumberExists(registerShopDTO.getAccountNumber(), null))
         .thenReturn(false);
     when(shopService.checkAccountNumber(registerShopDTO.getAccountNumber())).thenReturn(true);
-    when(shopService.checkPointsExists(List.of(addressDTO))).thenReturn(false);
+    when(shopService.checkPointsExists(List.of(addressDTO), null)).thenReturn(false);
     when(shopService.checkImage(registerShopDTO.getFile())).thenReturn(true);
     when(shopService.saveTempFile(registerShopDTO.getFile())).thenReturn(FILE_PATH_PARAM);
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);

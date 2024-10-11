@@ -1,0 +1,7 @@
+#textPlaces, .place, .searchSelect {
+    color: black;
+}
+
+#validationProvince {
+    transform: translateX(-100%);
+}

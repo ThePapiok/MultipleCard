@@ -1,7 +1,7 @@
 function atStart(page, isDescending, field) {
     checkLanguage();
     let selectedPage = document.getElementById("page" + page);
-    if (selectedPage !== null) {
+    if (selectedPage != null) {
         selectedPage.classList.add("selectedPage");
     }
     let searchSelect = document.getElementById("searchSelect");

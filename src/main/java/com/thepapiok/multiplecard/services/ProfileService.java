@@ -12,14 +12,20 @@ import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
+import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
@@ -43,6 +50,8 @@ public class ProfileService {
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
   private final CloudinaryService cloudinaryService;
+  private final ShopRepository shopRepository;
+  private final EmailService emailService;
 
   @Autowired
   public ProfileService(
@@ -54,7 +63,9 @@ public class ProfileService {
       ProductRepository productRepository,
       MongoTemplate mongoTemplate,
       MongoTransactionManager mongoTransactionManager,
-      CloudinaryService cloudinaryService) {
+      CloudinaryService cloudinaryService,
+      ShopRepository shopRepository,
+      EmailService emailService) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.profileConverter = profileConverter;
@@ -64,6 +75,8 @@ public class ProfileService {
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
     this.cloudinaryService = cloudinaryService;
+    this.shopRepository = shopRepository;
+    this.emailService = emailService;
   }
 
   public ProfileDTO getProfile(String phone) {
@@ -140,6 +153,62 @@ public class ProfileService {
                   }
                 }
                 mongoTemplate.remove(query(where(idParam).is(id)), User.class);
+              }
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  public boolean checkRole(String phone, Role role) {
+    Boolean isFound = accountRepository.hasRole(phone, role);
+    return isFound != null && isFound;
+  }
+
+  public ProfileShopDTO getShop(String phone) {
+    Optional<Shop> optionalShop =
+        shopRepository.findById(accountRepository.findIdByPhone(phone).getId());
+    if (optionalShop.isPresent()) {
+      return profileConverter.getDTO(optionalShop.get());
+    } else {
+      return null;
+    }
+  }
+
+  public boolean editProfileShop(
+      ProfileShopDTO profileShopDTO,
+      String filePath,
+      Locale locale,
+      List<MultipartFile> fileList,
+      String phone) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              Shop shop = profileConverter.getEntity(profileShopDTO, phone);
+              if (filePath != null) {
+                try {
+                  Path path = Path.of(filePath);
+                  shop.setImageUrl(
+                      cloudinaryService.addImage(
+                          Files.readAllBytes(path), shop.getId().toHexString()));
+                  Files.deleteIfExists(path);
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+              mongoTemplate.save(shop);
+              Account account = accountRepository.findByPhone(phone);
+              account.setActive(false);
+              mongoTemplate.save(account);
+              try {
+                emailService.sendEmailWithAttachment(shop, account, locale, fileList);
+              } catch (MessagingException e) {
+                throw new RuntimeException(e);
               }
             }
           });
