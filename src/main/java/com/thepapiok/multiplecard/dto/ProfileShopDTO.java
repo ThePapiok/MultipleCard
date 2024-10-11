@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -29,8 +30,8 @@ public class ProfileShopDTO {
   @Size(min = 26, max = 26)
   private String accountNumber;
 
-  @NotNull private List<AddressDTO> addresses;
+  @Valid @NotNull private List<AddressDTO> address;
   private String imageUrl;
-  @NotBlank private String totalAmount;
+  private String totalAmount;
   private MultipartFile file;
 }

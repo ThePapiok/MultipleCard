@@ -171,8 +171,7 @@ public class AuthenticationService {
               account.setBanned(false);
               mongoTemplate.save(account);
               try {
-                emailService.sendEmailWithAttachment(
-                    registerShopDTO, locale, id[0], fileList, shop.getImageUrl());
+                emailService.sendEmailWithAttachment(shop, account, locale, fileList);
               } catch (MessagingException e) {
                 throw new RuntimeException(e);
               }

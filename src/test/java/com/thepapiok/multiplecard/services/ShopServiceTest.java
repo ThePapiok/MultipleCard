@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.misc.AddressConverter;
-import com.thepapiok.multiplecard.repositories.ShopRepository;
+import com.thepapiok.multiplecard.repositories.AccountRepository;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -44,15 +44,15 @@ public class ShopServiceTest {
   private static final String TEST_OTHER_CONTENT_TYPE = "application/pdf";
   private static final String IBAN_API_URL =
       "https://api.ibanapi.com/v1/validate-basic/PL12312312312312312312312?api_key=null";
-  @Mock private ShopRepository shopRepository;
   @Mock private AddressConverter addressConverter;
   @Mock private RestTemplate restTemplate;
+  @Mock private AccountRepository accountRepository;
   private ShopService shopService;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    shopService = new ShopService(shopRepository, addressConverter, restTemplate);
+    shopService = new ShopService(addressConverter, accountRepository, restTemplate);
   }
 
   @Test
@@ -132,31 +132,33 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckAccountNumberExists() {
-    when(shopRepository.existsByAccountNumber(TEST_ACCOUNT_NUMBER)).thenReturn(true);
+  public void shouldSuccessAtCheckAccountNumberExistsWhenNullPhone() {
+    when(accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER, null))
+        .thenReturn(true);
 
-    assertTrue(shopService.checkAccountNumberExists(TEST_ACCOUNT_NUMBER));
+    assertTrue(shopService.checkAccountNumberExists(TEST_ACCOUNT_NUMBER, null));
   }
 
   @Test
-  public void shouldFailAtCheckAccountNumberExistsWhenNotFound() {
-    when(shopRepository.existsByAccountNumber(TEST_ACCOUNT_NUMBER)).thenReturn(false);
+  public void shouldFailAtCheckAccountNumberExistsWhenNotFoundAndNullPhone() {
+    when(accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER, null))
+        .thenReturn(false);
 
-    assertFalse(shopService.checkAccountNumberExists(TEST_ACCOUNT_NUMBER));
+    assertFalse(shopService.checkAccountNumberExists(TEST_ACCOUNT_NUMBER, null));
   }
 
   @Test
-  public void shouldSuccessAtCheckShopNameExists() {
-    when(shopRepository.existsByName(TEST_SHOP_NAME)).thenReturn(true);
+  public void shouldSuccessAtCheckShopNameExistsWhenNullPhone() {
+    when(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME, null)).thenReturn(true);
 
-    assertTrue(shopService.checkShopNameExists(TEST_SHOP_NAME));
+    assertTrue(shopService.checkShopNameExists(TEST_SHOP_NAME, null));
   }
 
   @Test
-  public void shouldFailAtCheckShopNameExistsWhenNotFound() {
-    when(shopRepository.existsByName(TEST_SHOP_NAME)).thenReturn(false);
+  public void shouldFailAtCheckShopNameExistsWhenNotFoundAndNullPhone() {
+    when(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME, null)).thenReturn(false);
 
-    assertFalse(shopService.checkShopNameExists(TEST_SHOP_NAME));
+    assertFalse(shopService.checkShopNameExists(TEST_SHOP_NAME, null));
   }
 
   @Test
@@ -179,7 +181,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckPointExists() {
+  public void shouldSuccessAtCheckPointExistsWhenNullPhone() {
     AddressDTO addressDTO1 = new AddressDTO();
     AddressDTO addressDTO2 = new AddressDTO();
     List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
@@ -188,13 +190,13 @@ public class ShopServiceTest {
     List<Address> addresses = List.of(address1, address2);
 
     when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
-    when(shopRepository.existsByPoint(address1)).thenReturn(true);
+    when(accountRepository.existsByPointsOtherThanPhone(address1, null)).thenReturn(true);
 
-    assertTrue(shopService.checkPointsExists(addressDTOList));
+    assertTrue(shopService.checkPointsExists(addressDTOList, null));
   }
 
   @Test
-  public void shouldFailAtCheckPointExistsWhenNoTheSamePlaces() {
+  public void shouldFailAtCheckPointExistsWhenNoTheSamePlacesWhenNullPhone() {
     AddressDTO addressDTO1 = new AddressDTO();
     AddressDTO addressDTO2 = new AddressDTO();
     List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
@@ -204,22 +206,7 @@ public class ShopServiceTest {
 
     when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
 
-    assertFalse(shopService.checkPointsExists(addressDTOList));
-  }
-
-  @Test
-  public void shouldFailAtCheckPointExistsWhenGetNull() {
-    AddressDTO addressDTO1 = new AddressDTO();
-    AddressDTO addressDTO2 = new AddressDTO();
-    List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
-    Address address1 = new Address();
-    Address address2 = new Address();
-    List<Address> addresses = List.of(address1, address2);
-
-    when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
-    when(shopRepository.existsByPoint(address1)).thenReturn(null);
-
-    assertFalse(shopService.checkPointsExists(addressDTOList));
+    assertFalse(shopService.checkPointsExists(addressDTOList, null));
   }
 
   @Test

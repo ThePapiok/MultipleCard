@@ -6,12 +6,14 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/files.css">
     <link rel="stylesheet" href="/css/verificationShopPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/files.js"></script>
 <script src="/js/verificationShopPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -20,24 +22,25 @@
 </div>
 <div id="body" onload="atStart()">
     <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
-    <span hidden th:text="#{verificationShopPage.upload_file.bad_type}" id="textBadType"></span>
-    <span hidden th:text="#{verificationShopPage.upload_file.too_many}" id="textTooMany"></span>
+    <span hidden th:text="#{upload_file.bad_type}" id="textBadType"></span>
+    <span hidden th:text="#{upload_file.too_many}" id="textTooMany"></span>
     <p class="title" th:text="#{verificationShopPage.title}"></p>
     <form th:action="@{/shop_verifications}" id="form" method="post" enctype="multipart/form-data">
-        <p th:text="#{verificationShopPage.upload_file.text}" id="titleUploadFile"></p>
+        <p th:text="#{upload_file.text}" id="titleUploadFile"></p>
         <div id="uploadFiles">
             <div class="uploadFile" id="file1">
-                <input class="inputFile" type="file" oninput="setFile(this)" name="file[0]" onmouseenter="showValidation(this, 'uploadFiles')"
+                <input class="inputFile" type="file" oninput="setFile(this)" name="file[0]"
+                       onmouseenter="showValidation(this, 'uploadFiles')"
                        onmouseleave="hideValidation('uploadFiles')">
             </div>
             <img id="noFile" src="/images/upload.png" alt="upload">
         </div>
         <div class="validation">
-            <span th:text="#{verificationShopPage.upload_file.text} + ' ' + #{validation.text}"></span>
+            <span th:text="#{upload_file.text} + ' ' + #{validation.text}"></span>
             <ul>
-                <li th:text="#{verificationShopPage.upload_file.validation1}"></li>
-                <li th:text="#{verificationShopPage.upload_file.validation2}"></li>
-                <li th:text="#{verificationShopPage.upload_file.validation3}"></li>
+                <li th:text="#{upload_file.validation1}"></li>
+                <li th:text="#{upload_file.validation2}"></li>
+                <li th:text="#{upload_file.validation3}"></li>
             </ul>
         </div>
         <p id="errorFile"></p>
@@ -81,13 +84,17 @@
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
             <button type="button" class="grayButton" id="registerButton"
-                    th:text="#{verificationShopPage.button.create_shop}" onclick="changeCursor(this)" onmousedown="pressedCorrectButton()"></button>
+                    th:text="#{verificationShopPage.button.create_shop}" onclick="changeCursor(this)"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
-            <button type="button" class="blackButton" th:text="#{button.newCode_sms}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegisterShop', true, false)|" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_sms}"
+                    th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegisterShop', true, false)|"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
-            <button type="button" class="blackButton" th:text="#{button.newCode_email}" th:attr="onclick=|getEmailCode('${email}')|" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_email}"
+                    th:attr="onclick=|getEmailCode('${email}')|" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/shop_verifications?reset'}">
             <button type="button" class="redButton" id="resetButton"

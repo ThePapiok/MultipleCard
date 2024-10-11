@@ -1,7 +1,8 @@
 package com.thepapiok.multiplecard.services;
 
-import com.thepapiok.multiplecard.dto.AddressDTO;
-import com.thepapiok.multiplecard.dto.RegisterShopDTO;
+import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Shop;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
@@ -34,11 +35,7 @@ public class EmailService {
   }
 
   public void sendEmailWithAttachment(
-      RegisterShopDTO registerShopDTO,
-      Locale locale,
-      String id,
-      List<MultipartFile> fileList,
-      String url)
+      Shop shop, Account account, Locale locale, List<MultipartFile> fileList)
       throws MessagingException {
     final String newLine = "\n";
     final String colon = ": ";
@@ -47,7 +44,7 @@ public class EmailService {
     MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, true);
     mimeMessageHelper.setTo("multiplecard@gmail.com");
     mimeMessageHelper.setSubject(
-        messageSource.getMessage("subject.verification_shop", null, locale) + " - " + id);
+        messageSource.getMessage("subject.verification_shop", null, locale) + " - " + shop.getId());
     for (MultipartFile multipartFile : fileList) {
       if (multipartFile != null && !multipartFile.isEmpty()) {
         mimeMessageHelper.addAttachment(multipartFile.getOriginalFilename(), multipartFile);
@@ -57,30 +54,29 @@ public class EmailService {
         new StringBuilder(
             messageSource.getMessage("firstName.text", null, locale)
                 + colon
-                + registerShopDTO.getFirstName()
+                + shop.getFirstName()
                 + newLine
                 + messageSource.getMessage("lastName.text", null, locale)
                 + colon
-                + registerShopDTO.getLastName()
+                + shop.getLastName()
                 + "\nEmail: "
-                + registerShopDTO.getEmail()
+                + account.getEmail()
                 + newLine
                 + messageSource.getMessage("phone.text", null, locale)
                 + colon
-                + registerShopDTO.getCallingCode()
-                + registerShopDTO.getPhone()
+                + account.getPhone()
                 + newLine
                 + messageSource.getMessage("shop_name.text", null, locale)
                 + colon
-                + registerShopDTO.getName()
+                + shop.getName()
                 + newLine
                 + messageSource.getMessage("account_number.text", null, locale)
                 + colon
-                + registerShopDTO.getAccountNumber()
+                + shop.getAccountNumber()
                 + newLine
                 + messageSource.getMessage("upload_image.text", null, locale)
                 + colon
-                + url);
+                + shop.getImageUrl());
     int index = 1;
     String placeLocale = messageSource.getMessage("place.text", null, locale);
     String cityLocale = messageSource.getMessage("city.text", null, locale);
@@ -89,29 +85,26 @@ public class EmailService {
     String houseNumberLocale = messageSource.getMessage("houseNumber.text", null, locale);
     String apartmentNumberLocale = messageSource.getMessage("apartmentNumber.text", null, locale);
     String provinceLocale = messageSource.getMessage("province.text", null, locale);
-    for (AddressDTO addressDTO : registerShopDTO.getAddress()) {
+    for (Address address : shop.getPoints()) {
       text.append(newLine).append(placeLocale).append(" ").append(index).append(" :");
-      text.append(newLineWithMinus).append(cityLocale).append(colon).append(addressDTO.getCity());
+      text.append(newLineWithMinus).append(cityLocale).append(colon).append(address.getCity());
       text.append(newLineWithMinus)
           .append(postalCodeLocale)
           .append(colon)
-          .append(addressDTO.getPostalCode());
-      text.append(newLineWithMinus)
-          .append(streetLocale)
-          .append(colon)
-          .append(addressDTO.getStreet());
+          .append(address.getPostalCode());
+      text.append(newLineWithMinus).append(streetLocale).append(colon).append(address.getStreet());
       text.append(newLineWithMinus)
           .append(houseNumberLocale)
           .append(colon)
-          .append(addressDTO.getHouseNumber());
+          .append(address.getHouseNumber());
       text.append(newLineWithMinus)
           .append(apartmentNumberLocale)
           .append(colon)
-          .append(addressDTO.getApartmentNumber());
+          .append(address.getApartmentNumber());
       text.append(newLineWithMinus)
           .append(provinceLocale)
           .append(colon)
-          .append(addressDTO.getProvince());
+          .append(address.getProvince());
       index++;
     }
     mimeMessageHelper.setText(text.toString());

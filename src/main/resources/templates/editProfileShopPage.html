@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/files.css">
+    <link rel="stylesheet" href="/css/verification.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/disable.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/files.js"></script>
+<script src="/js/editProfileShopPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body" onload="atStart()">
+    <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
+    <span hidden th:text="#{upload_file.bad_type}" id="textBadType"></span>
+    <span hidden th:text="#{upload_file.too_many}" id="textTooMany"></span>
+    <p class="title" th:text="#{edit_account}"></p>
+    <form th:action="@{/edit_profile}" id="form" method="post" enctype="multipart/form-data">
+        <p th:text="#{upload_file.text}" id="titleUploadFile"></p>
+        <div id="uploadFiles">
+            <div class="uploadFile" id="file1">
+                <input class="inputFile" type="file" oninput="setFile(this)" name="file[0]"
+                       onmouseenter="showValidation(this, 'uploadFiles')"
+                       onmouseleave="hideValidation('uploadFiles')">
+            </div>
+            <img id="noFile" src="/images/upload.png" alt="upload">
+        </div>
+        <div class="validation">
+            <span th:text="#{upload_file.text} + ' ' + #{validation.text}"></span>
+            <ul>
+                <li th:text="#{upload_file.validation1}"></li>
+                <li th:text="#{upload_file.validation2}"></li>
+                <li th:text="#{upload_file.validation3}"></li>
+            </ul>
+        </div>
+        <p id="errorFile"></p>
+        <div class="block-horizontally">
+            <label id="VerificationSms">
+                <label class="inputs">
+                    <input disabled id="verificationNumberSms" name="verificationNumberSms" type="text"
+                           th:placeholder="#{codeSms.text}" required
+                           oninput="checkVerificationSms(this, 2)" minlength="7" maxlength="7"
+                           onmouseenter="showValidation(this, 'VerificationSms')"
+                           onmouseleave="hideValidation('VerificationSms')">
+                    <img id="close2" src="/images/close.png" alt="close">
+                    <img hidden id="check2" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{codeSms.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
+                </ul>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="saveButton"
+                    th:text="#{button.save}" onmousedown="pressedCorrectButton()" onclick="changeCursor(this)"></button>
+        </a>
+        <a>
+            <button type="button" class="blackButton"
+                    th:text="#{codeSms.text}"
+                    th:attr="onclick=|getSmsCode('${phone}', 'codeSmsEditShop', false, true)|"></button>
+        </a>
+        <a th:href="@{'/edit_profile?reset'}">
+            <button type="button" class="redButton" id="resetButton"
+                    th:text="#{button.reset}" onmousedown="pressedCorrectButton()"></button>
+        </a>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

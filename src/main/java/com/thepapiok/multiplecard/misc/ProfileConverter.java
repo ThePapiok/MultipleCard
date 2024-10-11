@@ -6,6 +6,7 @@ import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,18 @@ public class ProfileConverter {
   private final UserRepository userRepository;
   private final AccountRepository accountRepository;
   private final AddressConverter addressConverter;
+  private final ShopRepository shopRepository;
 
   @Autowired
   public ProfileConverter(
       UserRepository userRepository,
       AccountRepository accountRepository,
-      AddressConverter addressConverter) {
+      AddressConverter addressConverter,
+      ShopRepository shopRepository) {
     this.userRepository = userRepository;
     this.accountRepository = accountRepository;
     this.addressConverter = addressConverter;
+    this.shopRepository = shopRepository;
   }
 
   public ProfileDTO getDTO(User user) {
@@ -45,7 +49,7 @@ public class ProfileConverter {
     profileShopDTO.setLastName(shop.getLastName());
     profileShopDTO.setName(shop.getName());
     profileShopDTO.setAccountNumber(shop.getAccountNumber());
-    profileShopDTO.setAddresses(addressConverter.getDTOs(shop.getPoints()));
+    profileShopDTO.setAddress(addressConverter.getDTOs(shop.getPoints()));
     profileShopDTO.setImageUrl(shop.getImageUrl());
     profileShopDTO.setTotalAmount(String.valueOf(shop.getTotalAmount() / centsPerZloty));
     return profileShopDTO;
@@ -62,5 +66,20 @@ public class ProfileConverter {
     user.setFirstName(profileDTO.getFirstName());
     user.setLastName(profileDTO.getLastName());
     return user;
+  }
+
+  public Shop getEntity(ProfileShopDTO profileShopDTO, String phone) {
+    Optional<Shop> optionalShop =
+        shopRepository.findById(accountRepository.findIdByPhone(phone).getId());
+    if (optionalShop.isEmpty()) {
+      return null;
+    }
+    Shop shop = optionalShop.get();
+    shop.setFirstName(profileShopDTO.getFirstName());
+    shop.setLastName(profileShopDTO.getLastName());
+    shop.setName(profileShopDTO.getName());
+    shop.setAccountNumber(profileShopDTO.getAccountNumber());
+    shop.setPoints(addressConverter.getEntities(profileShopDTO.getAddress()));
+    return shop;
   }
 }

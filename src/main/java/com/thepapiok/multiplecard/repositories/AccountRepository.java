@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.repositories;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Role;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -55,4 +56,253 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
                   """
       })
   Boolean hasRole(String phone, Role role);
+
+  @Aggregation(
+      pipeline = {
+        """
+          {
+              $match: {
+               $expr: {
+                  $ne: ["$phone", ?1]
+               }
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 1
+              }
+            }
+          """,
+        """
+          {
+              $lookup: {
+                  "from": "shops",
+                  "localField": "_id",
+                  "foreignField": "_id",
+                  "as": "shop",
+                  "pipeline": [{
+                      $match: {
+                          "name": ?0
+                      }
+                  },
+                  {
+                      $project: {
+                          "name": 1
+                      }
+                  }
+
+                  ]
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: [ {
+                                  $size: "$shop" }, 0]},
+                          then: 0,
+                          else: 1
+                      }
+                  }
+              }
+            }
+          """,
+        """
+          {
+              $group: {
+                  "_id": "_id",
+                  "sum": {$sum: "$isFound"}
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 0,
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: ["$sum", 0]
+                          },
+                          then: false,
+                          else: true
+                      }
+                  }
+              }
+            }
+          """
+      })
+  boolean existsByNameOtherThanPhone(String name, String phone);
+
+  @Aggregation(
+      pipeline = {
+        """
+          {
+              $match: {
+               $expr: {
+                  $ne: ["$phone", ?1]
+               }
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 1
+              }
+            }
+          """,
+        """
+          {
+              $lookup: {
+                  "from": "shops",
+                  "localField": "_id",
+                  "foreignField": "_id",
+                  "as": "shop",
+                  "pipeline": [{
+                      $match: {
+                          "accountNumber": ?0
+                      }
+                  },
+                  {
+                      $project: {
+                          "accountNumber": 1
+                      }
+                  }
+
+                  ]
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: [ {
+                                  $size: "$shop" }, 0]},
+                          then: 0,
+                          else: 1
+                      }
+                  }
+              }
+            }
+          """,
+        """
+          {
+              $group: {
+                  "_id": "_id",
+                  "sum": {$sum: "$isFound"}
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 0,
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: ["$sum", 0]
+                          },
+                          then: false,
+                          else: true
+                      }
+                  }
+              }
+            }
+          """
+      })
+  boolean existsByAccountNumberOtherThanPhone(String accountNumber, String phone);
+
+  @Aggregation(
+      pipeline = {
+        """
+          {
+              $match: {
+               $expr: {
+                  $ne: ["$phone", ?1]
+               }
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 1
+              }
+            }
+          """,
+        """
+          {
+              $lookup: {
+                  "from": "shops",
+                  "localField": "_id",
+                  "foreignField": "_id",
+                  "as": "shop",
+                  "pipeline": [{
+                               "$unwind": {
+                                   "path": "$points"
+                               }
+                               },{
+                                   '$project' : {
+                                        "points": 1,
+                                    }
+                                   },
+                               {
+                               $match: {
+                                   "points": ?0
+                               }
+                           }
+                  ]
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: [ {
+                                  $size: "$shop" }, 0]},
+                          then: 0,
+                          else: 1
+                      }
+                  }
+              }
+            }
+          """,
+        """
+          {
+              $group: {
+                  "_id": "_id",
+                  "sum": {$sum: "$isFound"}
+              }
+            }
+          """,
+        """
+          {
+              $project: {
+                  "_id": 0,
+                  "isFound": {
+                      $cond: {
+                          if: {
+                              $eq: ["$sum", 0]
+                          },
+                          then: false,
+                          else: true
+                      }
+                  }
+              }
+            }
+          """
+      })
+  boolean existsByPointsOtherThanPhone(Address address, String phone);
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,12 +32,15 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -44,6 +48,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class ProfileServiceTest {
   private static final String TEST_PHONE = "+48755775676767";
@@ -55,9 +61,17 @@ public class ProfileServiceTest {
   private static final ObjectId TEST_PRODUCT_ID2 = new ObjectId("123132103312123310312577");
   private static final ObjectId TEST_PRODUCT_ID3 = new ObjectId("423132303311123310772591");
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
+  private static final String TEST_SHOP_NAME = "shopName";
+  private static final Long TEST_TOTAL_AMOUNT = 3300L;
+  private static final String TEST_IMAGE_URL = "url";
+  private static final String TEST_FIRST_NAME = "firstNameShop";
+  private static final String TEST_LAST_NAME = "lastNameShop";
+  private static final String TEST_ACCOUNT_NUMBER = "accountNumberShop";
   private static Address address;
   private static User user;
+  private static Shop shop;
   private static ProfileDTO profileDTO;
+  private static ProfileShopDTO profileShopDTO;
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
   @Mock private ProfileConverter profileConverter;
@@ -68,10 +82,11 @@ public class ProfileServiceTest {
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private CloudinaryService cloudinaryService;
   @Mock private ShopRepository shopRepository;
+  @Mock private EmailService emailService;
   private ProfileService profileService;
 
-  @BeforeAll
-  public static void setObjects() {
+  @BeforeEach
+  public void setObjects() {
     final String street = "street";
     final String city = "city";
     final String country = "pl";
@@ -103,6 +118,21 @@ public class ProfileServiceTest {
     profileDTO.setAddress(addressDTO);
     profileDTO.setFirstName(firstName);
     profileDTO.setLastName(lastName);
+    profileShopDTO = new ProfileShopDTO();
+    profileShopDTO.setName(TEST_SHOP_NAME);
+    profileShopDTO.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    profileShopDTO.setFirstName(TEST_FIRST_NAME);
+    profileShopDTO.setLastName(TEST_LAST_NAME);
+    profileShopDTO.setAddress(List.of(addressDTO));
+    shop = new Shop();
+    shop.setId(TEST_ID);
+    shop.setName(TEST_SHOP_NAME);
+    shop.setTotalAmount(TEST_TOTAL_AMOUNT);
+    shop.setImageUrl(TEST_IMAGE_URL);
+    shop.setFirstName(TEST_FIRST_NAME);
+    shop.setLastName(TEST_LAST_NAME);
+    shop.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    shop.setPoints(List.of(address));
   }
 
   @BeforeEach
@@ -119,7 +149,8 @@ public class ProfileServiceTest {
             mongoTemplate,
             mongoTransactionManager,
             cloudinaryService,
-            shopRepository);
+            shopRepository,
+            emailService);
   }
 
   @Test
@@ -143,6 +174,22 @@ public class ProfileServiceTest {
     when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertNull(profileService.getProfile(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtEditProfile() {
+    when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
+
+    assertTrue(profileService.editProfile(profileDTO, TEST_PHONE));
+    verify(userRepository).save(user);
+  }
+
+  @Test
+  public void shouldFailAtEditProfileWhenGetException() {
+    when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
+    doThrow(MongoWriteException.class).when(userRepository).save(user);
+
+    assertFalse(profileService.editProfile(profileDTO, TEST_PHONE));
   }
 
   @Test
@@ -375,5 +422,63 @@ public class ProfileServiceTest {
     when(shopRepository.findById(TEST_ID)).thenReturn(Optional.empty());
 
     assertNull(profileService.getShop(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldSuccessAtEditProfileShopWithoutNewImage() throws MessagingException {
+    List<MultipartFile> list = List.of(new MockMultipartFile("file", new byte[0]));
+    Account account = new Account();
+    account.setActive(true);
+    Account expectedAccount = new Account();
+    expectedAccount.setActive(false);
+
+    when(profileConverter.getEntity(profileShopDTO, TEST_PHONE)).thenReturn(shop);
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
+
+    assertTrue(profileService.editProfileShop(profileShopDTO, null, null, list, TEST_PHONE));
+    verify(mongoTemplate).save(shop);
+    verify(mongoTemplate).save(account);
+    verify(emailService).sendEmailWithAttachment(eq(shop), eq(account), any(), eq(list));
+  }
+
+  @Test
+  public void shouldSuccessAtEditProfileShopWithNewImage() throws MessagingException, IOException {
+    final String otherImageUrlTest = "newUrl";
+    List<MultipartFile> list = List.of(new MockMultipartFile("file1", new byte[0]));
+    Account account = new Account();
+    account.setActive(true);
+    Account expectedAccount = new Account();
+    expectedAccount.setActive(false);
+    Shop expectedShopWithNewUrl = new Shop();
+    expectedShopWithNewUrl.setId(TEST_ID);
+    expectedShopWithNewUrl.setName(TEST_SHOP_NAME);
+    expectedShopWithNewUrl.setTotalAmount(TEST_TOTAL_AMOUNT);
+    expectedShopWithNewUrl.setImageUrl(otherImageUrlTest);
+    expectedShopWithNewUrl.setFirstName(TEST_FIRST_NAME);
+    expectedShopWithNewUrl.setLastName(TEST_LAST_NAME);
+    expectedShopWithNewUrl.setAccountNumber(TEST_ACCOUNT_NUMBER);
+    expectedShopWithNewUrl.setPoints(List.of(address));
+    MockMultipartFile multipartFile = new MockMultipartFile("file2", new byte[0]);
+    Path path = Files.createTempFile("_upload", ".tmp");
+    Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+    when(profileConverter.getEntity(profileShopDTO, TEST_PHONE)).thenReturn(shop);
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
+    when(cloudinaryService.addImage(Files.readAllBytes(path), shop.getId().toString()))
+        .thenReturn(otherImageUrlTest);
+
+    assertTrue(
+        profileService.editProfileShop(profileShopDTO, path.toString(), null, list, TEST_PHONE));
+    verify(mongoTemplate).save(expectedShopWithNewUrl);
+    verify(mongoTemplate).save(account);
+    verify(emailService).sendEmailWithAttachment(eq(shop), eq(account), any(), eq(list));
+  }
+
+  @Test
+  public void shouldFailAtEditProfileShopWhenGetException() {
+    when(profileConverter.getEntity(profileShopDTO, TEST_PHONE)).thenReturn(shop);
+    doThrow(MongoWriteException.class).when(mongoTemplate).save(shop);
+
+    assertFalse(profileService.editProfileShop(profileShopDTO, null, null, null, TEST_PHONE));
   }
 }

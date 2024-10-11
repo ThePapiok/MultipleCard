@@ -3,7 +3,7 @@ package com.thepapiok.multiplecard.services;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.misc.AddressConverter;
-import com.thepapiok.multiplecard.repositories.ShopRepository;
+import com.thepapiok.multiplecard.repositories.AccountRepository;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,8 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ShopService {
 
-  private final ShopRepository shopRepository;
   private final AddressConverter addressConverter;
+  private final AccountRepository accountRepository;
   private final RestTemplate restTemplate;
 
   @Value("${IBANAPI_API_KEY}")
@@ -31,9 +31,11 @@ public class ShopService {
 
   @Autowired
   public ShopService(
-      ShopRepository shopRepository, AddressConverter addressConverter, RestTemplate restTemplate) {
-    this.shopRepository = shopRepository;
+      AddressConverter addressConverter,
+      AccountRepository accountRepository,
+      RestTemplate restTemplate) {
     this.addressConverter = addressConverter;
+    this.accountRepository = accountRepository;
     this.restTemplate = restTemplate;
   }
 
@@ -53,12 +55,12 @@ public class ShopService {
     return image.getWidth() > minWidth && image.getHeight() > minHeight;
   }
 
-  public boolean checkAccountNumberExists(String accountNumber) {
-    return shopRepository.existsByAccountNumber(accountNumber);
+  public boolean checkAccountNumberExists(String accountNumber, String phone) {
+    return accountRepository.existsByAccountNumberOtherThanPhone(accountNumber, phone);
   }
 
-  public boolean checkShopNameExists(String name) {
-    return shopRepository.existsByName(name);
+  public boolean checkShopNameExists(String name, String phone) {
+    return accountRepository.existsByNameOtherThanPhone(name, phone);
   }
 
   public boolean checkAccountNumber(String accountNumber) {
@@ -72,11 +74,10 @@ public class ShopService {
     return true;
   }
 
-  public boolean checkPointsExists(List<AddressDTO> points) {
+  public boolean checkPointsExists(List<AddressDTO> points, String phone) {
     boolean found = false;
     for (Address address : addressConverter.getEntities(points)) {
-      Boolean exists = shopRepository.existsByPoint(address);
-      if (exists != null && exists) {
+      if (accountRepository.existsByPointsOtherThanPhone(address, phone)) {
         found = true;
       }
     }

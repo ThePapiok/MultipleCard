@@ -12,6 +12,7 @@ import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class ProfileConverterTest {
   @Mock private UserRepository userRepository;
   @Mock private AccountRepository accountRepository;
   @Mock private AddressConverter addressConverter;
+  @Mock private ShopRepository shopRepository;
   private ProfileConverter profileConverter;
 
   @BeforeAll
@@ -73,7 +75,8 @@ public class ProfileConverterTest {
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    profileConverter = new ProfileConverter(userRepository, accountRepository, addressConverter);
+    profileConverter =
+        new ProfileConverter(userRepository, accountRepository, addressConverter, shopRepository);
   }
 
   @Test
@@ -84,7 +87,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldSuccessAtGetEntityNotForShops() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -96,7 +99,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldFailGetEntityWhenUserNotFound() {
+  public void shouldFailGetEntityNotForShopsWhenUserNotFound() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -128,10 +131,65 @@ public class ProfileConverterTest {
     expectedProfileShopDTO.setAccountNumber(accountNumberTest);
     expectedProfileShopDTO.setImageUrl(imageUrlTest);
     expectedProfileShopDTO.setTotalAmount(String.valueOf(totalAmount / centsPerZloty));
-    expectedProfileShopDTO.setAddresses(List.of(addressDTO));
+    expectedProfileShopDTO.setAddress(List.of(addressDTO));
 
     when(addressConverter.getDTOs(List.of(address))).thenReturn(List.of(addressDTO));
 
     assertEquals(expectedProfileShopDTO, profileConverter.getDTO(shop));
+  }
+
+  @Test
+  public void shouldSuccessGetEntityForShops() {
+    final long totalAmountTest = 3L;
+    final String newShopNameTest = "newName";
+    final String newAccountNumberTest = "newAccountNumber";
+    final String newFirstNameTest = "newFirstName";
+    final String newLastNameTest = "newLastName";
+    final String urlTest = "url";
+    Account account = new Account();
+    account.setId(TEST_ID);
+    Shop shop = new Shop();
+    shop.setId(TEST_ID);
+    shop.setFirstName(TEST_FIRST_NAME);
+    shop.setLastName(TEST_LAST_NAME);
+    shop.setName("shop1");
+    shop.setPoints(List.of(new Address()));
+    shop.setAccountNumber("123123123123123123");
+    shop.setImageUrl(urlTest);
+    shop.setTotalAmount(totalAmountTest);
+    List<AddressDTO> addressDTOList = List.of(addressDTO);
+    List<Address> addresses = List.of(address);
+    ProfileShopDTO profileShopDTO = new ProfileShopDTO();
+    profileShopDTO.setFirstName(newFirstNameTest);
+    profileShopDTO.setLastName(newLastNameTest);
+    profileShopDTO.setName(newShopNameTest);
+    profileShopDTO.setAccountNumber(newAccountNumberTest);
+    profileShopDTO.setAddress(addressDTOList);
+    Shop expectedShop = new Shop();
+    expectedShop.setTotalAmount(totalAmountTest);
+    expectedShop.setName(newShopNameTest);
+    expectedShop.setPoints(addresses);
+    expectedShop.setId(TEST_ID);
+    expectedShop.setAccountNumber(newAccountNumberTest);
+    expectedShop.setImageUrl(urlTest);
+    expectedShop.setFirstName(newFirstNameTest);
+    expectedShop.setLastName(newLastNameTest);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(shopRepository.findById(TEST_ID)).thenReturn(Optional.of(shop));
+    when(addressConverter.getEntities(addressDTOList)).thenReturn(addresses);
+
+    assertEquals(expectedShop, profileConverter.getEntity(profileShopDTO, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldFailGetEntityForShopsWhenShopNotFound() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(shopRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+
+    assertNull(profileConverter.getEntity(new ProfileShopDTO(), TEST_PHONE));
   }
 }
