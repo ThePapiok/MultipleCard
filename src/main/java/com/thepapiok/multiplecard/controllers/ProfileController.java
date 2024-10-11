@@ -74,7 +74,7 @@ public class ProfileController {
     this.authenticationController = authenticationController;
   }
 
-  @GetMapping("/user")
+  @GetMapping("/profile")
   public String getProfile(
       @RequestParam(required = false) String error,
       @RequestParam(required = false) String success,
