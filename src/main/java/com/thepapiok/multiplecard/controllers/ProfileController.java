@@ -43,8 +43,8 @@ public class ProfileController {
   private static final String EDIT_PARAM = "edit";
   private static final String CODE_SMS_DELETE_PARAM = "codeSmsDelete";
   private static final String ERROR_VALIDATION_MESSAGE = "validation.incorrect_data";
-  private static final String REDIRECT_USER_ERROR = "redirect:/user?error";
-  private static final String REDIRECT_USER = "redirect:/user";
+  private static final String REDIRECT_PROFILE_ERROR = "redirect:/profile?error";
+  private static final String REDIRECT_PROFILE = "redirect:/profile";
   private static final String REDIRECT_LOGIN_SUCCESS = "redirect:/login?success";
   private static final Pattern PATTERN_CODE = Pattern.compile("^[0-9]{3} [0-9]{3}$");
 
@@ -116,8 +116,13 @@ public class ProfileController {
   public String editProfileShop(
       @Valid @ModelAttribute ProfileShopDTO profileShop,
       BindingResult bindingResult,
-      HttpSession httpSession) {
-    System.out.println(profileShop);
+      HttpSession httpSession,
+      Locale locale) {
+    if (bindingResult.hasErrors()) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
+      return REDIRECT_PROFILE_ERROR;
+    }
     return "redirect:/login";
   }
 
@@ -130,7 +135,7 @@ public class ProfileController {
     if (bindingResult.hasErrors()) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     }
     httpSession.setAttribute(EDIT_PARAM, profile);
     return "redirect:/edit_profile";
@@ -145,7 +150,7 @@ public class ProfileController {
       Model model) {
     ProfileDTO profileDTO = (ProfileDTO) httpSession.getAttribute(EDIT_PARAM);
     if (profileDTO == null) {
-      return REDIRECT_USER;
+      return REDIRECT_PROFILE;
     }
     String url =
         resetAndErrorParams(
@@ -176,7 +181,7 @@ public class ProfileController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_PARAM, null, locale));
       authenticationController.resetSession(httpSession, CODE_SMS_EDIT_PARAM, EDIT_PARAM);
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     } else if (!PATTERN_CODE.matcher(verificationNumberSms).matches()) {
       return redirectErrorPage(
           httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, redirectEditProfileError);
@@ -188,12 +193,12 @@ public class ProfileController {
       authenticationController.resetSession(httpSession, CODE_SMS_EDIT_PARAM, EDIT_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     }
     authenticationController.resetSession(httpSession, CODE_SMS_EDIT_PARAM, EDIT_PARAM);
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM, messageSource.getMessage("profilePage.data.updated", null, locale));
-    return "redirect:/user?success";
+    return "redirect:/profile?success";
   }
 
   @GetMapping("/password_change")
@@ -237,7 +242,7 @@ public class ProfileController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_PARAM, null, locale));
       authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     } else if (bindingResult.hasErrors()) {
       return redirectErrorPage(
           httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, redirectPasswordChangeError);
@@ -266,7 +271,7 @@ public class ProfileController {
       authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     }
     authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
     new SecurityContextLogoutHandler().logout(request, response, authentication);
@@ -310,7 +315,7 @@ public class ProfileController {
           ERROR_MESSAGE_PARAM,
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_PARAM, null, locale));
       authenticationController.resetSession(httpSession, CODE_SMS_DELETE_PARAM, null);
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     } else if (!PATTERN_CODE.matcher(verificationNumberSms).matches()) {
       return redirectErrorPage(
           httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, redirectDeleteAccountError);
@@ -322,7 +327,7 @@ public class ProfileController {
       authenticationController.resetSession(httpSession, CODE_SMS_DELETE_PARAM, null);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale));
-      return REDIRECT_USER_ERROR;
+      return REDIRECT_PROFILE_ERROR;
     }
     authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
     new SecurityContextLogoutHandler().logout(request, response, authentication);
@@ -345,7 +350,7 @@ public class ProfileController {
       }
     } else if (reset != null) {
       authenticationController.resetSession(httpSession, codeSmsParam, formObjectParam);
-      return REDIRECT_USER;
+      return REDIRECT_PROFILE;
     } else if (resetSession) {
       authenticationController.resetSession(httpSession, codeSmsParam, formObjectParam);
     }

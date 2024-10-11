@@ -60,7 +60,7 @@ public class ProfileControllerTest {
   private static final String PASSWORD_CHANGE_URL = "/password_change";
   private static final String EDIT_PROFILE_URL = "/edit_profile";
   private static final String EDIT_PROFILE_ERROR_URL = "/edit_profile?error";
-  private static final String USER_ERROR_URL = "/user?error";
+  private static final String PROFILE_ERROR_URL = "/profile?error";
   private static final String DELETE_ACCOUNT_URL = "/delete_account";
   private static final String DELETE_ACCOUNT_ERROR_URL = "/delete_account?error";
   private static final String DELETE_ACCOUNT_PAGE = "deleteAccountPage";
@@ -242,14 +242,16 @@ public class ProfileControllerTest {
   public void shouldRedirectToUserErrorAtEditProfileWhenValidationProblems() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
-    mockMvc.perform(post(USER_URL).session(httpSession)).andExpect(redirectedUrl(USER_ERROR_URL));
+    mockMvc
+        .perform(post(USER_URL).session(httpSession))
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldRedirectUserAtVerificationEditProfilePageWhenNoEditParam() throws Exception {
-    mockMvc.perform(get(EDIT_PROFILE_URL)).andExpect(redirectedUrl(USER_URL));
+    mockMvc.perform(get(EDIT_PROFILE_URL)).andExpect(redirectedUrl(PROFILE_URL));
   }
 
   @Test
@@ -292,7 +294,7 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(get(EDIT_PROFILE_URL).param(RESET_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(USER_URL));
+        .andExpect(redirectedUrl(PROFILE_URL));
     assertNull(httpSession.getAttribute(EDIT_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
@@ -327,7 +329,7 @@ public class ProfileControllerTest {
             post(EDIT_PROFILE_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(EDIT_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_EDIT_PARAM));
@@ -386,7 +388,7 @@ public class ProfileControllerTest {
             post(EDIT_PROFILE_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl("/user?success"));
+        .andExpect(redirectedUrl("/profile?success"));
     assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(EDIT_PARAM));
@@ -412,7 +414,7 @@ public class ProfileControllerTest {
             post(EDIT_PROFILE_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(EDIT_PARAM));
@@ -475,7 +477,7 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(get(PASSWORD_CHANGE_URL).param(RESET_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(USER_URL));
+        .andExpect(redirectedUrl(PROFILE_URL));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_CHANGE_PARAM));
@@ -501,7 +503,7 @@ public class ProfileControllerTest {
     MockHttpSession httpSession = new MockHttpSession();
     setSession(maxAttempts, httpSession);
 
-    redirectUserErrorAndLoginSuccess(httpSession, USER_ERROR_URL);
+    redirectUserErrorAndLoginSuccess(httpSession, PROFILE_ERROR_URL);
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
@@ -615,7 +617,7 @@ public class ProfileControllerTest {
     when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
     when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(false);
 
-    redirectUserErrorAndLoginSuccess(httpSession, USER_ERROR_URL);
+    redirectUserErrorAndLoginSuccess(httpSession, PROFILE_ERROR_URL);
     assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
@@ -680,7 +682,7 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(get(DELETE_ACCOUNT_URL).param(RESET_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(USER_URL));
+        .andExpect(redirectedUrl(PROFILE_URL));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
@@ -718,7 +720,7 @@ public class ProfileControllerTest {
             post(DELETE_ACCOUNT_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
@@ -776,7 +778,7 @@ public class ProfileControllerTest {
             post(DELETE_ACCOUNT_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertNull(httpSession.getAttribute(CODE_SMS_DELETE_PARAM));
