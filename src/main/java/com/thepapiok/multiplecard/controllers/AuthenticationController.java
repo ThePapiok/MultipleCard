@@ -563,7 +563,6 @@ public class AuthenticationController {
       message =
           messageSource.getMessage("authenticationController.register.same_points", null, locale);
     } else if (shopService.checkPointsExists(points)) {
-      System.out.println("xd");
       error = true;
       message =
           messageSource.getMessage(
@@ -647,7 +646,6 @@ public class AuthenticationController {
           messageSource.getMessage(ERROR_TOO_MANY_ATTEMPTS_MESSAGE, null, locale));
       return REDIRECT_LOGIN_ERROR;
     } else if (bindingResult.hasErrors()) {
-      System.out.println(bindingResult);
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,

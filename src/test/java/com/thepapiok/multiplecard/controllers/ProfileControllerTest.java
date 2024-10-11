@@ -55,6 +55,7 @@ public class ProfileControllerTest {
   private static final String OLD_PASSWORD_PARAM = "oldPassword";
   private static final String COUNTRIES_PARAM = "countries";
   private static final String USER_URL = "/user";
+  private static final String PROFILE_URL = "/profile";
   private static final String LOGIN_SUCCESS_URL = "/login?success";
   private static final String PASSWORD_CHANGE_URL = "/password_change";
   private static final String EDIT_PROFILE_URL = "/edit_profile";
@@ -146,7 +147,7 @@ public class ProfileControllerTest {
     when(countryService.getAll()).thenReturn(countryDTOS);
 
     mockMvc
-        .perform(get(USER_URL))
+        .perform(get(PROFILE_URL))
         .andExpect(model().attribute(CARD_PARAM, card))
         .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
@@ -163,7 +164,7 @@ public class ProfileControllerTest {
     when(countryService.getAll()).thenReturn(countryDTOS);
 
     mockMvc
-        .perform(get(USER_URL))
+        .perform(get(PROFILE_URL))
         .andExpect(model().attribute("profileShop", profileShopDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(view().name("profileShopPage"));
@@ -199,7 +200,7 @@ public class ProfileControllerTest {
     when(countryService.getAll()).thenReturn(countryDTOS);
 
     mockMvc
-        .perform(get(USER_URL).param(param, "").session(httpSession))
+        .perform(get(PROFILE_URL).param(param, "").session(httpSession))
         .andExpect(model().attribute(CARD_PARAM, card))
         .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))

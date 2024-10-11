@@ -460,8 +460,6 @@ public class AuthenticationControllerTest {
   private void performPostRegister(
       RegisterDTO expectedRegisterDTO, MockHttpSession httpSession, String redirectUrl)
       throws Exception {
-    System.out.println(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM);
-    System.out.println(expectedRegisterDTO.getAddress().getStreet());
     mockMvc
         .perform(
             post(REGISTER_URL)
