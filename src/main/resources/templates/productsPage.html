@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/reviews.css">
+    <link rel="stylesheet" href="/css/reviewPage.css">
+    <link rel="stylesheet" href="/css/productsPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}')|">
+<script src="/js/page.js"></script>
+<script src="/js/reviews.js"></script>
+<script src="/js/reviewPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h1 headerButton">
+        <button class="blackButton" th:text="#{button.login}"></button>
+    </a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <p class="title" th:text="#{productsPage.title}"></p>
+    <div id="searchBar">
+        <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+        <div id="searchButton" onclick="setParams()">
+            <img id="searchImage" src="/images/search.png" alt="search">
+        </div>
+        <a href="/add_product" id="addProduct">
+            <button class="greenButton" th:text="#{add_product.text}"></button>
+        </a>
+    </div>
+    <div id="allReviews">
+        <div id="reviews">
+            <div class="review" th:if="${reviewsSize} > 0" th:each="review : ${reviews}">
+                <div class="review-vertical">
+                    <div class="review-horizontal">
+                        <span class="name yourReview" th:text="#{yourReview.name}" th:if="${review.owner}"></span>
+                        <span class="name" th:text="${review.firstName}" th:unless="${review.owner}"></span>
+                        <div class="amountHearths">
+                        <span class="amount isAdded" th:text="${review.count}"
+                              th:data-is-added="${review.isAdded}"></span>
+                            <img class="hearth notLoginHearth" src="/images/hearth.png" alt="hearth"
+                                 th:unless="${principal}">
+                            <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
+                                 th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
+                            <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                                 th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
+                        </div>
+                    </div>
+                    <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
+                    <div class="review-horizontal">
+                        <div class="stars">
+                            <img class="star" src="/images/star.png" alt="star"
+                                 th:each="i : ${#numbers.sequence(1, review.review.rating)}">
+                            <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                                 th:if="${review.review.rating} < 5"
+                                 th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}">
+                        </div>
+                        <img class="delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
+                             th:attr="onclick=|removeReview('${review.id}', this)|">
+                    </div>
+                </div>
+            </div>
+            <span th:data-review-size="${reviewsSize}" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
+    </div>
+    <div id="pages">
+        <a>
+            <button class="darkGreenButton" th:text="#{reviewPage.button.previous}"></button>
+        </a>
+        <div id="pagesSelect">
+            <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
+                  th:if="${reviewsSize} != 0"></span>
+        </div>
+        <a>
+            <button class="darkGreenButton" th:text="#{reviewPage.button.next}"></button>
+        </a>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>
