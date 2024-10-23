@@ -136,7 +136,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "categoryId", "amount", "shopId", "isActive", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "isActive", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -159,9 +159,15 @@ db.createCollection("products", {
                     "bsonType": "string",
                     "description": "barcode is required and must be string"
                 },
-                "categoryId": {
-                    "bsonType": "objectId",
-                    "description": "categoryId is required and must be objectId"
+                "categories": {
+                    "bsonType": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "uniqueItems": true,
+                    "items": {
+                        "bsonType": ["objectId", "null"],
+                        "description": "categories must be objectId"
+                    }
                 },
                 "amount": {
                     "bsonType": "int",
@@ -245,6 +251,10 @@ db.createCollection("categories", {
                 "name":  {
                     "bsonType": "string",
                     "description": "name is required and must be string"
+                },
+                "ownerId":  {
+                    "bsonType": ["objectId", "null"],
+                    "description": "ownerId must be objectId"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -417,9 +427,11 @@ db.createCollection("cards", {
             }
         }}})
 db.categories.createIndex({"name": 1}, {"unique": true});
+db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.accounts.createIndex({"email": 1}, {"unique": true});
 db.users.createIndex({"review.description": "text"}, {"default_language": "none"})
 db.shops.createIndex({"name": 1}, {"unique": true});
 db.shops.createIndex({"accountNumber": 1}, {"unique": true});
+db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"})
