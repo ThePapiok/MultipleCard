@@ -29,7 +29,7 @@ public class AddProductDTO {
   @NotNull private List<String> category;
 
   @NotNull
-  @Size(min = 2, max = 7)
-  @Pattern(regexp = "^[0-9]*\\.[0-9]{2}$")
+  @Size(min = 5, max = 9)
+  @Pattern(regexp = "^[0-9]*\\.[0-9]{2}zł$")
   private String amount;
 }

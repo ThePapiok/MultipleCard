@@ -124,7 +124,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldSuccessAtValidationAmount() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1231.12");
+    addProductDTO.setAmount("1231.12zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
@@ -134,7 +134,17 @@ public class AddProductDTOTest {
   @Test
   public void shouldFailAtValidationAmountWhenContainsAnotherSpecialSymbols() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1!31.12");
+    addProductDTO.setAmount("1!31.12zł");
+
+    Set<ConstraintViolation<AddProductDTO>> violations =
+        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+    assertFalse(violations.isEmpty());
+  }
+
+  @Test
+  public void shouldFailAtValidationAmountWhenDontContainsCurrency() {
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setAmount("131.12");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
@@ -144,7 +154,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldFailAtValidationAmountWhenContainsLetters() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1A31.12");
+    addProductDTO.setAmount("1A31.12zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
@@ -154,7 +164,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldFailAtValidationAmountWhenNoContainsDot() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("113112");
+    addProductDTO.setAmount("113112zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
@@ -164,7 +174,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldFailAtValidationAmountWhenFractionalPartIsTooLong() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1131.122");
+    addProductDTO.setAmount("1131.122zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
@@ -174,7 +184,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldFailAtValidationAmountWhenFractionalPartIsTooShort() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1131.2");
+    addProductDTO.setAmount("1131.2zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, AMOUNT_PARAM);
