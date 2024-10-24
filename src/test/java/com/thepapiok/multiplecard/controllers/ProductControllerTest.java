@@ -290,6 +290,47 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameProductName()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    assertEquals(
+        "Posiadasz już produkt o takiej nazwie", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameBarcode()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    assertEquals(
+        "Posiadasz już produkt o takim kodzie kreskowym",
+        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldRedirectToProductsErrorAtAddProductWhenErrorAtAddProduct() throws Exception {
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
     MockHttpSession httpSession = new MockHttpSession();
@@ -305,6 +346,10 @@ public class ProductControllerTest {
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
     when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
         .thenReturn(false);
     when(productService.addProduct(expectedAddProductDTO, TEST_ID, addProductDTO.getCategory()))
         .thenReturn(false);
@@ -330,6 +375,10 @@ public class ProductControllerTest {
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
     when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
         .thenReturn(false);
     when(productService.addProduct(expectedAddProductDTO, TEST_ID, addProductDTO.getCategory()))
         .thenReturn(true);

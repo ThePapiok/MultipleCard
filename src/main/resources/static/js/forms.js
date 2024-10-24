@@ -16,6 +16,7 @@ let previousVerification = ["", ""];
 let callingCodeValue = "";
 let phoneValue = "";
 let buttons = false;
+let changedCursor = false;
 
 function check(i, con, ok, previous, id, success, hasCheck, isSubmit) {
     const previousCond = previous[i - 1];
@@ -357,4 +358,15 @@ function getEmailCode(email) {
             console.error(error);
         });
     buttons = false;
+}
+
+function changeCursor(e) {
+    if (changedCursor){
+        e.type = "button";
+    }
+    else if (e.type === "submit") {
+        e.style.cursor = "wait";
+        e.className = "grayButton";
+        changedCursor = true;
+    }
 }

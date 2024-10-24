@@ -7,4 +7,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ProductRepository extends MongoRepository<Product, ObjectId> {
   List<Product> getAllByShopId(ObjectId objectId);
+
+  boolean existsByNameAndShopId(String name, ObjectId shopId);
+
+  boolean existsByBarcodeAndShopId(String barcode, ObjectId shopId);
 }

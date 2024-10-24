@@ -81,7 +81,7 @@ Dodaj zmienne środowiskowe (przykładowe)
 Uruchom kontenery
 
 ```bash
-  ./startDb.sh
+  ./db.sh
   docker-compose up web
 ```
 
@@ -98,7 +98,7 @@ Po skończeniu używania
 Aby uruchomić testy, użyj tej komendy (wymagane mongosh, docker, mvn)
 
 ```bash
-    ./startTests.sh
+    ./tests.sh
 ```
 
 

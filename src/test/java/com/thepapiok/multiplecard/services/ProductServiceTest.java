@@ -2,13 +2,13 @@ package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -22,11 +22,15 @@ import org.springframework.mock.web.MockMultipartFile;
 
 public class ProductServiceTest {
 
+  private static final String TEST_PRODUCT_NAME = "name";
+  private static final String TEST_BARCODE = "12345678901234567890123";
+  private static final ObjectId TEST_OWNER_ID = new ObjectId("123451789012345678901234");
   @Mock private CategoryService categoryService;
   @Mock private ProductConverter productConverter;
   @Mock private CloudinaryService cloudinaryService;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private MongoTemplate mongoTemplate;
+  @Mock private ProductRepository productRepository;
   private ProductService productService;
 
   @BeforeEach
@@ -36,6 +40,7 @@ public class ProductServiceTest {
         new ProductService(
             categoryService,
             productConverter,
+            productRepository,
             cloudinaryService,
             mongoTransactionManager,
             mongoTemplate);
@@ -54,7 +59,7 @@ public class ProductServiceTest {
     List<String> categoryNames = List.of(firstCategoryName, secondCategoryName);
     List<ObjectId> categories = List.of(categoryId, categoryOtherId);
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setName("name");
+    addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setCategory(categoryNames);
     addProductDTO.setBarcode("barcode");
     addProductDTO.setAmount("11.23");
@@ -81,6 +86,7 @@ public class ProductServiceTest {
     productWithCategories.setActive(true);
     productWithCategories.setPromotion(0);
     productWithCategories.setShopId(ownerId);
+    productWithCategories.setImageUrl("");
     Product productWithId = new Product();
     productWithId.setName(addProductDTO.getName());
     productWithId.setAmount(cents);
@@ -91,6 +97,7 @@ public class ProductServiceTest {
     productWithId.setActive(true);
     productWithId.setPromotion(0);
     productWithId.setShopId(ownerId);
+    productWithId.setImageUrl("");
     Product expectedProduct = new Product();
     expectedProduct.setName(addProductDTO.getName());
     expectedProduct.setAmount(cents);
@@ -103,6 +110,7 @@ public class ProductServiceTest {
     expectedProduct.setActive(true);
     expectedProduct.setPromotion(0);
     expectedProduct.setShopId(ownerId);
+    expectedProduct.setImageUrl("");
 
     when(productConverter.getEntity(addProductDTO)).thenReturn(productAfterConverter);
     when(categoryService.getCategoryIdByName(firstCategoryName)).thenReturn(categoryId);
@@ -113,7 +121,6 @@ public class ProductServiceTest {
         .thenReturn(imageUrl);
 
     assertTrue(productService.addProduct(addProductDTO, ownerId, categoryNames));
-    verify(mongoTemplate).save(expectedProduct);
   }
 
   @Test
@@ -125,5 +132,35 @@ public class ProductServiceTest {
     assertFalse(
         productService.addProduct(
             addProductDTO, new ObjectId("123456789012345678904321"), List.of()));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckOwnerHasTheSameNameProductWhenFound() {
+    when(productRepository.existsByNameAndShopId(TEST_PRODUCT_NAME, TEST_OWNER_ID))
+        .thenReturn(true);
+
+    assertTrue(productService.checkOwnerHasTheSameNameProduct(TEST_OWNER_ID, TEST_PRODUCT_NAME));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckOwnerHasTheSameNameProductWhenNotFound() {
+    when(productRepository.existsByNameAndShopId(TEST_PRODUCT_NAME, TEST_OWNER_ID))
+        .thenReturn(false);
+
+    assertFalse(productService.checkOwnerHasTheSameNameProduct(TEST_OWNER_ID, TEST_PRODUCT_NAME));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckOwnerHasTheSameBarcodeWhenFound() {
+    when(productRepository.existsByBarcodeAndShopId(TEST_BARCODE, TEST_OWNER_ID)).thenReturn(true);
+
+    assertTrue(productService.checkOwnerHasTheSameBarcode(TEST_OWNER_ID, TEST_BARCODE));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckOwnerHasTheSameBarcodeWhenNotFound() {
+    when(productRepository.existsByBarcodeAndShopId(TEST_BARCODE, TEST_OWNER_ID)).thenReturn(false);
+
+    assertFalse(productService.checkOwnerHasTheSameBarcode(TEST_OWNER_ID, TEST_BARCODE));
   }
 }

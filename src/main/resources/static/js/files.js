@@ -91,8 +91,3 @@ function deleteFiles(e, index) {
     }
 }
 
-function changeCursor(e) {
-    if (e.type === "submit") {
-        e.style.cursor = "wait";
-    }
-}

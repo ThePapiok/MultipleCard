@@ -173,7 +173,7 @@
         <p id="errorFile"></p>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="addButton" th:text="#{add_product.text}"></button>
+            <button type="button" class="grayButton" id="addButton" th:text="#{add_product.text}" onclick="changeCursor(this)"></button>
         </a>
         <a th:href="@{/products}">
             <button type="button" class="redButton" th:text="#{button.reset}"></button>

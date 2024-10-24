@@ -116,15 +116,20 @@ public class ProductController {
     } else if (categoryService.checkOwnerHas20Categories(ownerId, categories)) {
       error = true;
       message = messageSource.getMessage("addProductPage.error.category.too_many", null, locale);
+    } else if (productService.checkOwnerHasTheSameNameProduct(ownerId, addProductDTO.getName())) {
+      error = true;
+      message =
+          messageSource.getMessage("addProductPage.error.product.the_same_name", null, locale);
+    } else if (productService.checkOwnerHasTheSameBarcode(ownerId, addProductDTO.getBarcode())) {
+      error = true;
+      message =
+          messageSource.getMessage("addProductPage.error.product.the_same_barcode", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
       return "redirect:/add_product?error";
     }
     if (!productService.addProduct(addProductDTO, ownerId, categories)) {
-      System.out.println(addProductDTO);
-      System.out.println(ownerId);
-      System.out.println(categories);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
       return "redirect:/products?error";

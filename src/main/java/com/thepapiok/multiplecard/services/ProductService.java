@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class ProductService {
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
+  private final ProductRepository productRepository;
   private final CloudinaryService cloudinaryService;
   private final MongoTransactionManager mongoTransactionManager;
   private final MongoTemplate mongoTemplate;
@@ -28,11 +30,13 @@ public class ProductService {
   public ProductService(
       CategoryService categoryService,
       ProductConverter productConverter,
+      ProductRepository productRepository,
       CloudinaryService cloudinaryService,
       MongoTransactionManager mongoTransactionManager,
       MongoTemplate mongoTemplate) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
+    this.productRepository = productRepository;
     this.cloudinaryService = cloudinaryService;
     this.mongoTransactionManager = mongoTransactionManager;
     this.mongoTemplate = mongoTemplate;
@@ -51,6 +55,8 @@ public class ProductService {
               product.setActive(true);
               product.setPromotion(0);
               product.setShopId(ownerId);
+              product.setImageUrl("");
+              System.out.println(product);
               for (String name : nameOfCategories) {
                 ObjectId id = categoryService.getCategoryIdByName(name);
                 if (id == null) {
@@ -65,6 +71,7 @@ public class ProductService {
               product.setCategories(categories);
               product = mongoTemplate.save(product);
               try {
+                System.out.println(product);
                 product.setImageUrl(
                     cloudinaryService.addImage(
                         addProductDTO.getFile().getBytes(), product.getId().toHexString()));
@@ -75,8 +82,17 @@ public class ProductService {
             }
           });
     } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
     return true;
+  }
+
+  public boolean checkOwnerHasTheSameNameProduct(ObjectId ownerId, String name) {
+    return productRepository.existsByNameAndShopId(name, ownerId);
+  }
+
+  public boolean checkOwnerHasTheSameBarcode(ObjectId ownerId, String barcode) {
+    return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
   }
 }
