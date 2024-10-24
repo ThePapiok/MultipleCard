@@ -36,6 +36,8 @@
             <button class="greenButton" th:text="#{add_product.text}"></button>
         </a>
     </div>
+    <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+    <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
     <div id="allReviews">
         <div id="reviews">
             <div class="review" th:if="${reviewsSize} > 0" th:each="review : ${reviews}">
