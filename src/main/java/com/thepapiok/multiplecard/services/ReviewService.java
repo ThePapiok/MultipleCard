@@ -83,11 +83,9 @@ public class ReviewService {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
         return false;
-      }
-      if (!atLike(id)) {
+      } else if (!atLike(id)) {
         return false;
-      }
-      if (likeRepository
+      } else if (likeRepository
           .findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1))
           .isPresent()) {
         return false;
@@ -107,8 +105,7 @@ public class ReviewService {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
         return false;
-      }
-      if (!atLike(id)) {
+      } else if (!atLike(id)) {
         return false;
       }
       Optional<Like> like =
@@ -140,8 +137,7 @@ public class ReviewService {
     ObjectId userId = accountRepository.findIdByPhone(phone).getId();
     if (userId.toHexString().length() == 0) {
       return null;
-    }
-    if (id.toHexString().length() == 0) {
+    } else if (id.toHexString().length() == 0) {
       return null;
     }
     return List.of(id, userId);
@@ -153,8 +149,7 @@ public class ReviewService {
       Optional<User> optionalUser = userRepository.findById(id);
       if (optionalUser.isEmpty()) {
         return false;
-      }
-      if (!userId.equals(id)) {
+      } else if (!userId.equals(id)) {
         return false;
       }
       User user = optionalUser.get();

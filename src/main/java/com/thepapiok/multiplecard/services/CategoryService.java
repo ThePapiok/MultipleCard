@@ -34,8 +34,7 @@ public class CategoryService {
     if (count == null) {
       count = 0;
     }
-    Boolean find =
-        categoryRepository.countByOwnerIsEqual20(ownerId, nameOfCategories.size() - count);
+    Boolean find = categoryRepository.countByOwnerIsGTE20(ownerId, nameOfCategories.size() - count);
     return find != null && find;
   }
 }

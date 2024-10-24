@@ -49,7 +49,7 @@ public interface CategoryRepository extends MongoRepository<Category, ObjectId> 
                 }
             """
       })
-  Boolean countByOwnerIsEqual20(ObjectId ownerId, int count);
+  Boolean countByOwnerIsGTE20(ObjectId ownerId, int count);
 
   @Aggregation(
       pipeline = {

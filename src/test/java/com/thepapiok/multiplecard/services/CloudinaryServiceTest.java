@@ -34,7 +34,7 @@ public class CloudinaryServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtAddImage() throws IOException {
+  public void shouldReturnUrlAtAddImageWhenEverythingOk() throws IOException {
     final String url = "www.testoweurl";
     byte[] file = new byte[0];
     Map<String, String> upload = Map.of("url", url);
@@ -52,7 +52,7 @@ public class CloudinaryServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddImageWhenGetException() throws IOException {
+  public void shouldReturnNullAtAddImageWhenGetException() throws IOException {
     byte[] file = new byte[0];
 
     when(cloudinary.uploader()).thenReturn(uploader);

@@ -118,7 +118,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCreateUser() {
+  public void shouldReturnTrueAtCreateUserWhenEverythingOk() {
     when(mongoTemplate.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
@@ -129,7 +129,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailAtCreateUser() {
+  public void shouldReturnFalseAtCreateUserWhenGetException() {
     when(mongoTemplate.save(expectedUser)).thenReturn(expectedUser2);
     when(userConverter.getEntity(registerDTO)).thenReturn(expectedUser);
     when(accountConverter.getEntity(registerDTO)).thenReturn(expectedAccount);
@@ -141,35 +141,35 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtPhoneExists() {
+  public void shouldReturnTrueAtPhoneExistsWhenUserFound() {
     when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(true);
 
     assertTrue(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldFailAtPhoneExists() {
+  public void shouldReturnFalseAtPhoneExistsWhenUserWithThatPhoneNotFound() {
     when(accountRepository.existsByPhone(TEST_PHONE)).thenReturn(false);
 
     assertFalse(authenticationService.phoneExists(TEST_PHONE));
   }
 
   @Test
-  public void shouldSuccessAtEmailExists() {
+  public void shouldReturnTrueAtEmailExistsWhenUserFound() {
     when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
 
     assertTrue(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test
-  public void shouldFailAtEmailExists() {
+  public void shouldReturnFalseAtEmailExistsWhenUserWithThatEmailNotFound() {
     when(accountRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
 
     assertFalse(authenticationService.emailExists(TEST_EMAIL));
   }
 
   @Test
-  public void shouldSuccessAtGetVerificationNumber() {
+  public void shouldReturnVerificationNumberAtGetVerificationNumberWhenEverythingOk() {
     authenticationService.setRandom(random);
 
     when(random.nextInt()).thenReturn(0);
@@ -178,7 +178,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtChangePassword() {
+  public void shouldReturnTrueAtChangePasswordWhenEverythingOk() {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     Account expectedAccount = new Account();
@@ -193,7 +193,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailAtChangePasswordWhenGetException() {
+  public void shouldReturnFalseAtChangePasswordWhenGetException() {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     Account expectedAccount = new Account();
@@ -209,7 +209,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetAccountByPhone() {
+  public void shouldReturnTrueAtGetAccountByPhoneWhenAccountFound() {
     Account account = new Account();
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
@@ -218,14 +218,14 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailAtGetAccountByPhone() {
+  public void shouldReturnFalseAtGetAccountByPhoneWhenAccountNotFound() {
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(null);
 
     assertFalse(authenticationService.getAccountByPhone(TEST_PHONE));
   }
 
   @Test
-  public void shouldSuccessAtCheckPassword() {
+  public void shouldReturnTrueAtCheckPasswordWhenEverythingOk() {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setPassword(TEST_ENCODE_PASSWORD);
@@ -237,7 +237,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckPassword() {
+  public void shouldFalseAtCheckPasswordWhenBadPassword() {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setPassword(TEST_ENCODE_PASSWORD);
@@ -249,7 +249,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCreateShop() throws IOException {
+  public void shouldReturnTrueAtCreateShopWhenEverythingOk() throws IOException {
     final String url = "fasdfds123123sads";
     final String email = "email@email";
     Locale locale = Locale.UK;
@@ -320,7 +320,7 @@ public class AuthenticationServiceTest {
   }
 
   @Test
-  public void shouldFailAtCreateShopWhenGetException() {
+  public void shouldReturnFalseAtCreateShopWhenGetException() {
     final String filePath = "safdfdas12312";
     Locale locale = Locale.UK;
     List<MultipartFile> list = List.of();

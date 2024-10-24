@@ -125,7 +125,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessAddLikeAtAddLike() throws Exception {
+  public void shouldSuccessAddLikeAtAddLikeWhenEverythingOk() throws Exception {
     when(reviewService.addLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -135,7 +135,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessDeleteLikeAtDeleteReview() throws Exception {
+  public void shouldSuccessDeleteLikeAtDeleteReviewWhenEverythingOk() throws Exception {
     when(reviewService.deleteLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -145,7 +145,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessRemoveReviewAtRemoveReview() throws Exception {
+  public void shouldSuccessRemoveReviewAtRemoveReviewWhenEverythingOk() throws Exception {
     when(reviewService.removeReview(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -155,7 +155,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessReviewPageAtReviewPage() throws Exception {
+  public void shouldSuccessReviewPageAtReviewPageWhenEverythingOk() throws Exception {
     final int count1 = 5;
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);

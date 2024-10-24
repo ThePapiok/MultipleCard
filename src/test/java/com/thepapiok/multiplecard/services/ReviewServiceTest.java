@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
@@ -87,7 +88,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtAddReviewWhenNoLikes() {
+  public void shouldReturnTrueAtAddReviewWhenNoLikes() {
     Review expectedReview = new Review();
     expectedReview.setRating(TEST_RATING);
     expectedReview.setDescription(TEST_DESCRIPTION);
@@ -108,7 +109,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtAddReviewWhenAreLikes() {
+  public void shouldReturnTrueAtAddReviewWhenContainsLikes() {
     Review expectedReview = new Review();
     expectedReview.setRating(TEST_RATING);
     expectedReview.setDescription(TEST_DESCRIPTION);
@@ -132,7 +133,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddReviewWhenUserIsEmpty() {
+  public void shouldReturnFalseAtAddReviewWhenUserIsEmpty() {
     when(reviewConverter.getEntity(reviewDTO)).thenReturn(review);
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(userRepository.findById(TEST_ID1)).thenReturn(Optional.empty());
@@ -141,7 +142,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddReviewGetException() {
+  public void shouldReturnFalseAtAddReviewGetException() {
     Review expectedReview = new Review();
     expectedReview.setRating(TEST_RATING);
     expectedReview.setDescription(TEST_DESCRIPTION);
@@ -163,7 +164,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtAddLike() {
+  public void shouldSReturnTrueAtAddLikeWhenEverythingOk() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
     expectedLike.setReviewUserId(TEST_ID2);
@@ -177,7 +178,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddLikeAndAtDeleteLikeWhenNoUserId() {
+  public void shouldReturnFalseAtAddLikeAndAtDeleteLikeWhenNoUserId() {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(null);
 
     assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
@@ -185,7 +186,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddLikeAndAtDeleteLikeWhenNoReviewUserId() {
+  public void shouldReturnFalseAtAddLikeAndAtDeleteLikeWhenNoReviewUserId() {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
 
     assertFalse(reviewService.addLike(new ObjectId(), TEST_PHONE));
@@ -193,7 +194,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddLikeAndAtDeleteLikeWhenNoAccount() {
+  public void shouldReturnFalseAtAddLikeAndAtDeleteLikeWhenNoAccount() {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(accountRepository.findById(TEST_ID2)).thenReturn(Optional.empty());
 
@@ -202,7 +203,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddLikeAndAtDeleteLikeWhenUserNotFound() {
+  public void shouldReturnFalseAtAddLikeAndAtDeleteLikeWhenUserNotFound() {
     Account account1 = new Account();
     account1.setId(TEST_ID2);
 
@@ -215,7 +216,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddLikeAndAtDeleteLikeWhenUserFoundWithoutReview() {
+  public void shouldReturnFalseAtAddLikeAndAtDeleteLikeWhenUserFoundWithoutReview() {
     Account account1 = new Account();
     account1.setId(TEST_ID2);
     User user = new User();
@@ -230,7 +231,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAddLikeWhenFoundLike() {
+  public void shouldReturnFalseAtAddLikeWhenFoundLike() {
     Like like = new Like();
 
     atLike();
@@ -241,7 +242,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAddLikeWhenGetException() {
+  public void shouldReturnFalseAtAddLikeWhenGetException() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
     expectedLike.setReviewUserId(TEST_ID2);
@@ -256,7 +257,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailDeleteLikeWhenNotFoundLike() {
+  public void shouldReturnFalseDeleteLikeWhenNotFoundLike() {
     atLike();
     when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
         .thenReturn(Optional.empty());
@@ -265,7 +266,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailDeleteLikeWhenGetException() {
+  public void shouldReturnFalseDeleteLikeWhenGetException() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
     expectedLike.setReviewUserId(TEST_ID2);
@@ -280,7 +281,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteLike() {
+  public void shouldReturnTrueAtDeleteLikeWhenEverythingOk() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
     expectedLike.setReviewUserId(TEST_ID2);
@@ -306,7 +307,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtRemoveReview() {
+  public void shouldReturnTrueAtRemoveReviewWhenEverythingOk() {
     User user = new User();
     user.setReview(new Review());
     user.setId(TEST_ID1);
@@ -321,7 +322,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtRemoveReviewWhenUserNotFound() {
+  public void shouldReturnFalseAtRemoveReviewWhenUserNotFound() {
     User expectedUser = new User();
     expectedUser.setId(TEST_ID1);
 
@@ -332,7 +333,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtRemoveReviewWhenNotTheSameId() {
+  public void shouldReturnFalseAtRemoveReviewWhenNotTheSameId() {
     User user = new User();
     user.setReview(new Review());
     user.setId(TEST_ID1);
@@ -346,7 +347,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtRemoveReviewWhenGetException() {
+  public void shouldReturnFalseAtRemoveReviewWhenGetException() {
     User user = new User();
     user.setReview(new Review());
     user.setId(TEST_ID1);
@@ -372,17 +373,17 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetReviews() {
+  public void shouldReturnListOfReviewGetDTOAtGetReviewsWhenEverythingOk() {
     getReviews(TEST_PHONE, false, TEST1_TEXT);
   }
 
   @Test
-  public void shouldSuccessAtGetReviewsWhenNotLoginUser() {
+  public void shouldReturnListOfReviewGetDTOAtGetReviewsWhenNotLoginUser() {
     getReviews(null, false, TEST1_TEXT);
   }
 
   @Test
-  public void shouldFailAtGetReviewsWhenGetNull() {
+  public void shouldReturnEmptyListAtGetReviewsWhenGetNull() {
     Account account = new Account();
     account.setId(TEST_ID1);
     List<ReviewGetDTO> expectedList = List.of();
@@ -403,7 +404,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldFailAtGetReviewsWhenGetException() {
+  public void shouldReturnEmptyListAtGetReviewsWhenGetException() {
     Account account = new Account();
     account.setId(TEST_ID1);
     List<ReviewGetDTO> expectedList = List.of();
@@ -424,7 +425,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetReviewsFirst3WhenFindMoreThan3Results() {
+  public void shouldReturnListOf3ElementsReviewGetDTOAtGetReviewsFirst3WhenFindMoreThan3Results() {
     final int count1 = 5;
     final int count2 = 4;
     final int count3 = 3;
@@ -455,7 +456,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetReviewsFirst3WhenFindLessThan3Results() {
+  public void shouldReturnListOf2ElemetsReviewGetDTOAtGetReviewsFirst3WhenFindLessThan3Results() {
     final int count1 = 5;
     final int count2 = 3;
     Account account = new Account();
@@ -525,7 +526,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPagesWhenToLess() {
+  public void shouldReturnListOf6PagesAtGetPagesWhenSizeIsEnough() {
     final int page = 3;
     final int page1 = 1;
     final int page2 = 2;
@@ -542,7 +543,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPagesWhenToMany() {
+  public void shouldReturnListOf7PagesAtGetPagesWhenSizeIsTooBig() {
     final int page = 7;
     final int page4 = 4;
     final int page5 = 5;
@@ -559,7 +560,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPagesWhenNoReviews() {
+  public void shouldReturnEmptyListAtGetPagesWhenNoReviews() {
     getPages(0, 0, List.of());
   }
 
@@ -570,7 +571,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetPagesWhenGetException() {
+  public void shouldReturnEmptyListAtGetPagesWhenGetException() {
     List<Integer> expectedList = List.of();
 
     when(userRepository.countAllByReviewIsNotNull()).thenThrow(MongoWriteException.class);
@@ -579,7 +580,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetReview() {
+  public void shouldReturnReviewGetDTOAtGetReviewWhenEverythingOk() {
     Account account = new Account();
     account.setId(TEST_ID1);
     ReviewGetDTO reviewGetDTO = new ReviewGetDTO();
@@ -588,5 +589,12 @@ public class ReviewServiceTest {
     when(userRepository.findReview(TEST_ID1)).thenReturn(reviewGetDTO);
 
     assertEquals(reviewGetDTO, reviewService.getReview(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturnNullAtGetReviewWhenGetException() {
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenThrow(RuntimeException.class);
+
+    assertNull(reviewService.getReview(TEST_PHONE));
   }
 }

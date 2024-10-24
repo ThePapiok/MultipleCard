@@ -23,7 +23,7 @@ public class CardConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnCardEntityAtGetEntityWhenEverythingOk() {
     final String testPin = "1213";
     final String testEncodePin = "123sdfsdfasdf123";
     final String testName = "name";

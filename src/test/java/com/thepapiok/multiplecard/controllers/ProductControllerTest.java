@@ -75,7 +75,7 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPage() throws Exception {
+  public void shouldReturnProductsPageAtProductsPageWhenEverythingOk() throws Exception {
     mockMvc.perform(get(PRODUCTS_URL)).andExpect(view().name(PRODUCTS_PAGE));
   }
 
@@ -124,7 +124,7 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnAddProductPageAtAddProductPage() throws Exception {
+  public void shouldReturnAddProductPageAtAddProductPageWhenEverythingOk() throws Exception {
     List<String> categories = List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME);
 
     when(categoryService.getAllNames()).thenReturn(categories);
@@ -315,7 +315,7 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToProductsSuccessAtAddProduct() throws Exception {
+  public void shouldRedirectToProductsSuccessAtAddProductWhenEverythingOk() throws Exception {
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
     MockHttpSession httpSession = new MockHttpSession();
     AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);

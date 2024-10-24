@@ -66,7 +66,7 @@ public class CategoryServiceTest {
   @Test
   public void shouldSuccessAtCheckOwnerHas20Categories() {
     when(categoryRepository.countExistingCategories(TEST_NAME_CATEGORIES)).thenReturn(null);
-    when(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, 2)).thenReturn(true);
+    when(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, 2)).thenReturn(true);
 
     assertTrue(categoryService.checkOwnerHas20Categories(TEST_OWNER_ID, TEST_NAME_CATEGORIES));
   }
@@ -74,7 +74,7 @@ public class CategoryServiceTest {
   @Test
   public void shouldFailAtCheckOwnerHas20CategoriesWhenLessThan20() {
     when(categoryRepository.countExistingCategories(TEST_NAME_CATEGORIES)).thenReturn(1);
-    when(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, 1)).thenReturn(false);
+    when(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, 1)).thenReturn(false);
 
     assertFalse(categoryService.checkOwnerHas20Categories(TEST_OWNER_ID, TEST_NAME_CATEGORIES));
   }
@@ -82,7 +82,7 @@ public class CategoryServiceTest {
   @Test
   public void shouldFailAtCheckOwnerHas20CategoriesWhenNoFound() {
     when(categoryRepository.countExistingCategories(TEST_NAME_CATEGORIES)).thenReturn(1);
-    when(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, 1)).thenReturn(null);
+    when(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, 1)).thenReturn(null);
 
     assertFalse(categoryService.checkOwnerHas20Categories(TEST_OWNER_ID, TEST_NAME_CATEGORIES));
   }

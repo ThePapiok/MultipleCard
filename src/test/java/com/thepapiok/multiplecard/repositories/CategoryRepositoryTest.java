@@ -54,7 +54,7 @@ public class CategoryRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessCountByOwnerIsEqual20() {
+  public void shouldReturnTrueAtCountByOwnerIsGTE20WhenFoundMoreOrEqual20Category() {
     final int count = 3;
     Category category1 = new Category();
     category1.setName(TEST_CATEGORY1_NAME);
@@ -136,28 +136,28 @@ public class CategoryRepositoryTest {
     mongoTemplate.save(category18);
     mongoTemplate.save(category19);
 
-    assertTrue(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, count));
+    assertTrue(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, count));
   }
 
   @Test
-  public void shouldFailCountByOwnerIsEqual20WhenUseExistingCategories() {
+  public void shouldReturnFalseAtCountByOwnerIsGTE20WhenUseExistingCategoriesAndIsLessThan20() {
     Category category1 = new Category();
     category1.setName(TEST_CATEGORY1_NAME);
     category1.setOwnerId(TEST_OWNER_ID);
     mongoTemplate.save(category1);
 
-    assertFalse(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, 0));
+    assertFalse(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, 0));
   }
 
   @Test
-  public void shouldFailCountByOwnerIsEqual20WhenNoCategories() {
+  public void shouldReturnFalseAtCountByOwnerIsGTE20WhenNoCategories() {
     final int count = 3;
 
-    assertNull(categoryRepository.countByOwnerIsEqual20(TEST_OWNER_ID, count));
+    assertNull(categoryRepository.countByOwnerIsGTE20(TEST_OWNER_ID, count));
   }
 
   @Test
-  public void shouldSuccessAtCountExistingCategories() {
+  public void shouldReturn2AtCountExistingCategoriesWhenFound2Categories() {
     Category category1 = new Category();
     category1.setName(TEST_CATEGORY1_NAME);
     category1.setOwnerId(TEST_OWNER_ID);
@@ -178,12 +178,12 @@ public class CategoryRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessAtCountExistingCategoriesWhenNotFound() {
+  public void shouldReturnNullAtCountExistingCategoriesWhenNotFound() {
     assertNull(categoryRepository.countExistingCategories(List.of(TEST_CATEGORY1_NAME)));
   }
 
   @Test
-  public void shouldSuccessAtFindIdByName() {
+  public void shouldReturnCategoryEntityWithOnlyFieldIdAtFindIdByNameWhenEverythingOk() {
     Category category1 = new Category();
     category1.setName(TEST_CATEGORY1_NAME);
     category1.setOwnerId(TEST_OWNER_ID);
@@ -195,7 +195,7 @@ public class CategoryRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessAtFindIdByNameWhenNotFound() {
+  public void shouldReturnNullAtFindIdByNameWhenNotFound() {
     assertNull(categoryRepository.findIdByName(TEST_CATEGORY1_NAME));
   }
 }

@@ -11,7 +11,7 @@ public class ProductConverterTest {
   private final ProductConverter productConverter = new ProductConverter();
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnProductEntityAtGetEntityWhenEverythingOk() {
     final int cents = 1345;
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName("name");

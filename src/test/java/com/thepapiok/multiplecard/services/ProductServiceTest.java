@@ -42,7 +42,7 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtAddProduct() throws IOException {
+  public void shouldReturnTrueAtAddProductWhenEverythingOk() throws IOException {
     final int cents = 1123;
     final String firstCategoryName = "category1";
     final String secondCategoryName = "category2";
@@ -117,7 +117,7 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldFailAtAddProductWhenGetException() {
+  public void shouldReturnFalseAtAddProductWhenGetException() {
     AddProductDTO addProductDTO = new AddProductDTO();
 
     when(productConverter.getEntity(addProductDTO)).thenThrow(RuntimeException.class);

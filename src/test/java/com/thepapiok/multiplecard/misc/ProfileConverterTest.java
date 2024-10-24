@@ -80,14 +80,14 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetDTOUser() {
+  public void shouldReturnProfileDTOAtGetDTOUserWhenEverythingOk() {
     when(addressConverter.getDTO(address)).thenReturn(addressDTO);
 
     assertEquals(profileDTO, profileConverter.getDTO(user));
   }
 
   @Test
-  public void shouldSuccessAtGetEntityNotForShops() {
+  public void shouldReturnUserEntityAtGetEntityNotForShopsWhenEverythingOk() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -99,7 +99,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldFailGetEntityNotForShopsWhenUserNotFound() {
+  public void shouldReturnNullAtGetEntityNotForShopsWhenUserNotFound() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -110,7 +110,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetDTOShop() {
+  public void shouldReturnProfilesShopDTOAtGetDTOShopWhenEverythingOk() {
     final long totalAmount = 3000;
     final float centsPerZloty = 100.0F;
     final String shopNameTest = "name";
@@ -139,7 +139,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldSuccessGetEntityForShops() {
+  public void shouldReturnShopEntityAtGetEntityForShopsWhenEverythingOk() {
     final long totalAmountTest = 3L;
     final String newShopNameTest = "newName";
     final String newAccountNumberTest = "newAccountNumber";
@@ -183,7 +183,7 @@ public class ProfileConverterTest {
   }
 
   @Test
-  public void shouldFailGetEntityForShopsWhenShopNotFound() {
+  public void shouldReturnNullAtGetEntityForShopsWhenShopNotFound() {
     Account account = new Account();
     account.setId(TEST_ID);
 

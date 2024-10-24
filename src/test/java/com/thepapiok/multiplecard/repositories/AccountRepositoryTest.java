@@ -116,7 +116,7 @@ public class AccountRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindAllPhones() {
+  public void shouldReturnListOfAccountEntitiesWithOnlyFieldPhoneAtFindAllPhonesWhenEverythingOk() {
     Account expectedAccount1 = new Account();
     expectedAccount1.setPhone(TEST_PHONE1);
     Account expectedAccount2 = new Account();
@@ -127,7 +127,7 @@ public class AccountRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindAllEmails() {
+  public void shouldReturnListOfAccountEntitiesWithOnlyFieldEmailAtFindAllEmailsWhenEverythingOk() {
     Account expectedAccount1 = new Account();
     expectedAccount1.setEmail(TEST_EMAIL1);
     Account expectedAccount2 = new Account();
@@ -140,7 +140,7 @@ public class AccountRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindIdByPhone() {
+  public void shouldReturnAccountEntityWithOnlyFieldIdAtFindIdByPhoneWhenEverythingOk() {
     Account expectedAccount = new Account();
     expectedAccount.setId(TEST_ID);
 
@@ -148,7 +148,8 @@ public class AccountRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPasswordByPhone() {
+  public void
+      shouldReturnAccountEntityWithOnlyFieldPasswordAtFindPasswordByPhoneWhenEverythingOk() {
     Account expecetedAccount = new Account();
     expecetedAccount.setPassword(TEST_PASSWORD1);
 
@@ -156,63 +157,63 @@ public class AccountRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessAtHasRole() {
+  public void shouldReturnTrueAtHasRoleWhenEverythingOk() {
     assertTrue(accountRepository.hasRole(TEST_PHONE1, Role.ROLE_USER));
   }
 
   @Test
-  public void shouldFailAtHasRoleWhenBadRole() {
+  public void shouldReturnFalseAtHasRoleWhenBadRole() {
     assertFalse(accountRepository.hasRole(TEST_PHONE1, Role.ROLE_SHOP));
   }
 
   @Test
-  public void shouldFailAtHasRoleWhenUserNotFound() {
+  public void shouldReturnNullAtHasRoleWhenUserNotFound() {
     assertNull(accountRepository.hasRole("+48123123321312213", Role.ROLE_SHOP));
   }
 
   @Test
-  public void shouldSuccessAtExistsByNameOtherThanPhoneWhenFound() {
+  public void shouldReturnTrueAtExistsByNameOtherThanPhoneWhenFound() {
     assertTrue(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME1, null));
   }
 
   @Test
-  public void shouldFailAtExistsByNameOtherThanPhoneWhenNotFound() {
+  public void shouldReturnFalseAtExistsByNameOtherThanPhoneWhenNotFound() {
     assertFalse(accountRepository.existsByNameOtherThanPhone("cos1", null));
   }
 
   @Test
-  public void shouldFailAtExistsByNameOtherThanPhoneWhenFoundButItsYours() {
+  public void shouldReturnFalseAtExistsByNameOtherThanPhoneWhenFoundButItsYours() {
     assertFalse(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME1, TEST_PHONE1));
   }
 
   @Test
-  public void shouldSuccessAtExistsByAccountNumberOtherThanPhoneWhenFound() {
+  public void shouldReturnTrueAtExistsByAccountNumberOtherThanPhoneWhenFound() {
     assertTrue(accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER1, null));
   }
 
   @Test
-  public void shouldFailAtExistsByAccountNumberOtherThanPhoneWhenNotFound() {
+  public void shouldReturnFalseAtExistsByAccountNumberOtherThanPhoneWhenNotFound() {
     assertFalse(accountRepository.existsByAccountNumberOtherThanPhone("cos2", null));
   }
 
   @Test
-  public void shouldFailAtExistsByAccountNumberOtherThanPhoneWhenFoundButItsYours() {
+  public void shouldReturnFalseAtExistsByAccountNumberOtherThanPhoneWhenFoundButItsYours() {
     assertFalse(
         accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER1, TEST_PHONE1));
   }
 
   @Test
-  public void shouldSuccessAtExistsByPointsOtherThanPhoneWhenFound() {
+  public void shouldReturnTrueAtExistsByPointsOtherThanPhoneWhenFound() {
     assertTrue(accountRepository.existsByPointsOtherThanPhone(address1, null));
   }
 
   @Test
-  public void shouldFailAtExistsByPointsOtherThanPhoneWhenNotFound() {
+  public void shouldReturnFalseAtExistsByPointsOtherThanPhoneWhenNotFound() {
     assertFalse(accountRepository.existsByPointsOtherThanPhone(null, null));
   }
 
   @Test
-  public void shouldFailAtExistsByPointsOtherThanPhoneWhenFoundButItsYours() {
+  public void shouldReturnFalseAtExistsByPointsOtherThanPhoneWhenFoundButItsYours() {
     assertFalse(accountRepository.existsByPointsOtherThanPhone(address1, TEST_PHONE1));
   }
 }

@@ -44,7 +44,7 @@ public class CustomAuthenticationProviderTest {
   }
 
   @Test
-  public void shouldReturnAuthenticationAtAuthenticate() {
+  public void shouldReturnAuthenticationAtAuthenticateWhenEverythingOk() {
     Authentication authentication =
         new UsernamePasswordAuthenticationToken(TEST_USER_TEXT, TEST_USER_TEXT);
     User user =

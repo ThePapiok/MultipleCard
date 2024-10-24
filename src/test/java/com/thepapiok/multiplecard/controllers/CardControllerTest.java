@@ -69,7 +69,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnNewCardPageAtNewCardPage() throws Exception {
+  public void shouldReturnNewCardPageAtNewCardPageWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
 
     mockMvc
@@ -137,7 +137,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserSuccessAtNewCard() throws Exception {
+  public void shouldRedirectToUserSuccessAtNewCardWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
     OrderCardDTO orderCardDTO = new OrderCardDTO();
     orderCardDTO.setCode(TEST_CODE);
@@ -259,7 +259,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnBlockCardPage() throws Exception {
+  public void shouldReturnBlockCardPageAtBlockCardPageWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     mockMvc
@@ -272,7 +272,8 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnBlockCardPageWhenParamErrorButNoMessage() throws Exception {
+  public void shouldReturnBlockCardPageAtBlockCardPageWhenParamErrorButNoMessage()
+      throws Exception {
 
     mockMvc
         .perform(get(BLOCK_CARD_URL).param(ERROR_PARAM, ""))
@@ -282,7 +283,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnBlockCardPageWhenParamReset() throws Exception {
+  public void shouldReturnBlockCardPageAtBlockCardPageWhenParamReset() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     mockMvc
@@ -294,7 +295,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserSuccess() throws Exception {
+  public void shouldRedirectToUserSuccessAtBlockCardWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
@@ -313,7 +314,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorWhenTooManyAttempts() throws Exception {
+  public void shouldRedirectToUserErrorAtBlockCardWhenTooManyAttempts() throws Exception {
     final int maxAttempts = 3;
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
     httpSession.setAttribute(ATTEMPTS_PARAM, maxAttempts);
@@ -330,7 +331,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToBlockCardErrorWhenErrorValidation() throws Exception {
+  public void shouldRedirectToBlockCardErrorAtBlockCardWhenErrorValidation() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     mockMvc
@@ -345,7 +346,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToBlockCardErrorWhenBadCode() throws Exception {
+  public void shouldRedirectToBlockCardErrorAtBlockCardWhenBadCode() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
@@ -362,7 +363,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorWhenCardIsBlocked() throws Exception {
+  public void shouldRedirectToUserErrorAtBlockCardWhenCardIsBlocked() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
@@ -380,7 +381,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorWhenErrorAtBlockCard() throws Exception {
+  public void shouldRedirectToUserErrorAtBlockCardWhenErrorAtBlockCard() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);

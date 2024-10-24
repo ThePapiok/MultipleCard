@@ -171,7 +171,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnProfilePageAtGetProfileUser() throws Exception {
+  public void shouldReturnProfilePageAtGetProfileUserWhenEverythingOk() throws Exception {
     successReturnProfilePage();
   }
 
@@ -193,7 +193,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void successReturnProfileShopPageAtGetProfileShop() throws Exception {
+  public void successReturnProfileShopPageAtGetProfileShopWhenEverythingOk() throws Exception {
     ProfileShopDTO profileShopDTO = new ProfileShopDTO();
 
     when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
@@ -248,7 +248,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToEditProfileAtEditProfile() throws Exception {
+  public void shouldRedirectToEditProfileAtEditProfileWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     mockMvc
@@ -559,7 +559,8 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToEditProfileAtEditProfileShopWithFile() throws Exception {
+  public void shouldRedirectToEditProfileAtEditProfileShopWithFileWhenEverythingOk()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(shopService.checkShopNameExists(profileShopDTO.getName(), TEST_PHONE)).thenReturn(false);
@@ -579,7 +580,8 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToEditProfileAtEditProfileShopWithoutFile() throws Exception {
+  public void shouldRedirectToEditProfileAtEditProfileShopWithoutFileWhenEverythingOk()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     ProfileShopDTO profileShopDTO1 = new ProfileShopDTO();
     profileShopDTO1.setName(profileShopDTO.getName());
@@ -1150,7 +1152,8 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnChangePasswordPageAtChangePasswordPage() throws Exception {
+  public void shouldReturnChangePasswordPageAtChangePasswordPageWhenEverythingOk()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
@@ -1211,7 +1214,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLoginSuccessAtChangePassword() throws Exception {
+  public void shouldRedirectToLoginSuccessAtChangePasswordWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     setSession(1, httpSession);
 
@@ -1358,7 +1361,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnDeleteAccountPageAtDeleteAccountPage() throws Exception {
+  public void shouldReturnDeleteAccountPageAtDeleteAccountPageWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ATTEMPTS_PARAM, 0);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
@@ -1416,7 +1419,7 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLoginSuccessAtDeleteAccount() throws Exception {
+  public void shouldRedirectToLoginSuccessAtDeleteAccountWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_SMS_DELETE_PARAM, TEST_ENCODE_CODE);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);

@@ -26,7 +26,7 @@ public class CountryServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetAll() {
+  public void shouldReturnListOfCountryDTOSAtGetAllWhenEverythingOk() {
     final String name1 = "Polskaa";
     final String code1 = "PL";
     final String callingCode1 = "+48";
@@ -81,14 +81,14 @@ public class CountryServiceTest {
   }
 
   @Test
-  public void shouldFailAtGetAllWhenGetNull() {
+  public void shouldReturnEmptyListAtGetAllWhenGetNull() {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class)).thenReturn(null);
 
     assertEquals(List.of(), countryService.getAll());
   }
 
   @Test
-  public void shouldFailAtGetAllWhenGetException() {
+  public void shouldReturnEmptyListAtGetAllWhenGetException() {
     when(restTemplate.getForObject(COUNTRIES_URL, CountryGetDTO[].class))
         .thenThrow(RestClientException.class);
 
