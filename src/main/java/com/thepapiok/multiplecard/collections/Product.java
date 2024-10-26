@@ -18,5 +18,4 @@ public class Product {
   private int amount;
   private ObjectId shopId;
   private boolean isActive;
-  private int promotion;
 }

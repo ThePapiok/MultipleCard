@@ -182,11 +182,6 @@ db.createCollection("products", {
                     "bsonType": "bool",
                     "description": "isActive is required and must be bool"
                 },
-                "promotion": {
-                    "bsonType": ["int", "null"],
-                    "minimum": 0,
-                    "description": "amount must be greater or equal 0"
-                },
                 "_class": {
                     "bsonType": "string",
                     "description": "_class is required and must be string",
@@ -426,12 +421,50 @@ db.createCollection("cards", {
                 }
             }
         }}})
+db.createCollection("promotions", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "startAt", "expiredAt", "amount", "productId", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "startAt": {
+                    "bsonType": "date",
+                    "description": "startAt is required and must be date"
+                },
+                "expiredAt": {
+                    "bsonType": "date",
+                    "description": "expiredAt is required and must be date"
+                },
+                "amount": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "description": "amount is required and must be greater or equal 0"
+                },
+                "productId": {
+                    "bsonType": "objectId",
+                    "description": "productId is required and must be objectId"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+        }
+    }
+})
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
 db.accounts.createIndex({"phone": 1}, {"unique": true});
 db.accounts.createIndex({"email": 1}, {"unique": true});
-db.users.createIndex({"review.description": "text"}, {"default_language": "none"})
+db.users.createIndex({"review.description": "text"}, {"default_language": "none"});
 db.shops.createIndex({"name": 1}, {"unique": true});
 db.shops.createIndex({"accountNumber": 1}, {"unique": true});
-db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"})
+db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"});
+db.promotions.createIndex({"productId": 1}, {"unique": true});
+db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
