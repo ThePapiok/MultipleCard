@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -28,11 +29,14 @@ public class ReviewController {
 
   private final MessageSource messageSource;
   private final ReviewService reviewService;
+  private final ResultService resultService;
 
   @Autowired
-  public ReviewController(MessageSource messageSource, ReviewService reviewService) {
+  public ReviewController(
+      MessageSource messageSource, ReviewService reviewService, ResultService resultService) {
     this.messageSource = messageSource;
     this.reviewService = reviewService;
+    this.resultService = resultService;
   }
 
   @PostMapping
@@ -91,7 +95,7 @@ public class ReviewController {
     List<ReviewGetDTO> reviews = reviewService.getReviews(phone, page, field, isDescending, text);
     model.addAttribute("field", field);
     model.addAttribute("isDescending", isDescending);
-    model.addAttribute("pages", reviewService.getPages(page + 1));
+    model.addAttribute("pages", resultService.getPages(page + 1, reviewService.getMaxPage()));
     model.addAttribute("pageSelected", page + 1);
     model.addAttribute("reviews", reviews);
     model.addAttribute("reviewsSize", reviews.size());

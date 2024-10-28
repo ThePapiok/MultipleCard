@@ -10,11 +10,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ShopService;
+import java.time.LocalDate;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
@@ -66,24 +72,69 @@ public class ProductControllerTest {
   private static final String PRODUCTS_PAGE = "productsPage";
   private static final String ADD_PRODUCT_PAGE = "addProductPage";
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
+  private static final String FIELD_PARAM = "field";
+  private static final String IS_DESCENDING_PARAM = "isDescending";
+  private static final String PAGES_PARAM = "pages";
+  private static final String PAGE_SELECTED_PARAM = "pageSelected";
+  private static final String PRODUCTS_PARAM = "products";
+  private static final String PROMOTIONS_PARAM = "promotions";
+  private static final String PRODUCTS_SIZE_PARAM = "productsSize";
+  private static final String MAX_PAGE_PARAM = "maxPage";
+  private static final String COUNT_FIELD = "count";
+  private static final Integer TEST_PRODUCT_SIZE = 2;
+  private Product testProduct1;
+  private Product testProduct2;
+  private List<Integer> testPages;
+  private PromotionGetDTO testPromotion;
+  private List<ProductGetDTO> testProducts;
 
   @Autowired private MockMvc mockMvc;
   @MockBean private CategoryService categoryService;
   @MockBean private AccountRepository accountRepository;
   @MockBean private ShopService shopService;
   @MockBean private ProductService productService;
+  @MockBean private ResultService resultService;
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnProductsPageAtProductsPageWhenEverythingOk() throws Exception {
-    mockMvc.perform(get(PRODUCTS_URL)).andExpect(view().name(PRODUCTS_PAGE));
+    setDataForProductsPage();
+
+    mockMvc
+        .perform(get(PRODUCTS_URL))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, testPages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
+        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(view().name(PRODUCTS_PAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnProductsPageAtProductsPageWithErrorParamWithoutMessage()
       throws Exception {
-    mockMvc.perform(get(PRODUCTS_URL).param(ERROR_PARAM, "")).andExpect(view().name(PRODUCTS_PAGE));
+    setDataForProductsPage();
+
+    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(resultService.getPages(1, 1)).thenReturn(testPages);
+
+    mockMvc
+        .perform(get(PRODUCTS_URL).param(ERROR_PARAM, ""))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, testPages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
+        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(view().name(PRODUCTS_PAGE));
   }
 
   @Test
@@ -91,9 +142,23 @@ public class ProductControllerTest {
   public void shouldReturnProductsPageAtProductsPageWithErrorParam() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+    setDataForProductsPage();
+
+    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(resultService.getPages(1, 1)).thenReturn(testPages);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(ERROR_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, testPages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
+        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
         .andExpect(view().name(PRODUCTS_PAGE));
     assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -103,8 +168,23 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnProductsPageAtProductsPageWithSuccessParamWithoutMessage()
       throws Exception {
+    setDataForProductsPage();
+
+    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(resultService.getPages(1, 1)).thenReturn(testPages);
+
     mockMvc
         .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, ""))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, testPages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
+        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(view().name(PRODUCTS_PAGE));
   }
 
@@ -114,12 +194,84 @@ public class ProductControllerTest {
     final String successMessage = "success!";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, successMessage);
+    setDataForProductsPage();
+
+    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(resultService.getPages(1, 1)).thenReturn(testPages);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, "").session(httpSession))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, testPages))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
+        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(SUCCESS_MESSAGE_PARAM, successMessage))
         .andExpect(view().name(PRODUCTS_PAGE));
     assertNull(httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+  }
+
+  private void setDataForProductsPage() {
+    final ObjectId productId1 = new ObjectId("123456789012345678904312");
+    final ObjectId productId2 = new ObjectId("023456589012345178904387");
+    final int testYearStartAt = 2024;
+    final int testMonthStartAt = 1;
+    final int testDayStartAt = 1;
+    final int testYearExpiredAt = 2015;
+    final int testMonthExpiredAt = 2;
+    final int testDayExpiredAt = 3;
+    final int testAmount = 10;
+    final int testOtherAmount = 222;
+    final int testPromotionAmount = 5;
+    List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
+    LocalDate startAt = LocalDate.of(testYearStartAt, testMonthStartAt, testDayStartAt);
+    LocalDate expiredAt = LocalDate.of(testYearExpiredAt, testMonthExpiredAt, testDayExpiredAt);
+    testProduct1 = new Product();
+    testProduct1.setActive(true);
+    testProduct1.setImageUrl("url1");
+    testProduct1.setBarcode("barcode1");
+    testProduct1.setDescription("description1");
+    testProduct1.setName("name1");
+    testProduct1.setShopId(TEST_ID);
+    testProduct1.setId(productId1);
+    testProduct1.setCategories(categories);
+    testProduct1.setAmount(testAmount);
+    testProduct2 = new Product();
+    testProduct2.setActive(true);
+    testProduct2.setAmount(testOtherAmount);
+    testProduct2.setDescription("description2");
+    testProduct2.setBarcode("barcode2");
+    testProduct2.setShopId(TEST_ID);
+    testProduct2.setImageUrl("url2");
+    testProduct2.setName("name2");
+    testProduct2.setCategories(categories);
+    testProduct2.setId(productId2);
+    Promotion promotion1 = new Promotion();
+    promotion1.setId(new ObjectId("923426389512345172904181"));
+    promotion1.setAmount(testPromotionAmount);
+    promotion1.setProductId(productId1);
+    promotion1.setStartAt(startAt);
+    promotion1.setExpiredAt(expiredAt);
+    testPromotion =
+        new PromotionGetDTO(productId1.toString(), startAt, expiredAt, testPromotionAmount);
+    ProductGetDTO productGetDTO1 = new ProductGetDTO();
+    productGetDTO1.setProduct(testProduct1);
+    productGetDTO1.setPromotion(promotion1);
+    ProductGetDTO productGetDTO2 = new ProductGetDTO();
+    productGetDTO2.setProduct(testProduct2);
+    productGetDTO2.setPromotion(null);
+    testProducts = List.of(productGetDTO1, productGetDTO2);
+    testPages = List.of(1);
+
+    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(resultService.getPages(1, 1)).thenReturn(testPages);
   }
 
   @Test

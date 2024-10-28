@@ -1,9 +1,13 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ShopService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -11,6 +15,7 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,7 @@ public class ProductController {
   private final MessageSource messageSource;
   private final ProductService productService;
   private final AccountRepository accountRepository;
+  private final ResultService resultService;
 
   @Autowired
   public ProductController(
@@ -38,20 +44,29 @@ public class ProductController {
       ShopService shopService,
       MessageSource messageSource,
       ProductService productService,
-      AccountRepository accountRepository) {
+      AccountRepository accountRepository,
+      ResultService resultService) {
     this.categoryService = categoryService;
     this.shopService = shopService;
     this.messageSource = messageSource;
     this.productService = productService;
     this.accountRepository = accountRepository;
+    this.resultService = resultService;
   }
 
   @GetMapping("/products")
   public String productsPage(
       @RequestParam(required = false) String error,
       @RequestParam(required = false) String success,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "count") String field,
+      @RequestParam(defaultValue = "true") Boolean isDescending,
+      @RequestParam(defaultValue = "") String text,
       HttpSession httpSession,
-      Model model) {
+      Model model,
+      Principal principal) {
+    final String phone = principal.getName();
+    int maxPage;
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
@@ -65,6 +80,33 @@ public class ProductController {
         httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
       }
     }
+    List<ProductGetDTO> products =
+        productService.getProductsOwner(phone, page, field, isDescending, text);
+    List<Promotion> promotions =
+        products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
+    List<PromotionGetDTO> promotionGetDTOS = null;
+    if (promotions.size() != 0) {
+      promotionGetDTOS =
+          promotions.stream()
+              .map(
+                  e ->
+                      new PromotionGetDTO(
+                          e.getProductId().toString(),
+                          e.getStartAt(),
+                          e.getExpiredAt(),
+                          e.getAmount()))
+              .toList();
+    }
+    maxPage = productService.getMaxPage(text, phone);
+    model.addAttribute("field", field);
+    model.addAttribute("isDescending", isDescending);
+    model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+    model.addAttribute("pageSelected", page + 1);
+    model.addAttribute("products", products.stream().map(ProductGetDTO::getProduct).toList());
+    model.addAttribute("promotions", promotionGetDTOS);
+    model.addAttribute("productsSize", products.size());
+    model.addAttribute("maxPage", maxPage);
+
     return "productsPage";
   }
 

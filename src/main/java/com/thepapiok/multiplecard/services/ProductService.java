@@ -3,7 +3,10 @@ package com.thepapiok.multiplecard.services;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,12 +22,20 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ProductService {
+  private static final String COUNT_FIELD = "count";
+  private static final String ID_FIELD = "_id";
+  private static final String SHOP_ID_FIELD = "shopId";
+  private static final String PRODUCTS_COLLECTION = "products";
+  private static final String TEXT_OPERATOR = "$text";
+  private static final String SEARCH_OPERATOR = "$search";
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
   private final ProductRepository productRepository;
   private final CloudinaryService cloudinaryService;
+  private final AccountRepository accountRepository;
   private final MongoTransactionManager mongoTransactionManager;
   private final MongoTemplate mongoTemplate;
+  private final AggregationRepository aggregationRepository;
 
   @Autowired
   public ProductService(
@@ -32,14 +43,18 @@ public class ProductService {
       ProductConverter productConverter,
       ProductRepository productRepository,
       CloudinaryService cloudinaryService,
+      AccountRepository accountRepository,
       MongoTransactionManager mongoTransactionManager,
-      MongoTemplate mongoTemplate) {
+      MongoTemplate mongoTemplate,
+      AggregationRepository aggregationRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
     this.cloudinaryService = cloudinaryService;
+    this.accountRepository = accountRepository;
     this.mongoTransactionManager = mongoTransactionManager;
     this.mongoTemplate = mongoTemplate;
+    this.aggregationRepository = aggregationRepository;
   }
 
   public boolean addProduct(
@@ -53,10 +68,8 @@ public class ProductService {
               List<ObjectId> categories = new ArrayList<>();
               Product product = productConverter.getEntity(addProductDTO);
               product.setActive(true);
-              product.setPromotion(0);
               product.setShopId(ownerId);
               product.setImageUrl("");
-              System.out.println(product);
               for (String name : nameOfCategories) {
                 ObjectId id = categoryService.getCategoryIdByName(name);
                 if (id == null) {
@@ -71,7 +84,6 @@ public class ProductService {
               product.setCategories(categories);
               product = mongoTemplate.save(product);
               try {
-                System.out.println(product);
                 product.setImageUrl(
                     cloudinaryService.addImage(
                         addProductDTO.getFile().getBytes(), product.getId().toHexString()));
@@ -82,7 +94,6 @@ public class ProductService {
             }
           });
     } catch (Exception e) {
-      System.out.println(e);
       return false;
     }
     return true;
@@ -94,5 +105,14 @@ public class ProductService {
 
   public boolean checkOwnerHasTheSameBarcode(ObjectId ownerId, String barcode) {
     return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
+  }
+
+  public List<ProductGetDTO> getProductsOwner(
+      String phone, int page, String field, boolean isDescending, String text) {
+    return aggregationRepository.getProductsOwner(phone, page, field, isDescending, text);
+  }
+
+  public int getMaxPage(String text, String phone) {
+    return aggregationRepository.getMaxPage(text, phone);
   }
 }

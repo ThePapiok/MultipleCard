@@ -1,54 +1,12 @@
-#reviews {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: 6%;
-    margin-top: 10px;
-}
 
-.review {
-    width: 420px;
-    height: 150px;
-    margin-top: 20px;
-    margin-left: 20px;
-    background-color: #FFFFFF;
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), -4px 8px 20px rgba(0, 0, 0, 0.10);
-}
 
-.review-horizontal {
-    display: flex;
-}
-
-.review-vertical {
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-}
-
-.review-vertical, .amountHearths {
+.amountHearths {
     display: flex;
     justify-content: flex-end;
 }
 
-.name, .description, .amount {
-    font-family: "Inter", sans-serif;
-}
 
-.name {
-    margin-left: 10px;
-    margin-top: 10px;
-    width: 90%;
-}
 
-.name, .description {
-    color: #000000;
-}
-
-.name {
-    font-weight: 800;
-    font-size: 16px;
-}
 
 .amountHearths {
     margin-top: 8px;
@@ -61,6 +19,7 @@
 }
 
 .description, .amount {
+    font-family: "Inter", sans-serif;
     font-weight: 500;
     font-size: 14px;
 }
@@ -73,11 +32,6 @@
     display: none;
 }
 
-.hearth, .delete {
-    height: 25px;
-    width: 25px;
-    cursor: pointer;
-}
 
 .notLoginHearth {
     cursor: auto;
@@ -89,6 +43,7 @@
     margin-right: 10px;
     height: 50%;
     word-wrap: break-word;
+    color: #000000;
 }
 
 .stars {
@@ -107,26 +62,4 @@
 
 .yourReview {
     font-weight: 1000;
-}
-
-#noResults {
-    display: none;
-}
-
-#noResults[data-review-size="0"] {
-    display: block;
-}
-
-@media only screen and (max-width: 768px) {
-    .review {
-        width: 83%;
-        height: 170px;
-        margin-bottom: 10px;
-        margin-left: 0;
-    }
-
-    #reviews {
-        justify-content: center;
-        margin-left: 0;
-    }
 }

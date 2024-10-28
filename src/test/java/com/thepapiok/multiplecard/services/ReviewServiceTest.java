@@ -57,6 +57,7 @@ public class ReviewServiceTest {
   @Mock private LikeRepository likeRepository;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private MongoTemplate mongoTemplate;
+  @Mock private ResultService resultService;
   private ReviewService reviewService;
 
   @BeforeAll
@@ -456,7 +457,7 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldReturnListOf2ElemetsReviewGetDTOAtGetReviewsFirst3WhenFindLessThan3Results() {
+  public void shouldReturnListOf2ElementsReviewGetDTOAtGetReviewsFirst3WhenFindLessThan3Results() {
     final int count1 = 5;
     final int count2 = 3;
     Account account = new Account();
@@ -526,60 +527,6 @@ public class ReviewServiceTest {
   }
 
   @Test
-  public void shouldReturnListOf6PagesAtGetPagesWhenSizeIsEnough() {
-    final int page = 3;
-    final int page1 = 1;
-    final int page2 = 2;
-    final int page3 = 3;
-    final int page4 = 4;
-    final int page5 = 5;
-    final int page6 = 6;
-    final int pages = 5;
-    final int someOtherReviews = 6;
-    getPages(
-        pages * COUNT_REVIEWS_AT_PAGE + someOtherReviews,
-        page,
-        List.of(page1, page2, page3, page4, page5, page6));
-  }
-
-  @Test
-  public void shouldReturnListOf7PagesAtGetPagesWhenSizeIsTooBig() {
-    final int page = 7;
-    final int page4 = 4;
-    final int page5 = 5;
-    final int page6 = 6;
-    final int page7 = 7;
-    final int page8 = 8;
-    final int page9 = 9;
-    final int page10 = 10;
-    final int pages = 13;
-    getPages(
-        pages * COUNT_REVIEWS_AT_PAGE,
-        page,
-        List.of(page4, page5, page6, page7, page8, page9, page10));
-  }
-
-  @Test
-  public void shouldReturnEmptyListAtGetPagesWhenNoReviews() {
-    getPages(0, 0, List.of());
-  }
-
-  private void getPages(int count, int page, List<Integer> expectedList) {
-    when(userRepository.countAllByReviewIsNotNull()).thenReturn(count);
-
-    assertEquals(expectedList, reviewService.getPages(page));
-  }
-
-  @Test
-  public void shouldReturnEmptyListAtGetPagesWhenGetException() {
-    List<Integer> expectedList = List.of();
-
-    when(userRepository.countAllByReviewIsNotNull()).thenThrow(MongoWriteException.class);
-
-    assertEquals(expectedList, reviewService.getPages(0));
-  }
-
-  @Test
   public void shouldReturnReviewGetDTOAtGetReviewWhenEverythingOk() {
     Account account = new Account();
     account.setId(TEST_ID1);
@@ -596,5 +543,22 @@ public class ReviewServiceTest {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenThrow(RuntimeException.class);
 
     assertNull(reviewService.getReview(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturn5AtGetMaxPageWhenCount50Reviews() {
+    final int maxPage = 5;
+    final int count = 50;
+    when(userRepository.countAllByReviewIsNotNull()).thenReturn(count);
+
+    assertEquals(maxPage, reviewService.getMaxPage());
+  }
+
+  @Test
+  public void shouldReturn1AtGetMaxPageWhenCount1Reviews() {
+    final int maxPage = 1;
+    when(userRepository.countAllByReviewIsNotNull()).thenReturn(1);
+
+    assertEquals(maxPage, reviewService.getMaxPage());
   }
 }

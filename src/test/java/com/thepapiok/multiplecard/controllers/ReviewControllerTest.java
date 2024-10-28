@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -58,6 +59,7 @@ public class ReviewControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
+  @MockBean private ResultService resultService;
 
   @Test
   @WithMockUser(username = TEST_PHONE)
@@ -198,7 +200,8 @@ public class ReviewControllerTest {
     List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
     List<Integer> pages = List.of(1);
 
-    when(reviewService.getPages(testPageInt + 1)).thenReturn(pages);
+    when(resultService.getPages(testPageInt + 1, 1)).thenReturn(pages);
+    when(reviewService.getMaxPage()).thenReturn(1);
     when(reviewService.getReviews(phone, testPageInt, TEST_FIELD, true, TEST_TEXT))
         .thenReturn(expectedReviews);
 
