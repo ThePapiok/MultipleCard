@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/productsPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+</head>
+<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}')|">
+<script src="/js/page.js"></script>
+<script src="/js/results.js"></script>
+<script src="/js/productsPage.js"></script>
+<script th:inline="javascript">
+    let ids = /*[[${ids}]]*/ [];
+    let promotions = /*[[${promotions}]]*/ [];
+</script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h1 headerButton">
+        <button class="blackButton" th:text="#{button.login}"></button>
+    </a>
+    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="#{productsPage.product.left_products}" id="textLeftProducts"></span>
+    <p class="title" th:text="#{productsPage.title}"></p>
+    <div id="searchBar">
+        <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+        <select id="searchSelect">
+            <option th:text="#{productsPage.select_option.most}" value="0"></option>
+            <option th:text="#{productsPage.select_option.least}" value="1"></option>
+            <option th:text="#{productsPage.select_option.latest}" value="2"></option>
+            <option th:text="#{productsPage.select_option.oldest}" value="3"></option>
+        </select>
+        <div id="searchButton" onclick="setParams()">
+            <img id="searchImage" src="/images/search.png" alt="search">
+        </div>
+        <a href="/add_product" id="addProduct">
+            <button class="greenButton" th:text="#{add_product.text}"></button>
+        </a>
+    </div>
+    <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+    <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
+    <div id="allResults">
+        <div id="results">
+            <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}"
+                 th:data-active="${product.active}">
+                <div class="result-vertical">
+                    <div class="result-horizontal notImageContainer">
+                        <span class="name" th:text="${product.name}"></span>
+                        <a th:href="@{'/edit_product?id=' + ${product.id}}" class="resultIcons">
+                            <img src="/images/edit.png" alt="edit">
+                        </a>
+                        <a th:href="@{'/discount_product?id=' + ${product.id}}" class="resultIcons">
+                            <img src="/images/discount.png" alt="discount">
+                        </a>
+                        <a th:href="@{'/delete_product?id=' + ${product.id}}" class="resultIcons">
+                            <img src="/images/close.png" alt="close">
+                        </a>
+                    </div>
+                    <div class="result-horizontal imageContainer">
+                        <img id="productImage" th:src="${product.imageUrl}">
+                        <div class="description" th:text="${product.description}">
+                        </div>
+                    </div>
+                    <div class="result-horizontal notImageContainer price" th:data-id="${product.id}">
+                        <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"></span>
+                        <div hidden class="promotionContainer">
+                            <div class="result-horizontal">
+                                <div class="result-vertical promotionInfo">
+                                <div class="date">
+                                    <span></span>
+                                    <span>-</span>
+                                    <span></span>
+                                </div>
+                                <span class="productsLeft"></span>
+                                </div>
+                                <div class="promotionAmount">
+                                    <span class="amount promotion" th:text="${product.amount}/100"></span>
+                                    <span class="amount"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <span th:data-results-size="${productsSize}" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
+    </div>
+    <div id="pages">
+        <a>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
+        </a>
+        <div id="pagesSelect">
+            <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
+                  th:if="${productsSize} != 0" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+        </div>
+        <a>
+            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
+                    th:attr="onclick=|nextPage('${maxPage}')|"></button>
+        </a>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

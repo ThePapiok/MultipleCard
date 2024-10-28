@@ -17,7 +17,7 @@ public class HealthControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @Test
-  public void shouldReturnStatus200AtGetStatus() throws Exception {
+  public void shouldReturnStatus200AtGetStatusWhenEverythingOk() throws Exception {
     mockMvc.perform(get("/health")).andExpect(status().isOk());
   }
 }

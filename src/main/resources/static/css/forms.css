@@ -58,6 +58,7 @@ img {
 }
 
 .optionsSelect {
+    min-height: 50px;
     position: relative;
     z-index: 2;
     list-style-type: none;

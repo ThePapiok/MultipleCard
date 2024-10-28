@@ -10,4 +10,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Category {
   @Id private ObjectId id;
   private String name;
+  private ObjectId ownerId;
 }

@@ -33,7 +33,7 @@ public class UserConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntityWithoutApartmentNumber() {
+  public void shouldReturnUserEntityAtGetEntityWithoutApartmentNumber() {
     AddressDTO addressDTO = new AddressDTO();
     addressDTO.setCity(TEST_CITY);
     addressDTO.setApartmentNumber("");
@@ -64,7 +64,7 @@ public class UserConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnUserEntityAtGetEntityWhenEverythingOk() {
     AddressDTO addressDTO = new AddressDTO();
     addressDTO.setCity(TEST_CITY);
     addressDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER);

@@ -56,7 +56,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckImage() throws IOException {
+  public void shouldReturnTrueAtCheckImageWhenEverythingOk() throws IOException {
     final int goodWidth = 460;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, goodWidth, goodHeight);
@@ -65,12 +65,12 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckImageWhenEmptyFile() {
+  public void shouldReturnFalseAtCheckImageWhenEmptyFile() {
     assertFalse(shopService.checkImage(new MockMultipartFile(TEST_FILE_NAME, new byte[0])));
   }
 
   @Test
-  public void shouldFailAtCheckImageWhenToLowHeight() throws IOException {
+  public void shouldReturnFalseAtCheckImageWhenToLowHeight() throws IOException {
     final int goodWidth = 460;
     final int badHeight = 410;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, goodWidth, badHeight);
@@ -79,7 +79,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckImageWhenToLowWidth() throws IOException {
+  public void shouldReturnFalseAtCheckImageWhenToLowWidth() throws IOException {
     final int badWidth = 410;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile(TEST_CONTENT_TYPE, badWidth, goodHeight);
@@ -88,7 +88,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckImageWhenBadType() throws IOException {
+  public void shouldReturnFalseAtCheckImageWhenBadType() throws IOException {
     final int goodWidth = 460;
     final int goodHeight = 460;
     MultipartFile multipartFile = setFile("pdf", goodWidth, goodHeight);
@@ -105,7 +105,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckImageWhenTooMuchSize() throws IOException {
+  public void shouldReturnFalseAtCheckImageWhenTooMuchSize() throws IOException {
     final int width = 1000;
     final int height = 1000;
     final int maxRGB = 256;
@@ -132,7 +132,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckAccountNumberExistsWhenNullPhone() {
+  public void shouldReturnTrueAtCheckAccountNumberExistsWhenNullPhone() {
     when(accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER, null))
         .thenReturn(true);
 
@@ -140,7 +140,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckAccountNumberExistsWhenNotFoundAndNullPhone() {
+  public void shouldReturnFalseAtCheckAccountNumberExistsWhenNotFoundAndNullPhone() {
     when(accountRepository.existsByAccountNumberOtherThanPhone(TEST_ACCOUNT_NUMBER, null))
         .thenReturn(false);
 
@@ -148,21 +148,21 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckShopNameExistsWhenNullPhone() {
+  public void shouldReturnTrueAtCheckShopNameExistsWhenNullPhone() {
     when(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME, null)).thenReturn(true);
 
     assertTrue(shopService.checkShopNameExists(TEST_SHOP_NAME, null));
   }
 
   @Test
-  public void shouldFailAtCheckShopNameExistsWhenNotFoundAndNullPhone() {
+  public void shouldReturnFalseAtCheckShopNameExistsWhenNotFoundAndNullPhone() {
     when(accountRepository.existsByNameOtherThanPhone(TEST_SHOP_NAME, null)).thenReturn(false);
 
     assertFalse(shopService.checkShopNameExists(TEST_SHOP_NAME, null));
   }
 
   @Test
-  public void shouldSuccessAtCheckAccountNumber() {
+  public void shouldReturnTrueAtCheckAccountNumberWhenEverythingOk() {
     final int statusOk = 200;
     ResponseEntity<String> response = new ResponseEntity<>(HttpStatusCode.valueOf(statusOk));
 
@@ -173,7 +173,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckAccountNumberWhenInvalidAccountNumber() {
+  public void shouldReturnFalseAtCheckAccountNumberWhenInvalidAccountNumber() {
     when(restTemplate.exchange(IBAN_API_URL, HttpMethod.GET, null, String.class))
         .thenThrow(HttpClientErrorException.class);
 
@@ -181,7 +181,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckPointExistsWhenNullPhone() {
+  public void shouldReturnTrueAtCheckPointExistsWhenNullPhone() {
     AddressDTO addressDTO1 = new AddressDTO();
     AddressDTO addressDTO2 = new AddressDTO();
     List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
@@ -196,7 +196,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckPointExistsWhenNoTheSamePlacesWhenNullPhone() {
+  public void shouldReturnFalseAtCheckPointExistsWhenNoTheSamePlacesWhenNullPhone() {
     AddressDTO addressDTO1 = new AddressDTO();
     AddressDTO addressDTO2 = new AddressDTO();
     List<AddressDTO> addressDTOList = List.of(addressDTO1, addressDTO2);
@@ -223,7 +223,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckFiles() {
+  public void shouldReturnTrueAtCheckFilesWhenEverythingOk() {
     MockMultipartFile multipartFile1 =
         new MockMultipartFile(
             TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
@@ -241,7 +241,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckFilesWhenNoPdf() {
+  public void shouldReturnFalseAtCheckFilesWhenNoPdf() {
     MockMultipartFile multipartFile1 =
         new MockMultipartFile(
             TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);
@@ -258,7 +258,7 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldFailAtCheckFilesWhenTooManyEmptyFiles() {
+  public void shouldReturnFalseAtCheckFilesWhenTooManyEmptyFiles() {
     MockMultipartFile multipartFile1 =
         new MockMultipartFile(
             TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_OTHER_CONTENT_TYPE, new byte[1]);

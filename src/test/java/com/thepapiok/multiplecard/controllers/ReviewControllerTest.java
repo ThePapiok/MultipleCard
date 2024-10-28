@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -58,6 +59,7 @@ public class ReviewControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
+  @MockBean private ResultService resultService;
 
   @Test
   @WithMockUser(username = TEST_PHONE)
@@ -125,7 +127,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessAddLikeAtAddLike() throws Exception {
+  public void shouldSuccessAddLikeAtAddLikeWhenEverythingOk() throws Exception {
     when(reviewService.addLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -135,7 +137,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessDeleteLikeAtDeleteReview() throws Exception {
+  public void shouldSuccessDeleteLikeAtDeleteReviewWhenEverythingOk() throws Exception {
     when(reviewService.deleteLike(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -145,7 +147,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessRemoveReviewAtRemoveReview() throws Exception {
+  public void shouldSuccessRemoveReviewAtRemoveReviewWhenEverythingOk() throws Exception {
     when(reviewService.removeReview(TEST_ID, TEST_PHONE)).thenReturn(true);
 
     mockMvc
@@ -155,7 +157,7 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldSuccessReviewPageAtReviewPage() throws Exception {
+  public void shouldSuccessReviewPageAtReviewPageWhenEverythingOk() throws Exception {
     final int count1 = 5;
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);
@@ -198,7 +200,8 @@ public class ReviewControllerTest {
     List<ReviewGetDTO> expectedReviews = List.of(reviewGetDTO1, reviewGetDTO2);
     List<Integer> pages = List.of(1);
 
-    when(reviewService.getPages(testPageInt + 1)).thenReturn(pages);
+    when(resultService.getPages(testPageInt + 1, 1)).thenReturn(pages);
+    when(reviewService.getMaxPage()).thenReturn(1);
     when(reviewService.getReviews(phone, testPageInt, TEST_FIELD, true, TEST_TEXT))
         .thenReturn(expectedReviews);
 
@@ -216,6 +219,7 @@ public class ReviewControllerTest {
         .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
         .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
         .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
+        .andExpect(model().attribute("maxPage", 1))
         .andExpect(view().name(REVIEWS_PAGE));
   }
 }

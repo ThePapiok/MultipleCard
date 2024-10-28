@@ -19,6 +19,7 @@
 <script th:inline="javascript">
     const points = /*[[${register.address}]]*/ [];
 </script>
+<script src="/js/image.js"></script>
 <script src="/js/shop.js"></script>
 <script src="/js/registerShopPage.js"></script>
 <div id="header">
@@ -220,7 +221,7 @@
         </div>
         <p th:text="#{upload_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this, false)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
+            <input th:field="*{file}" type="file" oninput="setImage(this, false, 10)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
                    onmouseleave="hideValidation('uploadFile')">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" src="/images/nothing.png" alt="image">

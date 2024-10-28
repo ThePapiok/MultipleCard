@@ -24,7 +24,7 @@ public class ShopConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnShopEntityAtGetEntityWhenEverythingOk() {
     final String name = "shop";
     final String accountNumber = "1231231234314534252345";
     List<AddressDTO> addressDTOList = List.of(new AddressDTO(), new AddressDTO());

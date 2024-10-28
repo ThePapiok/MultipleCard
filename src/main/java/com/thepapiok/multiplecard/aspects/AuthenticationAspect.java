@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.aspects;
 
 import com.thepapiok.multiplecard.dto.RegisterDTO;
+import com.thepapiok.multiplecard.dto.RegisterShopDTO;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -19,8 +20,15 @@ public class AuthenticationAspect {
     registerDTO.setPhone(registerDTO.getPhone().replaceAll(" ", ""));
   }
 
+  @Before(
+      "execution(* com.thepapiok.multiplecard.controllers.AuthenticationController.registerShop(..))")
+  public void removeWhiteSpaceRegisterShop(JoinPoint joinPoint) {
+    RegisterShopDTO registerShopDTO = (RegisterShopDTO) joinPoint.getArgs()[0];
+    registerShopDTO.setPhone(registerShopDTO.getPhone().replaceAll(" ", ""));
+  }
+
   @Around(
-      "execution(* com.thepapiok.multiplecard.controllers.AuthenticationController.getVerificationNumber(..))")
+      "execution(* com.thepapiok.multiplecard.controllers.AuthenticationController.getVerificationSms(..))")
   public Object removeWhiteSpaceResetPassword(ProceedingJoinPoint joinPoint) throws Throwable {
     Object[] args = joinPoint.getArgs();
     String phone = (String) args[2];

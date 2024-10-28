@@ -154,7 +154,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtGetProfile() {
+  public void shouldReturnProfileDTOAtGetProfileWhenEverythingOk() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -166,7 +166,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldFailAtGetProfileWhenUserNotFound() {
+  public void shouldReturnNullAtGetProfileWhenUserNotFound() {
     Account account = new Account();
     account.setId(TEST_ID);
 
@@ -177,7 +177,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtEditProfile() {
+  public void shouldReturnTrueAtEditProfileWhenEverythingOk() {
     when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
 
     assertTrue(profileService.editProfile(profileDTO, TEST_PHONE));
@@ -185,7 +185,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldFailAtEditProfileWhenGetException() {
+  public void shouldReturnFalseAtEditProfileWhenGetException() {
     when(profileConverter.getEntity(profileDTO, TEST_PHONE)).thenReturn(user);
     doThrow(MongoWriteException.class).when(userRepository).save(user);
 
@@ -193,7 +193,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenNoProducts() throws IOException {
+  public void shouldReturnTrueAtDeleteAccountRoleShopWhenNoProducts() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -208,7 +208,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsButNoOrders() throws IOException {
+  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsButNoOrders() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -240,7 +240,8 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleShopWhenProductsAndSomeOrders() throws IOException {
+  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsAndSomeOrders()
+      throws IOException {
     final int centsPerZloty = 100;
     final String pointsParam = "points";
     final ObjectId cardId1 = new ObjectId("123132123312123312312579");
@@ -313,7 +314,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleAdmin() {
+  public void shouldReturnTrueAtDeleteAccountWithRoleAdmin() {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_ADMIN);
@@ -326,7 +327,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleUserWhenNoCard() {
+  public void shouldReturnTrueAtDeleteAccountWithRoleUserWhenNoCard() {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_USER);
@@ -342,7 +343,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtDeleteAccountRoleUserWithCard() throws IOException {
+  public void shouldReturnTrueAtDeleteAccountRoleUserWithCard() throws IOException {
     final ObjectId cardId = new ObjectId("423132303311523310172599");
     Account account = new Account();
     account.setId(TEST_ID);
@@ -364,7 +365,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldFailAtDeleteAccountWhenGetException() {
+  public void shouldReturnFalseAtDeleteAccountWhenGetException() {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_USER);
@@ -376,28 +377,28 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCheckRole() {
+  public void shouldReturnTrueAtCheckRoleWhenUserHasThatRole() {
     when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(true);
 
     assertTrue(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
   }
 
   @Test
-  public void shouldFailAtCheckRoleWhenBadRole() {
+  public void shouldReturnFalseAtCheckRoleWhenBadRole() {
     when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(false);
 
     assertFalse(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
   }
 
   @Test
-  public void shouldFailAtCheckRoleWhenUserNotFound() {
+  public void shouldReturnFalseAtCheckRoleWhenUserNotFound() {
     when(accountRepository.hasRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(null);
 
     assertFalse(profileService.checkRole(TEST_PHONE, Role.ROLE_USER));
   }
 
   @Test
-  public void shouldSuccessAtGetShop() {
+  public void shouldReturnProfileShopDTOAtGetShopWhenEverythingOk() {
     Account account = new Account();
     account.setId(TEST_ID);
     Shop shop = new Shop();
@@ -412,7 +413,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldFailAtGetShopWhenShopNotFound() {
+  public void shouldReturnNullAtGetShopWhenShopNotFound() {
     Account account = new Account();
     account.setId(TEST_ID);
     Shop shop = new Shop();
@@ -425,7 +426,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtEditProfileShopWithoutNewImage() throws MessagingException {
+  public void shouldReturnTrueAtEditProfileShopWithoutNewImage() throws MessagingException {
     List<MultipartFile> list = List.of(new MockMultipartFile("file", new byte[0]));
     Account account = new Account();
     account.setActive(true);
@@ -442,7 +443,8 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtEditProfileShopWithNewImage() throws MessagingException, IOException {
+  public void shouldReturnTrueAtEditProfileShopWithNewImage()
+      throws MessagingException, IOException {
     final String otherImageUrlTest = "newUrl";
     List<MultipartFile> list = List.of(new MockMultipartFile("file1", new byte[0]));
     Account account = new Account();
@@ -475,7 +477,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldFailAtEditProfileShopWhenGetException() {
+  public void shouldReturnFalseAtEditProfileShopWhenGetException() {
     when(profileConverter.getEntity(profileShopDTO, TEST_PHONE)).thenReturn(shop);
     doThrow(MongoWriteException.class).when(mongoTemplate).save(shop);
 

@@ -65,24 +65,24 @@ public class AddressConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetDTO() {
+  public void shouldReturnAddressDTOAtGetDTOWhenEverythingOk() {
     assertEquals(TEST_ADDRESS_DTO, addressConverter.getDTO(TEST_ADDRESS));
   }
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnAddressEntityAtGetEntityWhenEverythingOk() {
     assertEquals(TEST_ADDRESS, addressConverter.getEntity(TEST_ADDRESS_DTO));
   }
 
   @Test
-  public void shouldSuccessAtGetEntities() {
+  public void shouldReturnListOfAddressEntitiesAtGetEntitiesWhenEverythingOk() {
     assertEquals(
         List.of(TEST_ADDRESS, TEST_OTHER_ADDRESS),
         addressConverter.getEntities(List.of(TEST_ADDRESS_DTO, TEST_OTHER_ADDRESS_DTO)));
   }
 
   @Test
-  public void shouldSuccessAtGetDTOs() {
+  public void shouldListOfAddressDTOAtGetDTOsWhenEverythingOk() {
     assertEquals(
         List.of(TEST_ADDRESS_DTO, TEST_OTHER_ADDRESS_DTO),
         addressConverter.getDTOs(List.of(TEST_ADDRESS, TEST_OTHER_ADDRESS)));

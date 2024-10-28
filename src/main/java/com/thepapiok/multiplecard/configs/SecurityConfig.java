@@ -39,6 +39,8 @@ public class SecurityConfig {
                     .authenticated()
                     .requestMatchers(HttpMethod.GET, "/profile")
                     .authenticated()
+                    .requestMatchers("/products", "/add_product")
+                    .hasRole("SHOP")
                     .anyRequest()
                     .permitAll())
         .formLogin(

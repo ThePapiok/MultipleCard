@@ -10,7 +10,7 @@ public class ReviewConverterTest {
   private final ReviewConverter reviewConverter = new ReviewConverter();
 
   @Test
-  public void shouldSuccessAtGetEntity() {
+  public void shouldReturnReviewEntityAtGetEntityWhenEverythingOk() {
     final int rating = 3;
     final String description = "tests123123123sdfwerw";
     ReviewDTO reviewDTO = new ReviewDTO();

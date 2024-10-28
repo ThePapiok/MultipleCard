@@ -11,8 +11,6 @@ import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.LikeRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -83,11 +81,9 @@ public class ReviewService {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
         return false;
-      }
-      if (!atLike(id)) {
+      } else if (!atLike(id)) {
         return false;
-      }
-      if (likeRepository
+      } else if (likeRepository
           .findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1))
           .isPresent()) {
         return false;
@@ -107,8 +103,7 @@ public class ReviewService {
       List<ObjectId> objectIds = getObjectId(phone, id);
       if (objectIds == null) {
         return false;
-      }
-      if (!atLike(id)) {
+      } else if (!atLike(id)) {
         return false;
       }
       Optional<Like> like =
@@ -140,8 +135,7 @@ public class ReviewService {
     ObjectId userId = accountRepository.findIdByPhone(phone).getId();
     if (userId.toHexString().length() == 0) {
       return null;
-    }
-    if (id.toHexString().length() == 0) {
+    } else if (id.toHexString().length() == 0) {
       return null;
     }
     return List.of(id, userId);
@@ -153,8 +147,7 @@ public class ReviewService {
       Optional<User> optionalUser = userRepository.findById(id);
       if (optionalUser.isEmpty()) {
         return false;
-      }
-      if (!userId.equals(id)) {
+      } else if (!userId.equals(id)) {
         return false;
       }
       User user = optionalUser.get();
@@ -198,38 +191,6 @@ public class ReviewService {
     }
   }
 
-  public List<Integer> getPages(int page) {
-    try {
-      List<Integer> pages = new ArrayList<>();
-      final float countReviewsAtPage = 12.0F;
-      final int maxPagesBefore = 4;
-      final int maxPagesAfter = 3;
-
-      int count = userRepository.countAllByReviewIsNotNull();
-      int countI = 0;
-      int maxPage = (int) Math.ceil(count / countReviewsAtPage);
-      for (int i = page; i >= 1; i--) {
-        countI++;
-        if (countI > maxPagesBefore) {
-          break;
-        }
-        pages.add(i);
-      }
-      Collections.reverse(pages);
-      countI = 0;
-      for (int i = page + 1; i <= maxPage; i++) {
-        countI++;
-        if (countI > maxPagesAfter) {
-          break;
-        }
-        pages.add(i);
-      }
-      return pages;
-    } catch (Exception e) {
-      return List.of();
-    }
-  }
-
   public ReviewGetDTO getReview(String phone) {
     try {
       ObjectId objectId = accountRepository.findIdByPhone(phone).getId();
@@ -237,5 +198,11 @@ public class ReviewService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public int getMaxPage() {
+    final float countReviewsAtPage = 12.0F;
+    int count = userRepository.countAllByReviewIsNotNull();
+    return (int) Math.ceil(count / countReviewsAtPage);
   }
 }

@@ -30,7 +30,7 @@ public class AccountConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntityRegisterDTO() {
+  public void shouldReturnAccountEntityAtGetEntityRegisterDTOWhenEverythingOk() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setPassword(TEST_PASSWORD);
     registerDTO.setCallingCode(TEST_CALLING_CODE);
@@ -47,7 +47,7 @@ public class AccountConverterTest {
   }
 
   @Test
-  public void shouldSuccessAtGetEntityRegisterShopDTO() {
+  public void shouldReturnAccountEntityAtGetEntityRegisterShopDTOWhenEverythingOk() {
     RegisterShopDTO registerShopDTO = new RegisterShopDTO();
     registerShopDTO.setPassword(TEST_PASSWORD);
     registerShopDTO.setCallingCode(TEST_CALLING_CODE);

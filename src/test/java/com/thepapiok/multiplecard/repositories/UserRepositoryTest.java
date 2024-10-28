@@ -203,7 +203,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldCountAndDescending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenIsDescendingAndFieldCount() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 
@@ -217,7 +217,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldCountAndAscending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenWithFieldCountAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO2, reviewGetDTO1);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -231,7 +231,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldCreatedAtAndDescending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldCreatedAtAndDescending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO2, reviewGetDTO1);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -246,7 +246,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldCreatedAtAndAscending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldCreatedAtAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 
@@ -260,7 +260,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldRatingAndDescending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldRatingAndDescending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO2, reviewGetDTO1, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -274,7 +274,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindPagesOfReviewWithFieldRatingAndAscending() {
+  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldRatingAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO1, reviewGetDTO2);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 
@@ -288,7 +288,7 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldSuccessFindReview() {
+  public void shouldReturnReviewGetDTOAtFindReviewWhenEverythingOk() {
     assertEquals(reviewGetDTO2, userRepository.findReview(TEST_ID2));
   }
 }

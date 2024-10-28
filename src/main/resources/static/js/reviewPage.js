@@ -1,4 +1,4 @@
-function atStart(page, isDescending, field) {
+function atStart(page, isDescending, field, maxPage) {
     checkLanguage();
     let selectedPage = document.getElementById("page" + page);
     if (selectedPage != null) {
@@ -27,6 +27,7 @@ function atStart(page, isDescending, field) {
                 break;
         }
     }
+    checkButtonPages(page, maxPage);
 }
 
 function setParams() {

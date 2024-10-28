@@ -221,7 +221,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnLoginPageAtLoginPage() throws Exception {
+  public void shouldReturnLoginPageAtLoginPageWhenEverythingOk() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -242,10 +242,10 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldReturnLoginPageAtLoginPageWhenParamSuccessWithMessage() throws Exception {
-    final String succesMessage = "Sukces!";
+    final String successMessage = "Sukces!";
     final String phone = "23412341234";
     MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, succesMessage);
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, successMessage);
     httpSession.setAttribute(PHONE_PARAM, phone);
     httpSession.setAttribute(CALLING_CODE_PARAM, PL_CALLING_CODE);
 
@@ -254,7 +254,7 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(get(LOGIN_URL).param(SUCCESS_PARAM, "").session(httpSession))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
-        .andExpect(model().attribute(SUCCESS_MESSAGE_PARAM, succesMessage))
+        .andExpect(model().attribute(SUCCESS_MESSAGE_PARAM, successMessage))
         .andExpect(model().attribute(PHONE_PARAM, phone))
         .andExpect(model().attribute(CALLING_CODE_PARAM, PL_CALLING_CODE))
         .andExpect(view().name(LOGIN_PAGE));
@@ -285,7 +285,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnRegisterPageAtRegisterPage() throws Exception {
+  public void shouldReturnRegisterPageAtRegisterPageWhenEverythingOk() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -318,7 +318,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToAccountVerificationAtCreateUser() throws Exception {
+  public void shouldRedirectToAccountVerificationAtCreateUserWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
@@ -496,12 +496,18 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationPageAtVerificationPage() throws Exception {
+  public void shouldReturnVerificationPageAtVerificationPageWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, expectedRegisterDTO);
 
     mockMvc
         .perform(get(VERIFICATION_URL).session(httpSession).locale(LOCALE))
+        .andExpect(
+            model()
+                .attribute(
+                    PHONE_PARAM,
+                    expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .andExpect(model().attribute(EMAIL_PARAM, expectedRegisterDTO.getEmail()))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
 
@@ -540,6 +546,12 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession).locale(LOCALE))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
+        .andExpect(
+            model()
+                .attribute(
+                    PHONE_PARAM,
+                    expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .andExpect(model().attribute(EMAIL_PARAM, expectedRegisterDTO.getEmail()))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
 
@@ -551,11 +563,17 @@ public class AuthenticationControllerTest {
 
     mockMvc
         .perform(get(VERIFICATION_URL).param(ERROR_PARAM, "").session(httpSession).locale(LOCALE))
+        .andExpect(
+            model()
+                .attribute(
+                    PHONE_PARAM,
+                    expectedRegisterDTO.getCallingCode() + expectedRegisterDTO.getPhone()))
+        .andExpect(model().attribute(EMAIL_PARAM, expectedRegisterDTO.getEmail()))
         .andExpect(view().name(VERIFICATION_PAGE));
   }
 
   @Test
-  public void shouldRedirectToLoginAtVerification() throws Exception {
+  public void shouldRedirectToLoginAtVerificationWhenEverythingOk() throws Exception {
     final String verificationSms = "213 555";
     final String codeSms = "s23141234sdfs";
     final String message = "Pomyślnie zarejestrowano";
@@ -676,7 +694,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnPasswordResetPageAtPasswordResetPage() throws Exception {
+  public void shouldReturnPasswordResetPageAtPasswordResetPageWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     setSessionAtResetPasswordPage(httpSession);
 
@@ -748,7 +766,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginSuccessAtResetPassword() throws Exception {
+  public void shouldRedirectToLoginSuccessAtResetPasswordWhenEverythingOk() throws Exception {
     final String fullPhone = PL_CALLING_CODE + TEST_PHONE;
     ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
     MockHttpSession httpSession = new MockHttpSession();
@@ -903,7 +921,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnOkAtGetVerificationSms() throws Exception {
+  public void shouldReturnOkAtGetVerificationSmsWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
@@ -1037,7 +1055,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnOkMessageAtGetVerificationEmail() throws Exception {
+  public void shouldReturnOkMessageAtGetVerificationEmailWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(CODE_AMOUNT_EMAIL_PARAM, 0);
 
@@ -1053,7 +1071,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnRegisterShopPageAtRegisterShopPage() throws Exception {
+  public void shouldReturnRegisterShopPageAtRegisterShopPageWhenEverythingOk() throws Exception {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
@@ -1102,7 +1120,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToShopVerificationsAtRegisterShop() throws Exception {
+  public void shouldRedirectToShopVerificationsAtRegisterShopWhenEverythingOk() throws Exception {
     RegisterShopDTO registerShopDTO = setRegisterShopDTO();
     AddressDTO addressDTO = registerShopDTO.getAddress().get(0);
     MockHttpSession httpSession = new MockHttpSession();
@@ -1630,7 +1648,8 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldReturnVerificationShopPageAtVerificationShopPage() throws Exception {
+  public void shouldReturnVerificationShopPageAtVerificationShopPageWhenEverythingOk()
+      throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
 
@@ -1849,7 +1868,7 @@ public class AuthenticationControllerTest {
   }
 
   @Test
-  public void shouldRedirectToLoginSuccessAtVerificationShop() throws Exception {
+  public void shouldRedirectToLoginSuccessAtVerificationShopWhenEverythingOk() throws Exception {
     MockHttpSession httpSession = setSessionAtVerificationShop(0);
 
     when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);

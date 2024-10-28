@@ -36,7 +36,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtLoadUserByUsername() {
+  public void shouldSuccessAtLoadUserByUsernameWhenEverythingOk() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
     expectedAccount.setId(TEST_ID);
