@@ -14,4 +14,5 @@ public class Promotion {
   private LocalDate expiredAt;
   private int amount;
   private ObjectId productId;
+  private int count;
 }

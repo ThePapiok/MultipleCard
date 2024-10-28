@@ -94,7 +94,8 @@ public class ProductController {
                           e.getProductId().toString(),
                           e.getStartAt(),
                           e.getExpiredAt(),
-                          e.getAmount()))
+                          e.getAmount(),
+                          e.getCount()))
               .toList();
     }
     maxPage = productService.getMaxPage(text, phone);

@@ -258,7 +258,7 @@ public class ProductControllerTest {
     promotion1.setStartAt(startAt);
     promotion1.setExpiredAt(expiredAt);
     testPromotion =
-        new PromotionGetDTO(productId1.toString(), startAt, expiredAt, testPromotionAmount);
+        new PromotionGetDTO(productId1.toString(), startAt, expiredAt, testPromotionAmount, 0);
     ProductGetDTO productGetDTO1 = new ProductGetDTO();
     productGetDTO1.setProduct(testProduct1);
     productGetDTO1.setPromotion(promotion1);

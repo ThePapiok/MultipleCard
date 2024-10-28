@@ -62,7 +62,15 @@
 
 .date{
     font-family: "Inter", sans-serif;
+}
+
+.promotionInfo{
     width: 55%;
+}
+
+.productsLeft{
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
 }
 
 .promotionAmount{

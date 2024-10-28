@@ -29,6 +29,7 @@
     </a>
 </div>
 <div id="body">
+    <span hidden th:text="#{productsPage.product.left_products}" id="textLeftProducts"></span>
     <p class="title" th:text="#{productsPage.title}"></p>
     <div id="searchBar">
         <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
@@ -73,10 +74,13 @@
                         <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"></span>
                         <div hidden class="promotionContainer">
                             <div class="result-horizontal">
+                                <div class="result-vertical promotionInfo">
                                 <div class="date">
                                     <span></span>
                                     <span>-</span>
                                     <span></span>
+                                </div>
+                                <span class="productsLeft"></span>
                                 </div>
                                 <div class="promotionAmount">
                                     <span class="amount promotion" th:text="${product.amount}/100"></span>

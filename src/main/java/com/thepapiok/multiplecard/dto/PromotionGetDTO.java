@@ -11,4 +11,5 @@ public class PromotionGetDTO {
   private LocalDate startAt;
   private LocalDate expiredAt;
   private int amount;
+  private int count;
 }

@@ -58,6 +58,8 @@ function atStart(page, isDescending, field, maxPage) {
     let promotion
     let amount;
     let date;
+    let count;
+    let resultVertical;
     if (promotions != null) {
         for (let i = 0; i < prices.length; i++) {
             price = prices[i];
@@ -65,14 +67,18 @@ function atStart(page, isDescending, field, maxPage) {
                 promotion = promotions[j];
                 if (promotion.productId === price.dataset.id) {
                     amount = promotion.amount;
+                    count = promotion.count;
                     noPromotionContainer = price.firstElementChild;
                     noPromotionContainer.hidden = true;
                     promotionContainer = noPromotionContainer.nextElementSibling;
                     promotionContainer.hidden = false;
-                    date = promotionContainer.firstElementChild.firstElementChild;
-                    date.nextElementSibling.firstElementChild.nextElementSibling.textContent = amount / 100 + "zł";
-                    date.firstElementChild.textContent = promotion.startAt;
-                    date.firstElementChild.nextElementSibling.nextElementSibling.textContent = promotion.expiredAt;
+                    resultVertical = promotionContainer.firstElementChild.firstElementChild;
+                    if (count !== 0){
+                        resultVertical.firstElementChild.nextElementSibling.textContent = promotion.count + ' ' + document.getElementById("textLeftProducts").textContent;
+                    }
+                    resultVertical.nextElementSibling.firstElementChild.nextElementSibling.textContent = amount / 100 + "zł";
+                    resultVertical.firstElementChild.firstElementChild.textContent = promotion.startAt;
+                    resultVertical.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.textContent = promotion.expiredAt;
                     promotions.splice(j, 1);
                 }
             }
