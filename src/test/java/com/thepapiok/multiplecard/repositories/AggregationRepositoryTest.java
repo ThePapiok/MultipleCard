@@ -22,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.TextIndexDefinition;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
@@ -424,6 +425,12 @@ public class AggregationRepositoryTest {
     productGetDTO4 = new ProductGetDTO();
     productGetDTO4.setProduct(product4);
     productGetDTO4.setPromotion(promotion3);
+    TextIndexDefinition textIndex =
+        new TextIndexDefinition.TextIndexDefinitionBuilder()
+            .onFields("description", "name")
+            .withDefaultLanguage("none")
+            .build();
+    mongoTemplate.indexOps(Product.class).ensureIndex(textIndex);
   }
 
   @AfterEach
