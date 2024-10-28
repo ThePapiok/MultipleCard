@@ -93,13 +93,15 @@ public class ReviewController {
       model.addAttribute("yourReview", reviewService.getReview(phone));
     }
     List<ReviewGetDTO> reviews = reviewService.getReviews(phone, page, field, isDescending, text);
+    int maxPage = reviewService.getMaxPage();
     model.addAttribute("field", field);
     model.addAttribute("isDescending", isDescending);
-    model.addAttribute("pages", resultService.getPages(page + 1, reviewService.getMaxPage()));
+    model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
     model.addAttribute("pageSelected", page + 1);
     model.addAttribute("reviews", reviews);
     model.addAttribute("reviewsSize", reviews.size());
     model.addAttribute("principal", principal != null);
+    model.addAttribute("maxPage", maxPage);
     return "reviewPage";
   }
 }

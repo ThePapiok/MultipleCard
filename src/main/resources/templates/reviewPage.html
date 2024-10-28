@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="/css/reviewPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
 </head>
-<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}')|">
+<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}')|">
 <script src="/js/page.js"></script>
 <script src="/js/reviews.js"></script>
+<script src="/js/results.js"></script>
 <script src="/js/reviewPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -28,21 +29,21 @@
 <div id="body">
     <p class="title" th:text="#{reviews.title}"></p>
     <div id="yourReview" th:if="${yourReview} != null">
-        <div class="review">
-            <div class="review-vertical">
-                <div class="review-horizontal">
+        <div class="result">
+            <div class="result-vertical">
+                <div class="result-horizontal">
                     <span class="name yourReview" th:text="#{yourReview.name}"></span>
                     <div class="amountHearths">
                         <span class="amount isAdded" th:text="${yourReview.count}"
                               th:data-is-added="${yourReview.isAdded}"></span>
-                        <img class="hearth fullHearth" src="/images/hearth.png" alt="hearth"
+                        <img class="resultIcons fullHearth" src="/images/hearth.png" alt="hearth"
                              th:attr="onclick=|deleteLike('${yourReview.id}', this)|">
-                        <img class="hearth emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                        <img class="resultIcons emptyHearth" src="/images/hearth_empty.png" alt="hearth"
                              th:attr="onclick=|addLike('${yourReview.id}', this)|">
                     </div>
                 </div>
                 <span class="description" th:text="'&quot;' + ${yourReview.review.description} + '&quot;'"></span>
-                <div class="review-horizontal">
+                <div class="result-horizontal">
                     <div class="stars">
                         <img class="star" src="/images/star.png" alt="star"
                              th:each="i : ${#numbers.sequence(1, yourReview.review.rating)}">
@@ -50,7 +51,7 @@
                              th:if="${yourReview.review.rating} < 5"
                              th:each="i : ${#numbers.sequence(1, 5 - yourReview.review.rating)}">
                     </div>
-                    <img class="delete" src="/images/close.png" alt="delete"
+                    <img class="resultIcons delete" src="/images/close.png" alt="delete"
                          th:attr="onclick=|removeReview('${yourReview.id}', this)|">
                 </div>
             </div>
@@ -107,14 +108,15 @@
     </div>
     <div id="pages">
         <a>
-            <button class="darkGreenButton" th:text="#{reviewPage.button.previous}"></button>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}" onclick="previousPage()"></button>
         </a>
         <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
-                  th:if="${reviewsSize} != 0"></span>
+                  th:if="${reviewsSize} != 0" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
         </div>
         <a>
-            <button class="darkGreenButton" th:text="#{reviewPage.button.next}"></button>
+            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
+                    th:attr="onclick=|nextPage('${maxPage}')|"></button>
         </a>
     </div>
 </div>

@@ -107,7 +107,6 @@ public class ProductController {
     model.addAttribute("promotions", promotionGetDTOS);
     model.addAttribute("productsSize", products.size());
     model.addAttribute("maxPage", maxPage);
-
     return "productsPage";
   }
 

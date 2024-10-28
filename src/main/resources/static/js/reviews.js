@@ -105,7 +105,7 @@ function removeReview(id, e) {
                 }
                 let reviews = document.getElementsByClassName("review");
                 if (reviews.length === 0) {
-                    document.getElementById("noResults").dataset.reviewSize = "0";
+                    document.getElementById("noResults").dataset.resultsSize = "0";
                 }
 
             }

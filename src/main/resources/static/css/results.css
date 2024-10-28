@@ -91,6 +91,7 @@
 
 .result {
     width: 420px;
+    min-height: 150px;
     margin-top: 20px;
     margin-left: 20px;
     background-color: #FFFFFF;

@@ -219,6 +219,7 @@ public class ReviewControllerTest {
         .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
         .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
         .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
+        .andExpect(model().attribute("maxPage", 1))
         .andExpect(view().name(REVIEWS_PAGE));
   }
 }
