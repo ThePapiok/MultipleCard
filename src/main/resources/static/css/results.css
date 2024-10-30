@@ -141,24 +141,30 @@
     #searchBar {
         width: 94%;
     }
+
     #searchInput {
         width: 40%;
     }
+
     #searchSelect {
         width: 55%;
     }
+
     #searchSelect, #searchInput {
         font-size: 13px;
     }
+
     #allResults {
         height: auto;
     }
+
     .result {
         width: 83%;
         height: 170px;
         margin-bottom: 10px;
         margin-left: 0;
     }
+
     #results {
         justify-content: center;
         margin-left: 0;

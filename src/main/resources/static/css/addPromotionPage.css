@@ -46,9 +46,11 @@
         padding-top: 20%;
         padding-left: 0;
     }
+
     #deleteChoice {
         width: 90%;
     }
+
     #deleteChoice a {
         width: 100px;
     }

@@ -88,14 +88,17 @@ input {
     .placeholderInput {
         font-size: 12px;
     }
+
     #cardInfo {
         width: 90%;
         left: 5%;
         height: 300px;
     }
+
     #cardWithButtons {
         width: 100%;
     }
+
     .cardButton {
         width: 100%;
     }

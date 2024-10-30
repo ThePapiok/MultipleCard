@@ -86,4 +86,16 @@
     .result {
         height: auto;
     }
+
+    .amount {
+        font-size: 13px;
+    }
+
+    .date {
+        font-size: 12px;
+    }
+
+    .productsLeft {
+        font-size: 10px;
+    }
 }

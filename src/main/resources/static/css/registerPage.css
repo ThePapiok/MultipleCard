@@ -55,6 +55,7 @@ select:invalid {
     #FirstName, #LastName, #Email, #Province, #Street, #HouseNumber, #ApartmentNumber, #PostalCode, #City, #Country, #CallingCode, #Phone, #Password, #RetypedPassword {
         width: 100%;
     }
+
     #Password, #RetypedPassword {
         margin-bottom: 3%;
     }
