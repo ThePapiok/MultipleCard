@@ -22,4 +22,3 @@ function checkAccountNumber(e) {
     const input = e.value;
     check(9, (input.length === 26 && regAccountNumber.test(input)), ok, previous, buttonId, success, true, true);
 }
-

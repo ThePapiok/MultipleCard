@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="/css/registerShopPage.css">
-    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
@@ -41,8 +41,8 @@
     <span hidden th:text="#{houseNumber.validation.1_condition}" id="textHouseNumberValidation1"></span>
     <span hidden th:text="#{houseNumber.validation.2_condition}" id="textHouseNumberValidation2"></span>
     <span hidden th:text="#{apartmentNumber.text}" id="textApartmentNumber"></span>
-    <span hidden th:text="#{apartmentNumber.validation.1_condition}" id="textApartmentNumberValidation1"></span>
-    <span hidden th:text="#{apartmentNumber.validation.2_condition}" id="textApartmentNumberValidation2"></span>
+    <span hidden th:text="#{validation.empty_or}" id="textApartmentNumberValidation1"></span>
+    <span hidden th:text="#{validation.not_negative}" id="textApartmentNumberValidation2"></span>
     <span hidden th:text="#{validation.only_digits}" id="textValidationOnlyDigits"></span>
     <span hidden th:text="#{postalCode.text}" id="textPostalCode"></span>
     <span hidden th:text="#{city.text}" id="textCity"></span>
@@ -221,7 +221,8 @@
         </div>
         <p th:text="#{upload_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this, false, 10)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
+            <input th:field="*{file}" type="file" oninput="setImage(this, false, 10)" accept="image/png, image/jpeg"
+                   onmouseenter="showValidation(this, 'uploadFile')"
                    onmouseleave="hideValidation('uploadFile')">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" src="/images/nothing.png" alt="image">

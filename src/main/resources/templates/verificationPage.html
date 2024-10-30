@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/verificationPage.css">
-    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
@@ -18,7 +18,7 @@
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
 </div>
-<div id="body" onload="atStart()">
+<div id="body">
     <p class="title" th:text="#{verificationPage.title}"></p>
     <form th:action="@{/account_verifications}" id="form" method="post">
         <label id="VerificationEmail">
@@ -60,13 +60,17 @@
         </div>
         <p id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="grayButton" id="registerButton" th:text="#{button.register}"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
-            <button type="button" class="blackButton" th:text="#{button.newCode_sms}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegister', true, false)|" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_sms}"
+                    th:attr="onclick=|getSmsCode('${phone}', 'codeSmsRegister', true, false)|"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a>
-            <button type="button" class="blackButton" th:text="#{button.newCode_email}" th:attr="onclick=|getEmailCode('${email}')|" onmousedown="pressedCorrectButton()"></button>
+            <button type="button" class="blackButton" th:text="#{button.newCode_email}"
+                    th:attr="onclick=|getEmailCode('${email}')|" onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/account_verifications?reset'}">
             <button type="button" class="redButton" id="resetButton"

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/files.css">
     <link rel="stylesheet" href="/css/verification.css">
-    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
@@ -20,11 +20,11 @@
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
-    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+    <a th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
-<div id="body" onload="atStart()">
+<div id="body">
     <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
     <span hidden th:text="#{upload_file.bad_type}" id="textBadType"></span>
     <span hidden th:text="#{upload_file.too_many}" id="textTooMany"></span>

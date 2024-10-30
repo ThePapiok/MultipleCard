@@ -17,6 +17,3 @@ function enableInputs() {
         }
     }
 }
-
-
-

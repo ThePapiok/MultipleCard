@@ -1,0 +1,57 @@
+#form {
+    width: 40%;
+}
+
+#deletePromotion {
+    width: 40%;
+    height: 300px;
+    position: absolute;
+    top: 45%;
+    z-index: 1;
+    padding: 30px;
+}
+
+#deleteChoice {
+    width: 60%;
+    height: 60%;
+    background-color: wheat;
+    opacity: 90%;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), -4px 8px 20px rgba(0, 0, 0, 0.10);
+    border-radius: 5px;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#deleteTitle {
+    font-size: 15px;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    margin-bottom: 20%;
+}
+
+#errorForbidden {
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #FF5A5F;
+    margin-left: 5%;
+}
+
+@media only screen and (max-width: 768px) {
+    #deletePromotion {
+        top: 20%;
+        width: 100%;
+        padding-top: 20%;
+        padding-left: 0;
+    }
+
+    #deleteChoice {
+        width: 90%;
+    }
+
+    #deleteChoice a {
+        width: 100px;
+    }
+}

@@ -102,14 +102,12 @@
     font-weight: 500;
 }
 
-
 #file {
     opacity: 0;
     cursor: pointer;
     position: absolute;
     z-index: 2;
 }
-
 
 #titleUploadImage {
     color: gray;
@@ -149,5 +147,4 @@
         width: 100%;
         height: 300px;
     }
-
 }

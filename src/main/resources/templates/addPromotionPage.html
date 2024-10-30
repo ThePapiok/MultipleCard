@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/addPromotionPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/amount.js"></script>
+<script src="/js/edit.js"></script>
+<script src="/js/addPromotionPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="${promotion.startAt}" id="dateStartAt"></span>
+    <span hidden th:text="${promotion.expiredAt}" id="dateExpiredAt"></span>
+    <span hidden th:text="${promotion.expiredAt} != null" id="hasPromotion"></span>
+    <span hidden th:text="${originalAmount}" id="originalAmount"></span>
+    <span hidden th:text="#{addPromotionPage.button.add_promotion}" id="textButtonAddPromotion"></span>
+    <span hidden th:text="#{addPromotionPage.button.edit_promotion}" id="textButtonEditPromotion"></span>
+    <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
+    <p class="title" th:text="#{addPromotionPage.title}"></p>
+    <p th:text="#{addPromotionPage.error.forbidden}" th:if="${isOwner} == false" id="errorForbidden"></p>
+    <form th:action="@{'/promotions'}" th:object="${promotion}" id="form" method="post" th:if="${isOwner} == true">
+        <input hidden th:field="*{productId}">
+        <div class="block-horizontally">
+            <label id="StartAt">
+                <label class="inputs">
+                    <input th:field="*{startAt}" type="date" required
+                           oninput="checkStartAt(this, false)"
+                           onmouseenter="showValidation(this, 'StartAt')" onmouseleave="hideValidation('StartAt')">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{addPromotionPage.date.start_at.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{addPromotionPage.expiredAt.validation2}"></li>
+                    <li th:text="#{addPromotionPage.expiredAt.validation3}"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="ExpiredAt">
+                <label class="inputs">
+                    <input th:field="*{expiredAt}" type="date" required
+                           oninput="checkExpiredAt(this, false)"
+                           onmouseenter="showValidation(this, 'ExpiredAt')" onmouseleave="hideValidation('ExpiredAt')">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{addPromotionPage.date.expired_at.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{addPromotionPage.expiredAt.validation1}"></li>
+                    <li th:text="#{addPromotionPage.expiredAt.validation2}"></li>
+                    <li th:text="#{addPromotionPage.expiredAt.validation3}"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="Amount">
+                <label class="inputs">
+                    <input th:field="*{amount}" type="text" th:placeholder="#{addPromotionPage.amount.text}" required
+                           oninput="checkAmount(this)"
+                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
+                           onmouseleave="hideValidation('Amount')" onfocusout="unfocused(this)"
+                           onfocus="focused(this)">
+                    <img id="close3" src="/images/close.png" alt="close">
+                    <img id="check3" hidden src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{addPromotionPage.amount.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
+                    <li th:text="#{validation.not_negative}"></li>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{addPromotionPage.amount.validation1}"></li>
+                    <li th:text="#{addPromotionPage.amount.validation2}"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="Count">
+                <label class="inputs">
+                    <input th:field="*{count}" type="text" th:placeholder="#{addPromotionPage.count.empty}"
+                           oninput="checkCount(this)"
+                           maxlength="5" onmouseenter="showValidation(this, 'Count')"
+                           onmouseleave="hideValidation('Count')">
+                    <img id="close4" hidden src="/images/close.png" alt="close">
+                    <img id="check4" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{addPromotionPage.count.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.empty_or}"></li>
+                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{validation.not_negative}"></li>
+                    <li th:text="#{validation.prefix_length} + ' 1 ' + #{validation.suffix_length} + ' 5'"></li>
+                </ul>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="promotionButton"></button>
+        </a>
+        <a th:if="${promotion.expiredAt} != null" onclick="showOrHideDeletePromotion()">
+            <button type="button" class="redButton" th:text="#{addPromotionPage.button.promotion_delete}"></button>
+        </a>
+        <a th:href="@{/products}">
+            <button type="button" class="redButton" th:text="#{button.reset}"></button>
+        </a>
+        <div id="deletePromotion" hidden>
+            <div id="deleteChoice">
+                <p th:text="#{addPromotionPage.delete.title}" id="deleteTitle"></p>
+                <div>
+                    <a>
+                        <button type="button" class="darkGreenButton" th:text="#{addPromotionPage.button.yes}"
+                                th:attr="onclick=|deletePromotion('${promotion.productId}')|"></button>
+                    </a>
+                    <a>
+                        <button type="button" class="redButton" th:text="#{addPromotionPage.button.no}"
+                                onclick="showOrHideDeletePromotion()"></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

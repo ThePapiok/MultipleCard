@@ -6,7 +6,6 @@ function atStart() {
     checkLanguage();
 }
 
-
 window.addEventListener('beforeunload', function (event) {
     if (buttons) {
         buttons = false;

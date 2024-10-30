@@ -31,7 +31,6 @@
     width: 14%;
 }
 
-
 #Password, #RetypedPassword {
     height: 50px;
 }
@@ -61,7 +60,3 @@ select:invalid {
         margin-bottom: 3%;
     }
 }
-
-
-
-

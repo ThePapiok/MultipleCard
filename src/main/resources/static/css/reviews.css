@@ -1,12 +1,7 @@
-
-
 .amountHearths {
     display: flex;
     justify-content: flex-end;
 }
-
-
-
 
 .amountHearths {
     margin-top: 8px;
@@ -31,7 +26,6 @@
 .isAdded[data-is-added="1"] ~ .emptyHearth, .isAdded[data-is-added="0"] ~ .fullHearth {
     display: none;
 }
-
 
 .notLoginHearth {
     cursor: auto;

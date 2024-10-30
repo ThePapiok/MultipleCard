@@ -90,4 +90,3 @@ function deleteFiles(e, index) {
         check(1, false, ok, previous, buttonId, success, false, true);
     }
 }
-

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/reviews.css">
     <link rel="stylesheet" href="/css/results.css">
     <link rel="stylesheet" href="/css/reviewPage.css">
-    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}')|">
 <script src="/js/page.js"></script>
@@ -108,7 +108,8 @@
     </div>
     <div id="pages">
         <a>
-            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}" onclick="previousPage()"></button>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
         </a>
         <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"

@@ -1,10 +1,8 @@
-const buttonId = "saveButton";
 let ok = [null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null];
-
 let name;
 let accountNumber;
-
+const buttonId = "saveButton";
 
 function atStart() {
     checkPoints(1);
@@ -13,7 +11,6 @@ function atStart() {
     name = document.getElementById("nameInput").value;
     accountNumber = document.getElementById("accountNumberInput").value;
     let places = document.getElementsByClassName("numberOfPlace");
-    let nextIndex;
     let inputs;
     for (let i = 0; i < places.length; i++) {
         inputs = places[i].firstElementChild.nextElementSibling.getElementsByTagName("input");
@@ -40,8 +37,3 @@ function checkAccountNumber(e) {
     const input = e.value;
     checkOnlyIfOther(input, (input.length === 26 && regAccountNumber.test(input)), 4, accountNumber, true, e);
 }
-
-
-
-
-

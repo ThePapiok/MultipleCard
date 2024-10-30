@@ -8,18 +8,19 @@
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/profile.css">
     <link rel="stylesheet" href="/css/profilePage.css">
-    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/C5RsVmp.png">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
+<script src="/js/edit.js"></script>
 <script src="/js/profile.js"></script>
 <script src="/js/profilePage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
-    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+    <a th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
@@ -151,9 +152,9 @@
             <div class="validation" id="validationApartmentNumber">
                 <span th:text="#{apartmentNumber.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{apartmentNumber.validation.1_condition}"></li>
+                    <li th:text="#{validation.empty_or}"></li>
                     <li th:text="#{validation.only_digits}"></li>
-                    <li th:text="#{apartmentNumber.validation.2_condition}"></li>
+                    <li th:text="#{validation.not_negative}"></li>
                     <li th:text="#{validation.prefix_length} + ' 1 ' + #{validation.suffix_length} + ' 6'"></li>
                 </ul>
             </div>

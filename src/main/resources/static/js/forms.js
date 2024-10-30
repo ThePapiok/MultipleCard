@@ -5,7 +5,7 @@ const regVerificationNumber = new RegExp("^[0-9]{3} [0-9]{3}$");
 const regFirstName = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+$");
 const regLastNameAndCity = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+([- ][A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż]+)?$");
 const regHouseNumber = new RegExp("^[1-9][0-9]*([A-Z]|\/[1-9][0-9]*)?$");
-const regApartmentNumber = new RegExp("^[1-9][0-9]*$");
+const regNumber = new RegExp("^[1-9][0-9]*$");
 const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
 const regAccountNumber = new RegExp("^[0-9]*$");
 let previousPostalCode = "";
@@ -204,7 +204,7 @@ function checkHouseNumber(e, value) {
 
 function checkApartmentNumber(e, value) {
     const input = e.value;
-    check(value, ((input >= 1 && input <= 10000 && regApartmentNumber.test(input)) || input.length === 0), ok, previous, buttonId, success, true, true);
+    check(value, ((input >= 1 && input <= 10000 && regNumber.test(input)) || input.length === 0), ok, previous, buttonId, success, true, true);
 }
 
 function checkPostalCode(e, value) {
@@ -312,7 +312,7 @@ function pressedCorrectButton() {
 }
 
 function getSmsCode(phone, param, newUser, enable) {
-    if(enable){
+    if (enable) {
         enableInputs();
     }
     fetch("/get_verification_sms", {
@@ -361,10 +361,9 @@ function getEmailCode(email) {
 }
 
 function changeCursor(e) {
-    if (changedCursor){
+    if (changedCursor) {
         e.type = "button";
-    }
-    else if (e.type === "submit") {
+    } else if (e.type === "submit") {
         e.style.cursor = "wait";
         e.className = "grayButton";
         changedCursor = true;
