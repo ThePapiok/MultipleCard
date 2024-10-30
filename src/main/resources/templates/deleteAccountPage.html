@@ -52,7 +52,8 @@
         </a>
         <a>
             <button type="button" class="blackButton"
-                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsDelete', false, true)|" onmousedown="pressedCorrectButton()"></button>
+                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsDelete', false, true)|"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/delete_account?reset'}">
             <button type="button" class="redButton" id="resetButton"

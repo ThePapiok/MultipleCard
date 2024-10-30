@@ -312,7 +312,7 @@ function pressedCorrectButton() {
 }
 
 function getSmsCode(phone, param, newUser, enable) {
-    if(enable){
+    if (enable) {
         enableInputs();
     }
     fetch("/get_verification_sms", {
@@ -361,10 +361,9 @@ function getEmailCode(email) {
 }
 
 function changeCursor(e) {
-    if (changedCursor){
+    if (changedCursor) {
         e.type = "button";
-    }
-    else if (e.type === "submit") {
+    } else if (e.type === "submit") {
         e.style.cursor = "wait";
         e.className = "grayButton";
         changedCursor = true;

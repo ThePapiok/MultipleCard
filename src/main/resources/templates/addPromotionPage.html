@@ -123,10 +123,12 @@
                 <p th:text="#{addPromotionPage.delete.title}" id="deleteTitle"></p>
                 <div>
                     <a>
-                        <button type="button" class="darkGreenButton" th:text="#{addPromotionPage.button.yes}" th:attr="onclick=|deletePromotion('${promotion.id}')|"></button>
+                        <button type="button" class="darkGreenButton" th:text="#{addPromotionPage.button.yes}"
+                                th:attr="onclick=|deletePromotion('${promotion.id}')|"></button>
                     </a>
                     <a>
-                        <button type="button" class="redButton" th:text="#{addPromotionPage.button.no}" onclick="showOrHideDeletePromotion()"></button>
+                        <button type="button" class="redButton" th:text="#{addPromotionPage.button.no}"
+                                onclick="showOrHideDeletePromotion()"></button>
                     </a>
                 </div>
             </div>

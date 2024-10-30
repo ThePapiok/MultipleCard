@@ -77,7 +77,8 @@
             </div>
             <label id="Province">
                 <label class="inputs">
-                    <input name="address.province" id="provinceInput" type="text" th:placeholder="#{province.text}" required
+                    <input name="address.province" id="provinceInput" type="text" th:placeholder="#{province.text}"
+                           required
                            oninput="checkProvince(this, 4)" minlength="2" maxlength="40"
                            onmouseenter="showValidation(this, 'Province')" onmouseleave="hideValidation('Province')">
                     <img id="close4" src="/images/close.png" alt="close">
@@ -116,7 +117,8 @@
             </div>
             <label id="HouseNumber">
                 <label class="inputs">
-                    <input name="address.houseNumber" id="houseNumberInput" type="text" th:placeholder="#{houseNumber.text}" required
+                    <input name="address.houseNumber" id="houseNumberInput" type="text"
+                           th:placeholder="#{houseNumber.text}" required
                            oninput="checkHouseNumber(this, 6)" minlength="1" maxlength="10"
                            onmouseenter="showValidation(this, 'HouseNumber')"
                            onmouseleave="hideValidation('HouseNumber')">
@@ -134,7 +136,8 @@
             </div>
             <label id="ApartmentNumber">
                 <label class="inputs">
-                    <input name="address.apartmentNumber" id="apartmentNumberInput" type="text" th:placeholder="#{apartmentNumber.text}"
+                    <input name="address.apartmentNumber" id="apartmentNumberInput" type="text"
+                           th:placeholder="#{apartmentNumber.text}"
                            oninput="checkApartmentNumber(this, 7)" maxlength="6"
                            onmouseenter="showValidation(this, 'ApartmentNumber')"
                            onmouseleave="hideValidation('ApartmentNumber')">
@@ -155,7 +158,8 @@
         <div class="block-horizontally">
             <label id="PostalCode">
                 <label class="inputs">
-                    <input name="address.postalCode" id="postalCodeInput" type="text" th:placeholder="#{postalCode.text}" required
+                    <input name="address.postalCode" id="postalCodeInput" type="text"
+                           th:placeholder="#{postalCode.text}" required
                            oninput="checkPostalCode(this, 8)" maxlength="6" minlength="6"
                            onmouseenter="showValidation(this, 'PostalCode')"
                            onmouseleave="hideValidation('PostalCode')">

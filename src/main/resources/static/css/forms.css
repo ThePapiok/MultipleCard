@@ -13,7 +13,6 @@
     padding: 3px;
 }
 
-
 #form {
     margin-top: 10%;
     margin-left: 3%;
@@ -102,17 +101,14 @@ img {
     .block-horizontally {
         display: inline;
     }
-
     .validation {
         transform: translateX(-100%);
         width: 80%;
     }
-
     input, .valueSelect, .searchSelect, .placeholderInput {
         height: 50px !important;
         border: 1px solid gray !important;
     }
-
     #form {
         width: 90% !important;
     }

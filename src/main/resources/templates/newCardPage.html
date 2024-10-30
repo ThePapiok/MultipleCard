@@ -115,7 +115,8 @@
         </a>
         <a>
             <button type="button" class="blackButton"
-                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsOrder', false, true)|" onmousedown="pressedCorrectButton()"></button>
+                    th:text="#{codeSms.text}" th:attr="onclick=|getSmsCode('${phone}', 'codeSmsOrder', false, true)|"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{'/new_card?reset'}">
             <button type="button" class="redButton" id="resetButton"

@@ -9,75 +9,66 @@ let count;
 let deleteProm = false;
 let today = new Date();
 
-function checkStartAt(e, oneTime){
+function checkStartAt(e, oneTime) {
     const input = e.value;
     const cond = (input !== "" && input >= today);
-    if(edit) {
+    if (edit) {
         checkOnlyIfOther(input, cond, 1, startAt, false, e);
-    }
-    else{
+    } else {
         check(1, cond, ok, previous, buttonId, success, false, true);
     }
-    if(!oneTime)
-    {
+    if (!oneTime) {
         checkExpiredAt(document.getElementById("expiredAt"), true);
     }
 }
 
-function checkExpiredAt(e, oneTime){
+function checkExpiredAt(e, oneTime) {
     const input = e.value;
     const cond = (input !== "" && input >= document.getElementById("startAt").value && input >= today);
-    if(edit) {
+    if (edit) {
         checkOnlyIfOther(input, cond, 2, expiredAt, false, e);
-    }
-    else{
+    } else {
         check(2, cond, ok, previous, buttonId, success, false, true);
     }
-    if(!oneTime){
+    if (!oneTime) {
         checkStartAt(document.getElementById("startAt"), true);
     }
 }
 
-function checkAmount(e){
+function checkAmount(e) {
     const input = e.value;
     const length = input.length;
     const cond = (length >= 2 && length <= 7 && regAmount.test(input));
-    if(edit) {
+    if (edit) {
         checkOnlyIfOther(input, cond, 3, amount, true, e);
-    }
-    else{
+    } else {
         check(3, cond, ok, previous, buttonId, success, true, true);
     }
 }
 
-
-function checkCount(e){
+function checkCount(e) {
     let input = e.value;
-    if (input === "0"){
+    if (input === "0") {
         input = "";
         e.value = "";
     }
     const cond = (input === "" || (input.length <= 5 && regNumber.test(input)));
-    if(edit) {
+    if (edit) {
         checkOnlyIfOther(input, cond, 4, count, true, e);
-    }
-    else{
+    } else {
         check(4, cond, ok, previous, buttonId, success, true, true);
     }
 }
 
-
-
-
-function atStart(){
+function atStart() {
     today = today.getFullYear().toString() + "-" + (today.getMonth() + 1).toString() + "-" + today.getDate().toString();
     checkLanguage();
     document.getElementById("startAt").value = document.getElementById("dateStartAt").textContent;
     document.getElementById("expiredAt").value = document.getElementById("dateExpiredAt").textContent;
-    if(document.getElementById("count").value === "0"){
+    if (document.getElementById("count").value === "0") {
         document.getElementById("count").value = "";
     }
-    if (document.getElementById("hasPromotion").textContent === "true"){
+    if (document.getElementById("hasPromotion").textContent === "true") {
         ok.push(null, null, null, null);
         previous.push(null, null, null, null);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonEditPromotion").textContent;
@@ -86,8 +77,7 @@ function atStart(){
         expiredAt = document.getElementById("expiredAt").value;
         count = document.getElementById("count").value;
         amount = document.getElementById("amount").value;
-    }
-    else {
+    } else {
         ok.push(false, false, false, true);
         previous.push(false, false, false, true);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonAddPromotion").textContent;
@@ -99,12 +89,12 @@ function atStart(){
     checkAmount(document.getElementById("amount"))
 }
 
-function showOrHideDeletePromotion(){
+function showOrHideDeletePromotion() {
     deleteProm = !deleteProm;
     document.getElementById("deletePromotion").hidden = !deleteProm;
 }
 
-function deletePromotion(id){
+function deletePromotion(id) {
     fetch("/promotions", {
         method: "DELETE",
         headers: {

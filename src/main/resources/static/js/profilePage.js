@@ -2,7 +2,6 @@ let ok = [null, null, null, null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null, null, null, null];
 const buttonId = "saveButton";
 
-
 function atStart() {
     firstName = document.getElementById("firstName").value;
     lastName = document.getElementById("lastName").value;

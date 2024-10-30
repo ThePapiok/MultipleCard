@@ -36,7 +36,6 @@ body {
     background-color: #F7F6F3;
     margin: 0;
     padding: 0;
-
 }
 
 iframe, div {
@@ -152,7 +151,6 @@ button {
     width: 100%;
     height: 100%;
     position: static;
-
 }
 
 .flag:hover {
@@ -176,31 +174,24 @@ button {
     button {
         font-size: 10px;
     }
-
     a {
         width: 20%;
     }
-
     .title {
         font-size: 30px;
     }
-
     #h5, #h4 {
         left: 4%;
     }
-
     #h3 {
         left: 28%;
     }
-
     .h2 {
         left: 52%;
     }
-
     .h1 {
         left: 76%;
     }
-
     #body {
         min-height: 0;
     }

@@ -13,7 +13,6 @@ function checkPin(e) {
     const input = e.value;
     check(2, (input.length = 4 && regPin.test(input)), ok, previous, buttonId, success, true, true);
     checkRetypedPin(document.getElementById("retypedPin"));
-
 }
 
 function checkRetypedPin(e) {
@@ -40,4 +39,3 @@ window.addEventListener('beforeunload', function (event) {
         console.error(error);
     });
 });
-

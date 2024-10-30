@@ -1,8 +1,8 @@
-#form{
+#form {
     width: 40%;
 }
 
-#deletePromotion{
+#deletePromotion {
     width: 40%;
     height: 300px;
     position: absolute;
@@ -11,7 +11,7 @@
     padding: 30px;
 }
 
-#deleteChoice{
+#deleteChoice {
     width: 60%;
     height: 60%;
     background-color: wheat;
@@ -24,14 +24,14 @@
     align-items: center;
 }
 
-#deleteTitle{
+#deleteTitle {
     font-size: 15px;
     font-family: "Inter", sans-serif;
     font-weight: 700;
     margin-bottom: 20%;
 }
 
-#errorForbidden{
+#errorForbidden {
     font-family: "Inter", sans-serif;
     font-size: 20px;
     font-weight: 500;
@@ -40,16 +40,15 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #deletePromotion{
+    #deletePromotion {
         top: 20%;
         width: 100%;
         padding-top: 20%;
         padding-left: 0;
     }
-    #deleteChoice{
+    #deleteChoice {
         width: 90%;
     }
-
     #deleteChoice a {
         width: 100px;
     }

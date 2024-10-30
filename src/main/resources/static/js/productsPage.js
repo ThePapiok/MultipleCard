@@ -73,7 +73,7 @@ function atStart(page, isDescending, field, maxPage) {
                     promotionContainer = noPromotionContainer.nextElementSibling;
                     promotionContainer.hidden = false;
                     resultVertical = promotionContainer.firstElementChild.firstElementChild;
-                    if (count !== 0){
+                    if (count !== 0) {
                         resultVertical.firstElementChild.nextElementSibling.textContent = promotion.count + ' ' + document.getElementById("textLeftProducts").textContent;
                     }
                     resultVertical.nextElementSibling.firstElementChild.nextElementSibling.textContent = amount / 100 + "zł";

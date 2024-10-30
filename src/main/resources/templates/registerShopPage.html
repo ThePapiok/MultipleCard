@@ -221,7 +221,8 @@
         </div>
         <p th:text="#{upload_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this, false, 10)" accept="image/png, image/jpeg" onmouseenter="showValidation(this, 'uploadFile')"
+            <input th:field="*{file}" type="file" oninput="setImage(this, false, 10)" accept="image/png, image/jpeg"
+                   onmouseenter="showValidation(this, 'uploadFile')"
                    onmouseleave="hideValidation('uploadFile')">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" src="/images/nothing.png" alt="image">

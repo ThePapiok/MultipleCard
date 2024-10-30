@@ -4,11 +4,11 @@
     font-weight: 600;
 }
 
-#titleUploadFile, .nameFile, #errorFile{
+#titleUploadFile, .nameFile, #errorFile {
     font-family: "Inter", sans-serif;
 }
 
-#uploadFiles{
+#uploadFiles {
     width: 60%;
     height: 400px;
     background-color: white;
@@ -20,12 +20,12 @@
     position: relative;
 }
 
-.uploadFile{
+.uploadFile {
     width: 85px;
     height: 100px;
 }
 
-.inputFile{
+.inputFile {
     opacity: 0;
     width: 100%;
     height: 100% !important;
@@ -46,7 +46,7 @@
     font-weight: 500;
 }
 
-.fileContainer{
+.fileContainer {
     position: relative;
     border: 1px solid black;
     overflow: hidden;
@@ -56,12 +56,12 @@
     height: 100%;
 }
 
-.imageFile{
+.imageFile {
     top: auto;
     position: relative;
 }
 
-.deleteFile{
+.deleteFile {
     width: 30px;
     height: 30px;
     top: auto;
@@ -70,8 +70,7 @@
     z-index: 2;
 }
 
-
-.nameFile{
+.nameFile {
     font-weight: 500;
     font-size: 10px;
     margin: 5px;
@@ -79,10 +78,10 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #uploadFiles{
+    #uploadFiles {
         width: 100%;
     }
-    #noFile{
+    #noFile {
         left: 80%;
     }
 }

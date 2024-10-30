@@ -9,7 +9,6 @@ class address {
         this.province = province;
     }
 }
-
 let firstName;
 let lastName;
 let addresses = [];

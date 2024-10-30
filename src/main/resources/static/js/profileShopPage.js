@@ -1,10 +1,8 @@
-const buttonId = "saveButton";
 let ok = [null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null];
-
 let name;
 let accountNumber;
-
+const buttonId = "saveButton";
 
 function atStart() {
     checkPoints(1);
@@ -39,8 +37,3 @@ function checkAccountNumber(e) {
     const input = e.value;
     checkOnlyIfOther(input, (input.length === 26 && regAccountNumber.test(input)), 4, accountNumber, true, e);
 }
-
-
-
-
-

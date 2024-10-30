@@ -108,7 +108,8 @@
     </div>
     <div id="pages">
         <a>
-            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}" onclick="previousPage()"></button>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
         </a>
         <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"

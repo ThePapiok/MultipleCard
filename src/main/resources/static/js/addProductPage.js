@@ -8,7 +8,7 @@ const regProductName = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśź�
 const regCategory = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
 const regBarcode = new RegExp("^[0-9]*$")
 
-function checkAmount(e, index){
+function checkAmount(e, index) {
     const input = e.value;
     const length = input.length;
     check(index, (length >= 2 && length <= 7 && regAmount.test(input)), ok, previous, buttonId, success, true, true);
@@ -25,18 +25,17 @@ function checkProductName(e, index) {
     check(index, (length >= 2 && length <= 30 && regProductName.test(input)), ok, previous, buttonId, success, true, true);
 }
 
-function checkCategory(e){
+function checkCategory(e) {
     const input = e.value;
     const length = input.length;
     const text = input.toString().toLowerCase();
     let options = document.getElementsByClassName("optionSelect");
     document.getElementById("typedCategory").textContent = input;
-    if(length >= 2 && length <= 15 && regCategory.test(input)){
+    if (length >= 2 && length <= 15 && regCategory.test(input)) {
         document.getElementById("checkTypedCategory").hidden = false;
         document.getElementById("closeTypedCategory").hidden = true;
         okTypedCategory = true;
-    }
-    else {
+    } else {
         document.getElementById("checkTypedCategory").hidden = true;
         document.getElementById("closeTypedCategory").hidden = false;
         okTypedCategory = false;
@@ -50,44 +49,40 @@ function checkCategory(e){
             option.style.display = "none";
         }
     }
-
 }
 
-function checkBarcode(e, index){
+function checkBarcode(e, index) {
     const input = e.value;
     const length = input.length;
     check(index, (length === 13 && regBarcode.test(input)), ok, previous, buttonId, success, true, true);
 }
 
-function atStart(){
+function atStart() {
     checkLanguage();
 }
 
-function showOrHideCategory(){
+function showOrHideCategory() {
     category = !category;
-    if(category){
+    if (category) {
         document.getElementById("categories").style.display = "block";
         document.getElementById("optionsCategory").style.display = "block";
-    }
-    else{
+    } else {
         document.getElementById("categories").style.display = "none";
         document.getElementById("optionsCategory").style.display = "none";
     }
 }
 
-function setValueCategory(e, index, typed){
+function setValueCategory(e, index, typed) {
     let find = false;
     const category = e.textContent;
     const selectedCategory = document.getElementsByClassName("selectedCategory");
-    for(let i = 0; i < selectedCategory.length; i++){
-        if(selectedCategory[i].firstElementChild.value === category){
+    for (let i = 0; i < selectedCategory.length; i++) {
+        if (selectedCategory[i].firstElementChild.value === category) {
             find = true;
             break;
         }
     }
-
-    if(indexCategory <= 3 && !find && (!typed || (typed && okTypedCategory)))
-    {
+    if (indexCategory <= 3 && !find && (!typed || (typed && okTypedCategory))) {
         check(2, true, ok, previous, buttonId, success, true, true);
         document.getElementById("category" + indexCategory).value = category;
         document.getElementById("inputCategory" + indexCategory).value = category;
@@ -102,7 +97,7 @@ function setValueCategory(e, index, typed){
     showOrHideCategory();
 }
 
-function deleteCategory(e){
+function deleteCategory(e) {
     indexCategory--;
     let selected = e.parentElement;
     let sibling = selected.nextElementSibling;
@@ -110,7 +105,7 @@ function deleteCategory(e){
     let firstElementChildSibling;
     const id = e.id;
     const index = parseInt(id.charAt(id.length - 1));
-    for(let i = index; i < indexCategory; i++) {
+    for (let i = index; i < indexCategory; i++) {
         firstElementChildSelected = selected.firstElementChild;
         firstElementChildSibling = sibling.firstElementChild;
         firstElementChildSelected.value = firstElementChildSibling.value;
@@ -122,8 +117,7 @@ function deleteCategory(e){
     firstElementChildSelected.value = "";
     firstElementChildSelected.nextElementSibling.value = document.getElementById("textCategoryNotSelected").textContent;
     document.getElementById("delete" + indexCategory).style.display = "none";
-    if(indexCategory === 1){
+    if (indexCategory === 1) {
         check(2, false, ok, previous, buttonId, success, true, true);
     }
-
 }

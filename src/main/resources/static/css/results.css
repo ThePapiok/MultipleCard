@@ -68,7 +68,6 @@
     opacity: 70%;
 }
 
-
 .selectedPage {
     background-color: #31A49D;
     cursor: default;
@@ -129,7 +128,6 @@
     color: #000000;
     font-weight: 800;
     font-size: 16px;
-
 }
 
 .resultIcons {
@@ -143,15 +141,12 @@
     #searchBar {
         width: 94%;
     }
-
     #searchInput {
         width: 40%;
     }
-
     #searchSelect {
         width: 55%;
     }
-
     #searchSelect, #searchInput {
         font-size: 13px;
     }
@@ -164,7 +159,6 @@
         margin-bottom: 10px;
         margin-left: 0;
     }
-
     #results {
         justify-content: center;
         margin-left: 0;

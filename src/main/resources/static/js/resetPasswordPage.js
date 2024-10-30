@@ -101,4 +101,3 @@ window.addEventListener('beforeunload', function (event) {
         console.error(error);
     });
 });
-

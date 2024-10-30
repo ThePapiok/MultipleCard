@@ -81,41 +81,32 @@ label {
     #b2 {
         margin-left: 76%;
     }
-
     #recenzje {
         font-size: 30px;
     }
-
     #noResults {
         font-size: 15px;
     }
-
     #image {
         height: 35vh;
     }
-
     .review:not(:first-child) {
         display: none;
     }
-
     #addOpinion {
         margin-left: 5.5%;
         width: 100%;
     }
-
     #text {
         width: 90%;
         height: 150px;
     }
-
     .starAtReview {
         height: 40px;
         width: 40px;
     }
-
     #addOpinionButton {
         margin-left: 3%;
         margin-top: 5px;
     }
 }
-
