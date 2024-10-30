@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
@@ -239,5 +240,44 @@ public class ProductServiceTest {
     when(aggregationRepository.getMaxPage("", TEST_PHONE)).thenReturn(maxPage);
 
     assertEquals(maxPage, productService.getMaxPage("", TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturnTrueAtIsProductOwnerWhenIsOwner() {
+    Account account = new Account();
+    account.setId(TEST_OWNER_ID);
+    Product product = new Product();
+    product.setShopId(TEST_OWNER_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(productRepository.findShopIdById(TEST_OWNER_ID)).thenReturn(product);
+
+    assertTrue(productService.isProductOwner(TEST_PHONE, TEST_OWNER_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsProductOwnerWhenIsNotOwner() {
+    final ObjectId otherOwnerId = new ObjectId("098765432112345678904321");
+    Account account = new Account();
+    account.setId(TEST_OWNER_ID);
+    Product product = new Product();
+    product.setShopId(otherOwnerId);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(productRepository.findShopIdById(otherOwnerId)).thenReturn(product);
+
+    assertFalse(productService.isProductOwner(TEST_PHONE, otherOwnerId.toString()));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsProductOwnerWhenProductNotFound() {
+    final ObjectId otherOwnerId = new ObjectId("098765439912345678904329");
+    Account account = new Account();
+    account.setId(TEST_OWNER_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(productRepository.findShopIdById(otherOwnerId)).thenReturn(null);
+
+    assertFalse(productService.isProductOwner(TEST_PHONE, otherOwnerId.toString()));
   }
 }

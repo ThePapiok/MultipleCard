@@ -21,10 +21,7 @@
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
-    <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h1 headerButton">
-        <button class="blackButton" th:text="#{button.login}"></button>
-    </a>
-    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+    <a th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
@@ -58,8 +55,8 @@
                         <a th:href="@{'/edit_product?id=' + ${product.id}}" class="resultIcons">
                             <img src="/images/edit.png" alt="edit">
                         </a>
-                        <a th:href="@{'/discount_product?id=' + ${product.id}}" class="resultIcons">
-                            <img src="/images/discount.png" alt="discount">
+                        <a th:href="@{'/promotions?id=' + ${product.id}}" class="resultIcons">
+                            <img src="/images/discount.png" alt="discount" id="discountIcon">
                         </a>
                         <a th:href="@{'/delete_product?id=' + ${product.id}}" class="resultIcons">
                             <img src="/images/close.png" alt="close">

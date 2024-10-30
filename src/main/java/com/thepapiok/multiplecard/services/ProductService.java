@@ -115,4 +115,12 @@ public class ProductService {
   public int getMaxPage(String text, String phone) {
     return aggregationRepository.getMaxPage(text, phone);
   }
+
+  public boolean isProductOwner(String phone, String id) {
+    Product product = productRepository.findShopIdById(new ObjectId(id));
+    if (product == null) {
+      return false;
+    }
+    return accountRepository.findIdByPhone(phone).getId().equals(product.getShopId());
+  }
 }

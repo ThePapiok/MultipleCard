@@ -21,6 +21,7 @@
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/image.js"></script>
+<script src="/js/edit.js"></script>
 <script src="/js/shop.js"></script>
 <script src="/js/profile.js"></script>
 <script src="/js/profileShopPage.js"></script>
@@ -28,7 +29,7 @@
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
-    <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="h1 headerButton">
+    <a th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
@@ -46,8 +47,8 @@
     <span hidden th:text="#{houseNumber.validation.1_condition}" id="textHouseNumberValidation1"></span>
     <span hidden th:text="#{houseNumber.validation.2_condition}" id="textHouseNumberValidation2"></span>
     <span hidden th:text="#{apartmentNumber.text}" id="textApartmentNumber"></span>
-    <span hidden th:text="#{apartmentNumber.validation.1_condition}" id="textApartmentNumberValidation1"></span>
-    <span hidden th:text="#{apartmentNumber.validation.2_condition}" id="textApartmentNumberValidation2"></span>
+    <span hidden th:text="#{validation.empty_or}" id="textApartmentNumberValidation1"></span>
+    <span hidden th:text="#{validation.not_negative}" id="textApartmentNumberValidation2"></span>
     <span hidden th:text="#{validation.only_digits}" id="textValidationOnlyDigits"></span>
     <span hidden th:text="#{postalCode.text}" id="textPostalCode"></span>
     <span hidden th:text="#{city.text}" id="textCity"></span>

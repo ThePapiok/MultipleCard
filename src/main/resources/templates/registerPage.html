@@ -145,9 +145,9 @@
             <div class="validation" id="validationApartmentNumber">
                 <span th:text="#{apartmentNumber.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{apartmentNumber.validation.1_condition}"></li>
+                    <li th:text="#{validation.empty_or}"></li>
                     <li th:text="#{validation.only_digits}"></li>
-                    <li th:text="#{apartmentNumber.validation.2_condition}"></li>
+                    <li th:text="#{validation.not_negative}"></li>
                     <li th:text="#{validation.prefix_length} + ' 1 ' + #{validation.suffix_length} + ' 6'"></li>
                 </ul>
             </div>

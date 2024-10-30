@@ -18,8 +18,11 @@
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
 </div>
-<div id="body" onload="atStart()">
+<div id="body">
     <p class="title" th:text="#{newCardPage.title}"></p>
     <form th:action="@{/new_card}" id="form" method="post" th:object="${card}">
         <div class="block-horizontally">

@@ -13,7 +13,6 @@ function atStart() {
     name = document.getElementById("nameInput").value;
     accountNumber = document.getElementById("accountNumberInput").value;
     let places = document.getElementsByClassName("numberOfPlace");
-    let nextIndex;
     let inputs;
     for (let i = 0; i < places.length; i++) {
         inputs = places[i].firstElementChild.nextElementSibling.getElementsByTagName("input");

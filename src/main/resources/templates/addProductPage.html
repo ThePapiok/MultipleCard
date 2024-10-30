@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
@@ -14,10 +14,14 @@
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/image.js"></script>
+<script src="/js/amount.js"></script>
 <script src="/js/addProductPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
 <div id="body">
@@ -104,7 +108,7 @@
             <label id="Amount">
                 <label class="inputs">
                     <input th:field="*{amount}" type="text" th:placeholder="#{product_amount.text}" required
-                           oninput="checkAmount(this, 3)"
+                           oninput="checkAmount(this)"
                            minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
                            onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)" onfocus="focusedAmount(this)">
                     <img id="close3" src="/images/close.png" alt="close">
@@ -114,7 +118,8 @@
             <div class="validation">
                 <span th:text="#{product_amount.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{validation.prefix_length} + ' 4 ' + #{validation.suffix_length} + ' 7'"></li>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
+                    <li th:text="#{validation.not_negative}"></li>
                     <li th:text="#{validation.only_digits}"></li>
                 </ul>
             </div>

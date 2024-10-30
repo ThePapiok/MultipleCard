@@ -57,7 +57,6 @@ function atStart(page, isDescending, field, maxPage) {
     let promotionContainer;
     let promotion
     let amount;
-    let date;
     let count;
     let resultVertical;
     if (promotions != null) {
@@ -68,6 +67,7 @@ function atStart(page, isDescending, field, maxPage) {
                 if (promotion.productId === price.dataset.id) {
                     amount = promotion.amount;
                     count = promotion.count;
+                    price.parentElement.firstElementChild.firstElementChild.nextElementSibling.nextElementSibling.firstElementChild.src = "/images/discount_fill.png";
                     noPromotionContainer = price.firstElementChild;
                     noPromotionContainer.hidden = true;
                     promotionContainer = noPromotionContainer.nextElementSibling;
@@ -85,5 +85,4 @@ function atStart(page, isDescending, field, maxPage) {
         }
     }
     checkButtonPages(page, maxPage);
-
 }
