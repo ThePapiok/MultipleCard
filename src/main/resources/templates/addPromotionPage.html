@@ -26,13 +26,15 @@
 <div id="body">
     <span hidden th:text="${promotion.startAt}" id="dateStartAt"></span>
     <span hidden th:text="${promotion.expiredAt}" id="dateExpiredAt"></span>
-    <span hidden th:text="${promotion.id} != null" id="hasPromotion"></span>
+    <span hidden th:text="${promotion.expiredAt} != null" id="hasPromotion"></span>
+    <span hidden th:text="${originalAmount}" id="originalAmount"></span>
     <span hidden th:text="#{addPromotionPage.button.add_promotion}" id="textButtonAddPromotion"></span>
     <span hidden th:text="#{addPromotionPage.button.edit_promotion}" id="textButtonEditPromotion"></span>
     <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
     <p class="title" th:text="#{addPromotionPage.title}"></p>
     <p th:text="#{addPromotionPage.error.forbidden}" th:if="${isOwner} == false" id="errorForbidden"></p>
     <form th:action="@{'/promotions'}" th:object="${promotion}" id="form" method="post" th:if="${isOwner} == true">
+        <input hidden th:field="*{productId}">
         <div class="block-horizontally">
             <label id="StartAt">
                 <label class="inputs">
@@ -72,8 +74,8 @@
                     <input th:field="*{amount}" type="text" th:placeholder="#{addPromotionPage.amount.text}" required
                            oninput="checkAmount(this)"
                            minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
-                           onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)"
-                           onfocus="focusedAmount(this)">
+                           onmouseleave="hideValidation('Amount')" onfocusout="unfocused(this)"
+                           onfocus="focused(this)">
                     <img id="close3" src="/images/close.png" alt="close">
                     <img id="check3" hidden src="/images/check.png" alt="check">
                 </label>
@@ -84,6 +86,8 @@
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
                     <li th:text="#{validation.not_negative}"></li>
                     <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{addPromotionPage.amount.validation1}"></li>
+                    <li th:text="#{addPromotionPage.amount.validation2}"></li>
                 </ul>
             </div>
         </div>
@@ -112,7 +116,7 @@
         <a>
             <button type="button" class="grayButton" id="promotionButton"></button>
         </a>
-        <a th:if="${promotion.id} != null" onclick="showOrHideDeletePromotion()">
+        <a th:if="${promotion.expiredAt} != null" onclick="showOrHideDeletePromotion()">
             <button type="button" class="redButton" th:text="#{addPromotionPage.button.promotion_delete}"></button>
         </a>
         <a th:href="@{/products}">
@@ -124,7 +128,7 @@
                 <div>
                     <a>
                         <button type="button" class="darkGreenButton" th:text="#{addPromotionPage.button.yes}"
-                                th:attr="onclick=|deletePromotion('${promotion.id}')|"></button>
+                                th:attr="onclick=|deletePromotion('${promotion.productId}')|"></button>
                     </a>
                     <a>
                         <button type="button" class="redButton" th:text="#{addPromotionPage.button.no}"

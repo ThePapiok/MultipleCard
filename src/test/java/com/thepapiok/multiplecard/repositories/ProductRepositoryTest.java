@@ -26,7 +26,7 @@ public class ProductRepositoryTest {
   @MockBean private RestTemplate restTemplate;
 
   @Test
-  public void shouldReturnProductAtFindShopIdById() {
+  public void shouldReturnProductAtFindShopIdByIdWhenEverythingOk() {
     final ObjectId shopId = new ObjectId("123456789012345678901234");
     final int amount = 500;
     ObjectId productId;

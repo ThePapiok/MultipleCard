@@ -6,6 +6,7 @@ let startAt;
 let expiredAt;
 let amount;
 let count;
+let originalAmount;
 let deleteProm = false;
 let today = new Date();
 
@@ -38,7 +39,7 @@ function checkExpiredAt(e, oneTime) {
 function checkAmount(e) {
     const input = e.value;
     const length = input.length;
-    const cond = (length >= 2 && length <= 7 && regAmount.test(input));
+    const cond = (length >= 2 && length <= 7 && regAmount.test(input) && parseFloat(input.toString().replace("zł", "")) < originalAmount);
     if (edit) {
         checkOnlyIfOther(input, cond, 3, amount, true, e);
     } else {
@@ -65,9 +66,6 @@ function atStart() {
     checkLanguage();
     document.getElementById("startAt").value = document.getElementById("dateStartAt").textContent;
     document.getElementById("expiredAt").value = document.getElementById("dateExpiredAt").textContent;
-    if (document.getElementById("count").value === "0") {
-        document.getElementById("count").value = "";
-    }
     if (document.getElementById("hasPromotion").textContent === "true") {
         ok.push(null, null, null, null);
         previous.push(null, null, null, null);
@@ -76,7 +74,11 @@ function atStart() {
         startAt = document.getElementById("startAt").value;
         expiredAt = document.getElementById("expiredAt").value;
         count = document.getElementById("count").value;
+        originalAmount = parseFloat(document.getElementById("originalAmount").textContent);
+        unfocusedAmount(document.getElementById("amount"));
+        document.getElementById("amount").value = document.getElementById("amount").value + " (" + originalAmount + "zł)";
         amount = document.getElementById("amount").value;
+
     } else {
         ok.push(false, false, false, true);
         previous.push(false, false, false, true);
@@ -114,4 +116,21 @@ function deletePromotion(id) {
         }).catch((error) => {
         console.error(error);
     });
+}
+
+function focused(e) {
+    focusedAmount(e);
+    e.value = e.value.toString().substring(0, e.value.toString().indexOf("(") - 1);
+}
+
+function unfocused(e) {
+    const index = e.value.indexOf("%");
+    if (index === -1) {
+        unfocusedAmount(e);
+    } else if (index === (e.value.length - 1) && index === e.value.lastIndexOf("%")) {
+        e.value = (originalAmount * parseInt(e.value.substring(0, index)) / 100.0).toFixed(2);
+        checkAmount(e);
+        unfocusedAmount(e);
+    }
+    e.value = e.value + " (" + originalAmount + "zł)";
 }

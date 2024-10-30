@@ -7,7 +7,7 @@ function focusedAmount(e) {
 }
 
 function unfocusedAmount(e) {
-    if (ok[2]) {
+    if (ok[2] || ok[2] == null) {
         if (!e.value.toString().includes(".")) {
             e.value += ".00";
         }

@@ -11,6 +11,7 @@ import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoTransactionManager;
@@ -122,5 +123,24 @@ public class ProductService {
       return false;
     }
     return accountRepository.findIdByPhone(phone).getId().equals(product.getShopId());
+  }
+
+  public boolean isLessThanOriginalPrice(String amount, String productId) {
+    final int centsPerZl = 100;
+    final int amountCents = (int) (Double.parseDouble(amount) * centsPerZl);
+    Optional<Product> product = productRepository.findById(new ObjectId(productId));
+    if (product.isEmpty()) {
+      return false;
+    }
+    return product.get().getAmount() > amountCents;
+  }
+
+  public Double getAmount(String productId) {
+    final double centsPerZl = 100.0;
+    Optional<Product> product = productRepository.findById(new ObjectId(productId));
+    if (product.isEmpty()) {
+      return null;
+    }
+    return (product.get().getAmount() / centsPerZl);
   }
 }

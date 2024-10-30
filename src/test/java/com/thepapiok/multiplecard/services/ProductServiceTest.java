@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +30,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 
 public class ProductServiceTest {
-
+  private static final String TEST_ID = "103451789009876547211492";
+  private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
   private static final String TEST_PRODUCT_NAME = "name";
   private static final String TEST_BARCODE = "12345678901234567890123";
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123451789012345678901234");
   private static final String TEST_PHONE = "+482314123412341423";
+  private ProductService productService;
+
   @Mock private CategoryService categoryService;
   @Mock private ProductConverter productConverter;
   @Mock private CloudinaryService cloudinaryService;
@@ -41,7 +46,6 @@ public class ProductServiceTest {
   @Mock private ProductRepository productRepository;
   @Mock private AccountRepository accountRepository;
   @Mock private AggregationRepository aggregationRepository;
-  private ProductService productService;
 
   @BeforeEach
   public void setUp() {
@@ -174,7 +178,7 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductGetDTOAtGetProductsOwner() {
+  public void shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenEverythingOk() {
     final ObjectId productId1 = new ObjectId("123456789012345678904312");
     final ObjectId productId2 = new ObjectId("023456589012345178904387");
     final int testAmountProduct1 = 10;
@@ -234,7 +238,7 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturn12AtGetMaxPage() {
+  public void shouldReturn12AtGetMaxPageWhenEverythingOk() {
     final int maxPage = 12;
 
     when(aggregationRepository.getMaxPage("", TEST_PHONE)).thenReturn(maxPage);
@@ -257,27 +261,78 @@ public class ProductServiceTest {
 
   @Test
   public void shouldReturnFalseAtIsProductOwnerWhenIsNotOwner() {
-    final ObjectId otherOwnerId = new ObjectId("098765432112345678904321");
+    final ObjectId shopId = new ObjectId(TEST_ID);
     Account account = new Account();
     account.setId(TEST_OWNER_ID);
     Product product = new Product();
-    product.setShopId(otherOwnerId);
+    product.setId(TEST_PRODUCT_ID);
+    product.setShopId(shopId);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(productRepository.findShopIdById(otherOwnerId)).thenReturn(product);
+    when(productRepository.findShopIdById(TEST_PRODUCT_ID)).thenReturn(product);
 
-    assertFalse(productService.isProductOwner(TEST_PHONE, otherOwnerId.toString()));
+    assertFalse(productService.isProductOwner(TEST_PHONE, TEST_ID));
   }
 
   @Test
   public void shouldReturnFalseAtIsProductOwnerWhenProductNotFound() {
-    final ObjectId otherOwnerId = new ObjectId("098765439912345678904329");
     Account account = new Account();
     account.setId(TEST_OWNER_ID);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(productRepository.findShopIdById(otherOwnerId)).thenReturn(null);
+    when(productRepository.findShopIdById(TEST_PRODUCT_ID)).thenReturn(null);
 
-    assertFalse(productService.isProductOwner(TEST_PHONE, otherOwnerId.toString()));
+    assertFalse(productService.isProductOwner(TEST_PHONE, TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtIsLessThanOriginalPriceWhenIsLess() {
+    final int amount = 3000;
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setAmount(amount);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertTrue(productService.isLessThanOriginalPrice("20.00", TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsLessThanOriginalPriceWhenIsMore() {
+    final int amount = 3000;
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setAmount(amount);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertFalse(productService.isLessThanOriginalPrice("40.00", TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsLessThanOriginalPriceWhenProductIsNotFound() {
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.empty());
+
+    assertFalse(productService.isLessThanOriginalPrice("35.00", TEST_ID));
+  }
+
+  @Test
+  public void shouldReturn35dot91AtGetAmountWhenEverythingOk() {
+    final int amount = 3591;
+    final double amountWithoutCents = 35.91;
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setAmount(amount);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertEquals(amountWithoutCents, productService.getAmount(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnNull1AtGetAmountWhenProductNotFound() {
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.empty());
+
+    assertNull(productService.getAmount(TEST_ID));
   }
 }
