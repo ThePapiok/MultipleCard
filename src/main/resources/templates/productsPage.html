@@ -48,31 +48,38 @@
     <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
     <div id="allResults">
         <div id="results">
-            <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}">
+            <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}"
+                 th:data-is-active="${product.active}">
                 <div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
-                        <span class="name" th:text="${product.name}"></span>
-                        <a class="resultIcons" th:attr="onclick=|showOrHideBlockProduct('${product.id}', this.parentElement.parentElement.parentElement)|">
-                            <img src="/images/block.png" alt="edit">
+                        <span class="name" th:text="${product.product.name}"></span>
+                        <a class="resultIcons"
+                           th:attr="onclick=|showOrHideBlockProduct('${product.product.id}', this.parentElement.parentElement.parentElement)|"
+                           th:if="${product.active}">
+                            <img src="/images/block.png" alt="block">
                         </a>
-                        <a th:href="@{'/edit_product?id=' + ${product.id}}" class="resultIcons">
+                        <a class="resultIcons" th:attr="onclick=|unblockProduct('${product.product.id}')|"
+                           th:unless="${product.active}">
+                            <img src="/images/unblock.png" alt="unblock">
+                        </a>
+                        <a th:href="@{'/edit_product?id=' + ${product.product.id}}" class="resultIcons">
                             <img src="/images/edit.png" alt="edit">
                         </a>
-                        <a th:href="@{'/promotions?id=' + ${product.id}}" class="resultIcons">
+                        <a th:href="@{'/promotions?id=' + ${product.product.id}}" class="resultIcons">
                             <img src="/images/discount.png" alt="discount" id="discountIcon">
                         </a>
                         <a class="resultIcons"
-                           th:attr="onclick=|showOrHideDeleteProduct('${product.id}', this.parentElement.parentElement.parentElement)|">
+                           th:attr="onclick=|showOrHideDeleteProduct('${product.product.id}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
                     </div>
                     <div class="result-horizontal imageContainer">
-                        <img id="productImage" th:src="${product.imageUrl}">
-                        <div class="description" th:text="${product.description}">
+                        <img id="productImage" th:src="${product.product.imageUrl}" alt="product">
+                        <div class="description" th:text="${product.product.description}">
                         </div>
                     </div>
-                    <div class="result-horizontal notImageContainer price" th:data-id="${product.id}">
-                        <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"></span>
+                    <div class="result-horizontal notImageContainer price" th:data-id="${product.product.id}">
+                        <span class="amount fullAmount" th:text="${product.product.amount}/100 + 'zł'"></span>
                         <div hidden class="promotionContainer">
                             <div class="result-horizontal">
                                 <div class="result-vertical promotionInfo">
@@ -84,7 +91,7 @@
                                     <span class="productsLeft"></span>
                                 </div>
                                 <div class="promotionAmount">
-                                    <span class="amount promotion" th:text="${product.amount}/100"></span>
+                                    <span class="amount promotion" th:text="${product.product.amount}/100"></span>
                                     <span class="amount"></span>
                                 </div>
                             </div>
@@ -111,7 +118,7 @@
     </div>
     <div id="delete" class="confirmation" hidden data-id="">
         <div class="confirmationChoice">
-            <p th:text="#{delete.title}" class="confirmationTitle"></p>
+            <p th:text="#{productsPage.delete.title}" class="confirmationTitle"></p>
             <div>
                 <a>
                     <button type="button" class="darkGreenButton" th:text="#{button.yes}"
@@ -137,6 +144,7 @@
                             onclick="showOrHideBlockProduct()"></button>
                 </a>
             </div>
+            <p th:text="#{productsPage.block.info}" id="blockInfo"></p>
         </div>
     </div>
 </div>

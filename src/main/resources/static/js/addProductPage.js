@@ -8,10 +8,10 @@ const regProductName = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśź�
 const regCategory = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
 const regBarcode = new RegExp("^[0-9]*$")
 
-function checkAmount(e, index) {
+function checkAmount(e) {
     const input = e.value;
     const length = input.length;
-    check(index, (length >= 2 && length <= 7 && regAmount.test(input)), ok, previous, buttonId, success, true, true);
+    check(3, (length >= 2 && length <= 7 && regAmount.test(input)), ok, previous, buttonId, success, true, true);
 }
 
 function checkDescription(e, index) {

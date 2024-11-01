@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -106,7 +107,11 @@ public class ProductController {
     model.addAttribute("isDescending", isDescending);
     model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
     model.addAttribute("pageSelected", page + 1);
-    model.addAttribute("products", products.stream().map(ProductGetDTO::getProduct).toList());
+    model.addAttribute(
+        "products",
+        products.stream()
+            .map(e -> new ProductDTO(e.getBlocked() == null, e.getProduct()))
+            .toList());
     model.addAttribute("promotions", promotionGetDTOS);
     model.addAttribute("productsSize", products.size());
     model.addAttribute("maxPage", maxPage);

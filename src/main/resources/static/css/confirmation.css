@@ -1,4 +1,4 @@
-#delete {
+.confirmation {
     width: 40%;
     height: 300px;
     position: absolute;
@@ -7,7 +7,7 @@
     padding: 30px;
 }
 
-#deleteChoice {
+.confirmationChoice {
     width: 60%;
     height: 60%;
     background-color: wheat;
@@ -18,9 +18,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2%;
 }
 
-#deleteTitle {
+.confirmationTitle {
     font-size: 15px;
     font-family: "Inter", sans-serif;
     font-weight: 700;
@@ -28,18 +29,18 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #delete {
+    .confirmation {
         top: 20%;
         width: 100%;
         padding-top: 20%;
         padding-left: 0;
     }
 
-    #deleteChoice {
+    .confirmationChoice {
         width: 90%;
     }
 
-    #deleteChoice a {
+    .confirmationChoice a {
         width: 100px;
     }
 }

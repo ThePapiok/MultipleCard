@@ -82,6 +82,20 @@
     transform: translateX(-325px);
 }
 
+.result[data-is-active="false"]{
+    opacity: 30%;
+}
+
+#blockInfo{
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+}
+
+.confirmationTitle{
+    margin-bottom: 10%;
+}
+
 @media only screen and (max-width: 768px) {
     .result {
         height: auto;

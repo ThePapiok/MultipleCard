@@ -12,9 +12,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -111,7 +113,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -135,7 +142,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -160,7 +172,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -186,7 +203,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -212,7 +234,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -265,9 +292,11 @@ public class ProductControllerTest {
     ProductGetDTO productGetDTO1 = new ProductGetDTO();
     productGetDTO1.setProduct(testProduct1);
     productGetDTO1.setPromotion(promotion1);
+    productGetDTO1.setBlocked(null);
     ProductGetDTO productGetDTO2 = new ProductGetDTO();
     productGetDTO2.setProduct(testProduct2);
     productGetDTO2.setPromotion(null);
+    productGetDTO2.setBlocked(new Blocked());
     testProducts = List.of(productGetDTO1, productGetDTO2);
     testPages = List.of(1);
 

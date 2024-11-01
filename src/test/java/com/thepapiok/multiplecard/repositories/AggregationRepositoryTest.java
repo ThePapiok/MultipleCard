@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.repositories;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
@@ -396,18 +397,26 @@ public class AggregationRepositoryTest {
             testHourCreatedAtOrder4,
             testMinuteCreatedAtOrder4));
     mongoTemplate.save(order4);
+    Blocked blocked = new Blocked();
+    blocked.setExpiredAt(LocalDate.now().plusYears(1));
+    blocked.setProductId(product3.getId());
+    blocked = mongoTemplate.save(blocked);
     productGetDTO1 = new ProductGetDTO();
     productGetDTO1.setProduct(product1);
     productGetDTO1.setPromotion(promotion1);
+    productGetDTO1.setBlocked(null);
     productGetDTO2 = new ProductGetDTO();
     productGetDTO2.setProduct(product2);
     productGetDTO2.setPromotion(promotion2);
+    productGetDTO2.setBlocked(null);
     productGetDTO3 = new ProductGetDTO();
     productGetDTO3.setProduct(product3);
     productGetDTO3.setPromotion(null);
+    productGetDTO3.setBlocked(blocked);
     productGetDTO4 = new ProductGetDTO();
     productGetDTO4.setProduct(product4);
     productGetDTO4.setPromotion(promotion3);
+    productGetDTO4.setBlocked(null);
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
