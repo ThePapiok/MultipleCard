@@ -1,3 +1,5 @@
+let deleteProd = false;
+
 function setParams() {
     const value = parseInt(document.getElementById("searchSelect").value);
     const text = document.getElementById("searchInput").value;
@@ -85,4 +87,41 @@ function atStart(page, isDescending, field, maxPage) {
         }
     }
     checkButtonPages(page, maxPage);
+}
+
+function showOrHideDeleteProduct(productId, e) {
+    let deleteProduct = document.getElementById("delete");
+    deleteProd = !deleteProd;
+
+    deleteProduct.hidden = !deleteProd;
+    if (deleteProd) {
+        const cord = e.getBoundingClientRect();
+        deleteProduct.style.left = cord.right + window.scrollX + 'px';
+        deleteProduct.style.top = cord.top + window.scrollY + 'px';
+        deleteProduct.dataset.id = productId;
+    } else {
+        deleteProduct.dataset.id = "";
+    }
+}
+
+function deleteProduct() {
+    fetch("/products", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "id": document.getElementById("delete").dataset.id
+        })
+    }).then(response => response.text())
+        .then(response => {
+            if (response === "ok") {
+                window.location.href = "/products";
+            } else {
+                showOrHideDeleteProduct();
+                document.getElementById("error").textContent = response;
+            }
+        }).catch((error) => {
+        console.error(error);
+    });
 }

@@ -18,16 +18,11 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 public class PromotionServiceTest {
   private static final String TEST_ID = "123456789012345678901234";
-  private static final LocalDate TEST_DATE = LocalDate.of(2024, 1, 1);
-  private static final LocalDate TEST_DATE1 = LocalDate.of(2025, 1, 1);
-  private static final LocalDate TEST_DATE2 = LocalDate.of(2023, 1, 1);
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
-  private static MockedStatic<LocalDate> localDateMockedStatic;
   @Mock private PromotionRepository promotionRepository;
   @Mock private PromotionConverter promotionConverter;
   private PromotionService promotionService;

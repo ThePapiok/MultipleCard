@@ -23,14 +23,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
+  private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -173,12 +176,23 @@ public class ProductController {
     }
     if (!productService.addProduct(addProductDTO, ownerId, categories)) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
       return "redirect:/products?error";
     }
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("addProductPage.success.add_product", null, locale));
     return "redirect:/products?success";
+  }
+
+  @DeleteMapping("/products")
+  @ResponseBody
+  public String deleteProduct(@RequestParam String id, Locale locale, Principal principal) {
+    if (!productService.isProductOwner(principal.getName(), id)) {
+      return messageSource.getMessage("error.not_owner", null, locale);
+    } else if (!productService.deleteProduct(id)) {
+      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+    }
+    return "ok";
   }
 }

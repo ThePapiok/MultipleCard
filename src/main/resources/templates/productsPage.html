@@ -6,6 +6,7 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/delete.css">
     <link rel="stylesheet" href="/css/productsPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
@@ -58,7 +59,8 @@
                         <a th:href="@{'/promotions?id=' + ${product.id}}" class="resultIcons">
                             <img src="/images/discount.png" alt="discount" id="discountIcon">
                         </a>
-                        <a th:href="@{'/delete_product?id=' + ${product.id}}" class="resultIcons">
+                        <a class="resultIcons"
+                           th:attr="onclick=|showOrHideDeleteProduct('${product.id}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
                     </div>
@@ -104,6 +106,21 @@
             <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
                     th:attr="onclick=|nextPage('${maxPage}')|"></button>
         </a>
+    </div>
+    <div id="delete" hidden data-id="">
+        <div id="deleteChoice">
+            <p th:text="#{delete.title}" id="deleteTitle"></p>
+            <div>
+                <a>
+                    <button type="button" class="darkGreenButton" th:text="#{button.yes}"
+                            th:attr="onclick=|deleteProduct()|"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideDeleteProduct()"></button>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 <div id="footer">

@@ -225,7 +225,7 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductId(any())).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndUsed(any(), eq(false))).thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -267,31 +267,46 @@ public class ProfileServiceTest {
     Order order1 = new Order();
     order1.setAmount(amount1);
     order1.setCardId(cardId1);
+    order1.setUsed(false);
     Order order2 = new Order();
     order2.setAmount(amount2);
     order2.setCardId(cardId2);
+    order2.setUsed(false);
     Order order3 = new Order();
     order3.setAmount(amount3);
     order3.setCardId(cardId3);
+    order3.setUsed(false);
+    Order order1AfterDelete = new Order();
+    order1AfterDelete.setAmount(amount1);
+    order1AfterDelete.setCardId(cardId1);
+    order1AfterDelete.setUsed(true);
+    Order order2AfterDelete = new Order();
+    order2AfterDelete.setAmount(amount2);
+    order2AfterDelete.setCardId(cardId2);
+    order2AfterDelete.setUsed(true);
+    Order order3AfterDelete = new Order();
+    order3AfterDelete.setAmount(amount3);
+    order3AfterDelete.setCardId(cardId3);
+    order3AfterDelete.setUsed(true);
     orders.add(order1);
     orders.add(order2);
     orders.add(order3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductId(TEST_PRODUCT_ID1)).thenReturn(orders);
-    when(orderRepository.findAllByProductId(TEST_PRODUCT_ID2)).thenReturn(List.of());
-    when(orderRepository.findAllByProductId(TEST_PRODUCT_ID3)).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
+    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID2, false)).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID3, false)).thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
+    verify(mongoTemplate).save(order1AfterDelete);
+    verify(mongoTemplate).save(order2AfterDelete);
+    verify(mongoTemplate).save(order3AfterDelete);
     verify(mongoTemplate).remove(product1);
     verify(mongoTemplate).remove(product2);
     verify(mongoTemplate).remove(product3);
-    verify(mongoTemplate).remove(order1);
-    verify(mongoTemplate).remove(order2);
-    verify(mongoTemplate).remove(order3);
     verify(cloudinaryService).deleteImage(TEST_ID.toString());
     verify(cloudinaryService).deleteImage(product1.getId().toString());
     verify(cloudinaryService).deleteImage(product2.getId().toString());
