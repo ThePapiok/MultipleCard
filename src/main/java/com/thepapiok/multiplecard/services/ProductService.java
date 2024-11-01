@@ -1,12 +1,18 @@
 package com.thepapiok.multiplecard.services;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
+
 import com.thepapiok.multiplecard.collections.Category;
+import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
+import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +22,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -37,6 +44,8 @@ public class ProductService {
   private final MongoTransactionManager mongoTransactionManager;
   private final MongoTemplate mongoTemplate;
   private final AggregationRepository aggregationRepository;
+  private final PromotionService promotionService;
+  private final OrderRepository orderRepository;
 
   @Autowired
   public ProductService(
@@ -47,7 +56,9 @@ public class ProductService {
       AccountRepository accountRepository,
       MongoTransactionManager mongoTransactionManager,
       MongoTemplate mongoTemplate,
-      AggregationRepository aggregationRepository) {
+      AggregationRepository aggregationRepository,
+      PromotionService promotionService,
+      OrderRepository orderRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -56,6 +67,8 @@ public class ProductService {
     this.mongoTransactionManager = mongoTransactionManager;
     this.mongoTemplate = mongoTemplate;
     this.aggregationRepository = aggregationRepository;
+    this.promotionService = promotionService;
+    this.orderRepository = orderRepository;
   }
 
   public boolean addProduct(
@@ -142,5 +155,38 @@ public class ProductService {
       return null;
     }
     return (product.get().getAmount() / centsPerZl);
+  }
+
+  public boolean deleteProduct(String productId) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              try {
+                final ObjectId objectId = new ObjectId(productId);
+                final float centsPerZloty = 100;
+                cloudinaryService.deleteImage(productId);
+                promotionService.deletePromotion(productId);
+                productRepository.deleteById(objectId);
+                List<Order> orders = orderRepository.findAllByProductIdAndUsed(objectId, false);
+                for (Order order : orders) {
+                  mongoTemplate.updateFirst(
+                      query(where("cardId").is(order.getCardId())),
+                      new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
+                      User.class);
+                  order.setUsed(true);
+                  mongoTemplate.save(order);
+                }
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

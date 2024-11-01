@@ -3,8 +3,10 @@ package com.thepapiok.multiplecard.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -55,6 +57,7 @@ public class ProductControllerTest {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String ERROR_PARAM = "error";
+  private static final String ID_PARAM = "id";
   private static final String ERROR_MESSAGE = "error!";
   private static final String SUCCESS_PARAM = "success";
   private static final String ADD_PRODUCT_PARAM = "addProduct";
@@ -82,6 +85,8 @@ public class ProductControllerTest {
   private static final String MAX_PAGE_PARAM = "maxPage";
   private static final String COUNT_FIELD = "count";
   private static final Integer TEST_PRODUCT_SIZE = 2;
+  private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
+
   private Product testProduct1;
   private Product testProduct2;
   private List<Integer> testPages;
@@ -507,7 +512,7 @@ public class ProductControllerTest {
         .thenReturn(false);
 
     performPostAddProduct(addProductDTO, httpSession, "/products?error", multipartFile);
-    assertEquals("Nieoczekiwany błąd", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -576,5 +581,37 @@ public class ProductControllerTest {
                 .param(AMOUNT_PARAM, addProductDTO.getAmount())
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtDeleteProductWhenIsNotOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("Nie posiadasz tego produktu"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.deleteProduct(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnOkAtDeleteProductWhenEverythingOk() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.deleteProduct(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("ok"));
   }
 }

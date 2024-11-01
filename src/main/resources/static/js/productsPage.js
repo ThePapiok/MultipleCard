@@ -119,7 +119,7 @@ function deleteProduct() {
                 window.location.href = "/products";
             } else {
                 showOrHideDeleteProduct();
-                document.getElementById("error").textContent = document.getElementById("textUnexpectedError").textContent;
+                document.getElementById("error").textContent = response;
             }
         }).catch((error) => {
         console.error(error);

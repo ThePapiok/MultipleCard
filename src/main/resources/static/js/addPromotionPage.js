@@ -111,7 +111,7 @@ function deletePromotion(id) {
                 window.location.href = "/products";
             } else {
                 showOrHideDeletePromotion();
-                document.getElementById("error").textContent = document.getElementById("textUnexpectedError").textContent;
+                document.getElementById("error").textContent = response;
             }
         }).catch((error) => {
         console.error(error);

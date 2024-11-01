@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ProductController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
+  private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -175,7 +176,7 @@ public class ProductController {
     }
     if (!productService.addProduct(addProductDTO, ownerId, categories)) {
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
       return "redirect:/products?error";
     }
     httpSession.setAttribute(
@@ -186,8 +187,12 @@ public class ProductController {
 
   @DeleteMapping("/products")
   @ResponseBody
-  public String deleteProduct(@RequestParam String id) {
-    System.out.println(id);
+  public String deleteProduct(@RequestParam String id, Locale locale, Principal principal) {
+    if (!productService.isProductOwner(principal.getName(), id)) {
+      return messageSource.getMessage("error.not_owner", null, locale);
+    } else if (!productService.deleteProduct(id)) {
+      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+    }
     return "ok";
   }
 }

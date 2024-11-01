@@ -122,13 +122,15 @@ public class ProfileService {
                 mongoTemplate.remove(query(where(idParam).is(id)), Shop.class);
                 List<Product> products = productRepository.getAllByShopId(id);
                 for (Product product : products) {
-                  List<Order> orders = orderRepository.findAllByProductId(product.getId());
+                  List<Order> orders =
+                      orderRepository.findAllByProductIdAndUsed(product.getId(), false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),
                         new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
                         User.class);
-                    mongoTemplate.remove(order);
+                    order.setUsed(true);
+                    mongoTemplate.save(order);
                   }
                   try {
                     cloudinaryService.deleteImage(product.getId().toString());
