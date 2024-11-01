@@ -35,6 +35,8 @@ public class PromotionControllerTest {
   private static final String TEST_PRODUCT_ID = "123456789012345678901234";
   private static final String IS_OWNER_PARAM = "isOwner";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
+  private static final String ERROR_NOT_OWNER_MESSAGE = "Nie posiadasz tego produktu";
+  private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_PARAM = "error";
   private static final String PROMOTION_PARAM = "promotion";
   private static final String ORIGINAL_AMOUNT_PARAM = "originalAmount";
@@ -156,7 +158,32 @@ public class PromotionControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtDeletePromotionWhenNotProductOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_PRODUCT_ID)).thenReturn(false);
+
+    mockMvc
+        .perform(delete(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID))
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtDeletePromotionWhenGetErrorAtDeletePromotion()
+      throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_PRODUCT_ID)).thenReturn(true);
+    when(promotionService.deletePromotion(TEST_PRODUCT_ID)).thenReturn(false);
+
+    mockMvc
+        .perform(delete(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtDeletePromotionWhenEverythingOk() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_PRODUCT_ID)).thenReturn(true);
+    when(promotionService.deletePromotion(TEST_PRODUCT_ID)).thenReturn(true);
+
     mockMvc
         .perform(delete(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID))
         .andExpect(content().string("ok"));
@@ -256,7 +283,7 @@ public class PromotionControllerTest {
 
     performPostAddPromotion(
         ERROR_MESSAGE_PARAM,
-        "Nie posiadasz tego produktu",
+        ERROR_NOT_OWNER_MESSAGE,
         PROMOTIONS_ID_URL + TEST_PRODUCT_ID + ERROR_URL_PARAM,
         promotionDTO);
   }
@@ -325,7 +352,7 @@ public class PromotionControllerTest {
     when(promotionService.upsertPromotion(expectedPromotionDTO)).thenReturn(false);
 
     performPostAddPromotion(
-        ERROR_MESSAGE_PARAM, "Nieoczekiwany błąd", "/products?error", promotionDTO);
+        ERROR_MESSAGE_PARAM, ERROR_UNEXPECTED_MESSAGE, "/products?error", promotionDTO);
   }
 
   @Test
