@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.services;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
@@ -12,9 +13,11 @@ import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
+import com.thepapiok.multiplecard.repositories.BlockedRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +49,7 @@ public class ProductService {
   private final AggregationRepository aggregationRepository;
   private final PromotionService promotionService;
   private final OrderRepository orderRepository;
+  private final BlockedRepository blockedRepository;
 
   @Autowired
   public ProductService(
@@ -58,7 +62,8 @@ public class ProductService {
       MongoTemplate mongoTemplate,
       AggregationRepository aggregationRepository,
       PromotionService promotionService,
-      OrderRepository orderRepository) {
+      OrderRepository orderRepository,
+      BlockedRepository blockedRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -69,6 +74,7 @@ public class ProductService {
     this.aggregationRepository = aggregationRepository;
     this.promotionService = promotionService;
     this.orderRepository = orderRepository;
+    this.blockedRepository = blockedRepository;
   }
 
   public boolean addProduct(
@@ -187,5 +193,32 @@ public class ProductService {
       return false;
     }
     return true;
+  }
+
+  public boolean hasBlock(String id) {
+    return blockedRepository.existsByProductId(new ObjectId(id));
+  }
+
+  public boolean blockProduct(String id) {
+    try {
+      final int month = 30;
+      Blocked blocked = new Blocked();
+      blocked.setProductId(new ObjectId(id));
+      blocked.setExpiredAt(LocalDate.now().plusDays(month));
+      blockedRepository.save(blocked);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public boolean unblockProduct(String id) {
+    try {
+      Blocked blocked = blockedRepository.findByProductId(new ObjectId(id));
+      blockedRepository.delete(blocked);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

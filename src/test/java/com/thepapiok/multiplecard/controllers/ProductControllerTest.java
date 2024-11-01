@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -74,6 +75,8 @@ public class ProductControllerTest {
   private static final String PRODUCTS_URL = "/products";
   private static final String ADD_PRODUCT_URL = "/add_product";
   private static final String ADD_PRODUCT_ERROR_URL = "/add_product?error";
+  private static final String BLOCK_PRODUCT_URL = "/block_product";
+  private static final String UNBLOCK_PRODUCT_URL = "/unblock_product";
   private static final String PRODUCTS_PAGE = "productsPage";
   private static final String ADD_PRODUCT_PAGE = "addProductPage";
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
@@ -88,6 +91,8 @@ public class ProductControllerTest {
   private static final String COUNT_FIELD = "count";
   private static final Integer TEST_PRODUCT_SIZE = 2;
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
+  private static final String ERROR_NOT_OWNER_MESSAGE = "Nie posiadasz tego produktu";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
 
   private Product testProduct1;
   private Product testProduct2;
@@ -617,7 +622,7 @@ public class ProductControllerTest {
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
-        .andExpect(content().string("Nie posiadasz tego produktu"));
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
   }
 
   @Test
@@ -639,6 +644,96 @@ public class ProductControllerTest {
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
-        .andExpect(content().string("ok"));
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenIsNotOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenHasBlockAlready() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("Ten produkt już jest zablokowany"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenErrorAtBlockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+    when(productService.blockProduct(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnOkAtBlockProductWhenEverythingOk() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+    when(productService.blockProduct(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtUnblockProductWhenIsNotOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtUnblockProductWhenHasNotBlock() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("Ten produkt nie jest zablokowany"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnOkAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
   }
 }
