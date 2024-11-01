@@ -93,7 +93,7 @@ function atStart() {
 
 function showOrHideDeletePromotion() {
     deleteProm = !deleteProm;
-    document.getElementById("deletePromotion").hidden = !deleteProm;
+    document.getElementById("delete").hidden = !deleteProm;
 }
 
 function deletePromotion(id) {

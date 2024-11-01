@@ -23,9 +23,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
@@ -180,5 +182,12 @@ public class ProductController {
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("addProductPage.success.add_product", null, locale));
     return "redirect:/products?success";
+  }
+
+  @DeleteMapping("/products")
+  @ResponseBody
+  public String deleteProduct(@RequestParam String id) {
+    System.out.println(id);
+    return "ok";
   }
 }

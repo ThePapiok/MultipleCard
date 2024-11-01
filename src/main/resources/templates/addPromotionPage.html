@@ -6,6 +6,7 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/delete.css">
     <link rel="stylesheet" href="/css/addPromotionPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
@@ -122,16 +123,16 @@
         <a th:href="@{/products}">
             <button type="button" class="redButton" th:text="#{button.reset}"></button>
         </a>
-        <div id="deletePromotion" hidden>
+        <div id="delete" hidden data-id="">
             <div id="deleteChoice">
-                <p th:text="#{addPromotionPage.delete.title}" id="deleteTitle"></p>
+                <p th:text="#{delete.title}" id="deleteTitle"></p>
                 <div>
                     <a>
-                        <button type="button" class="darkGreenButton" th:text="#{addPromotionPage.button.yes}"
+                        <button type="button" class="darkGreenButton" th:text="#{button.yes}"
                                 th:attr="onclick=|deletePromotion('${promotion.productId}')|"></button>
                     </a>
                     <a>
-                        <button type="button" class="redButton" th:text="#{addPromotionPage.button.no}"
+                        <button type="button" class="redButton" th:text="#{button.no}"
                                 onclick="showOrHideDeletePromotion()"></button>
                     </a>
                 </div>
