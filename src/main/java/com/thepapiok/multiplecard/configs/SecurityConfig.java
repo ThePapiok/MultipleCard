@@ -39,7 +39,12 @@ public class SecurityConfig {
                     .authenticated()
                     .requestMatchers(HttpMethod.GET, "/profile")
                     .authenticated()
-                    .requestMatchers("/products", "/add_product", "/promotions")
+                    .requestMatchers(
+                        "/products",
+                        "/add_product",
+                        "/promotions",
+                        "/block_product",
+                        "/unblock_product")
                     .hasRole("SHOP")
                     .anyRequest()
                     .permitAll())

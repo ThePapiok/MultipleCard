@@ -6,15 +6,18 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -72,6 +75,8 @@ public class ProductControllerTest {
   private static final String PRODUCTS_URL = "/products";
   private static final String ADD_PRODUCT_URL = "/add_product";
   private static final String ADD_PRODUCT_ERROR_URL = "/add_product?error";
+  private static final String BLOCK_PRODUCT_URL = "/block_product";
+  private static final String UNBLOCK_PRODUCT_URL = "/unblock_product";
   private static final String PRODUCTS_PAGE = "productsPage";
   private static final String ADD_PRODUCT_PAGE = "addProductPage";
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
@@ -86,6 +91,8 @@ public class ProductControllerTest {
   private static final String COUNT_FIELD = "count";
   private static final Integer TEST_PRODUCT_SIZE = 2;
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
+  private static final String ERROR_NOT_OWNER_MESSAGE = "Nie posiadasz tego produktu";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
 
   private Product testProduct1;
   private Product testProduct2;
@@ -111,7 +118,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -135,7 +147,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -160,7 +177,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -186,7 +208,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -212,7 +239,12 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, List.of(testProduct1, testProduct2)))
+        .andExpect(
+            model()
+                .attribute(
+                    PRODUCTS_PARAM,
+                    List.of(
+                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
         .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
         .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
@@ -237,7 +269,6 @@ public class ProductControllerTest {
     LocalDate startAt = LocalDate.of(testYearStartAt, testMonthStartAt, testDayStartAt);
     LocalDate expiredAt = LocalDate.of(testYearExpiredAt, testMonthExpiredAt, testDayExpiredAt);
     testProduct1 = new Product();
-    testProduct1.setActive(true);
     testProduct1.setImageUrl("url1");
     testProduct1.setBarcode("barcode1");
     testProduct1.setDescription("description1");
@@ -247,7 +278,6 @@ public class ProductControllerTest {
     testProduct1.setCategories(categories);
     testProduct1.setAmount(testAmount);
     testProduct2 = new Product();
-    testProduct2.setActive(true);
     testProduct2.setAmount(testOtherAmount);
     testProduct2.setDescription("description2");
     testProduct2.setBarcode("barcode2");
@@ -267,9 +297,11 @@ public class ProductControllerTest {
     ProductGetDTO productGetDTO1 = new ProductGetDTO();
     productGetDTO1.setProduct(testProduct1);
     productGetDTO1.setPromotion(promotion1);
+    productGetDTO1.setBlocked(null);
     ProductGetDTO productGetDTO2 = new ProductGetDTO();
     productGetDTO2.setProduct(testProduct2);
     productGetDTO2.setPromotion(null);
+    productGetDTO2.setBlocked(new Blocked());
     testProducts = List.of(productGetDTO1, productGetDTO2);
     testPages = List.of(1);
 
@@ -590,7 +622,7 @@ public class ProductControllerTest {
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
-        .andExpect(content().string("Nie posiadasz tego produktu"));
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
   }
 
   @Test
@@ -612,6 +644,96 @@ public class ProductControllerTest {
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
-        .andExpect(content().string("ok"));
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenIsNotOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenHasBlockAlready() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("Ten produkt już jest zablokowany"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenErrorAtBlockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+    when(productService.blockProduct(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnOkAtBlockProductWhenEverythingOk() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+    when(productService.blockProduct(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtUnblockProductWhenIsNotOwner() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtUnblockProductWhenHasNotBlock() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string("Ten produkt nie jest zablokowany"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnErrorMessageAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(false);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnOkAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
+    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(true);
+
+    mockMvc
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .andExpect(content().string(SUCCESS_OK_MESSAGE));
   }
 }

@@ -50,6 +50,8 @@ public class AggregationRepository {
     final String isNullField = "isNull";
     final String productField = "product";
     final String promotionField = "promotion";
+    final String blockedField = "blocked";
+    final String productIdField = "productId";
     ObjectId shopId = accountRepository.findIdByPhone(phone).getId();
     GroupOperation groupOperation = null;
     SortOperation sortOperation = null;
@@ -132,9 +134,11 @@ public class AggregationRepository {
             sortOperation,
             lookup(PRODUCTS_COLLECTION, ID_FIELD, ID_FIELD, productField),
             unwind(productField, true),
-            lookup("promotions", ID_FIELD, "productId", promotionField),
+            lookup("promotions", ID_FIELD, productIdField, promotionField),
             unwind(promotionField, true),
-            project(productField, promotionField).andExclude(ID_FIELD),
+            lookup(blockedField, ID_FIELD, productIdField, blockedField),
+            unwind(blockedField, true),
+            project(productField, promotionField, blockedField).andExclude(ID_FIELD),
             skip((long) countReviewsAtPage * page),
             limit(countReviewsAtPage));
     return mongoTemplate

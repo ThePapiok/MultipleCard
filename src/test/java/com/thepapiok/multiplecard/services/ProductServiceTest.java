@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
@@ -22,6 +24,7 @@ import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
+import com.thepapiok.multiplecard.repositories.BlockedRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
@@ -57,6 +60,7 @@ public class ProductServiceTest {
   @Mock private AggregationRepository aggregationRepository;
   @Mock private PromotionService promotionService;
   @Mock private OrderRepository orderRepository;
+  @Mock private BlockedRepository blockedRepository;
 
   @BeforeEach
   public void setUp() {
@@ -72,7 +76,8 @@ public class ProductServiceTest {
             mongoTemplate,
             aggregationRepository,
             promotionService,
-            orderRepository);
+            orderRepository,
+            blockedRepository);
   }
 
   @Test
@@ -112,7 +117,6 @@ public class ProductServiceTest {
     productWithCategories.setBarcode(addProductDTO.getBarcode());
     productWithCategories.setDescription(addProductDTO.getDescription());
     productWithCategories.setCategories(categories);
-    productWithCategories.setActive(true);
     productWithCategories.setShopId(ownerId);
     productWithCategories.setImageUrl("");
     Product productWithId = new Product();
@@ -122,7 +126,6 @@ public class ProductServiceTest {
     productWithId.setDescription(addProductDTO.getDescription());
     productWithId.setCategories(categories);
     productWithId.setId(productId);
-    productWithId.setActive(true);
     productWithId.setShopId(ownerId);
     productWithId.setImageUrl("");
     Product expectedProduct = new Product();
@@ -134,7 +137,6 @@ public class ProductServiceTest {
     expectedProduct.setId(productId);
     expectedProduct.setImageUrl(imageUrl);
     expectedProduct.setId(productId);
-    expectedProduct.setActive(true);
     expectedProduct.setShopId(ownerId);
     expectedProduct.setImageUrl("");
 
@@ -206,7 +208,6 @@ public class ProductServiceTest {
     final String countField = "count";
     List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
     Product product1 = new Product();
-    product1.setActive(true);
     product1.setImageUrl("url1");
     product1.setBarcode("barcode1");
     product1.setDescription("description1");
@@ -216,7 +217,6 @@ public class ProductServiceTest {
     product1.setCategories(categories);
     product1.setAmount(testAmountProduct1);
     Product product2 = new Product();
-    product2.setActive(true);
     product2.setAmount(testAmountProduct2);
     product2.setDescription("description2");
     product2.setBarcode("barcode2");
@@ -423,6 +423,7 @@ public class ProductServiceTest {
     verify(cloudinaryService).deleteImage(TEST_ID);
     verify(promotionService).deletePromotion(TEST_ID);
     verify(productRepository).deleteById(productId);
+    verify(blockedRepository).deleteByProductId(productId);
   }
 
   @Test
@@ -430,5 +431,70 @@ public class ProductServiceTest {
     doThrow(RuntimeException.class).when(cloudinaryService).deleteImage(TEST_ID);
 
     assertFalse(productService.deleteProduct(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtHasBlockWhenProductIsBlocked() {
+    when(blockedRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(true);
+
+    assertTrue(productService.hasBlock(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtHasBlockWhenProductIsNotBlocked() {
+    when(blockedRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(false);
+
+    assertFalse(productService.hasBlock(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtBlockProductWhenEverythingOk() {
+    final int month = 30;
+    Blocked expectedBlocked = new Blocked();
+    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+
+    assertTrue(productService.blockProduct(TEST_ID));
+    verify(blockedRepository).save(expectedBlocked);
+  }
+
+  @Test
+  public void shouldReturnFalseAtBlockProductWhenGetException() {
+    final int month = 30;
+    Blocked expectedBlocked = new Blocked();
+    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+
+    when(blockedRepository.save(expectedBlocked)).thenThrow(MongoWriteException.class);
+
+    assertFalse(productService.blockProduct(TEST_ID));
+    verify(blockedRepository).save(expectedBlocked);
+  }
+
+  @Test
+  public void shouldReturnTrueAtUnblockProductWhenEverythingOk() {
+    final int month = 30;
+    Blocked expectedBlocked = new Blocked();
+    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+
+    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlocked);
+
+    assertTrue(productService.unblockProduct(TEST_ID));
+    verify(blockedRepository).delete(expectedBlocked);
+  }
+
+  @Test
+  public void shouldReturnFalseAtUnblockProductWhenGetException() {
+    final int month = 30;
+    Blocked expectedBlocked = new Blocked();
+    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+
+    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlocked);
+    doThrow(MongoWriteException.class).when(blockedRepository).delete(expectedBlocked);
+
+    assertFalse(productService.unblockProduct(TEST_ID));
+    verify(blockedRepository).delete(expectedBlocked);
   }
 }

@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -34,6 +35,8 @@ public class ProductController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
+  private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
+  private static final String SUCCESS_OK_MESSAGE = "ok";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -106,7 +109,11 @@ public class ProductController {
     model.addAttribute("isDescending", isDescending);
     model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
     model.addAttribute("pageSelected", page + 1);
-    model.addAttribute("products", products.stream().map(ProductGetDTO::getProduct).toList());
+    model.addAttribute(
+        "products",
+        products.stream()
+            .map(e -> new ProductDTO(e.getBlocked() == null, e.getProduct()))
+            .toList());
     model.addAttribute("promotions", promotionGetDTOS);
     model.addAttribute("productsSize", products.size());
     model.addAttribute("maxPage", maxPage);
@@ -189,10 +196,36 @@ public class ProductController {
   @ResponseBody
   public String deleteProduct(@RequestParam String id, Locale locale, Principal principal) {
     if (!productService.isProductOwner(principal.getName(), id)) {
-      return messageSource.getMessage("error.not_owner", null, locale);
+      return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
     } else if (!productService.deleteProduct(id)) {
       return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
     }
-    return "ok";
+    return SUCCESS_OK_MESSAGE;
+  }
+
+  @PostMapping("/block_product")
+  @ResponseBody
+  public String blockProduct(@RequestParam String id, Locale locale, Principal principal) {
+    if (!productService.isProductOwner(principal.getName(), id)) {
+      return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
+    } else if (productService.hasBlock(id)) {
+      return messageSource.getMessage("blockProduct.error.block_already", null, locale);
+    } else if (!productService.blockProduct(id)) {
+      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+    }
+    return SUCCESS_OK_MESSAGE;
+  }
+
+  @PostMapping("/unblock_product")
+  @ResponseBody
+  public String unblockProduct(@RequestParam String id, Locale locale, Principal principal) {
+    if (!productService.isProductOwner(principal.getName(), id)) {
+      return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
+    } else if (!productService.hasBlock(id)) {
+      return messageSource.getMessage("blockProduct.error.no_block", null, locale);
+    } else if (!productService.unblockProduct(id)) {
+      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+    }
+    return SUCCESS_OK_MESSAGE;
   }
 }

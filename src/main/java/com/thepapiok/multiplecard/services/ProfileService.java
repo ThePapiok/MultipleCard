@@ -4,10 +4,12 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
@@ -102,6 +104,7 @@ public class ProfileService {
   public boolean deleteAccount(String phone) {
     final String idParam = "_id";
     final String cardIdParam = "cardId";
+    final String productIdParam = "productId";
     final float centsPerZloty = 100;
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
@@ -109,6 +112,7 @@ public class ProfileService {
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
+              ObjectId productId;
               Account account = accountRepository.findByPhone(phone);
               ObjectId id = account.getId();
               Role role = account.getRole();
@@ -122,8 +126,10 @@ public class ProfileService {
                 mongoTemplate.remove(query(where(idParam).is(id)), Shop.class);
                 List<Product> products = productRepository.getAllByShopId(id);
                 for (Product product : products) {
-                  List<Order> orders =
-                      orderRepository.findAllByProductIdAndUsed(product.getId(), false);
+                  productId = product.getId();
+                  mongoTemplate.remove(query(where(productIdParam).is(productId)), Promotion.class);
+                  mongoTemplate.remove(query(where(productIdParam).is(productId)), Blocked.class);
+                  List<Order> orders = orderRepository.findAllByProductIdAndUsed(productId, false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),
