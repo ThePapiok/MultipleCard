@@ -15,10 +15,12 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
@@ -67,6 +69,8 @@ public class ProfileServiceTest {
   private static final String TEST_FIRST_NAME = "firstNameShop";
   private static final String TEST_LAST_NAME = "lastNameShop";
   private static final String TEST_ACCOUNT_NUMBER = "accountNumberShop";
+  private static final String PRODUCT_ID_PARAM = "productId";
+
   private static Address address;
   private static User user;
   private static Shop shop;
@@ -237,6 +241,18 @@ public class ProfileServiceTest {
     verify(cloudinaryService).deleteImage(product1.getId().toString());
     verify(cloudinaryService).deleteImage(product2.getId().toString());
     verify(cloudinaryService).deleteImage(product3.getId().toString());
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
   }
 
   @Test
@@ -326,6 +342,18 @@ public class ProfileServiceTest {
             query(where(CARD_ID_PARAM).is(cardId3)),
             new Update().inc(pointsParam, (amount3 / centsPerZloty)),
             User.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+    verify(mongoTemplate)
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
   }
 
   @Test

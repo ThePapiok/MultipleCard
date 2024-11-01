@@ -423,6 +423,7 @@ public class ProductServiceTest {
     verify(cloudinaryService).deleteImage(TEST_ID);
     verify(promotionService).deletePromotion(TEST_ID);
     verify(productRepository).deleteById(productId);
+    verify(blockedRepository).deleteByProductId(productId);
   }
 
   @Test

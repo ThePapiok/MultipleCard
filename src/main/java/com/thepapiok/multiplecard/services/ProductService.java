@@ -175,6 +175,7 @@ public class ProductService {
                 cloudinaryService.deleteImage(productId);
                 promotionService.deletePromotion(productId);
                 productRepository.deleteById(objectId);
+                blockedRepository.deleteByProductId(objectId);
                 List<Order> orders = orderRepository.findAllByProductIdAndUsed(objectId, false);
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
