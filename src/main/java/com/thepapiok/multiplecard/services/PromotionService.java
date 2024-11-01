@@ -55,4 +55,13 @@ public class PromotionService {
   public boolean checkDateIsMaxNextYear(LocalDate date) {
     return !date.isAfter(LocalDate.now().plusYears(1));
   }
+
+  public boolean deletePromotion(String id) {
+    try {
+      promotionRepository.deleteByProductId(new ObjectId(id));
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
 }

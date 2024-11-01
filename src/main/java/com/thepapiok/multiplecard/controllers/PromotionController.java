@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/promotions")
 public class PromotionController {
+  private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
+  private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String PROMOTION_PARAM = "promotion";
@@ -103,7 +105,7 @@ public class PromotionController {
       message = messageSource.getMessage("addPromotion.error.expiredAt_too_far", null, locale);
     } else if (!productService.isProductOwner(principal.getName(), id)) {
       error = true;
-      message = messageSource.getMessage("addPromotion.error.not_owner", null, locale);
+      message = messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
     } else if (!promotionService.checkNewStartAtIsPresent(startAt, id)) {
       error = true;
       message = messageSource.getMessage("addPromotion.error.startAt_not_present", null, locale);
@@ -118,7 +120,7 @@ public class PromotionController {
     if (!promotionService.upsertPromotion(promotion)) {
       System.out.println(promotion);
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
       return "redirect:/products?error";
     }
     httpSession.setAttribute(
@@ -129,7 +131,12 @@ public class PromotionController {
 
   @DeleteMapping
   @ResponseBody
-  public String deletePromotion(@RequestParam String id) {
+  public String deletePromotion(@RequestParam String id, Principal principal, Locale locale) {
+    if (!productService.isProductOwner(principal.getName(), id)) {
+      return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
+    } else if (!promotionService.deletePromotion(id)) {
+      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+    }
     return "ok";
   }
 }
