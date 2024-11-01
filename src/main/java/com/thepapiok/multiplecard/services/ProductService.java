@@ -81,7 +81,6 @@ public class ProductService {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
               List<ObjectId> categories = new ArrayList<>();
               Product product = productConverter.getEntity(addProductDTO);
-              product.setActive(true);
               product.setShopId(ownerId);
               product.setImageUrl("");
               for (String name : nameOfCategories) {

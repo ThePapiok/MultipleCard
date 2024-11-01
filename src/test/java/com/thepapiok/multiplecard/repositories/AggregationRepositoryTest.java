@@ -128,7 +128,6 @@ public class AggregationRepositoryTest {
     Product product1 = new Product();
     product1.setImageUrl("url1");
     product1.setName(TEST_PRODUCT_NAME);
-    product1.setActive(true);
     product1.setDescription("description1");
     product1.setAmount(testProduct1Amount);
     product1.setBarcode("barcode1");
@@ -137,7 +136,6 @@ public class AggregationRepositoryTest {
     Product product2 = new Product();
     product2.setImageUrl("url2");
     product2.setName("product2");
-    product2.setActive(true);
     product2.setDescription("description2");
     product2.setAmount(testProduct2Amount);
     product2.setBarcode("barcode2");
@@ -146,7 +144,6 @@ public class AggregationRepositoryTest {
     Product product3 = new Product();
     product3.setImageUrl("url3");
     product3.setName(TEST_PRODUCT_NAME);
-    product3.setActive(true);
     product3.setDescription("description3");
     product3.setAmount(testProduct3Amount);
     product3.setBarcode("barcode3");
@@ -155,7 +152,6 @@ public class AggregationRepositoryTest {
     Product product4 = new Product();
     product4.setImageUrl("url4");
     product4.setName("product4");
-    product4.setActive(true);
     product4.setDescription("description4");
     product4.setAmount(testProduct4Amount);
     product4.setBarcode("barcode4");
@@ -164,7 +160,6 @@ public class AggregationRepositoryTest {
     Product product5 = new Product();
     product5.setImageUrl("url45");
     product5.setName("product5");
-    product5.setActive(true);
     product5.setDescription("description5");
     product5.setAmount(testProduct5Amount);
     product5.setBarcode("barcode5");
@@ -173,7 +168,6 @@ public class AggregationRepositoryTest {
     Product product6 = new Product();
     product6.setImageUrl("url6");
     product6.setName("product6");
-    product6.setActive(true);
     product6.setDescription("description6");
     product6.setAmount(testProduct6Amount);
     product6.setBarcode("barcode6");
@@ -182,7 +176,6 @@ public class AggregationRepositoryTest {
     Product product7 = new Product();
     product7.setImageUrl("url7");
     product7.setName("product7");
-    product7.setActive(true);
     product7.setDescription("description7");
     product7.setAmount(testProduct7Amount);
     product7.setBarcode("barcode7");
@@ -191,7 +184,6 @@ public class AggregationRepositoryTest {
     Product product8 = new Product();
     product8.setImageUrl("url8");
     product8.setName("product8");
-    product8.setActive(true);
     product8.setDescription("description8");
     product8.setAmount(testProduct8Amount);
     product8.setBarcode("barcode8");
@@ -200,7 +192,6 @@ public class AggregationRepositoryTest {
     Product product9 = new Product();
     product9.setImageUrl("url9");
     product9.setName("product9");
-    product9.setActive(true);
     product9.setDescription("description9");
     product9.setAmount(testProduct9Amount);
     product9.setBarcode("barcode9");
@@ -209,7 +200,6 @@ public class AggregationRepositoryTest {
     Product product10 = new Product();
     product10.setImageUrl("url10");
     product10.setName("product10");
-    product10.setActive(true);
     product10.setDescription("description10");
     product10.setAmount(testProduct10Amount);
     product10.setBarcode("barcode10");
@@ -218,7 +208,6 @@ public class AggregationRepositoryTest {
     Product product11 = new Product();
     product11.setImageUrl("url11");
     product11.setName("product11");
-    product11.setActive(true);
     product11.setDescription("description11");
     product11.setAmount(testProduct11Amount);
     product11.setBarcode("barcode11");
@@ -227,7 +216,6 @@ public class AggregationRepositoryTest {
     Product product12 = new Product();
     product12.setImageUrl("url12");
     product12.setName("product12");
-    product12.setActive(true);
     product12.setDescription("description12");
     product12.setAmount(testProduct12Amount);
     product12.setBarcode("barcode12");
@@ -236,7 +224,6 @@ public class AggregationRepositoryTest {
     Product product13 = new Product();
     product13.setImageUrl("url13");
     product13.setName("product13");
-    product13.setActive(true);
     product13.setDescription("description13");
     product13.setAmount(testProduct13Amount);
     product13.setBarcode("barcode13");
@@ -245,7 +232,6 @@ public class AggregationRepositoryTest {
     Product product14 = new Product();
     product14.setImageUrl("url14");
     product14.setName("product14");
-    product14.setActive(true);
     product14.setDescription("description14");
     product14.setAmount(testProduct14Amount);
     product14.setBarcode("barcode14");
@@ -254,7 +240,6 @@ public class AggregationRepositoryTest {
     Product product15 = new Product();
     product15.setImageUrl("url15");
     product15.setName("product15");
-    product15.setActive(true);
     product15.setDescription("description15");
     product15.setAmount(testProduct15Amount);
     product15.setBarcode("barcode15");
@@ -263,7 +248,6 @@ public class AggregationRepositoryTest {
     Product product16 = new Product();
     product16.setImageUrl("url16");
     product16.setName("product16");
-    product16.setActive(true);
     product16.setDescription("description16");
     product16.setAmount(testProduct16Amount);
     product16.setBarcode("barcode16");
@@ -272,7 +256,6 @@ public class AggregationRepositoryTest {
     Product product17 = new Product();
     product17.setImageUrl("url17");
     product17.setName("product17");
-    product17.setActive(true);
     product17.setDescription("description17");
     product17.setAmount(testProduct17Amount);
     product17.setBarcode("barcode17");

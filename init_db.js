@@ -136,7 +136,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "isActive", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -177,10 +177,6 @@ db.createCollection("products", {
                 "shopId": {
                     "bsonType": "objectId",
                     "description": "shopId is required and must be objectId"
-                },
-                "isActive": {
-                    "bsonType": "bool",
-                    "description": "isActive is required and must be bool"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -462,6 +458,34 @@ db.createCollection("promotions", {
             }
         }
     }
+});
+db.createCollection("blocked", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "expiredAt", "productId", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "productId": {
+                    "bsonType": "objectId",
+                    "description": "productId is required and must be objectId"
+                },
+                "expiredAt": {
+                    "bsonType": "date",
+                    "description": "expiredAt is required and must be date"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
 })
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
@@ -474,3 +498,4 @@ db.shops.createIndex({"accountNumber": 1}, {"unique": true});
 db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"});
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
+db.blocked.createIndex({"productId": 1}, {"unique": true});

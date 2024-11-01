@@ -112,7 +112,6 @@ public class ProductServiceTest {
     productWithCategories.setBarcode(addProductDTO.getBarcode());
     productWithCategories.setDescription(addProductDTO.getDescription());
     productWithCategories.setCategories(categories);
-    productWithCategories.setActive(true);
     productWithCategories.setShopId(ownerId);
     productWithCategories.setImageUrl("");
     Product productWithId = new Product();
@@ -122,7 +121,6 @@ public class ProductServiceTest {
     productWithId.setDescription(addProductDTO.getDescription());
     productWithId.setCategories(categories);
     productWithId.setId(productId);
-    productWithId.setActive(true);
     productWithId.setShopId(ownerId);
     productWithId.setImageUrl("");
     Product expectedProduct = new Product();
@@ -134,7 +132,6 @@ public class ProductServiceTest {
     expectedProduct.setId(productId);
     expectedProduct.setImageUrl(imageUrl);
     expectedProduct.setId(productId);
-    expectedProduct.setActive(true);
     expectedProduct.setShopId(ownerId);
     expectedProduct.setImageUrl("");
 
@@ -206,7 +203,6 @@ public class ProductServiceTest {
     final String countField = "count";
     List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
     Product product1 = new Product();
-    product1.setActive(true);
     product1.setImageUrl("url1");
     product1.setBarcode("barcode1");
     product1.setDescription("description1");
@@ -216,7 +212,6 @@ public class ProductServiceTest {
     product1.setCategories(categories);
     product1.setAmount(testAmountProduct1);
     Product product2 = new Product();
-    product2.setActive(true);
     product2.setAmount(testAmountProduct2);
     product2.setDescription("description2");
     product2.setBarcode("barcode2");

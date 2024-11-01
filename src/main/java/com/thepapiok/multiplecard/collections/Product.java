@@ -17,5 +17,4 @@ public class Product {
   private List<ObjectId> categories;
   private int amount;
   private ObjectId shopId;
-  private boolean isActive;
 }

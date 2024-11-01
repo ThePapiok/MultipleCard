@@ -36,7 +36,6 @@ public class ProductRepositoryTest {
     mongoTemplate.save(category);
     Product product = new Product();
     product.setShopId(shopId);
-    product.setActive(true);
     product.setImageUrl("url");
     product.setName("name");
     product.setBarcode("barcode");

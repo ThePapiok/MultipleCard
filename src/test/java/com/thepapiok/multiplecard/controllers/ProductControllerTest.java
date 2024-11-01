@@ -237,7 +237,6 @@ public class ProductControllerTest {
     LocalDate startAt = LocalDate.of(testYearStartAt, testMonthStartAt, testDayStartAt);
     LocalDate expiredAt = LocalDate.of(testYearExpiredAt, testMonthExpiredAt, testDayExpiredAt);
     testProduct1 = new Product();
-    testProduct1.setActive(true);
     testProduct1.setImageUrl("url1");
     testProduct1.setBarcode("barcode1");
     testProduct1.setDescription("description1");
@@ -247,7 +246,6 @@ public class ProductControllerTest {
     testProduct1.setCategories(categories);
     testProduct1.setAmount(testAmount);
     testProduct2 = new Product();
-    testProduct2.setActive(true);
     testProduct2.setAmount(testOtherAmount);
     testProduct2.setDescription("description2");
     testProduct2.setBarcode("barcode2");

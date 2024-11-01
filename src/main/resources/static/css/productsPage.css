@@ -55,10 +55,6 @@
     background-color: #f7f7f7;
 }
 
-.result[data-active="false"] {
-    opacity: 40%;
-}
-
 .date {
     font-family: "Inter", sans-serif;
 }
@@ -82,7 +78,7 @@
     width: 100%;
 }
 
-#delete {
+.confirmation {
     transform: translateX(-325px);
 }
 
