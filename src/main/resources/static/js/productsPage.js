@@ -182,3 +182,7 @@ function unblockProduct(productId) {
         console.error(error);
     });
 }
+
+function productInfo(productId) {
+    window.location.href = "/products?id=" + productId;
+}

@@ -1,0 +1,42 @@
+#titleUploadImage {
+    font-size: 25px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    color: gray;
+}
+
+#uploadFile {
+    width: 30%;
+    height: 440px;
+    background-color: white;
+    border: 1px solid #767676;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#noImage {
+    top: auto;
+}
+
+#image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: auto;
+}
+
+#errorFile {
+    color: #FF5A5F;
+    font-family: "Inter", sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+@media only screen and (max-width: 768px) {
+    #uploadFile {
+        width: 100%;
+        height: 300px;
+    }
+}

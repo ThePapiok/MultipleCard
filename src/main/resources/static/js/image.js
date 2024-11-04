@@ -1,10 +1,13 @@
-function setImage(e, type, index) {
+function setImage(e, type, index, isEdit) {
     let upload = document.getElementById("noImage");
     let image = e.files[0];
     let message;
     let error = false;
     const reader = new FileReader();
     const imagePreview = document.getElementById('image');
+    if (isEdit) {
+        previous[index - 1] = false;
+    }
     if (image == null) {
         error = true;
         message = "";

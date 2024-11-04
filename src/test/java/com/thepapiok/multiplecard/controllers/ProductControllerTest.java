@@ -56,7 +56,8 @@ public class ProductControllerTest {
   private static final String TEST_CATEGORY1_NAME = "Kategoria";
   private static final String TEST_CATEGORY2_NAME = "Kateegoria";
   private static final String TEST_CATEGORY3_NAME = "Kateeegoria";
-  private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
+  private static final String TEST_ID = "123456789012345678901234";
+  private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String ERROR_PARAM = "error";
@@ -253,6 +254,37 @@ public class ProductControllerTest {
     assertNull(httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
   }
 
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductsAtProductsPageWithIdParamWhenNotProductOwner()
+      throws Exception {
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(false);
+
+    mockMvc
+        .perform(get(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
+        .andExpect(redirectedUrl(PRODUCTS_URL));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldReturnProductPageAtProductsPageWithIdParamWhenEverythingOk() throws Exception {
+    final String productCategory = "food4";
+    List<String> allCategories = List.of("food1", "food2", "food3", productCategory);
+    Product product = new Product();
+
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.getProductById(TEST_ID)).thenReturn(product);
+    when(categoryService.getAllNames()).thenReturn(allCategories);
+    when(productService.getCategoriesNames(product)).thenReturn(List.of(productCategory));
+
+    mockMvc
+        .perform(get(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
+        .andExpect(model().attribute(CATEGORIES_PARAM, allCategories))
+        .andExpect(model().attribute("product", product))
+        .andExpect(model().attribute("productCategories", List.of(productCategory)))
+        .andExpect(view().name("productPage"));
+  }
+
   private void setDataForProductsPage() {
     final ObjectId productId1 = new ObjectId("123456789012345678904312");
     final ObjectId productId2 = new ObjectId("023456589012345178904387");
@@ -273,7 +305,7 @@ public class ProductControllerTest {
     testProduct1.setBarcode("barcode1");
     testProduct1.setDescription("description1");
     testProduct1.setName("name1");
-    testProduct1.setShopId(TEST_ID);
+    testProduct1.setShopId(TEST_OBJECT_ID);
     testProduct1.setId(productId1);
     testProduct1.setCategories(categories);
     testProduct1.setAmount(testAmount);
@@ -281,7 +313,7 @@ public class ProductControllerTest {
     testProduct2.setAmount(testOtherAmount);
     testProduct2.setDescription("description2");
     testProduct2.setBarcode("barcode2");
-    testProduct2.setShopId(TEST_ID);
+    testProduct2.setShopId(TEST_OBJECT_ID);
     testProduct2.setImageUrl("url2");
     testProduct2.setName("name2");
     testProduct2.setCategories(categories);
@@ -408,7 +440,7 @@ public class ProductControllerTest {
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME, "Kateeeegoria"));
     List<String> categories = addProductDTO.getCategory();
     Account account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_OBJECT_ID);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
 
@@ -469,7 +501,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(true);
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
@@ -486,9 +518,9 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
         .thenReturn(true);
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
@@ -505,11 +537,11 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
         .thenReturn(true);
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
@@ -534,13 +566,14 @@ public class ProductControllerTest {
     expectedAddProductDTO.setFile(multipartFile);
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
         .thenReturn(false);
-    when(productService.addProduct(expectedAddProductDTO, TEST_ID, addProductDTO.getCategory()))
+    when(productService.addProduct(
+            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
 
     performPostAddProduct(addProductDTO, httpSession, "/products?error", multipartFile);
@@ -563,13 +596,14 @@ public class ProductControllerTest {
     expectedAddProductDTO.setFile(multipartFile);
 
     when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_ID, addProductDTO.getCategory()))
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_ID, addProductDTO.getName()))
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
         .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_ID, addProductDTO.getBarcode()))
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
         .thenReturn(false);
-    when(productService.addProduct(expectedAddProductDTO, TEST_ID, addProductDTO.getCategory()))
+    when(productService.addProduct(
+            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(true);
 
     performPostAddProduct(addProductDTO, httpSession, "/products?success", multipartFile);
@@ -596,7 +630,7 @@ public class ProductControllerTest {
       throws Exception {
     List<String> categories = addProductDTO.getCategory();
     Account account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_OBJECT_ID);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
 
@@ -618,122 +652,122 @@ public class ProductControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtDeleteProductWhenIsNotOwner() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.deleteProduct(TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtDeleteProductWhenEverythingOk() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID.toString())).thenReturn(true);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.deleteProduct(TEST_ID)).thenReturn(true);
 
     mockMvc
-        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(SUCCESS_OK_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtBlockProductWhenIsNotOwner() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtBlockProductWhenHasBlockAlready() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(true);
 
     mockMvc
-        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string("Ten produkt już jest zablokowany"));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtBlockProductWhenErrorAtBlockProduct() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
-    when(productService.blockProduct(TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(false);
+    when(productService.blockProduct(TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtBlockProductWhenEverythingOk() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
-    when(productService.blockProduct(TEST_ID.toString())).thenReturn(true);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(false);
+    when(productService.blockProduct(TEST_ID)).thenReturn(true);
 
     mockMvc
-        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(BLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(SUCCESS_OK_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtUnblockProductWhenIsNotOwner() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtUnblockProductWhenHasNotBlock() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string("Ten produkt nie jest zablokowany"));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnErrorMessageAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
-    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(false);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID)).thenReturn(false);
 
     mockMvc
-        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtBlockProductWhenErrorAtUnblockProduct() throws Exception {
-    when(productService.isProductOwner(TEST_PHONE, TEST_ID.toString())).thenReturn(true);
-    when(productService.hasBlock(TEST_ID.toString())).thenReturn(true);
-    when(productService.unblockProduct(TEST_ID.toString())).thenReturn(true);
+    when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
+    when(productService.hasBlock(TEST_ID)).thenReturn(true);
+    when(productService.unblockProduct(TEST_ID)).thenReturn(true);
 
     mockMvc
-        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID.toHexString()))
+        .perform(post(UNBLOCK_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(SUCCESS_OK_MESSAGE));
   }
 }

@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
@@ -37,6 +38,7 @@ public class ProductController {
   private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String SUCCESS_OK_MESSAGE = "ok";
+  private static final String CATEGORIES_PARAM = "categories";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -64,6 +66,7 @@ public class ProductController {
   public String productsPage(
       @RequestParam(required = false) String error,
       @RequestParam(required = false) String success,
+      @RequestParam(required = false) String id,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "count") String field,
       @RequestParam(defaultValue = "true") Boolean isDescending,
@@ -86,38 +89,49 @@ public class ProductController {
         httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
       }
     }
-    List<ProductGetDTO> products =
-        productService.getProductsOwner(phone, page, field, isDescending, text);
-    List<Promotion> promotions =
-        products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
-    List<PromotionGetDTO> promotionGetDTOS = null;
-    if (promotions.size() != 0) {
-      promotionGetDTOS =
-          promotions.stream()
-              .map(
-                  e ->
-                      new PromotionGetDTO(
-                          e.getProductId().toString(),
-                          e.getStartAt(),
-                          e.getExpiredAt(),
-                          e.getAmount(),
-                          e.getCount()))
-              .toList();
+    if (id == null) {
+      List<ProductGetDTO> products =
+          productService.getProductsOwner(phone, page, field, isDescending, text);
+      List<Promotion> promotions =
+          products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
+      List<PromotionGetDTO> promotionGetDTOS = null;
+      if (promotions.size() != 0) {
+        promotionGetDTOS =
+            promotions.stream()
+                .map(
+                    e ->
+                        new PromotionGetDTO(
+                            e.getProductId().toString(),
+                            e.getStartAt(),
+                            e.getExpiredAt(),
+                            e.getAmount(),
+                            e.getCount()))
+                .toList();
+      }
+      maxPage = productService.getMaxPage(text, phone);
+      model.addAttribute("field", field);
+      model.addAttribute("isDescending", isDescending);
+      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+      model.addAttribute("pageSelected", page + 1);
+      model.addAttribute(
+          "products",
+          products.stream()
+              .map(e -> new ProductDTO(e.getBlocked() == null, e.getProduct()))
+              .toList());
+      model.addAttribute("promotions", promotionGetDTOS);
+      model.addAttribute("productsSize", products.size());
+      model.addAttribute("maxPage", maxPage);
+      return "productsPage";
+    } else {
+      if (!productService.isProductOwner(principal.getName(), id)) {
+        return "redirect:/products";
+      }
+      Product product = productService.getProductById(id);
+      model.addAttribute(CATEGORIES_PARAM, categoryService.getAllNames());
+      model.addAttribute("productCategories", productService.getCategoriesNames(product));
+      model.addAttribute("product", product);
+      return "productPage";
     }
-    maxPage = productService.getMaxPage(text, phone);
-    model.addAttribute("field", field);
-    model.addAttribute("isDescending", isDescending);
-    model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
-    model.addAttribute("pageSelected", page + 1);
-    model.addAttribute(
-        "products",
-        products.stream()
-            .map(e -> new ProductDTO(e.getBlocked() == null, e.getProduct()))
-            .toList());
-    model.addAttribute("promotions", promotionGetDTOS);
-    model.addAttribute("productsSize", products.size());
-    model.addAttribute("maxPage", maxPage);
-    return "productsPage";
   }
 
   @GetMapping("/add_product")
@@ -130,7 +144,7 @@ public class ProductController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
-    model.addAttribute("categories", categoryService.getAllNames());
+    model.addAttribute(CATEGORIES_PARAM, categoryService.getAllNames());
     model.addAttribute("addProduct", new AddProductDTO());
     return "addProductPage";
   }

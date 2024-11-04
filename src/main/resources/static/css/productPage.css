@@ -1,0 +1,11 @@
+#inputEdit {
+    justify-content: flex-start;
+}
+
+#inputEdit {
+    width: 100%;
+}
+
+#validationAmount, #validationDescription, #validationCategory, #validationTypedCategory {
+    transform: translateX(-100%);
+}

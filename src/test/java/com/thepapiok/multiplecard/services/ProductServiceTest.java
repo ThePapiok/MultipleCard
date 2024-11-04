@@ -25,6 +25,7 @@ import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class ProductServiceTest {
   @Mock private PromotionService promotionService;
   @Mock private OrderRepository orderRepository;
   @Mock private BlockedRepository blockedRepository;
+  @Mock private CategoryRepository categoryRepository;
 
   @BeforeEach
   public void setUp() {
@@ -77,7 +79,8 @@ public class ProductServiceTest {
             aggregationRepository,
             promotionService,
             orderRepository,
-            blockedRepository);
+            blockedRepository,
+            categoryRepository);
   }
 
   @Test
@@ -496,5 +499,53 @@ public class ProductServiceTest {
 
     assertFalse(productService.unblockProduct(TEST_ID));
     verify(blockedRepository).delete(expectedBlocked);
+  }
+
+  @Test
+  public void shouldReturnProductAtGetProductByIdWhenEverythingOk() {
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertEquals(product, productService.getProductById(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnNullAtGetProductByIdWhenNotFoundProduct() {
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.empty());
+
+    assertNull(productService.getProductById(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnListOfStringAtGetCategoriesNamesWhenEverythingOk() {
+    final ObjectId categoryId1 = new ObjectId("925158789012345678904321");
+    final ObjectId categoryId2 = new ObjectId("225158789012345678904321");
+    final ObjectId categoryId3 = new ObjectId("725158789012345678904321");
+    final ObjectId categoryId4 = new ObjectId("825158789012345678904321");
+    final String categoryName1 = "categoryName1";
+    final String categoryName2 = "categoryName2";
+    final String categoryName3 = "categoryName3";
+    Category category1 = new Category();
+    category1.setName(categoryName1);
+    category1.setId(categoryId1);
+    Category category2 = new Category();
+    category2.setName(categoryName2);
+    category2.setId(categoryId2);
+    Category category3 = new Category();
+    category3.setName(categoryName3);
+    category3.setId(categoryId3);
+    List<ObjectId> objectIds = List.of(categoryId1, categoryId2, categoryId3, categoryId4);
+    Product product = new Product();
+    product.setCategories(objectIds);
+    List<String> expectedNames = List.of(categoryName1, categoryName2, categoryName3);
+
+    when(categoryRepository.findById(categoryId1)).thenReturn(Optional.of(category1));
+    when(categoryRepository.findById(categoryId2)).thenReturn(Optional.of(category2));
+    when(categoryRepository.findById(categoryId3)).thenReturn(Optional.of(category3));
+    when(categoryRepository.findById(categoryId4)).thenReturn(Optional.empty());
+
+    assertEquals(expectedNames, productService.getCategoriesNames(product));
   }
 }

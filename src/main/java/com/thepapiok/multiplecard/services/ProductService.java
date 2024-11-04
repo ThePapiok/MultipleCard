@@ -14,6 +14,7 @@ import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class ProductService {
   private final PromotionService promotionService;
   private final OrderRepository orderRepository;
   private final BlockedRepository blockedRepository;
+  private final CategoryRepository categoryRepository;
 
   @Autowired
   public ProductService(
@@ -63,7 +65,8 @@ public class ProductService {
       AggregationRepository aggregationRepository,
       PromotionService promotionService,
       OrderRepository orderRepository,
-      BlockedRepository blockedRepository) {
+      BlockedRepository blockedRepository,
+      CategoryRepository categoryRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -75,6 +78,7 @@ public class ProductService {
     this.promotionService = promotionService;
     this.orderRepository = orderRepository;
     this.blockedRepository = blockedRepository;
+    this.categoryRepository = categoryRepository;
   }
 
   public boolean addProduct(
@@ -159,6 +163,7 @@ public class ProductService {
     if (product.isEmpty()) {
       return null;
     }
+
     return (product.get().getAmount() / centsPerZl);
   }
 
@@ -221,5 +226,25 @@ public class ProductService {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  public Product getProductById(String id) {
+    Optional<Product> optionalProduct = productRepository.findById(new ObjectId(id));
+    if (optionalProduct.isEmpty()) {
+      return null;
+    }
+    return optionalProduct.get();
+  }
+
+  public List<String> getCategoriesNames(Product product) {
+    Optional<Category> optionalCategory;
+    List<String> names = new ArrayList<>();
+    for (ObjectId categoryId : product.getCategories()) {
+      optionalCategory = categoryRepository.findById(categoryId);
+      if (optionalCategory.isPresent()) {
+        names.add(optionalCategory.get().getName());
+      }
+    }
+    return names;
   }
 }

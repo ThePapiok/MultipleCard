@@ -15,4 +15,5 @@ function unfocusedAmount(e) {
             e.value += "zł";
         }
     }
+    checkAmount(e);
 }
