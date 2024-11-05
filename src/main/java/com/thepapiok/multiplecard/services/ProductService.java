@@ -9,11 +9,13 @@ import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
@@ -50,6 +53,7 @@ public class ProductService {
   private final PromotionService promotionService;
   private final OrderRepository orderRepository;
   private final BlockedRepository blockedRepository;
+  private final CategoryRepository categoryRepository;
 
   @Autowired
   public ProductService(
@@ -63,7 +67,8 @@ public class ProductService {
       AggregationRepository aggregationRepository,
       PromotionService promotionService,
       OrderRepository orderRepository,
-      BlockedRepository blockedRepository) {
+      BlockedRepository blockedRepository,
+      CategoryRepository categoryRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -75,6 +80,7 @@ public class ProductService {
     this.promotionService = promotionService;
     this.orderRepository = orderRepository;
     this.blockedRepository = blockedRepository;
+    this.categoryRepository = categoryRepository;
   }
 
   public boolean addProduct(
@@ -85,22 +91,10 @@ public class ProductService {
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-              List<ObjectId> categories = new ArrayList<>();
               Product product = productConverter.getEntity(addProductDTO);
               product.setShopId(ownerId);
               product.setImageUrl("");
-              for (String name : nameOfCategories) {
-                ObjectId id = categoryService.getCategoryIdByName(name);
-                if (id == null) {
-                  Category category = new Category();
-                  category.setName(name);
-                  category.setOwnerId(ownerId);
-                  categories.add(mongoTemplate.save(category).getId());
-                } else {
-                  categories.add(id);
-                }
-              }
-              product.setCategories(categories);
+              product.setCategories(setCategories(nameOfCategories, ownerId));
               product = mongoTemplate.save(product);
               try {
                 product.setImageUrl(
@@ -159,6 +153,7 @@ public class ProductService {
     if (product.isEmpty()) {
       return null;
     }
+
     return (product.get().getAmount() / centsPerZl);
   }
 
@@ -221,5 +216,73 @@ public class ProductService {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  public Product getProductById(String id) {
+    Optional<Product> optionalProduct = productRepository.findById(new ObjectId(id));
+    if (optionalProduct.isEmpty()) {
+      return null;
+    }
+    return optionalProduct.get();
+  }
+
+  public List<String> getCategoriesNames(Product product) {
+    Optional<Category> optionalCategory;
+    List<String> names = new ArrayList<>();
+    for (ObjectId categoryId : product.getCategories()) {
+      optionalCategory = categoryRepository.findById(categoryId);
+      if (optionalCategory.isPresent()) {
+        names.add(optionalCategory.get().getName());
+      }
+    }
+    return names;
+  }
+
+  public EditProductDTO getEditProductDTO(Product product) {
+    return productConverter.getDTO(product);
+  }
+
+  public boolean editProduct(
+      EditProductDTO editProduct, ObjectId ownerId, List<String> nameOfCategories) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              final MultipartFile file = editProduct.getFile();
+              Product product = productConverter.getEntity(editProduct);
+              product.setCategories(setCategories(nameOfCategories, ownerId));
+              if (file != null) {
+                try {
+                  product.setImageUrl(
+                      cloudinaryService.addImage(file.getBytes(), product.getId().toHexString()));
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+              mongoTemplate.save(product);
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  private List<ObjectId> setCategories(List<String> nameOfCategories, ObjectId ownerId) {
+    List<ObjectId> categories = new ArrayList<>();
+    for (String name : nameOfCategories) {
+      ObjectId id = categoryService.getCategoryIdByName(name);
+      if (id == null) {
+        Category category = new Category();
+        category.setName(name);
+        category.setOwnerId(ownerId);
+        categories.add(mongoTemplate.save(category).getId());
+      } else {
+        categories.add(id);
+      }
+    }
+    return categories;
   }
 }

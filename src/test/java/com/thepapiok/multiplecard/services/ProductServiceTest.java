@@ -20,11 +20,13 @@ import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
@@ -40,6 +42,7 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class ProductServiceTest {
   private static final String TEST_ID = "103451789009876547211492";
@@ -47,7 +50,20 @@ public class ProductServiceTest {
   private static final String TEST_PRODUCT_NAME = "name";
   private static final String TEST_BARCODE = "12345678901234567890123";
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123451789012345678901234");
+  private static final ObjectId TEST_CATEGORY_ID1 = new ObjectId("123456789009876544215678");
+  private static final ObjectId TEST_CATEGORY_ID2 = new ObjectId("921456789019876524215678");
+  private static final ObjectId TEST_CATEGORY_ID3 = new ObjectId("752145671905987654421528");
   private static final String TEST_PHONE = "+482314123412341423";
+  private static final String TEST_CATEGORY_NAME1 = "category1";
+  private static final String TEST_CATEGORY_NAME2 = "category2";
+  private static final String TEST_CATEGORY_NAME3 = "category3";
+  private static final String TEST_URL = "url";
+  private static Category testCategory;
+  private static Category testExpectedCategory;
+  private static List<String> testNameOfCategories;
+  private static Product testProduct;
+  private static Product testExpectedProduct;
+  private static EditProductDTO testEditProductDTO;
   private ProductService productService;
 
   @Mock private CategoryService categoryService;
@@ -61,6 +77,7 @@ public class ProductServiceTest {
   @Mock private PromotionService promotionService;
   @Mock private OrderRepository orderRepository;
   @Mock private BlockedRepository blockedRepository;
+  @Mock private CategoryRepository categoryRepository;
 
   @BeforeEach
   public void setUp() {
@@ -77,20 +94,19 @@ public class ProductServiceTest {
             aggregationRepository,
             promotionService,
             orderRepository,
-            blockedRepository);
+            blockedRepository,
+            categoryRepository);
+    setDataForEditProduct();
   }
 
   @Test
   public void shouldReturnTrueAtAddProductWhenEverythingOk() throws IOException {
     final int cents = 1123;
-    final String firstCategoryName = "category1";
-    final String secondCategoryName = "category2";
-    final String imageUrl = "url";
     final ObjectId categoryId = new ObjectId("123456789012345678901234");
     final ObjectId categoryOtherId = new ObjectId("223456789012345678901235");
     final ObjectId ownerId = new ObjectId("123456789012345678901235");
     final ObjectId productId = new ObjectId("123456789012345678901211");
-    List<String> categoryNames = List.of(firstCategoryName, secondCategoryName);
+    List<String> categoryNames = List.of(TEST_CATEGORY_NAME1, TEST_CATEGORY_NAME2);
     List<ObjectId> categories = List.of(categoryId, categoryOtherId);
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
@@ -106,10 +122,10 @@ public class ProductServiceTest {
     productAfterConverter.setDescription(addProductDTO.getDescription());
     Category category = new Category();
     category.setOwnerId(ownerId);
-    category.setName(secondCategoryName);
+    category.setName(TEST_CATEGORY_NAME2);
     Category expectedCategory = new Category();
     expectedCategory.setOwnerId(ownerId);
-    expectedCategory.setName(secondCategoryName);
+    expectedCategory.setName(TEST_CATEGORY_NAME2);
     expectedCategory.setId(categoryOtherId);
     Product productWithCategories = new Product();
     productWithCategories.setName(addProductDTO.getName());
@@ -135,18 +151,18 @@ public class ProductServiceTest {
     expectedProduct.setDescription(addProductDTO.getDescription());
     expectedProduct.setCategories(categories);
     expectedProduct.setId(productId);
-    expectedProduct.setImageUrl(imageUrl);
+    expectedProduct.setImageUrl(TEST_URL);
     expectedProduct.setId(productId);
     expectedProduct.setShopId(ownerId);
     expectedProduct.setImageUrl("");
 
     when(productConverter.getEntity(addProductDTO)).thenReturn(productAfterConverter);
-    when(categoryService.getCategoryIdByName(firstCategoryName)).thenReturn(categoryId);
-    when(categoryService.getCategoryIdByName(secondCategoryName)).thenReturn(null);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME1)).thenReturn(categoryId);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME2)).thenReturn(null);
     when(mongoTemplate.save(category)).thenReturn(expectedCategory);
     when(mongoTemplate.save(productWithCategories)).thenReturn(productWithId);
     when(cloudinaryService.addImage(addProductDTO.getFile().getBytes(), productId.toHexString()))
-        .thenReturn(imageUrl);
+        .thenReturn(TEST_URL);
 
     assertTrue(productService.addProduct(addProductDTO, ownerId, categoryNames));
   }
@@ -496,5 +512,142 @@ public class ProductServiceTest {
 
     assertFalse(productService.unblockProduct(TEST_ID));
     verify(blockedRepository).delete(expectedBlocked);
+  }
+
+  @Test
+  public void shouldReturnProductAtGetProductByIdWhenEverythingOk() {
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertEquals(product, productService.getProductById(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnNullAtGetProductByIdWhenNotFoundProduct() {
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.empty());
+
+    assertNull(productService.getProductById(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnListOfStringAtGetCategoriesNamesWhenEverythingOk() {
+    final ObjectId categoryId1 = new ObjectId("925158789012345678904321");
+    final ObjectId categoryId2 = new ObjectId("225158789012345678904321");
+    final ObjectId categoryId3 = new ObjectId("725158789012345678904321");
+    final ObjectId categoryId4 = new ObjectId("825158789012345678904321");
+    final String categoryName1 = "categoryName1";
+    final String categoryName2 = "categoryName2";
+    final String categoryName3 = "categoryName3";
+    Category category1 = new Category();
+    category1.setName(categoryName1);
+    category1.setId(categoryId1);
+    Category category2 = new Category();
+    category2.setName(categoryName2);
+    category2.setId(categoryId2);
+    Category category3 = new Category();
+    category3.setName(categoryName3);
+    category3.setId(categoryId3);
+    List<ObjectId> objectIds = List.of(categoryId1, categoryId2, categoryId3, categoryId4);
+    Product product = new Product();
+    product.setCategories(objectIds);
+    List<String> expectedNames = List.of(categoryName1, categoryName2, categoryName3);
+
+    when(categoryRepository.findById(categoryId1)).thenReturn(Optional.of(category1));
+    when(categoryRepository.findById(categoryId2)).thenReturn(Optional.of(category2));
+    when(categoryRepository.findById(categoryId3)).thenReturn(Optional.of(category3));
+    when(categoryRepository.findById(categoryId4)).thenReturn(Optional.empty());
+
+    assertEquals(expectedNames, productService.getCategoriesNames(product));
+  }
+
+  @Test
+  public void shouldReturnEditProductDTOAtGetEditProductDTOWhenEverythingOk() {
+    Product product = new Product();
+    product.setName(TEST_PRODUCT_NAME);
+    product.setBarcode(TEST_BARCODE);
+    product.setId(TEST_PRODUCT_ID);
+    EditProductDTO editProductDTO = new EditProductDTO();
+    editProductDTO.setName(TEST_PRODUCT_NAME);
+    editProductDTO.setBarcode(TEST_BARCODE);
+    editProductDTO.setId(TEST_ID);
+
+    when(productConverter.getDTO(product)).thenReturn(editProductDTO);
+
+    assertEquals(editProductDTO, productService.getEditProductDTO(product));
+  }
+
+  @Test
+  public void shouldReturnTrueAtEditProductWhenFileIsNull() {
+    assertTrue(productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
+    verify(mongoTemplate).save(testExpectedProduct);
+  }
+
+  @Test
+  public void shouldReturnTrueAtEditProductWhenHasFile() {
+    final String testNewUrl = "newUrl";
+    final byte[] bytes = new byte[0];
+    final MultipartFile multipartFile = new MockMultipartFile("file1", bytes);
+    EditProductDTO editProductDTO = new EditProductDTO();
+    editProductDTO.setName(TEST_PRODUCT_NAME);
+    editProductDTO.setBarcode(TEST_BARCODE);
+    editProductDTO.setId(TEST_ID);
+    editProductDTO.setCategory(testNameOfCategories);
+    editProductDTO.setFile(multipartFile);
+    Product expectedProduct = new Product();
+    expectedProduct.setName(TEST_PRODUCT_NAME);
+    expectedProduct.setBarcode(TEST_BARCODE);
+    expectedProduct.setId(TEST_PRODUCT_ID);
+    expectedProduct.setImageUrl(testNewUrl);
+    expectedProduct.setCategories(List.of(TEST_CATEGORY_ID1, TEST_CATEGORY_ID2, TEST_CATEGORY_ID3));
+
+    when(productConverter.getEntity(editProductDTO)).thenReturn(testProduct);
+    when(cloudinaryService.addImage(bytes, TEST_ID)).thenReturn(testNewUrl);
+
+    assertTrue(productService.editProduct(editProductDTO, TEST_OWNER_ID, testNameOfCategories));
+    verify(mongoTemplate).save(expectedProduct);
+  }
+
+  @Test
+  public void shouldReturnFalseAtEditProductWhenGetException() {
+    when(mongoTemplate.save(testProduct)).thenThrow(MongoWriteException.class);
+
+    assertFalse(
+        productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
+  }
+
+  private void setDataForEditProduct() {
+    testCategory = new Category();
+    testCategory.setName(TEST_CATEGORY_NAME3);
+    testCategory.setOwnerId(TEST_OWNER_ID);
+    testExpectedCategory = new Category();
+    testExpectedCategory.setId(TEST_CATEGORY_ID3);
+    testExpectedCategory.setName(TEST_CATEGORY_NAME3);
+    testExpectedCategory.setOwnerId(TEST_OWNER_ID);
+    testNameOfCategories = List.of(TEST_CATEGORY_NAME1, TEST_CATEGORY_NAME2, TEST_CATEGORY_NAME3);
+    testProduct = new Product();
+    testProduct.setName(TEST_PRODUCT_NAME);
+    testProduct.setBarcode(TEST_BARCODE);
+    testProduct.setId(TEST_PRODUCT_ID);
+    testProduct.setImageUrl(TEST_URL);
+    testEditProductDTO = new EditProductDTO();
+    testEditProductDTO.setName(TEST_PRODUCT_NAME);
+    testEditProductDTO.setBarcode(TEST_BARCODE);
+    testEditProductDTO.setId(TEST_ID);
+    testEditProductDTO.setCategory(testNameOfCategories);
+    testExpectedProduct = new Product();
+    testExpectedProduct.setName(TEST_PRODUCT_NAME);
+    testExpectedProduct.setBarcode(TEST_BARCODE);
+    testExpectedProduct.setId(TEST_PRODUCT_ID);
+    testExpectedProduct.setImageUrl(TEST_URL);
+    testExpectedProduct.setCategories(
+        List.of(TEST_CATEGORY_ID1, TEST_CATEGORY_ID2, TEST_CATEGORY_ID3));
+
+    when(productConverter.getEntity(testEditProductDTO)).thenReturn(testProduct);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME1)).thenReturn(TEST_CATEGORY_ID1);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME2)).thenReturn(TEST_CATEGORY_ID2);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME3)).thenReturn(null);
+    when(mongoTemplate.save(testCategory)).thenReturn(testExpectedCategory);
   }
 }

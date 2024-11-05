@@ -49,7 +49,7 @@
     <div id="allResults">
         <div id="results">
             <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}"
-                 th:data-is-active="${product.active}">
+                 th:data-is-active="${product.active}" th:attr="onclick=|productInfo('${product.product.id}')|">
                 <div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name" th:text="${product.product.name}"></span>
@@ -61,9 +61,6 @@
                         <a class="resultIcons" th:attr="onclick=|unblockProduct('${product.product.id}')|"
                            th:unless="${product.active}">
                             <img src="/images/unblock.png" alt="unblock">
-                        </a>
-                        <a th:href="@{'/edit_product?id=' + ${product.product.id}}" class="resultIcons">
-                            <img src="/images/edit.png" alt="edit">
                         </a>
                         <a th:href="@{'/promotions?id=' + ${product.product.id}}" class="resultIcons">
                             <img src="/images/discount.png" alt="discount" id="discountIcon">

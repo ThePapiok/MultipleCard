@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/profile.css">
     <link rel="stylesheet" href="/css/image.css">
-    <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="/css/categories.css">
-    <link rel="stylesheet" href="/css/addProductPage.css">
+    <link rel="stylesheet" href="/css/productPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/image.js"></script>
+<script src="/js/edit.js"></script>
 <script src="/js/amount.js"></script>
 <script src="/js/categories.js"></script>
-<script src="/js/addProductPage.js"></script>
+<script src="/js/productPage.js"></script>
+<script th:inline="javascript">
+    let categories = /*[[${productCategories}]]*/ [];
+</script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
@@ -28,20 +32,23 @@
     </a>
 </div>
 <div id="body">
-    <span hidden th:text="#{upload_image.bad_type}" id="textBadType"></span>
-    <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
-    <span hidden th:text="#{upload_image.too_small}" id="textTooSmall"></span>
     <span hidden th:text="#{category.not_selected}" id="textCategoryNotSelected"></span>
-    <p class="title" th:text="#{add_product.text}"></p>
-    <form th:action="@{/add_product}" th:object="${addProduct}" id="form" method="post" enctype="multipart/form-data">
+    <p class="title" th:text="#{productPage.title}"></p>
+    <form th:action="@{/products}" th:object="${product}" id="form" method="post" enctype="multipart/form-data">
+        <input hidden th:field="*{id}" th:value="*{id}">
         <div class="block-horizontally">
             <label id="Name">
-                <label class="inputs">
-                    <input th:field="*{name}" type="text" th:placeholder="#{product_name.text}" required
-                           oninput="checkProductName(this, 1)" minlength="2" maxlength="30"
-                           onmouseenter="showValidation(this, 'Name')" onmouseleave="hideValidation('Name')">
-                    <img id="close1" src="/images/close.png" alt="close">
-                    <img id="check1" hidden src="/images/check.png" alt="check">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{product_name.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{name}" type="text" required th:value="*{name}"
+                               oninput="checkName(this)" minlength="2" maxlength="30"
+                               onmouseenter="showValidation(this, 'Name')"
+                               onmouseleave="hideValidation('Name')">
+                        <img hidden id="close1" src="/images/close.png" alt="close">
+                        <img hidden id="check1" src="/images/check.png" alt="check">
+                    </label>
                 </label>
             </label>
             <div class="validation">
@@ -52,77 +59,42 @@
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 30'"></li>
                 </ul>
             </div>
-        </div>
-        <div class="block-horizontally">
-            <label id="Category">
-                <label class="inputs">
-                    <input id="categoryInput" type="text" th:placeholder="#{product_category.text}"
-                           oninput="checkCategory(this)"
-                           minlength="2" maxlength="15" onmouseenter="showValidation(this, 'Category')"
-                           onmouseleave="hideValidation('Category')" onclick="showOrHideCategory()">
-                    <img id="close2" src="/images/close.png" alt="close">
-                    <img id="check2" hidden src="/images/check.png" alt="check">
+            <label id="Barcode">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{product_barcode.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{barcode}" type="text" required th:value="*{barcode}"
+                               oninput="checkBarcode(this)" minlength="13" maxlength="13"
+                               onmouseenter="showValidation(this, 'Barcode')"
+                               onmouseleave="hideValidation('Barcode')">
+                        <img hidden id="close2" src="/images/close.png" alt="close">
+                        <img hidden id="check2" src="/images/check.png" alt="check">
+                    </label>
                 </label>
-                <div id="categories">
-                    <label class="inputs selectedCategory">
-                        <input hidden id="inputCategory1" type="text" name="category[0]">
-                        <input readonly id="category1" th:value="#{category.not_selected}">
-                        <img id="delete1" class="deleteCategory" src="/images/close.png" alt="close"
-                             onclick="deleteCategory(this)">
-                    </label>
-                    <label class="inputs selectedCategory">
-                        <input hidden id="inputCategory2" type="text" name="category[1]">
-                        <input readonly id="category2" th:value="#{category.not_selected}">
-                        <img id="delete2" class="deleteCategory" src="/images/close.png" alt="close"
-                             onclick="deleteCategory(this)">
-                    </label>
-                    <label class="inputs selectedCategory">
-                        <input hidden id="inputCategory3" type="text" name="category[2]">
-                        <input readonly id="category3" th:value="#{category.not_selected}">
-                        <img id="delete3" class="deleteCategory" src="/images/close.png" alt="close"
-                             onclick="deleteCategory(this)">
-                    </label>
-                </div>
-                <ul id="optionsCategory" class="optionsSelect">
-                    <div class="inputs">
-                        <li id="typedCategory" class="optionSelect optionCategory"
-                            onclick="setValueCategory(this, true, false)"
-                            onmouseenter="showValidation(this, 'validationCategory')"
-                            onmouseleave="hideValidation('validationCategory')"></li>
-                        <img id="closeTypedCategory" src="/images/close.png" alt="close">
-                        <img id="checkTypedCategory" hidden src="/images/check.png" alt="check">
-                    </div>
-                    <li class="optionSelect optionCategory" th:each="category : ${categories}"
-                        th:text="${category}"
-                        onclick="setValueCategory(this, false, false)"></li>
-                </ul>
             </label>
-            <div class="validation" id="validationCategory">
-                <span th:text="#{product_category.text} + ' ' + #{validation.text}"></span>
+            <div class="validation" id="validationBarcode">
+                <span th:text="#{product_barcode.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{addProductPage.category.validation1}"></li>
-                </ul>
-            </div>
-            <div class="validation">
-                <span th:text="#{product_category.text} + ' ' + #{validation.text}"></span>
-                <ul>
-                    <li th:text="#{validation.starts_uppercase}"></li>
-                    <li th:text="#{validation.only_letters}"></li>
-                    <li th:text="#{validation.max_2_parts}"></li>
-                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 15'"></li>
+                    <li th:text="#{validation.prefix_length_is} + ' 13'"></li>
+                    <li th:text="#{validation.only_digits}"></li>
                 </ul>
             </div>
         </div>
         <div class="block-horizontally">
             <label id="Amount">
-                <label class="inputs">
-                    <input th:field="*{amount}" type="text" th:placeholder="#{product_amount.text}" required
-                           oninput="checkAmount(this)"
-                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
-                           onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)"
-                           onfocus="focusedAmount(this)">
-                    <img id="close3" src="/images/close.png" alt="close">
-                    <img id="check3" hidden src="/images/check.png" alt="check">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{product_amount.text}">
+                    </label>
+                    <label class="inputs">
+                        <input th:field="*{amount}" type="text" required th:value="*{amount}"
+                               oninput="checkAmount(this)" minlength="2" maxlength="7"
+                               onmouseenter="showValidation(this, 'Amount')"
+                               onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)"
+                               onfocus="focusedAmount(this)">
+                        <img hidden id="close3" src="/images/close.png" alt="close">
+                        <img hidden id="check3" src="/images/check.png" alt="check">
+                    </label>
                 </label>
             </label>
             <div class="validation">
@@ -133,38 +105,81 @@
                     <li th:text="#{validation.only_digits}"></li>
                 </ul>
             </div>
-        </div>
-        <div class="block-horizontally">
-            <label id="Barcode">
+            <label id="Category">
                 <label class="inputs">
-                    <input th:field="*{barcode}" type="text" th:placeholder="#{product_barcode.text}" required
-                           oninput="checkBarcode(this, 4)" minlength="13" maxlength="13"
-                           onmouseenter="showValidation(this, 'Barcode')"
-                           onmouseleave="hideValidation('Barcode')">
-                    <img id="close4" src="/images/close.png" alt="close">
+                    <input id="categoryInput" type="text" th:placeholder="#{product_category.text}"
+                           oninput="checkCategory(this)"
+                           minlength="2" maxlength="15" onmouseenter="showValidation(this, 'Category')"
+                           onmouseleave="hideValidation('Category')" onclick="showOrHideCategory()">
+                    <img id="close4" hidden src="/images/close.png" alt="close">
                     <img id="check4" hidden src="/images/check.png" alt="check">
                 </label>
+                <div id="categories">
+                    <label class="inputs selectedCategory">
+                        <input hidden id="inputCategory1" type="text" name="category[0]">
+                        <input readonly id="category1" th:value="#{category.not_selected}">
+                        <img id="delete1" class="deleteCategory" src="/images/close.png" alt="close"
+                             onclick="deleteCategory(this, true)">
+                    </label>
+                    <label class="inputs selectedCategory">
+                        <input hidden id="inputCategory2" type="text" name="category[1]">
+                        <input readonly id="category2" th:value="#{category.not_selected}">
+                        <img id="delete2" class="deleteCategory" src="/images/close.png" alt="close"
+                             onclick="deleteCategory(this, true)">
+                    </label>
+                    <label class="inputs selectedCategory">
+                        <input hidden id="inputCategory3" type="text" name="category[2]">
+                        <input readonly id="category3" th:value="#{category.not_selected}">
+                        <img id="delete3" class="deleteCategory" src="/images/close.png" alt="close"
+                             onclick="deleteCategory(this, true)">
+                    </label>
+                </div>
+                <ul id="optionsCategory" class="optionsSelect">
+                    <div class="inputs">
+                        <li id="typedCategory" class="optionSelect optionCategory"
+                            onclick="setValueCategory(this, true, true)"
+                            onmouseenter="showValidation(this, 'validationCategory')"
+                            onmouseleave="hideValidation('validationCategory')"></li>
+                        <img id="closeTypedCategory" src="/images/close.png" alt="close">
+                        <img id="checkTypedCategory" hidden src="/images/check.png" alt="check">
+                    </div>
+                    <li class="optionSelect optionCategory" th:each="category : ${categories}"
+                        th:text="${category}"
+                        onclick="setValueCategory(this, false, true)"></li>
+                </ul>
             </label>
-            <div class="validation">
-                <span th:text="#{product_barcode.text} + ' ' + #{validation.text}"></span>
+            <div class="validation" id="validationCategory">
+                <span th:text="#{product_category.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{validation.prefix_length_is} + ' 13'"></li>
-                    <li th:text="#{validation.only_digits}"></li>
+                    <li th:text="#{addProductPage.category.validation1}"></li>
+                </ul>
+            </div>
+            <div class="validation" id="validationTypedCategory">
+                <span th:text="#{product_category.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.starts_uppercase}"></li>
+                    <li th:text="#{validation.only_letters}"></li>
+                    <li th:text="#{validation.max_2_parts}"></li>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 15'"></li>
                 </ul>
             </div>
         </div>
         <div class="block-horizontally" id="descriptionInput">
             <label id="Description">
-                <label class="inputs">
-                    <textarea th:field="*{description}" th:placeholder="#{product_description.text}" required
-                              oninput="checkDescription(this, 5)" minlength="5" maxlength="100"
-                              onmouseenter="showValidation(this, 'Description')"
-                              onmouseleave="hideValidation('Description')"></textarea>
-                    <img id="close5" src="/images/close.png" alt="close">
-                    <img id="check5" hidden src="/images/check.png" alt="check">
+                <label class="placeholderWithInput">
+                    <label class="placeholderInput" th:text="#{product_description.text}">
+                    </label>
+                    <label class="inputs">
+            <textarea id="inputEdit" th:field="*{description}" th:placeholder="#{product_description.text}" required
+                      oninput="checkDescription(this)" minlength="5" maxlength="100"
+                      onmouseenter="showValidation(this, 'Description')"
+                      onmouseleave="hideValidation('Description')"></textarea>
+                        <img hidden id="close5" src="/images/close.png" alt="close">
+                        <img hidden id="check5" src="/images/check.png" alt="check">
+                    </label>
                 </label>
             </label>
-            <div class="validation">
+            <div class="validation" id="validationDescription">
                 <span th:text="#{product_description.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length} + ' 5 ' + #{validation.suffix_length} + ' 100'"></li>
@@ -172,12 +187,12 @@
             </div>
         </div>
         <p th:text="#{product_image.text}" id="titleUploadImage"></p>
-        <label id="uploadFile">
-            <input th:field="*{file}" type="file" oninput="setImage(this, false, 6)" accept="image/png, image/jpeg"
-                   onmouseenter="showValidation(this, 'uploadFile')"
-                   onmouseleave="hideValidation('uploadFile')">
+        <label id="uploadFile" onmouseenter="showValidation(this, 'uploadFile')"
+               onmouseleave="hideValidation('uploadFile')">
+            <input th:field="*{file}" type="file" oninput="setImage(this, false, 7, true)"
+                   accept="image/png, image/jpeg">
             <img id="noImage" src="/images/upload.png" alt="upload">
-            <img id="image" src="/images/nothing.png" alt="image">
+            <img id="image" th:src="*{imageUrl}" alt="image">
         </label>
         <div class="validation">
             <span th:text="#{product_image.text} + ' ' + #{validation.text}"></span>
@@ -188,10 +203,12 @@
             </ul>
         </div>
         <p id="errorFile"></p>
+        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="addButton" th:text="#{add_product.text}"
-                    onclick="changeCursor(this)"></button>
+            <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"
+                    onclick="changeCursor(this)"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{/products}">
             <button type="button" class="redButton" th:text="#{button.reset}"></button>

@@ -28,61 +28,6 @@ input {
     font-weight: 600;
 }
 
-.qr {
-    position: static;
-    margin-top: 5px;
-    aspect-ratio: 1 / 1;
-    height: 40%;
-    width: auto;
-}
-
-.nameCard {
-    font-weight: 800;
-    font-family: "Inter", sans-serif;
-}
-
-#cardWithButtons {
-    display: flex;
-    height: 60%;
-    width: 70%;
-}
-
-#cardButtons {
-    margin-left: 5%;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-#card {
-    background-color: white;
-    height: 100%;
-    width: 100%;
-    border: 1px solid black;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    border-radius: 5px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    position: relative;
-}
-
-#cardInfo {
-    position: relative;
-    width: 50%;
-    height: 350px;
-    left: 20%;
-}
-
-#imageCard {
-    width: 100%;
-    height: 100%;
-    margin-top: 10px;
-}
-
-#validationLastName, #validationApartmentNumber, #validationCity, #validationAccountNumber {
-    transform: translateX(-100%);
-}
 
 #TotalAmount {
     width: 30%;
@@ -105,20 +50,6 @@ input {
 @media only screen and (max-width: 768px) {
     .placeholderInput {
         font-size: 12px;
-    }
-
-    #cardInfo {
-        width: 90%;
-        left: 5%;
-        height: 300px;
-    }
-
-    #cardWithButtons {
-        width: 100%;
-    }
-
-    .cardButton {
-        width: 100%;
     }
 
     .placeholderWithInput {

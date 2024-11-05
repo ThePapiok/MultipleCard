@@ -12,7 +12,10 @@ let today = new Date();
 
 function checkStartAt(e, oneTime) {
     const input = e.value;
-    const cond = (input !== "" && input >= today);
+    let cond;
+    let startAt = new Date(input);
+    startAt.setHours(0, 0, 0, 0);
+    cond = (input !== "" && startAt >= today);
     if (edit) {
         checkOnlyIfOther(input, cond, 1, startAt, false, e);
     } else {
@@ -25,7 +28,12 @@ function checkStartAt(e, oneTime) {
 
 function checkExpiredAt(e, oneTime) {
     const input = e.value;
-    const cond = (input !== "" && input >= document.getElementById("startAt").value && input >= today);
+    let cond;
+    let expiredAt = new Date(input);
+    expiredAt.setHours(0, 0, 0, 0);
+    let startAt = new Date(document.getElementById("startAt").value);
+    startAt.setHours(0, 0, 0, 0);
+    cond = (input !== "" && expiredAt >= today && expiredAt >= startAt);
     if (edit) {
         checkOnlyIfOther(input, cond, 2, expiredAt, false, e);
     } else {
@@ -39,7 +47,7 @@ function checkExpiredAt(e, oneTime) {
 function checkAmount(e) {
     const input = e.value;
     const length = input.length;
-    const cond = (length >= 2 && length <= 7 && regAmount.test(input) && parseFloat(input.toString().replace("zł", "")) < originalAmount);
+    let cond = (length >= 2 && length <= 7 && regAmount.test(input) && parseFloat(input.toString().replace("zł", "")) < originalAmount);
     if (edit) {
         checkOnlyIfOther(input, cond, 3, amount, true, e);
     } else {
@@ -62,11 +70,22 @@ function checkCount(e) {
 }
 
 function atStart() {
-    today = today.getFullYear().toString() + "-" + (today.getMonth() + 1).toString() + "-" + today.getDate().toString();
+    let suffix;
+    today.setHours(0, 0, 0, 0);
+    originalAmount = parseFloat(document.getElementById("originalAmount").textContent);
+    suffix = originalAmount.toString().substring(originalAmount.length - 3, originalAmount.length);
+    if (suffix.charAt(1) === ".") {
+        originalAmount += "0";
+    } else if (suffix.charAt(2) === ".") {
+        originalAmount += "00";
+    } else if (!suffix.includes(".")) {
+        originalAmount += ".00";
+    }
     checkLanguage();
     document.getElementById("startAt").value = document.getElementById("dateStartAt").textContent;
     document.getElementById("expiredAt").value = document.getElementById("dateExpiredAt").textContent;
     if (document.getElementById("hasPromotion").textContent === "true") {
+        let amountInput = document.getElementById("amount");
         ok.push(null, null, null, null);
         previous.push(null, null, null, null);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonEditPromotion").textContent;
@@ -74,11 +93,10 @@ function atStart() {
         startAt = document.getElementById("startAt").value;
         expiredAt = document.getElementById("expiredAt").value;
         count = document.getElementById("count").value;
-        originalAmount = parseFloat(document.getElementById("originalAmount").textContent);
-        unfocusedAmount(document.getElementById("amount"));
-        document.getElementById("amount").value = document.getElementById("amount").value + " (" + originalAmount + "zł)";
-        amount = document.getElementById("amount").value;
-
+        unfocusedAmount(amountInput);
+        amount = amountInput.value;
+        checkAmount(amountInput);
+        amountInput.value = amountInput.value + " (" + originalAmount + "zł)";
     } else {
         ok.push(false, false, false, true);
         previous.push(false, false, false, true);
@@ -86,9 +104,7 @@ function atStart() {
         edit = false;
         document.getElementById("amount").value = "";
     }
-    checkStartAt(document.getElementById("startAt"), false);
-    checkCount(document.getElementById("count"));
-    checkAmount(document.getElementById("amount"))
+
 }
 
 function showOrHideDeletePromotion() {
@@ -128,7 +144,7 @@ function unfocused(e) {
     if (index === -1) {
         unfocusedAmount(e);
     } else if (index === (e.value.length - 1) && index === e.value.lastIndexOf("%")) {
-        e.value = (originalAmount * parseInt(e.value.substring(0, index)) / 100.0).toFixed(2);
+        e.value = parseFloat(originalAmount) * parseInt(e.value.substring(0, index)) / 100.0.toFixed(2);
         checkAmount(e);
         unfocusedAmount(e);
     }
