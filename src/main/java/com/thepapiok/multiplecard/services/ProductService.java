@@ -9,6 +9,7 @@ import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
+import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
@@ -89,22 +91,10 @@ public class ProductService {
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-              List<ObjectId> categories = new ArrayList<>();
               Product product = productConverter.getEntity(addProductDTO);
               product.setShopId(ownerId);
               product.setImageUrl("");
-              for (String name : nameOfCategories) {
-                ObjectId id = categoryService.getCategoryIdByName(name);
-                if (id == null) {
-                  Category category = new Category();
-                  category.setName(name);
-                  category.setOwnerId(ownerId);
-                  categories.add(mongoTemplate.save(category).getId());
-                } else {
-                  categories.add(id);
-                }
-              }
-              product.setCategories(categories);
+              product.setCategories(setCategories(nameOfCategories, ownerId));
               product = mongoTemplate.save(product);
               try {
                 product.setImageUrl(
@@ -246,5 +236,53 @@ public class ProductService {
       }
     }
     return names;
+  }
+
+  public EditProductDTO getEditProductDTO(Product product) {
+    return productConverter.getDTO(product);
+  }
+
+  public boolean editProduct(
+      EditProductDTO editProduct, ObjectId ownerId, List<String> nameOfCategories) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              final MultipartFile file = editProduct.getFile();
+              Product product = productConverter.getEntity(editProduct);
+              product.setCategories(setCategories(nameOfCategories, ownerId));
+              if (file != null) {
+                try {
+                  product.setImageUrl(
+                      cloudinaryService.addImage(file.getBytes(), product.getId().toHexString()));
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+              mongoTemplate.save(product);
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
+
+  private List<ObjectId> setCategories(List<String> nameOfCategories, ObjectId ownerId) {
+    List<ObjectId> categories = new ArrayList<>();
+    for (String name : nameOfCategories) {
+      ObjectId id = categoryService.getCategoryIdByName(name);
+      if (id == null) {
+        Category category = new Category();
+        category.setName(name);
+        category.setOwnerId(ownerId);
+        categories.add(mongoTemplate.save(category).getId());
+      } else {
+        categories.add(id);
+      }
+    }
+    return categories;
   }
 }

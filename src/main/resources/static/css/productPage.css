@@ -6,6 +6,6 @@
     width: 100%;
 }
 
-#validationAmount, #validationDescription, #validationCategory, #validationTypedCategory {
+#validationBarcode, #validationDescription, #validationCategory, #validationTypedCategory {
     transform: translateX(-100%);
 }

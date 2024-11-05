@@ -34,7 +34,8 @@
 <div id="body">
     <span hidden th:text="#{category.not_selected}" id="textCategoryNotSelected"></span>
     <p class="title" th:text="#{productPage.title}"></p>
-    <form th:action="@{/products}" th:object="${product}" id="form" method="post">
+    <form th:action="@{/products}" th:object="${product}" id="form" method="post" enctype="multipart/form-data">
+        <input hidden th:field="*{id}" th:value="*{id}">
         <div class="block-horizontally">
             <label id="Name">
                 <label class="placeholderWithInput">
@@ -72,14 +73,13 @@
                     </label>
                 </label>
             </label>
-            <div class="validation">
+            <div class="validation" id="validationBarcode">
                 <span th:text="#{product_barcode.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length_is} + ' 13'"></li>
                     <li th:text="#{validation.only_digits}"></li>
                 </ul>
             </div>
-
         </div>
         <div class="block-horizontally">
             <label id="Amount">
@@ -97,7 +97,7 @@
                     </label>
                 </label>
             </label>
-            <div class="validation" id="validationAmount">
+            <div class="validation">
                 <span th:text="#{product_amount.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
@@ -189,7 +189,8 @@
         <p th:text="#{product_image.text}" id="titleUploadImage"></p>
         <label id="uploadFile" onmouseenter="showValidation(this, 'uploadFile')"
                onmouseleave="hideValidation('uploadFile')">
-            <input type="file" oninput="setImage(this, false, 7, true)" accept="image/png, image/jpeg">
+            <input th:field="*{file}" type="file" oninput="setImage(this, false, 7, true)"
+                   accept="image/png, image/jpeg">
             <img id="noImage" src="/images/upload.png" alt="upload">
             <img id="image" th:src="*{imageUrl}" alt="image">
         </label>
@@ -205,7 +206,9 @@
         <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
         <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"></button>
+            <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"
+                    onclick="changeCursor(this)"
+                    onmousedown="pressedCorrectButton()"></button>
         </a>
         <a th:href="@{/products}">
             <button type="button" class="redButton" th:text="#{button.reset}"></button>
