@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.configs.DbConfig;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,20 @@ public class ProductRepositoryTest {
   public void shouldReturnProductAtFindShopIdByIdWhenEverythingOk() {
     final ObjectId shopId = new ObjectId("123456789012345678901234");
     final int amount = 500;
+    final int testYearOfCreatedAt = 2024;
+    final int testMonthOfCreatedAt = 5;
+    final int testDayOfCreatedAt = 5;
+    final int testHourOfCreatedAt = 5;
+    final int testMinuteOfCreatedAt = 1;
+    final int testSecondOfCreatedAt = 1;
+    final LocalDateTime localDateTime =
+        LocalDateTime.of(
+            testYearOfCreatedAt,
+            testMonthOfCreatedAt,
+            testDayOfCreatedAt,
+            testHourOfCreatedAt,
+            testMinuteOfCreatedAt,
+            testSecondOfCreatedAt);
     ObjectId productId;
     Category category = new Category();
     category.setName("category");
@@ -42,6 +57,7 @@ public class ProductRepositoryTest {
     product.setDescription("description");
     product.setAmount(amount);
     product.setCategories(List.of(category.getId()));
+    product.setUpdatedAt(localDateTime);
     product = mongoTemplate.save(product);
     productId = product.getId();
     Product expectedProduct = new Product();

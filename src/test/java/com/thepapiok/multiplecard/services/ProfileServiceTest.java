@@ -229,7 +229,7 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndUsed(any(), eq(false))).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(any(), eq(false))).thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -310,9 +310,11 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID2, false)).thenReturn(List.of());
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID3, false)).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID2, false))
+        .thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID3, false))
+        .thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);

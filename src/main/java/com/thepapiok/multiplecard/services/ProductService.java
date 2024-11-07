@@ -20,6 +20,7 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -94,6 +95,7 @@ public class ProductService {
               Product product = productConverter.getEntity(addProductDTO);
               product.setShopId(ownerId);
               product.setImageUrl("");
+              product.setUpdatedAt(LocalDateTime.now());
               product.setCategories(setCategories(nameOfCategories, ownerId));
               product = mongoTemplate.save(product);
               try {
@@ -162,11 +164,10 @@ public class ProductService {
               try {
                 final ObjectId objectId = new ObjectId(productId);
                 final float centsPerZloty = 100;
-                cloudinaryService.deleteImage(productId);
                 promotionService.deletePromotion(productId);
                 productRepository.deleteById(objectId);
                 blockedRepository.deleteByProductId(objectId);
-                List<Order> orders = orderRepository.findAllByProductIdAndUsed(objectId, false);
+                List<Order> orders = orderRepository.findAllByProductIdAndIsUsed(objectId, false);
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
                       query(where("cardId").is(order.getCardId())),
@@ -175,6 +176,7 @@ public class ProductService {
                   order.setUsed(true);
                   mongoTemplate.save(order);
                 }
+                cloudinaryService.deleteImage(productId);
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
@@ -248,6 +250,7 @@ public class ProductService {
               final MultipartFile file = editProduct.getFile();
               Product product = productConverter.getEntity(editProduct);
               product.setCategories(setCategories(nameOfCategories, ownerId));
+              product.setUpdatedAt(LocalDateTime.now());
               if (file != null) {
                 try {
                   product.setImageUrl(

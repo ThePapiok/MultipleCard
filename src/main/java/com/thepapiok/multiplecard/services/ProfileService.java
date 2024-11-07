@@ -129,7 +129,8 @@ public class ProfileService {
                   productId = product.getId();
                   mongoTemplate.remove(query(where(productIdParam).is(productId)), Promotion.class);
                   mongoTemplate.remove(query(where(productIdParam).is(productId)), Blocked.class);
-                  List<Order> orders = orderRepository.findAllByProductIdAndUsed(productId, false);
+                  List<Order> orders =
+                      orderRepository.findAllByProductIdAndIsUsed(productId, false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),

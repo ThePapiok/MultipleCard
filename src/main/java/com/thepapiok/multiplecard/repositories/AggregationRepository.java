@@ -199,7 +199,6 @@ public class AggregationRepository {
     if (pages == null) {
       pages = 0;
     }
-    System.out.println(pages);
     return (int) Math.ceil(pages / countProductsAtPage);
   }
 }

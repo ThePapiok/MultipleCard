@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -31,12 +32,14 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -58,6 +61,7 @@ public class ProductServiceTest {
   private static final String TEST_CATEGORY_NAME2 = "category2";
   private static final String TEST_CATEGORY_NAME3 = "category3";
   private static final String TEST_URL = "url";
+  private static final LocalDateTime TEST_DATE = LocalDateTime.now();
   private static Category testCategory;
   private static Category testExpectedCategory;
   private static List<String> testNameOfCategories;
@@ -96,7 +100,6 @@ public class ProductServiceTest {
             orderRepository,
             blockedRepository,
             categoryRepository);
-    setDataForEditProduct();
   }
 
   @Test
@@ -106,6 +109,9 @@ public class ProductServiceTest {
     final ObjectId categoryOtherId = new ObjectId("223456789012345678901235");
     final ObjectId ownerId = new ObjectId("123456789012345678901235");
     final ObjectId productId = new ObjectId("123456789012345678901211");
+
+    MockedStatic<LocalDateTime> localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_DATE);
     List<String> categoryNames = List.of(TEST_CATEGORY_NAME1, TEST_CATEGORY_NAME2);
     List<ObjectId> categories = List.of(categoryId, categoryOtherId);
     AddProductDTO addProductDTO = new AddProductDTO();
@@ -135,6 +141,7 @@ public class ProductServiceTest {
     productWithCategories.setCategories(categories);
     productWithCategories.setShopId(ownerId);
     productWithCategories.setImageUrl("");
+    productWithCategories.setUpdatedAt(TEST_DATE);
     Product productWithId = new Product();
     productWithId.setName(addProductDTO.getName());
     productWithId.setAmount(cents);
@@ -144,6 +151,7 @@ public class ProductServiceTest {
     productWithId.setId(productId);
     productWithId.setShopId(ownerId);
     productWithId.setImageUrl("");
+    productWithId.setUpdatedAt(TEST_DATE);
     Product expectedProduct = new Product();
     expectedProduct.setName(addProductDTO.getName());
     expectedProduct.setAmount(cents);
@@ -155,6 +163,7 @@ public class ProductServiceTest {
     expectedProduct.setId(productId);
     expectedProduct.setShopId(ownerId);
     expectedProduct.setImageUrl("");
+    expectedProduct.setUpdatedAt(TEST_DATE);
 
     when(productConverter.getEntity(addProductDTO)).thenReturn(productAfterConverter);
     when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME1)).thenReturn(categoryId);
@@ -165,6 +174,7 @@ public class ProductServiceTest {
         .thenReturn(TEST_URL);
 
     assertTrue(productService.addProduct(addProductDTO, ownerId, categoryNames));
+    localDateTimeMockedStatic.close();
   }
 
   @Test
@@ -357,7 +367,7 @@ public class ProductServiceTest {
     order3AfterDelete.setAmount(amount3);
     List<Order> orders = List.of(order1, order2, order3);
 
-    when(orderRepository.findAllByProductIdAndUsed(productId, false)).thenReturn(orders);
+    when(orderRepository.findAllByProductIdAndIsUsed(productId, false)).thenReturn(orders);
 
     assertTrue(productService.deleteProduct(TEST_ID));
     verify(mongoTemplate)
@@ -522,15 +532,23 @@ public class ProductServiceTest {
 
   @Test
   public void shouldReturnTrueAtEditProductWhenFileIsNull() {
+    MockedStatic<LocalDateTime> localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_DATE);
+    setDataForEditProduct();
+
     assertTrue(productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
     verify(mongoTemplate).save(testExpectedProduct);
+    localDateTimeMockedStatic.close();
   }
 
   @Test
   public void shouldReturnTrueAtEditProductWhenHasFile() {
+    setDataForEditProduct();
     final String testNewUrl = "newUrl";
     final byte[] bytes = new byte[0];
     final MultipartFile multipartFile = new MockMultipartFile("file1", bytes);
+    MockedStatic<LocalDateTime> localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_DATE);
     EditProductDTO editProductDTO = new EditProductDTO();
     editProductDTO.setName(TEST_PRODUCT_NAME);
     editProductDTO.setBarcode(TEST_BARCODE);
@@ -543,20 +561,27 @@ public class ProductServiceTest {
     expectedProduct.setId(TEST_PRODUCT_ID);
     expectedProduct.setImageUrl(testNewUrl);
     expectedProduct.setCategories(List.of(TEST_CATEGORY_ID1, TEST_CATEGORY_ID2, TEST_CATEGORY_ID3));
+    expectedProduct.setUpdatedAt(TEST_DATE);
 
     when(productConverter.getEntity(editProductDTO)).thenReturn(testProduct);
     when(cloudinaryService.addImage(bytes, TEST_ID)).thenReturn(testNewUrl);
 
     assertTrue(productService.editProduct(editProductDTO, TEST_OWNER_ID, testNameOfCategories));
     verify(mongoTemplate).save(expectedProduct);
+    localDateTimeMockedStatic.close();
   }
 
   @Test
   public void shouldReturnFalseAtEditProductWhenGetException() {
+    setDataForEditProduct();
+    MockedStatic<LocalDateTime> localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_DATE);
+
     when(mongoTemplate.save(testProduct)).thenThrow(MongoWriteException.class);
 
     assertFalse(
         productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
+    localDateTimeMockedStatic.close();
   }
 
   private void setDataForEditProduct() {
@@ -573,6 +598,7 @@ public class ProductServiceTest {
     testProduct.setBarcode(TEST_BARCODE);
     testProduct.setId(TEST_PRODUCT_ID);
     testProduct.setImageUrl(TEST_URL);
+    testProduct.setUpdatedAt(TEST_DATE);
     testEditProductDTO = new EditProductDTO();
     testEditProductDTO.setName(TEST_PRODUCT_NAME);
     testEditProductDTO.setBarcode(TEST_BARCODE);
@@ -585,6 +611,7 @@ public class ProductServiceTest {
     testExpectedProduct.setImageUrl(TEST_URL);
     testExpectedProduct.setCategories(
         List.of(TEST_CATEGORY_ID1, TEST_CATEGORY_ID2, TEST_CATEGORY_ID3));
+    testExpectedProduct.setUpdatedAt(TEST_DATE);
 
     when(productConverter.getEntity(testEditProductDTO)).thenReturn(testProduct);
     when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME1)).thenReturn(TEST_CATEGORY_ID1);

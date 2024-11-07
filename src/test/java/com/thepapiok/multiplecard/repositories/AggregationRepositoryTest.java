@@ -201,6 +201,20 @@ public class AggregationRepositoryTest {
     final int testDayCreatedAtOrder18 = 2;
     final int testHourCreatedAtOrder18 = 3;
     final int testMinuteCreatedAtOrder18 = 10;
+    final int testYearOfCreatedAt = 2024;
+    final int testMonthOfCreatedAt = 5;
+    final int testDayOfCreatedAt = 5;
+    final int testHourOfCreatedAt = 5;
+    final int testMinuteOfCreatedAt = 1;
+    final int testSecondOfCreatedAt = 1;
+    final LocalDateTime localDateTime =
+        LocalDateTime.of(
+            testYearOfCreatedAt,
+            testMonthOfCreatedAt,
+            testDayOfCreatedAt,
+            testHourOfCreatedAt,
+            testMinuteOfCreatedAt,
+            testSecondOfCreatedAt);
     aggregationRepository = new AggregationRepository(accountRepository, mongoTemplate);
     Category category = new Category();
     category.setOwnerId(TEST_OWNER_ID);
@@ -214,6 +228,7 @@ public class AggregationRepositoryTest {
     product1.setBarcode("barcode1");
     product1.setShopId(TEST_OWNER_ID);
     product1.setCategories(List.of(category.getId()));
+    product1.setUpdatedAt(localDateTime);
     Product product2 = new Product();
     product2.setImageUrl("url2");
     product2.setName("product2");
@@ -222,6 +237,7 @@ public class AggregationRepositoryTest {
     product2.setBarcode("barcode2");
     product2.setShopId(TEST_OWNER_ID);
     product2.setCategories(List.of(category.getId()));
+    product2.setUpdatedAt(localDateTime);
     Product product3 = new Product();
     product3.setImageUrl("url3");
     product3.setName(TEST_PRODUCT_NAME);
@@ -230,6 +246,7 @@ public class AggregationRepositoryTest {
     product3.setBarcode("barcode3");
     product3.setShopId(TEST_OWNER_ID);
     product3.setCategories(List.of(category.getId()));
+    product3.setUpdatedAt(localDateTime);
     Product product4 = new Product();
     product4.setImageUrl("url4");
     product4.setName("product4");
@@ -238,6 +255,7 @@ public class AggregationRepositoryTest {
     product4.setBarcode("barcode4");
     product4.setShopId(testOtherShopId);
     product4.setCategories(List.of(category.getId()));
+    product4.setUpdatedAt(localDateTime);
     Product product5 = new Product();
     product5.setImageUrl("url45");
     product5.setName(TEST_PRODUCT_NAME);
@@ -246,6 +264,7 @@ public class AggregationRepositoryTest {
     product5.setBarcode("barcode5");
     product5.setShopId(testOther3ShopId);
     product5.setCategories(List.of(category.getId()));
+    product5.setUpdatedAt(localDateTime);
     Product product6 = new Product();
     product6.setImageUrl("url6");
     product6.setName(TEST_PRODUCT_NAME);
@@ -254,6 +273,7 @@ public class AggregationRepositoryTest {
     product6.setBarcode("barcode6");
     product6.setShopId(testOther3ShopId);
     product6.setCategories(List.of(category.getId()));
+    product6.setUpdatedAt(localDateTime);
     Product product7 = new Product();
     product7.setImageUrl("url7");
     product7.setName("product7");
@@ -262,6 +282,7 @@ public class AggregationRepositoryTest {
     product7.setBarcode("barcode7");
     product7.setShopId(testOther3ShopId);
     product7.setCategories(List.of(category.getId()));
+    product7.setUpdatedAt(localDateTime);
     Product product8 = new Product();
     product8.setImageUrl("url8");
     product8.setName("product8");
@@ -270,6 +291,7 @@ public class AggregationRepositoryTest {
     product8.setBarcode("barcode8");
     product8.setShopId(testOther3ShopId);
     product8.setCategories(List.of(category.getId()));
+    product8.setUpdatedAt(localDateTime);
     Product product9 = new Product();
     product9.setImageUrl("url9");
     product9.setName("product9");
@@ -278,6 +300,7 @@ public class AggregationRepositoryTest {
     product9.setBarcode("barcode9");
     product9.setShopId(testOther3ShopId);
     product9.setCategories(List.of(category.getId()));
+    product9.setUpdatedAt(localDateTime);
     Product product10 = new Product();
     product10.setImageUrl("url10");
     product10.setName("product10");
@@ -286,6 +309,7 @@ public class AggregationRepositoryTest {
     product10.setBarcode("barcode10");
     product10.setShopId(testOther3ShopId);
     product10.setCategories(List.of(category.getId()));
+    product10.setUpdatedAt(localDateTime);
     Product product11 = new Product();
     product11.setImageUrl("url11");
     product11.setName("product11");
@@ -294,6 +318,7 @@ public class AggregationRepositoryTest {
     product11.setBarcode("barcode11");
     product11.setShopId(testOther3ShopId);
     product11.setCategories(List.of(category.getId()));
+    product11.setUpdatedAt(localDateTime);
     Product product12 = new Product();
     product12.setImageUrl("url12");
     product12.setName("product12");
@@ -302,6 +327,7 @@ public class AggregationRepositoryTest {
     product12.setBarcode("barcode12");
     product12.setShopId(testOther3ShopId);
     product12.setCategories(List.of(category.getId()));
+    product12.setUpdatedAt(localDateTime);
     Product product13 = new Product();
     product13.setImageUrl("url13");
     product13.setName("product13");
@@ -310,6 +336,7 @@ public class AggregationRepositoryTest {
     product13.setBarcode("barcode13");
     product13.setShopId(testOther3ShopId);
     product13.setCategories(List.of(category.getId()));
+    product13.setUpdatedAt(localDateTime);
     Product product14 = new Product();
     product14.setImageUrl("url14");
     product14.setName("product14");
@@ -318,6 +345,7 @@ public class AggregationRepositoryTest {
     product14.setBarcode("barcode14");
     product14.setShopId(testOther3ShopId);
     product14.setCategories(List.of(category.getId()));
+    product14.setUpdatedAt(localDateTime);
     Product product15 = new Product();
     product15.setImageUrl("url15");
     product15.setName("product15");
@@ -326,6 +354,7 @@ public class AggregationRepositoryTest {
     product15.setBarcode("barcode15");
     product15.setShopId(testOther3ShopId);
     product15.setCategories(List.of(category.getId()));
+    product15.setUpdatedAt(localDateTime);
     Product product16 = new Product();
     product16.setImageUrl("url16");
     product16.setName("product16");
@@ -334,6 +363,7 @@ public class AggregationRepositoryTest {
     product16.setBarcode("barcode16");
     product16.setShopId(testOther3ShopId);
     product16.setCategories(List.of(category.getId()));
+    product16.setUpdatedAt(localDateTime);
     Product product17 = new Product();
     product17.setImageUrl("url17");
     product17.setName(TEST_PRODUCT_NAME);
@@ -342,6 +372,7 @@ public class AggregationRepositoryTest {
     product17.setBarcode("barcode17");
     product17.setShopId(testOther3ShopId);
     product17.setCategories(List.of(category.getId()));
+    product17.setUpdatedAt(localDateTime);
     product1 = mongoTemplate.save(product1);
     product2 = mongoTemplate.save(product2);
     mongoTemplate.save(product3);

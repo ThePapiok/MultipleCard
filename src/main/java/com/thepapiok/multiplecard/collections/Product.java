@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.collections;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 import org.bson.types.ObjectId;
@@ -17,4 +18,5 @@ public class Product {
   private List<ObjectId> categories;
   private int amount;
   private ObjectId shopId;
+  private LocalDateTime updatedAt;
 }

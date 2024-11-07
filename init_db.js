@@ -136,7 +136,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "updatedAt", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -173,6 +173,10 @@ db.createCollection("products", {
                     "bsonType": "int",
                     "minimum": 0,
                     "description": "amount is required and must be greater or equal 0"
+                },
+                "updatedAt": {
+                    "bsonType": "date",
+                    "description": "updatedAt is required and must be date"
                 },
                 "shopId": {
                     "bsonType": "objectId",
