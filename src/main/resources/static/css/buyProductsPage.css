@@ -1,0 +1,56 @@
+.resultIcons {
+    position: relative;
+    top: 5px;
+}
+
+.basketImage {
+    height: 100%;
+}
+
+.basketUrl {
+    height: 100%;
+}
+
+#notEmptyBasket {
+    cursor: pointer;
+    display: block;
+}
+
+#emptyBasket {
+    display: none;
+}
+
+#basket {
+    padding-left: 5px;
+    position: relative;
+}
+
+#basketAmount[data-empty="true"] ~ #emptyBasket {
+    display: block;
+}
+
+#basketAmount[data-empty="true"] ~ #notEmptyBasket {
+    display: none;
+}
+
+#basketAmount {
+    position: absolute;
+    left: 30px;
+    top: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.imageContainer {
+    cursor: auto;
+}
+
+@media only screen and (max-width: 768px) {
+    #basketAmount {
+        font-size: 13px;
+        top: 23px;
+        left: 33px;
+    }
+}

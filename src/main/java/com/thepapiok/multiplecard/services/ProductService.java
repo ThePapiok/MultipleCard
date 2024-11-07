@@ -120,11 +120,6 @@ public class ProductService {
     return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
   }
 
-  public List<ProductGetDTO> getProductsOwner(
-      String phone, int page, String field, boolean isDescending, String text) {
-    return aggregationRepository.getProductsOwner(phone, page, field, isDescending, text);
-  }
-
   public int getMaxPage(String text, String phone) {
     return aggregationRepository.getMaxPage(text, phone);
   }
@@ -284,5 +279,10 @@ public class ProductService {
       }
     }
     return categories;
+  }
+
+  public List<ProductGetDTO> getProducts(
+      String phone, int page, String field, boolean isDescending, String text) {
+    return aggregationRepository.getProducts(phone, page, field, isDescending, text);
   }
 }

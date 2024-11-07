@@ -105,7 +105,7 @@ public class ProductController {
     }
     if (id == null) {
       List<ProductGetDTO> products =
-          productService.getProductsOwner(phone, page, field, isDescending, text);
+          productService.getProducts(phone, page, field, isDescending, text);
       List<Promotion> promotions =
           products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
       List<PromotionGetDTO> promotionGetDTOS = null;

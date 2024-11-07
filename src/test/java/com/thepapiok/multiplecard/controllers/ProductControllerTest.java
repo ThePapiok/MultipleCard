@@ -182,8 +182,7 @@ public class ProductControllerTest {
       throws Exception {
     setDataForProductsPage();
 
-    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
-        .thenReturn(testProducts);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
     when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
 
@@ -212,8 +211,7 @@ public class ProductControllerTest {
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
     setDataForProductsPage();
 
-    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
-        .thenReturn(testProducts);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
     when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
 
@@ -243,8 +241,7 @@ public class ProductControllerTest {
       throws Exception {
     setDataForProductsPage();
 
-    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
-        .thenReturn(testProducts);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
     when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
 
@@ -274,8 +271,7 @@ public class ProductControllerTest {
     httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, successMessage);
     setDataForProductsPage();
 
-    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
-        .thenReturn(testProducts);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
     when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
 
@@ -364,8 +360,7 @@ public class ProductControllerTest {
     testProducts = List.of(productGetDTO1, productGetDTO2);
     testPages = List.of(1);
 
-    when(productService.getProductsOwner(TEST_PHONE, 0, COUNT_FIELD, true, ""))
-        .thenReturn(testProducts);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
     when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
   }

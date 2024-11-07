@@ -1,11 +1,19 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.services.CardService;
+import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ResultService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -38,17 +46,23 @@ public class CardController {
   private final MessageSource messageSource;
   private final CardService cardService;
   private final AuthenticationController authenticationController;
+  private final ProductService productService;
+  private final ResultService resultService;
 
   @Autowired
   public CardController(
       PasswordEncoder passwordEncoder,
       MessageSource messageSource,
       CardService cardService,
-      AuthenticationController authenticationController) {
+      AuthenticationController authenticationController,
+      ProductService productService,
+      ResultService resultService) {
     this.passwordEncoder = passwordEncoder;
     this.messageSource = messageSource;
     this.cardService = cardService;
     this.authenticationController = authenticationController;
+    this.productService = productService;
+    this.resultService = resultService;
   }
 
   @GetMapping("/new_card")
@@ -199,5 +213,46 @@ public class CardController {
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("blockCardPage.success.block_card", null, locale));
     return REDIRECT_USER_SUCCESS;
+  }
+
+  @GetMapping("/cards")
+  public String buyProductsPage(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "count") String field,
+      @RequestParam(defaultValue = "true") Boolean isDescending,
+      @RequestParam(defaultValue = "") String text,
+      @RequestParam String id,
+      Model model) {
+    int maxPage;
+    List<ProductGetDTO> products =
+        productService.getProducts(null, page, field, isDescending, text);
+    List<Promotion> promotions =
+        products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
+    List<PromotionGetDTO> promotionGetDTOS = null;
+    if (promotions.size() != 0) {
+      promotionGetDTOS =
+          promotions.stream()
+              .map(
+                  e ->
+                      new PromotionGetDTO(
+                          e.getProductId().toString(),
+                          e.getStartAt(),
+                          e.getExpiredAt(),
+                          e.getAmount(),
+                          e.getCount()))
+              .toList();
+    }
+    maxPage = productService.getMaxPage(text, null);
+    model.addAttribute("field", field);
+    model.addAttribute("isDescending", isDescending);
+    model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+    model.addAttribute("pageSelected", page + 1);
+    model.addAttribute(
+        "products", products.stream().map(e -> new ProductDTO(true, e.getProduct())).toList());
+    model.addAttribute("promotions", promotionGetDTOS);
+    model.addAttribute("productsSize", products.size());
+    model.addAttribute("maxPage", maxPage);
+    model.addAttribute("id", id);
+    return "buyProductsPage";
   }
 }

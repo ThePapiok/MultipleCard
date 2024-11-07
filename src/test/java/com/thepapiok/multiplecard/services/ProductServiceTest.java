@@ -209,64 +209,6 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenEverythingOk() {
-    final ObjectId productId1 = new ObjectId("123456789012345678904312");
-    final ObjectId productId2 = new ObjectId("023456589012345178904387");
-    final int testAmountProduct1 = 10;
-    final int testAmountProduct2 = 222;
-    final int testAmountPromotion1 = 5;
-    final int testYearStartAtPromotion1 = 2024;
-    final int testMonthStartAtPromotion1 = 1;
-    final int testDayStartAtPromotion1 = 1;
-    final int testYearExpiredAtPromotion1 = 2015;
-    final int testMonthExpiredAtPromotion1 = 2;
-    final int testDayExpiredAtPromotion1 = 3;
-    final String countField = "count";
-    List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
-    Product product1 = new Product();
-    product1.setImageUrl("url1");
-    product1.setBarcode("barcode1");
-    product1.setDescription("description1");
-    product1.setName("name1");
-    product1.setShopId(TEST_OWNER_ID);
-    product1.setId(productId1);
-    product1.setCategories(categories);
-    product1.setAmount(testAmountProduct1);
-    Product product2 = new Product();
-    product2.setAmount(testAmountProduct2);
-    product2.setDescription("description2");
-    product2.setBarcode("barcode2");
-    product2.setShopId(TEST_OWNER_ID);
-    product2.setImageUrl("url2");
-    product2.setName("name2");
-    product2.setCategories(categories);
-    product2.setId(productId2);
-    Promotion promotion1 = new Promotion();
-    promotion1.setId(new ObjectId("923426389512345172904181"));
-    promotion1.setAmount(testAmountPromotion1);
-    promotion1.setProductId(productId1);
-    promotion1.setStartAt(
-        LocalDate.of(
-            testYearStartAtPromotion1, testMonthStartAtPromotion1, testDayStartAtPromotion1));
-    promotion1.setExpiredAt(
-        LocalDate.of(
-            testYearExpiredAtPromotion1, testMonthExpiredAtPromotion1, testDayExpiredAtPromotion1));
-    ProductGetDTO productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(product1);
-    productGetDTO1.setPromotion(promotion1);
-    ProductGetDTO productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(product2);
-    productGetDTO2.setPromotion(null);
-    List<ProductGetDTO> expectedProducts = List.of(productGetDTO1, productGetDTO2);
-
-    when(aggregationRepository.getProductsOwner(TEST_PHONE, 1, countField, true, ""))
-        .thenReturn(expectedProducts);
-
-    assertEquals(
-        expectedProducts, productService.getProductsOwner(TEST_PHONE, 1, countField, true, ""));
-  }
-
-  @Test
   public void shouldReturn12AtGetMaxPageWhenEverythingOk() {
     final int maxPage = 12;
 
@@ -649,5 +591,62 @@ public class ProductServiceTest {
     when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME2)).thenReturn(TEST_CATEGORY_ID2);
     when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME3)).thenReturn(null);
     when(mongoTemplate.save(testCategory)).thenReturn(testExpectedCategory);
+  }
+
+  @Test
+  public void shouldReturnListOfProductGetDTOAtGetProductsWhenEverythingOk() {
+    final ObjectId productId1 = new ObjectId("123456789012345678904312");
+    final ObjectId productId2 = new ObjectId("023456589012345178904387");
+    final int testAmountProduct1 = 10;
+    final int testAmountProduct2 = 222;
+    final int testAmountPromotion1 = 5;
+    final int testYearStartAtPromotion1 = 2024;
+    final int testMonthStartAtPromotion1 = 1;
+    final int testDayStartAtPromotion1 = 1;
+    final int testYearExpiredAtPromotion1 = 2015;
+    final int testMonthExpiredAtPromotion1 = 2;
+    final int testDayExpiredAtPromotion1 = 3;
+    final String countField = "count";
+    List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
+    Product product1 = new Product();
+    product1.setImageUrl("url1");
+    product1.setBarcode("barcode1");
+    product1.setDescription("description1");
+    product1.setName("name1");
+    product1.setShopId(TEST_OWNER_ID);
+    product1.setId(productId1);
+    product1.setCategories(categories);
+    product1.setAmount(testAmountProduct1);
+    Product product2 = new Product();
+    product2.setAmount(testAmountProduct2);
+    product2.setDescription("description2");
+    product2.setBarcode("barcode2");
+    product2.setShopId(TEST_OWNER_ID);
+    product2.setImageUrl("url2");
+    product2.setName("name2");
+    product2.setCategories(categories);
+    product2.setId(productId2);
+    Promotion promotion1 = new Promotion();
+    promotion1.setId(new ObjectId("923426389512345172904181"));
+    promotion1.setAmount(testAmountPromotion1);
+    promotion1.setProductId(productId1);
+    promotion1.setStartAt(
+        LocalDate.of(
+            testYearStartAtPromotion1, testMonthStartAtPromotion1, testDayStartAtPromotion1));
+    promotion1.setExpiredAt(
+        LocalDate.of(
+            testYearExpiredAtPromotion1, testMonthExpiredAtPromotion1, testDayExpiredAtPromotion1));
+    ProductGetDTO productGetDTO1 = new ProductGetDTO();
+    productGetDTO1.setProduct(product1);
+    productGetDTO1.setPromotion(promotion1);
+    ProductGetDTO productGetDTO2 = new ProductGetDTO();
+    productGetDTO2.setProduct(product2);
+    productGetDTO2.setPromotion(null);
+    List<ProductGetDTO> expectedProducts = List.of(productGetDTO1, productGetDTO2);
+
+    when(aggregationRepository.getProducts(TEST_PHONE, 1, countField, true, ""))
+        .thenReturn(expectedProducts);
+
+    assertEquals(expectedProducts, productService.getProducts(TEST_PHONE, 1, countField, true, ""));
   }
 }
