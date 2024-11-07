@@ -53,8 +53,8 @@
             </a>
         </div>
     </div>
-    <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-    <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
+    <p id="error" th:text="${errorMessage}"></p>
+    <p id="success" th:text="${successMessage}"></p>
     <div id="allResults">
         <div id="results">
             <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}">

@@ -194,8 +194,8 @@
             <div id="places">
             </div>
         </div>
-        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
-        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <p id="success" th:text="${successMessage}"></p>
+        <p id="error" th:text="${errorMessage}"></p>
         <a>
             <button type="button" class="grayButton" id="saveButton" th:text="#{button.save}"></button>
         </a>

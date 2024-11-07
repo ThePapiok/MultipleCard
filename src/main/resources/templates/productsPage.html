@@ -37,6 +37,10 @@
             <option th:text="#{select_option.least}" value="1"></option>
             <option th:text="#{select_option.latest}" value="2"></option>
             <option th:text="#{select_option.oldest}" value="3"></option>
+            <option th:text="#{select_option.most_expensive}" value="4"></option>
+            <option th:text="#{select_option.cheapest}" value="5"></option>
+            <option th:text="#{select_option.latest_add}" value="6"></option>
+            <option th:text="#{select_option.oldest_add}" value="7"></option>
         </select>
         <div id="searchButton" onclick="setParams('/products')">
             <img id="searchImage" src="/images/search.png" alt="search">
@@ -45,8 +49,8 @@
             <button class="greenButton" th:text="#{add_product.text}"></button>
         </a>
     </div>
-    <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-    <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
+    <p id="error" th:text="${errorMessage}"></p>
+    <p id="success" th:text="${successMessage}"></p>
     <div id="allResults">
         <div id="results">
             <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}"

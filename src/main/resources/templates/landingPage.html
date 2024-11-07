@@ -115,8 +115,8 @@
                         th:text="#{landingPage.button.send_review}"></button>
             </a>
         </div>
-        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
-        <p th:if="${param.success}" id="success" th:text="${successMessage}"></p>
+        <p id="error" th:text="${errorMessage}"></p>
+        <p id="success" th:text="${successMessage}"></p>
     </form>
 </div>
 <div id="footer">
