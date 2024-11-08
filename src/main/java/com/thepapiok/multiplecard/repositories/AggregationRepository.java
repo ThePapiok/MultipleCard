@@ -48,6 +48,8 @@ public class AggregationRepository {
     final int countReviewsAtPage = 12;
     final String createdAtField = "order.createdAt";
     final String dateField = "date";
+    final String amountField = "amount";
+    final String updatedAtField = "updatedAt";
     final String isNullField = "isNull";
     final String productField = "product";
     final String promotionField = "promotion";
@@ -56,31 +58,9 @@ public class AggregationRepository {
     ObjectId shopId = null;
     GroupOperation groupOperation = null;
     SortOperation sortOperation = null;
+    boolean hasOrders = false;
     if (phone != null) {
       shopId = accountRepository.findIdByPhone(phone).getId();
-    }
-    if (COUNT_FIELD.equals(field)) {
-      groupOperation =
-          Aggregation.group(ID_FIELD).count().as(COUNT_FIELD).min(createdAtField).as(dateField);
-      if (isDescending) {
-        sortOperation =
-            Aggregation.sort(
-                Sort.by(isNullField).ascending().and(Sort.by(COUNT_FIELD).descending()));
-      } else {
-        sortOperation =
-            Aggregation.sort(
-                Sort.by(isNullField).descending().and(Sort.by(COUNT_FIELD).ascending()));
-      }
-    } else if (dateField.equals(field)) {
-      if (isDescending) {
-        groupOperation = Aggregation.group(ID_FIELD).max(createdAtField).as(dateField);
-        sortOperation =
-            Aggregation.sort(Sort.by(isNullField).ascending().and(Sort.by(dateField).descending()));
-      } else {
-        groupOperation = Aggregation.group(ID_FIELD).min(createdAtField).as(dateField);
-        sortOperation =
-            Aggregation.sort(Sort.by(isNullField).descending().and(Sort.by(dateField).ascending()));
-      }
     }
     String lookupWithPipeline =
         """
@@ -137,14 +117,82 @@ public class AggregationRepository {
       stages.add(lookup(blockedField, ID_FIELD, productIdField, blockedField));
       stages.add(match(Criteria.where(blockedField).size(0)));
     }
-    stages.add(project(ID_FIELD));
-    stages.add(new CustomProjectAggregationOperation(lookupWithPipeline));
-    stages.add(unwind("order", true));
-    stages.add(groupOperation);
-    stages.add(new CustomProjectAggregationOperation(addFields));
-    stages.add(sortOperation);
-    stages.add(lookup(PRODUCTS_COLLECTION, ID_FIELD, ID_FIELD, productField));
-    stages.add(unwind(productField, true));
+    switch (field) {
+      case COUNT_FIELD:
+        groupOperation =
+            Aggregation.group(ID_FIELD).count().as(COUNT_FIELD).min(createdAtField).as(dateField);
+        if (isDescending) {
+          sortOperation =
+              Aggregation.sort(
+                  Sort.by(isNullField).ascending().and(Sort.by(COUNT_FIELD).descending()));
+        } else {
+          sortOperation =
+              Aggregation.sort(
+                  Sort.by(isNullField).descending().and(Sort.by(COUNT_FIELD).ascending()));
+        }
+        hasOrders = true;
+        break;
+      case dateField:
+        if (isDescending) {
+          groupOperation = Aggregation.group(ID_FIELD).max(createdAtField).as(dateField);
+          sortOperation =
+              Aggregation.sort(
+                  Sort.by(isNullField).ascending().and(Sort.by(dateField).descending()));
+        } else {
+          groupOperation = Aggregation.group(ID_FIELD).min(createdAtField).as(dateField);
+          sortOperation =
+              Aggregation.sort(
+                  Sort.by(isNullField).descending().and(Sort.by(dateField).ascending()));
+        }
+        hasOrders = true;
+        break;
+      case "price":
+        if (isDescending) {
+          sortOperation = Aggregation.sort(Sort.by(amountField).descending());
+        } else {
+          sortOperation = Aggregation.sort(Sort.by(amountField).ascending());
+        }
+        break;
+      case "added":
+        if (isDescending) {
+          sortOperation = Aggregation.sort(Sort.by(updatedAtField).descending());
+        } else {
+          sortOperation = Aggregation.sort(Sort.by(updatedAtField).ascending());
+        }
+        break;
+      default:
+        break;
+    }
+    if (hasOrders) {
+      stages.add(project(ID_FIELD));
+      stages.add(new CustomProjectAggregationOperation(lookupWithPipeline));
+      stages.add(unwind("order", true));
+      stages.add(groupOperation);
+      stages.add(new CustomProjectAggregationOperation(addFields));
+      stages.add(sortOperation);
+      stages.add(lookup(PRODUCTS_COLLECTION, ID_FIELD, ID_FIELD, productField));
+      stages.add(unwind(productField, true));
+    } else {
+      stages.add(sortOperation);
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+              {
+                $project: {
+                  "product._id": "$_id",
+                  "product.name": "$name",
+                  "product.description": "$description",
+                  "product.imageUrl": "$imageUrl",
+                  "product.barcode": "$barcode",
+                  "product.categories": "$categories",
+                  "product.amount": "$amount",
+                  "product.shopId": "$shopId",
+                  "product.updatedAt": "$updatedAt",
+                  "product._class": "$_class"
+                }
+              }
+              """));
+    }
     stages.add(lookup("promotions", ID_FIELD, productIdField, promotionField));
     stages.add(unwind(promotionField, true));
     if (phone != null) {
