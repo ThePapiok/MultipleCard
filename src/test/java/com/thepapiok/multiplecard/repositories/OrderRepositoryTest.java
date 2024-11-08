@@ -78,5 +78,6 @@ public class OrderRepositoryTest {
     assertEquals(
         List.of(order1, order2),
         orderRepository.findAllByProductIdAndIsUsed(testProduct1Id, false));
+    orderRepository.deleteAll();
   }
 }

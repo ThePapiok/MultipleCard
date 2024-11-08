@@ -23,6 +23,7 @@ import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
@@ -675,5 +676,25 @@ public class ProductServiceTest {
         .thenReturn(expectedProducts);
 
     assertEquals(expectedProducts, productService.getProducts(TEST_PHONE, 1, countField, true, ""));
+  }
+
+  @Test
+  public void shouldReturnListOfProductWithPromotionDTOAtGetProductsByIdsWhenEverythingOk() {
+    final String testOtherId = "123451789112345678901234";
+    final ObjectId testOtherProductId = new ObjectId(testOtherId);
+    Promotion promotion = new Promotion();
+    promotion.setProductId(TEST_PRODUCT_ID);
+    ProductWithPromotionDTO product1 = new ProductWithPromotionDTO();
+    product1.setId(TEST_ID);
+    product1.setPromotion(promotion);
+    ProductWithPromotionDTO product2 = new ProductWithPromotionDTO();
+    product2.setId(testOtherId);
+
+    when(productRepository.findProductsByIds(List.of(TEST_PRODUCT_ID, testOtherProductId), 0))
+        .thenReturn(List.of(product1, product2));
+
+    assertEquals(
+        List.of(product1, product2),
+        productService.getProductsByIds(List.of(TEST_ID, testOtherId), 0));
   }
 }

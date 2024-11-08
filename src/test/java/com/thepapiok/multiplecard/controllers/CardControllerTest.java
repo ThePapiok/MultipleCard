@@ -530,4 +530,12 @@ public class CardControllerTest {
         .andExpect(model().attribute(ID_PARAM, TEST_ID))
         .andExpect(view().name(BUY_PRODUCTS_PAGE));
   }
+
+  @Test
+  public void shouldReturnCartPageAtCartPageWhenEverythingOk() throws Exception {
+    mockMvc
+        .perform(get("/cart"))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 0))
+        .andExpect(view().name("cartPage"));
+  }
 }

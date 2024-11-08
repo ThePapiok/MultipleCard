@@ -11,6 +11,7 @@ import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
@@ -287,5 +288,11 @@ public class ProductService {
   public List<ProductGetDTO> getProducts(
       String phone, int page, String field, boolean isDescending, String text) {
     return aggregationRepository.getProducts(phone, page, field, isDescending, text);
+  }
+
+  public List<ProductWithPromotionDTO> getProductsByIds(List<String> productsId, int page) {
+    final int countProductsAtPage = 12;
+    return productRepository.findProductsByIds(
+        productsId.stream().map(ObjectId::new).toList(), page * countProductsAtPage);
   }
 }

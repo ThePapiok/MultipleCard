@@ -6,6 +6,7 @@ import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
@@ -23,6 +24,8 @@ import java.util.regex.Pattern;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -310,5 +313,12 @@ public class ProductController {
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("productPage.success.edit_product", null, locale));
     return REDIRECT_PRODUCTS_SUCCESS;
+  }
+
+  @PostMapping("/get_products")
+  @ResponseBody
+  public ResponseEntity<List<ProductWithPromotionDTO>> getProducts(
+      @RequestParam List<String> productsId, @RequestParam int page) {
+    return new ResponseEntity<>(productService.getProductsByIds(productsId, page), HttpStatus.OK);
   }
 }

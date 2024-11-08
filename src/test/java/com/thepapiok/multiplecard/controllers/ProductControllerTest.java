@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,8 +13,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Product;
@@ -22,6 +27,7 @@ import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
 import com.thepapiok.multiplecard.dto.PromotionGetDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
@@ -42,6 +48,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -1088,5 +1095,45 @@ public class ProductControllerTest {
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
     assertEquals(message, httpSession.getAttribute(param));
+  }
+
+  @Test
+  public void shouldReturnResponseOfListProductWithPromotionDTOAtGetProductsWhenEverythingOk()
+      throws Exception {
+    final int amount = 500;
+    final int amountOther = 5200;
+    final String testProductId = "523456789012345678101254";
+    final String productsIdParam = "productsId";
+    ProductWithPromotionDTO product1 = new ProductWithPromotionDTO();
+    product1.setId(TEST_ID);
+    product1.setAmount(amount);
+    product1.setName(TEST_PRODUCT_NAME);
+    product1.setBarcode(TEST_BARCODE);
+    product1.setShopId(TEST_OBJECT_ID);
+    product1.setDescription(TEST_DESCRIPTION);
+    ProductWithPromotionDTO product2 = new ProductWithPromotionDTO();
+    product2.setId(testProductId.toString());
+    product2.setAmount(amountOther);
+    product2.setName(TEST_PRODUCT_NAME + "A");
+    product2.setBarcode(TEST_BARCODE + "2");
+    product2.setShopId(TEST_OBJECT_ID);
+    product2.setDescription(TEST_DESCRIPTION + "C");
+    List<ProductWithPromotionDTO> products = List.of(product1, product2);
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new Jdk8Module()); // Dla obsługi opcjonalnych typów
+    objectMapper.registerModule(new JavaTimeModule());
+
+    when(productService.getProductsByIds(List.of(TEST_ID, testProductId), 0)).thenReturn(products);
+
+    MvcResult mvcResult =
+        mockMvc
+            .perform(
+                post("/get_products")
+                    .param(productsIdParam, TEST_ID)
+                    .param(productsIdParam, testProductId)
+                    .param("page", "0"))
+            .andExpect(status().isOk())
+            .andReturn();
+    assertNotNull("cos", mvcResult.getResponse().getContentAsString());
   }
 }

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CardController {
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String PHONE_PARAM = "phone";
+  private static final String PAGE_SELECTED_PARAM = "pageSelected";
   private static final String CODE_SMS_ORDER_PARAM = "codeSmsOrder";
   private static final String CODE_SMS_BLOCK_PARAM = "codeSmsBlock";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
@@ -246,7 +247,7 @@ public class CardController {
     model.addAttribute("field", field);
     model.addAttribute("isDescending", isDescending);
     model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
-    model.addAttribute("pageSelected", page + 1);
+    model.addAttribute(PAGE_SELECTED_PARAM, page + 1);
     model.addAttribute(
         "products", products.stream().map(e -> new ProductDTO(true, e.getProduct())).toList());
     model.addAttribute("promotions", promotionGetDTOS);
@@ -254,5 +255,11 @@ public class CardController {
     model.addAttribute("maxPage", maxPage);
     model.addAttribute("id", id);
     return "buyProductsPage";
+  }
+
+  @GetMapping("/cart")
+  public String cartPage(@RequestParam(defaultValue = "0") Integer page, Model model) {
+    model.addAttribute(PAGE_SELECTED_PARAM, page);
+    return "cartPage";
   }
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/cartPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
+</head>
+<body th:attr="onload=|atStart('${pageSelected}')|">
+<script src="/js/page.js"></script>
+<script src="/js/results.js"></script>
+<script src="/js/productsId.js"></script>
+<script src="/js/promotions.js"></script>
+<script src="/js/cartPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
+    <p class="title" th:text="#{cartPage.title}"></p>
+    <div id="buyContainer">
+        <a id="buyUrl">
+            <button id="buyButton" class="greenButton" th:text="#{cartPage.button.buy_products}"></button>
+        </a>
+    </div>
+    <div id="allResults">
+        <div id="results">
+            <span th:data-results-size="0" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
+    </div>
+    <div id="pages">
+        <a>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
+        </a>
+        <div id="pagesSelect">
+        </div>
+        <a>
+            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"></button>
+        </a>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:href="@{'?lang=eng'}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:href="@{'?lang=pl'}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

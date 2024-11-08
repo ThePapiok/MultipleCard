@@ -1,11 +1,5 @@
-let productsId = [];
-
 function addProduct(id, e) {
-    let amount = parseInt(e.textContent);
-    if (amount < 10) {
-        amount++;
-        e.textContent = amount.toString();
-        productsId.push(id);
+    if (addProductId(id, e)) {
         let basketAmount = document.getElementById("basketAmount");
         basketAmount.dataset.empty = "false";
         basketAmount.textContent = (parseInt(basketAmount.textContent) + 1).toString();
@@ -13,11 +7,7 @@ function addProduct(id, e) {
 }
 
 function deleteProduct(id, e) {
-    let amount = parseInt(e.textContent);
-    if (amount > 0) {
-        amount--;
-        e.textContent = amount.toString();
-        productsId.splice(productsId.indexOf(id), 1);
+    if (deleteProductId(id, e)) {
         let basketAmount = document.getElementById("basketAmount");
         basketAmount.textContent = (parseInt(basketAmount.textContent) - 1).toString();
         if (basketAmount.textContent === "0") {
@@ -27,7 +17,7 @@ function deleteProduct(id, e) {
 }
 
 function goToBasket(id) {
-    sessionStorage.setItem("productsId", JSON.stringify(productsId));
+    sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
     sessionStorage.setItem("cardId", id);
     window.location = "/cart";
 }

@@ -17,6 +17,7 @@
 }
 
 .promotion {
+    opacity: 50%;
     text-decoration-line: line-through;
     color: red;
 }
