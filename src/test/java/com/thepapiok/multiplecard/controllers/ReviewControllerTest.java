@@ -45,7 +45,6 @@ public class ReviewControllerTest {
   private static final String TEST_DESCRIPTION2 = "123sdfasdfasdfsaf1 test";
   private static final String REVIEWS_PAGE = "reviewPage";
   private static final String REVIEWS_PARAM = "reviews";
-  private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
   private static final String PRINCIPAL_PARAM = "principal";
   private static final String PAGE_PARAM = "page";
   private static final String FIELD_PARAM = "field";
@@ -217,7 +216,7 @@ public class ReviewControllerTest {
         .andExpect(model().attribute(PAGES_PARAM, pages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, testPageInt + 1))
         .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
-        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
+        .andExpect(model().attribute("reviewsEmpty", expectedReviews.size() == 0))
         .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
         .andExpect(model().attribute("maxPage", 1))
         .andExpect(view().name(REVIEWS_PAGE));

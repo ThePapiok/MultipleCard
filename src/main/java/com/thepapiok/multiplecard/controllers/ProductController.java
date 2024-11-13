@@ -1,13 +1,10 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.collections.Product;
-import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
-import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
-import com.thepapiok.multiplecard.dto.PromotionGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
@@ -19,7 +16,6 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,36 +103,15 @@ public class ProductController {
       }
     }
     if (id == null) {
-      List<ProductGetDTO> products =
+      List<ProductDTO> products =
           productService.getProducts(phone, page, field, isDescending, text);
-      List<Promotion> promotions =
-          products.stream().map(ProductGetDTO::getPromotion).filter(Objects::nonNull).toList();
-      List<PromotionGetDTO> promotionGetDTOS = null;
-      if (promotions.size() != 0) {
-        promotionGetDTOS =
-            promotions.stream()
-                .map(
-                    e ->
-                        new PromotionGetDTO(
-                            e.getProductId().toString(),
-                            e.getStartAt(),
-                            e.getExpiredAt(),
-                            e.getAmount(),
-                            e.getCount()))
-                .toList();
-      }
       maxPage = productService.getMaxPage(text, phone);
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
       model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("pageSelected", page + 1);
-      model.addAttribute(
-          "products",
-          products.stream()
-              .map(e -> new ProductDTO(e.getBlocked() == null, e.getProduct()))
-              .toList());
-      model.addAttribute("promotions", promotionGetDTOS);
-      model.addAttribute("productsSize", products.size());
+      model.addAttribute("products", products);
+      model.addAttribute("productsEmpty", products.size() == 0);
       model.addAttribute("maxPage", maxPage);
       return "productsPage";
     } else {
@@ -317,7 +292,7 @@ public class ProductController {
 
   @PostMapping("/get_products")
   @ResponseBody
-  public ResponseEntity<List<ProductWithPromotionDTO>> getProducts(
+  public ResponseEntity<List<ProductWithShopDTO>> getProducts(
       @RequestParam List<String> productsId, @RequestParam int page) {
     return new ResponseEntity<>(productService.getProductsByIds(productsId, page), HttpStatus.OK);
   }

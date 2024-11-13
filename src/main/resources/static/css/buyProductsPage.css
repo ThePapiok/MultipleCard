@@ -47,6 +47,10 @@
     cursor: auto;
 }
 
+.result-vertical {
+    justify-content: normal;
+}
+
 @media only screen and (max-width: 768px) {
     #basketAmount {
         font-size: 13px;

@@ -7,11 +7,12 @@ import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
-import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
@@ -19,6 +20,7 @@ import com.thepapiok.multiplecard.repositories.BlockedRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,12 +40,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
-  private static final String COUNT_FIELD = "count";
-  private static final String ID_FIELD = "_id";
-  private static final String SHOP_ID_FIELD = "shopId";
-  private static final String PRODUCTS_COLLECTION = "products";
-  private static final String TEXT_OPERATOR = "$text";
-  private static final String SEARCH_OPERATOR = "$search";
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
   private final ProductRepository productRepository;
@@ -56,6 +52,7 @@ public class ProductService {
   private final OrderRepository orderRepository;
   private final BlockedRepository blockedRepository;
   private final CategoryRepository categoryRepository;
+  private final ShopRepository shopRepository;
 
   @Autowired
   public ProductService(
@@ -70,7 +67,8 @@ public class ProductService {
       PromotionService promotionService,
       OrderRepository orderRepository,
       BlockedRepository blockedRepository,
-      CategoryRepository categoryRepository) {
+      CategoryRepository categoryRepository,
+      ShopRepository shopRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -83,6 +81,7 @@ public class ProductService {
     this.orderRepository = orderRepository;
     this.blockedRepository = blockedRepository;
     this.categoryRepository = categoryRepository;
+    this.shopRepository = shopRepository;
   }
 
   public boolean addProduct(
@@ -285,14 +284,25 @@ public class ProductService {
     return categories;
   }
 
-  public List<ProductGetDTO> getProducts(
+  public List<ProductDTO> getProducts(
       String phone, int page, String field, boolean isDescending, String text) {
     return aggregationRepository.getProducts(phone, page, field, isDescending, text);
   }
 
-  public List<ProductWithPromotionDTO> getProductsByIds(List<String> productsId, int page) {
+  public List<ProductWithShopDTO> getProductsByIds(List<String> productsId, int page) {
     final int countProductsAtPage = 12;
     return productRepository.findProductsByIds(
         productsId.stream().map(ObjectId::new).toList(), page * countProductsAtPage);
+  }
+
+  public List<ProductWithShopDTO> getProductsWithShops(
+      int page, String field, boolean isDescending, String text) {
+    List<ProductDTO> productDTOS = getProducts(null, page, field, isDescending, text);
+    List<ProductWithShopDTO> products = new ArrayList<>();
+    for (ProductDTO productDTO : productDTOS) {
+      Shop shop = shopRepository.findImageUrlAndNameById(productDTO.getShopId());
+      products.add(new ProductWithShopDTO(productDTO, shop.getName(), shop.getImageUrl()));
+    }
+    return products;
   }
 }

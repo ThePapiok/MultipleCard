@@ -78,8 +78,5 @@ function atStart(page, isDescending, field, maxPage, type) {
                 break;
         }
     }
-    if (promotions != null) {
-        setPromotions(promotions, type);
-    }
     checkButtonPages(page, maxPage);
 }

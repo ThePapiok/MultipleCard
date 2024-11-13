@@ -9,12 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import com.thepapiok.multiplecard.collections.Product;
-import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
-import com.thepapiok.multiplecard.dto.ProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
-import com.thepapiok.multiplecard.dto.PromotionGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ResultService;
@@ -44,14 +40,7 @@ public class CardControllerTest {
   private static final String COUNT_FILED = "count";
   private static final String CARDS_URL = "/cards";
   private static final String ID_PARAM = "id";
-  private static final String FIELD_PARAM = "field";
-  private static final String IS_DESCENDING_PARAM = "isDescending";
-  private static final String PAGES_PARAM = "pages";
   private static final String PAGE_SELECTED_PARAM = "pageSelected";
-  private static final String PRODUCTS_PARAM = "products";
-  private static final String PRODUCTS_SIZE_PARAM = "productsSize";
-  private static final String MAX_PAGE_PARAM = "maxPage";
-  private static final String BUY_PRODUCTS_PAGE = "buyProductsPage";
   private static final String TEST_CODE = "111 222";
   private static final String TEST_PIN = "1234";
   private static final String TEST_ID = "523956189032345658901294";
@@ -426,109 +415,54 @@ public class CardControllerTest {
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSizeOfPromotionsIsNot0()
-      throws Exception {
-    final ObjectId testPromotionId = new ObjectId("213956789315345618901230");
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenEverythingOk() throws Exception {
     final int testAmount = 500;
     final int testCount = 5;
     final int size = 3;
     final LocalDate testStartAt = LocalDate.now();
     final LocalDate testExpiredAt = LocalDate.now().plusYears(1);
-    Promotion promotion = new Promotion();
-    promotion.setId(testPromotionId);
-    promotion.setStartAt(testStartAt);
-    promotion.setExpiredAt(testExpiredAt);
-    promotion.setAmount(testAmount);
-    promotion.setCount(testCount);
-    promotion.setProductId(TEST_PRODUCT1_ID);
-    Product product1 = new Product();
-    product1.setId(TEST_PRODUCT1_ID);
-    Product product2 = new Product();
-    product2.setId(TEST_PRODUCT2_ID);
-    Product product3 = new Product();
-    product3.setId(TEST_PRODUCT3_ID);
-    ProductGetDTO productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(product1);
-    productGetDTO1.setPromotion(promotion);
-    productGetDTO1.setBlocked(null);
-    ProductGetDTO productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(product2);
-    productGetDTO2.setPromotion(null);
-    productGetDTO2.setBlocked(null);
-    ProductGetDTO productGetDTO3 = new ProductGetDTO();
-    productGetDTO3.setProduct(product3);
-    productGetDTO3.setPromotion(null);
-    productGetDTO3.setBlocked(null);
-    ProductDTO productDTO1 = new ProductDTO(true, product1);
-    ProductDTO productDTO2 = new ProductDTO(true, product2);
-    ProductDTO productDTO3 = new ProductDTO(true, product3);
-    PromotionGetDTO promotionGetDTO1 =
-        new PromotionGetDTO(
-            TEST_PRODUCT1_ID.toString(), testStartAt, testExpiredAt, testAmount, testCount);
-    List<ProductGetDTO> productGetDTOS = List.of(productGetDTO1, productGetDTO2, productGetDTO3);
+    final String testShopImageUrl = "url";
+    ProductWithShopDTO productDTO1 = new ProductWithShopDTO();
+    productDTO1.setProductId(TEST_PRODUCT1_ID.toString());
+    productDTO1.setAmountPromotion(testAmount);
+    productDTO1.setCountPromotion(testCount);
+    productDTO1.setExpiredAtPromotion(testExpiredAt);
+    productDTO1.setStartAtPromotion(testStartAt);
+    productDTO1.setShopName(TEST_NAME);
+    productDTO1.setShopImageUrl(testShopImageUrl);
+    ProductWithShopDTO productDTO2 = new ProductWithShopDTO();
+    productDTO2.setProductId(TEST_PRODUCT2_ID.toString());
+    productDTO2.setAmountPromotion(0);
+    productDTO2.setCountPromotion(0);
+    productDTO2.setExpiredAtPromotion(null);
+    productDTO2.setStartAtPromotion(null);
+    productDTO2.setShopName(TEST_NAME);
+    productDTO2.setShopImageUrl(testShopImageUrl);
+    ProductWithShopDTO productDTO3 = new ProductWithShopDTO();
+    productDTO3.setProductId(TEST_PRODUCT3_ID.toString());
+    productDTO3.setAmountPromotion(0);
+    productDTO3.setCountPromotion(0);
+    productDTO3.setExpiredAtPromotion(null);
+    productDTO3.setStartAtPromotion(null);
+    productDTO3.setShopName(TEST_NAME);
+    productDTO3.setShopImageUrl(testShopImageUrl);
+    List<ProductWithShopDTO> productDTOS = List.of(productDTO1, productDTO2, productDTO3);
 
-    when(productService.getProducts(null, 0, COUNT_FILED, true, "")).thenReturn(productGetDTOS);
+    when(productService.getProductsWithShops(0, COUNT_FILED, true, "")).thenReturn(productDTOS);
     when(productService.getMaxPage("", null)).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(List.of(1));
 
     mockMvc
         .perform(get(CARDS_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(model().attribute(FIELD_PARAM, COUNT_FILED))
-        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
-        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute("field", COUNT_FILED))
+        .andExpect(model().attribute("isDescending", true))
+        .andExpect(model().attribute("pages", List.of(1)))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model().attribute(PRODUCTS_PARAM, List.of(productDTO1, productDTO2, productDTO3)))
-        .andExpect(model().attribute("promotions", List.of(promotionGetDTO1)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, size))
-        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(model().attribute("products", List.of(productDTO1, productDTO2, productDTO3)))
+        .andExpect(model().attribute("productsEmpty", size == 0))
+        .andExpect(model().attribute("maxPage", 1))
         .andExpect(model().attribute(ID_PARAM, TEST_ID))
-        .andExpect(view().name(BUY_PRODUCTS_PAGE));
-  }
-
-  @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSizeOfPromotionsIs0()
-      throws Exception {
-    final int size = 3;
-    Product product1 = new Product();
-    product1.setId(TEST_PRODUCT1_ID);
-    Product product2 = new Product();
-    product2.setId(TEST_PRODUCT2_ID);
-    Product product3 = new Product();
-    product3.setId(TEST_PRODUCT3_ID);
-    ProductGetDTO productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(product1);
-    productGetDTO1.setPromotion(null);
-    productGetDTO1.setBlocked(null);
-    ProductGetDTO productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(product2);
-    productGetDTO2.setPromotion(null);
-    productGetDTO2.setBlocked(null);
-    ProductGetDTO productGetDTO3 = new ProductGetDTO();
-    productGetDTO3.setProduct(product3);
-    productGetDTO3.setPromotion(null);
-    productGetDTO3.setBlocked(null);
-    ProductDTO productDTO1 = new ProductDTO(true, product1);
-    ProductDTO productDTO2 = new ProductDTO(true, product2);
-    ProductDTO productDTO3 = new ProductDTO(true, product3);
-    List<ProductGetDTO> productGetDTOS = List.of(productGetDTO1, productGetDTO2, productGetDTO3);
-
-    when(productService.getProducts(null, 0, COUNT_FILED, true, "")).thenReturn(productGetDTOS);
-    when(productService.getMaxPage("", null)).thenReturn(1);
-    when(resultService.getPages(1, 1)).thenReturn(List.of(1));
-
-    mockMvc
-        .perform(get(CARDS_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(model().attribute(FIELD_PARAM, COUNT_FILED))
-        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
-        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
-        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model().attribute(PRODUCTS_PARAM, List.of(productDTO1, productDTO2, productDTO3)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, size))
-        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
-        .andExpect(model().attribute(ID_PARAM, TEST_ID))
-        .andExpect(view().name(BUY_PRODUCTS_PAGE));
+        .andExpect(view().name("buyProductsPage"));
   }
 
   @Test

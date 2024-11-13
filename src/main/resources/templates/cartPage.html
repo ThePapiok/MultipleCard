@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/results.css">
     <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/shopInfo.css">
     <link rel="stylesheet" href="/css/cartPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
@@ -14,7 +15,7 @@
 <script src="/js/page.js"></script>
 <script src="/js/results.js"></script>
 <script src="/js/productsId.js"></script>
-<script src="/js/promotions.js"></script>
+<script src="/js/shopInfo.js"></script>
 <script src="/js/cartPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -31,7 +32,7 @@
     </div>
     <div id="allResults">
         <div id="results">
-            <span th:data-results-size="0" th:text="#{select.no_results}" id="noResults"></span>
+            <span data-results-empty="true" th:text="#{select.no_results}" id="noResults"></span>
         </div>
     </div>
     <div id="pages">

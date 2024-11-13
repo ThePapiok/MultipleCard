@@ -16,19 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.collections.Blocked;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
-import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
-import com.thepapiok.multiplecard.dto.PromotionGetDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
@@ -102,8 +96,7 @@ public class ProductControllerTest {
   private static final String PAGES_PARAM = "pages";
   private static final String PAGE_SELECTED_PARAM = "pageSelected";
   private static final String PRODUCTS_PARAM = "products";
-  private static final String PROMOTIONS_PARAM = "promotions";
-  private static final String PRODUCTS_SIZE_PARAM = "productsSize";
+  private static final String PRODUCTS_EMPTY_PARAM = "productsEmpty";
   private static final String MAX_PAGE_PARAM = "maxPage";
   private static final String COUNT_FIELD = "count";
   private static final Integer TEST_PRODUCT_SIZE = 2;
@@ -124,8 +117,7 @@ public class ProductControllerTest {
   private Product testProduct1;
   private Product testProduct2;
   private List<Integer> testPages;
-  private PromotionGetDTO testPromotion;
-  private List<ProductGetDTO> testProducts;
+  private List<ProductDTO> testProducts;
 
   @Autowired private MockMvc mockMvc;
   @MockBean private CategoryService categoryService;
@@ -171,14 +163,8 @@ public class ProductControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model()
-                .attribute(
-                    PRODUCTS_PARAM,
-                    List.of(
-                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
-        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(PRODUCTS_PARAM, testProducts))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, TEST_PRODUCT_SIZE == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(view().name(PRODUCTS_PAGE));
   }
@@ -189,24 +175,14 @@ public class ProductControllerTest {
       throws Exception {
     setDataForProductsPage();
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
-    when(resultService.getPages(1, 1)).thenReturn(testPages);
-
     mockMvc
         .perform(get(PRODUCTS_URL).param(ERROR_PARAM, ""))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model()
-                .attribute(
-                    PRODUCTS_PARAM,
-                    List.of(
-                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
-        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(PRODUCTS_PARAM, testProducts))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, TEST_PRODUCT_SIZE == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(view().name(PRODUCTS_PAGE));
   }
@@ -218,24 +194,14 @@ public class ProductControllerTest {
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
     setDataForProductsPage();
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
-    when(resultService.getPages(1, 1)).thenReturn(testPages);
-
     mockMvc
         .perform(get(PRODUCTS_URL).param(ERROR_PARAM, "").session(httpSession))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model()
-                .attribute(
-                    PRODUCTS_PARAM,
-                    List.of(
-                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
-        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(PRODUCTS_PARAM, testProducts))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, TEST_PRODUCT_SIZE == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
         .andExpect(view().name(PRODUCTS_PAGE));
@@ -248,24 +214,14 @@ public class ProductControllerTest {
       throws Exception {
     setDataForProductsPage();
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
-    when(resultService.getPages(1, 1)).thenReturn(testPages);
-
     mockMvc
         .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, ""))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model()
-                .attribute(
-                    PRODUCTS_PARAM,
-                    List.of(
-                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
-        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(PRODUCTS_PARAM, testProducts))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, TEST_PRODUCT_SIZE == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(view().name(PRODUCTS_PAGE));
   }
@@ -278,24 +234,14 @@ public class ProductControllerTest {
     httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, successMessage);
     setDataForProductsPage();
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
-    when(resultService.getPages(1, 1)).thenReturn(testPages);
-
     mockMvc
         .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, "").session(httpSession))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(
-            model()
-                .attribute(
-                    PRODUCTS_PARAM,
-                    List.of(
-                        new ProductDTO(true, testProduct1), new ProductDTO(false, testProduct2))))
-        .andExpect(model().attribute(PROMOTIONS_PARAM, List.of(testPromotion)))
-        .andExpect(model().attribute(PRODUCTS_SIZE_PARAM, TEST_PRODUCT_SIZE))
+        .andExpect(model().attribute(PRODUCTS_PARAM, testProducts))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, TEST_PRODUCT_SIZE == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(SUCCESS_MESSAGE_PARAM, successMessage))
         .andExpect(view().name(PRODUCTS_PAGE));
@@ -337,7 +283,6 @@ public class ProductControllerTest {
   }
 
   private void setDataForProductsPage() {
-
     final int testYearStartAt = 2024;
     final int testMonthStartAt = 1;
     final int testDayStartAt = 1;
@@ -347,24 +292,39 @@ public class ProductControllerTest {
     final int testPromotionAmount = 5;
     LocalDate startAt = LocalDate.of(testYearStartAt, testMonthStartAt, testDayStartAt);
     LocalDate expiredAt = LocalDate.of(testYearExpiredAt, testMonthExpiredAt, testDayExpiredAt);
-
     Promotion promotion1 = new Promotion();
     promotion1.setId(new ObjectId("923426389512345172904181"));
     promotion1.setAmount(testPromotionAmount);
     promotion1.setProductId(TEST_PRODUCT_ID);
     promotion1.setStartAt(startAt);
     promotion1.setExpiredAt(expiredAt);
-    testPromotion =
-        new PromotionGetDTO(TEST_PRODUCT_ID.toString(), startAt, expiredAt, testPromotionAmount, 0);
-    ProductGetDTO productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(testProduct1);
-    productGetDTO1.setPromotion(promotion1);
-    productGetDTO1.setBlocked(null);
-    ProductGetDTO productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(testProduct2);
-    productGetDTO2.setPromotion(null);
-    productGetDTO2.setBlocked(new Blocked());
-    testProducts = List.of(productGetDTO1, productGetDTO2);
+    ProductDTO productDTO1 = new ProductDTO();
+    productDTO1.setProductId(testProduct1.getId().toString());
+    productDTO1.setProductName(testProduct1.getName());
+    productDTO1.setActive(true);
+    productDTO1.setAmount(testProduct1.getAmount());
+    productDTO1.setBarcode(testProduct1.getBarcode());
+    productDTO1.setDescription(testProduct1.getDescription());
+    productDTO1.setShopId(testProduct1.getShopId());
+    productDTO1.setCountPromotion(promotion1.getCount());
+    productDTO1.setAmountPromotion(promotion1.getAmount());
+    productDTO1.setProductImageUrl(testProduct1.getImageUrl());
+    productDTO1.setStartAtPromotion(promotion1.getStartAt());
+    productDTO1.setExpiredAtPromotion(promotion1.getExpiredAt());
+    ProductDTO productDTO2 = new ProductDTO();
+    productDTO2.setProductName(testProduct2.getName());
+    productDTO2.setProductId(testProduct2.getId().toString());
+    productDTO2.setActive(false);
+    productDTO2.setAmount(testProduct2.getAmount());
+    productDTO2.setBarcode(testProduct2.getBarcode());
+    productDTO2.setDescription(testProduct2.getDescription());
+    productDTO2.setShopId(testProduct2.getShopId());
+    productDTO2.setCountPromotion(0);
+    productDTO2.setAmountPromotion(0);
+    productDTO2.setProductImageUrl(testProduct2.getImageUrl());
+    productDTO2.setStartAtPromotion(null);
+    productDTO2.setExpiredAtPromotion(null);
+    testProducts = List.of(productDTO1, productDTO2);
     testPages = List.of(1);
 
     when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
@@ -1098,30 +1058,29 @@ public class ProductControllerTest {
   }
 
   @Test
-  public void shouldReturnResponseOfListProductWithPromotionDTOAtGetProductsWhenEverythingOk()
+  public void shouldReturnResponseOfListProductWithShopDTOAtGetProductsWhenEverythingOk()
       throws Exception {
     final int amount = 500;
     final int amountOther = 5200;
     final String testProductId = "523456789012345678101254";
     final String productsIdParam = "productsId";
-    ProductWithPromotionDTO product1 = new ProductWithPromotionDTO();
-    product1.setId(TEST_ID);
-    product1.setAmount(amount);
-    product1.setName(TEST_PRODUCT_NAME);
+    ProductWithShopDTO product1 = new ProductWithShopDTO();
+    product1.setProductId(TEST_ID);
+    product1.setProductName(TEST_PRODUCT_NAME);
+    product1.setActive(true);
     product1.setBarcode(TEST_BARCODE);
-    product1.setShopId(TEST_OBJECT_ID);
     product1.setDescription(TEST_DESCRIPTION);
-    ProductWithPromotionDTO product2 = new ProductWithPromotionDTO();
-    product2.setId(testProductId.toString());
-    product2.setAmount(amountOther);
-    product2.setName(TEST_PRODUCT_NAME + "A");
-    product2.setBarcode(TEST_BARCODE + "2");
-    product2.setShopId(TEST_OBJECT_ID);
-    product2.setDescription(TEST_DESCRIPTION + "C");
-    List<ProductWithPromotionDTO> products = List.of(product1, product2);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new Jdk8Module()); // Dla obsługi opcjonalnych typów
-    objectMapper.registerModule(new JavaTimeModule());
+    product1.setShopId(TEST_OBJECT_ID);
+    product1.setAmount(amount);
+    ProductWithShopDTO product2 = new ProductWithShopDTO();
+    product1.setProductId(testProductId.toString());
+    product1.setProductName(TEST_PRODUCT_NAME + "A");
+    product1.setActive(true);
+    product1.setBarcode(TEST_BARCODE + "2");
+    product1.setDescription(TEST_DESCRIPTION + "C");
+    product1.setShopId(TEST_OBJECT_ID);
+    product1.setAmount(amountOther);
+    List<ProductWithShopDTO> products = List.of(product1, product2);
 
     when(productService.getProductsByIds(List.of(TEST_ID, testProductId), 0)).thenReturn(products);
 
@@ -1134,6 +1093,6 @@ public class ProductControllerTest {
                     .param("page", "0"))
             .andExpect(status().isOk())
             .andReturn();
-    assertNotNull("cos", mvcResult.getResponse().getContentAsString());
+    assertNotNull(mvcResult.getResponse().getContentAsString());
   }
 }

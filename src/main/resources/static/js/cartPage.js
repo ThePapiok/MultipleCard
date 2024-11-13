@@ -1,12 +1,21 @@
-let maxPage;
 
-class Promotion {
-    constructor(productId, startAt, expiredAt, count, amount) {
+
+class Product{
+    constructor({isActive, productId, productName, description, productImageUrl, barcode, amount, shopId, startAtPromotion, expiredAtPromotion, countPromotion, amountPromotion, shopName, shopImageUrl}) {
+        this.isActive = isActive;
         this.productId = productId;
-        this.startAt = startAt;
-        this.expiredAt = expiredAt;
-        this.count = count;
+        this.productName = productName;
+        this.description = description;
+        this.productImageUrl = productImageUrl;
+        this.barcode = barcode;
         this.amount = amount;
+        this.shopId = shopId;
+        this.startAtPromotion = startAtPromotion;
+        this.expiredAtPromotion = expiredAtPromotion;
+        this.countPromotion = countPromotion;
+        this.amountPromotion = amountPromotion;
+        this.shopName = shopName;
+        this.shopImageUrl = shopImageUrl;
     }
 }
 
@@ -15,9 +24,8 @@ function atStart(page) {
     let results = document.getElementById("results");
     let result;
     let product;
-    let promotion;
     let productsSession;
-    let promotions = [];
+    let maxPage;
     checkLanguage();
     productsSession = sessionStorage.getItem("productsId");
     if (productsSession == null) {
@@ -42,52 +50,61 @@ function atStart(page) {
             for (let i = 0; i < response.length; i++) {
                 result = document.createElement("div")
                 result.className = "result";
-                product = response[i];
-                promotion = product.promotion;
-                if (promotion != null) {
-                    promotions.push(new Promotion(product.id, promotion.startAt, promotion.expiredAt, promotion.count, promotion.amount));
-                }
-                result.innerHTML = `<div class="result-vertical">
+                product = new Product(response[i]);
+                let innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
-                        <span class="name">` + product.name + `</span>
-                        <span class="amount">` + productsId.get(product.id) + `</span>
+                        <span class="name">` + product.productName + `</span>
+                        <span class="amount">` + productsId.get(product.productId) + `</span>
                         <a class="resultIcons"
-                           onclick="addProduct('` + product.id + `', this.previousElementSibling, this.parentElement.parentElement.parentElement)">
+                           onclick="addProduct('` + product.productId + `', this.previousElementSibling, this.parentElement.parentElement.parentElement)">
                             <img src="/images/plus.png" alt="add">
                         </a>
                         <a class="resultIcons"
-                           onclick="deleteProduct('` + product.id + `', this.previousElementSibling.previousElementSibling, this.parentElement.parentElement.parentElement)">
+                           onclick="deleteProduct('` + product.productId + `', this.previousElementSibling.previousElementSibling, this.parentElement.parentElement.parentElement)">
                             <img src="/images/minus.png" alt="minus">
                         </a>
-                        <a class="resultIcons" onclick="removeProduct('` + product.id + `' , this.parentElement.parentElement.parentElement)">
+                        <a class="resultIcons" onclick="removeProduct('` + product.productId + `' , this.parentElement.parentElement.parentElement)">
                             <img src="/images/close.png" alt="close">
                         </a>
                     </div>
                     <div class="result-horizontal imageContainer">
-                        <img id="productImage" src="` + product.imageUrl + `" alt="product">
+                        <div class="shopLogo" title="` + product.shopName + `">
+                            <img class="shopImage" src="` + product.shopImageUrl + `">
+                        </div>
+                        <img id="productImage" src="` + product.productImageUrl + `" alt="product" onmouseenter="hideLogo(this.previousElementSibling)" onmouseleave="showLogo(this.previousElementSibling)">
                         <div class="description">` + product.description + `
                         </div>
                     </div>
-                    <div class="result-horizontal notImageContainer price" data-id="` + product.id + `">
-                        <span class="amount fullAmount">` + product.amount / 100 + `zł</span>
-                        <div hidden class="promotionContainer">
+                    <div class='result-horizontal notImageContainer price'>
+                    `;
+                if(product.startAtPromotion == null){
+                    innerHtml += "<span class='amount fullAmount'>" + product.amount / 100 + "zł</span></div></div>";
+                }
+                else{
+                    innerHtml += `
+                         <div class="promotionContainer">
                             <div class="result-horizontal">
                                 <div class="result-vertical promotionInfo">
                                     <div class="date">
-                                        <span></span>
+                                        <span>` + product.startAtPromotion + `</span>
                                         <span>-</span>
-                                        <span></span>
-                                    </div>
-                                    <span class="productsLeft"></span>
-                                </div>
+                                        <span>` + product.expiredAtPromotion + `</span>
+                                    </div>`;
+                     if(!product.countPromotion === 0){
+                         innerHtml += "<span className='productsLeft'>" + product.countPromotion + ' ' + document.getElementById("textLeftProducts") + "</span>";
+                     }
+                     innerHtml += `</div>
                                 <div class="promotionAmount">
                                     <span class="amount promotion">` + product.amount / 100 + `</span>
-                                    <span class="amount"></span>
+                                    <span class="amount">` + product.amountPromotion / 100 + 'zł' + `</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>`
+                    </div>
+                    `;
+                }
+                result.innerHTML = innerHtml;
                 results.appendChild(result);
             }
             let newPage;
@@ -119,7 +136,6 @@ function atStart(page) {
                     }
                     document.getElementById("nextPage").onclick = () => nextPage(maxPage);
                     checkButtonPages((parseInt(page) + 1).toString(), maxPage.toString());
-                    setPromotions(promotions, false);
                 })
                 .catch((error) => {
                     console.error(error);

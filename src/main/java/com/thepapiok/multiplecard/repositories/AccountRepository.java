@@ -32,277 +32,329 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
   @Aggregation(
       pipeline = {
         """
-                    {
-                      $match: {
-                      "phone": "?0"
-                      }
-                    }
-                  """,
+                              {
+                                $match: {
+                                "phone": "?0"
+                                }
+                              }
+                            """,
         """
-                    {
-                      $project: {
-                        "_id": 0,
-                        "isFound": {
-                          $cond: {
-                            if: {
-                              $eq: ["$role", "?1"]
-                              },
-                            then: true,
-                            else: false
-                          }
-                        }
-                      }
-                    }
-                  """
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                    $cond: {
+                                      if: {
+                                        $eq: ["$role", "?1"]
+                                        },
+                                      then: true,
+                                      else: false
+                                    }
+                                  }
+                                }
+                            }
+                            """,
+        """
+                              {
+                                $project: {
+                                  "_id": 0,
+                                  "isFound": 1
+                                }
+                              }
+                            """
       })
   Boolean hasRole(String phone, Role role);
 
   @Aggregation(
       pipeline = {
         """
-          {
-              $match: {
-               $expr: {
-                  $ne: ["$phone", ?1]
-               }
-              }
-            }
-          """,
+                            {
+                                $match: {
+                                 $expr: {
+                                    $ne: ["$phone", ?1]
+                                 }
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 1
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "_id": 1
+                                }
+                              }
+                            """,
         """
-          {
-              $lookup: {
-                  "from": "shops",
-                  "localField": "_id",
-                  "foreignField": "_id",
-                  "as": "shop",
-                  "pipeline": [{
-                      $match: {
-                          "name": ?0
-                      }
-                  },
-                  {
-                      $project: {
-                          "name": 1
-                      }
-                  }
+                            {
+                                $lookup: {
+                                    "from": "shops",
+                                    "localField": "_id",
+                                    "foreignField": "_id",
+                                    "as": "shop",
+                                    "pipeline": [{
+                                        $match: {
+                                            "name": ?0
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            "name": 1
+                                        }
+                                    }
 
-                  ]
-              }
-            }
-          """,
+                                    ]
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: [ {
-                                  $size: "$shop" }, 0]},
-                          then: 0,
-                          else: 1
-                      }
-                  }
-              }
-            }
-          """,
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: [ {
+                                                    $size: "$shop" }, 0]},
+                                            then: 0,
+                                            else: 1
+                                        }
+                                    }
+                                }
+                              }
+                            """,
         """
-          {
-              $group: {
-                  "_id": "_id",
-                  "sum": {$sum: "$isFound"}
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "isFound": 1,
+                                    "_id": 0
+                                }
+                            }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 0,
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: ["$sum", 0]
-                          },
-                          then: false,
-                          else: true
-                      }
-                  }
-              }
-            }
-          """
+                            {
+                                $group: {
+                                    "_id": "_id",
+                                    "sum": {$sum: "$isFound"}
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: ["$sum", 0]
+                                            },
+                                            then: false,
+                                            else: true
+                                        }
+                                    }
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "_id": 0,
+                                    "isFound": 1
+                                }
+                            }
+                            """
       })
   boolean existsByNameOtherThanPhone(String name, String phone);
 
   @Aggregation(
       pipeline = {
         """
-          {
-              $match: {
-               $expr: {
-                  $ne: ["$phone", ?1]
-               }
-              }
-            }
-          """,
+                            {
+                                $match: {
+                                 $expr: {
+                                    $ne: ["$phone", ?1]
+                                 }
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 1
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "_id": 1
+                                }
+                              }
+                            """,
         """
-          {
-              $lookup: {
-                  "from": "shops",
-                  "localField": "_id",
-                  "foreignField": "_id",
-                  "as": "shop",
-                  "pipeline": [{
-                      $match: {
-                          "accountNumber": ?0
-                      }
-                  },
-                  {
-                      $project: {
-                          "accountNumber": 1
-                      }
-                  }
+                            {
+                                $lookup: {
+                                    "from": "shops",
+                                    "localField": "_id",
+                                    "foreignField": "_id",
+                                    "as": "shop",
+                                    "pipeline": [{
+                                        $match: {
+                                            "accountNumber": ?0
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            "accountNumber": 1
+                                        }
+                                    }
 
-                  ]
-              }
-            }
-          """,
+                                    ]
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: [ {
-                                  $size: "$shop" }, 0]},
-                          then: 0,
-                          else: 1
-                      }
-                  }
-              }
-            }
-          """,
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: [ {
+                                                    $size: "$shop" }, 0]},
+                                            then: 0,
+                                            else: 1
+                                        }
+                                    }
+                                }
+                              }
+                            """,
         """
-          {
-              $group: {
-                  "_id": "_id",
-                  "sum": {$sum: "$isFound"}
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "isFound": 1,
+                                    "_id": 0
+                                }
+                            }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 0,
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: ["$sum", 0]
-                          },
-                          then: false,
-                          else: true
-                      }
-                  }
-              }
-            }
-          """
+                            {
+                                $group: {
+                                    "_id": "_id",
+                                    "sum": {$sum: "$isFound"}
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: ["$sum", 0]
+                                            },
+                                            then: false,
+                                            else: true
+                                        }
+                                    }
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "_id": 0,
+                                    "isFound": 1
+                                }
+                            }
+                            """
       })
   boolean existsByAccountNumberOtherThanPhone(String accountNumber, String phone);
 
   @Aggregation(
       pipeline = {
         """
-          {
-              $match: {
-               $expr: {
-                  $ne: ["$phone", ?1]
-               }
-              }
-            }
-          """,
+                            {
+                                $match: {
+                                 $expr: {
+                                    $ne: ["$phone", ?1]
+                                 }
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 1
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "_id": 1
+                                }
+                              }
+                            """,
         """
-          {
-              $lookup: {
-                  "from": "shops",
-                  "localField": "_id",
-                  "foreignField": "_id",
-                  "as": "shop",
-                  "pipeline": [{
-                               "$unwind": {
-                                   "path": "$points"
-                               }
-                               },{
-                                   '$project' : {
-                                        "points": 1,
+                            {
+                                $lookup: {
+                                    "from": "shops",
+                                    "localField": "_id",
+                                    "foreignField": "_id",
+                                    "as": "shop",
+                                    "pipeline": [{
+                                                 "$unwind": {
+                                                     "path": "$points"
+                                                 }
+                                                 },{
+                                                     '$project' : {
+                                                          "points": 1,
+                                                      }
+                                                     },
+                                                 {
+                                                 $match: {
+                                                     "points": ?0
+                                                 }
+                                             }
+                                    ]
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: [ {
+                                                    $size: "$shop" }, 0]},
+                                            then: 0,
+                                            else: 1
+                                        }
                                     }
-                                   },
-                               {
-                               $match: {
-                                   "points": ?0
-                               }
-                           }
-                  ]
-              }
-            }
-          """,
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: [ {
-                                  $size: "$shop" }, 0]},
-                          then: 0,
-                          else: 1
-                      }
-                  }
-              }
-            }
-          """,
+                            {
+                                $project: {
+                                    "_id": 0,
+                                    "isFound": 1
+                                }
+                            }
+                            """,
         """
-          {
-              $group: {
-                  "_id": "_id",
-                  "sum": {$sum: "$isFound"}
-              }
-            }
-          """,
+                            {
+                                $group: {
+                                    "_id": "_id",
+                                    "sum": {$sum: "$isFound"}
+                                }
+                              }
+                            """,
         """
-          {
-              $project: {
-                  "_id": 0,
-                  "isFound": {
-                      $cond: {
-                          if: {
-                              $eq: ["$sum", 0]
-                          },
-                          then: false,
-                          else: true
-                      }
-                  }
-              }
-            }
-          """
+                            {
+                                $addFields: {
+                                    "isFound": {
+                                        $cond: {
+                                            if: {
+                                                $eq: ["$sum", 0]
+                                            },
+                                            then: false,
+                                            else: true
+                                        }
+                                    }
+                                }
+                              }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "isFound": 1,
+                                    "_id": 0
+                                }
+                            }
+                            """
       })
   boolean existsByPointsOtherThanPhone(Address address, String phone);
 }

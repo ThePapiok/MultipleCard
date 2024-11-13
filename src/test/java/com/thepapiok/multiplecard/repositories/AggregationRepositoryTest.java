@@ -10,7 +10,7 @@ import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.configs.DbConfig;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles("test")
 @Import(DbConfig.class)
 public class AggregationRepositoryTest {
-
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123456789012345678901234");
   private static final String TEST_PHONE = "+48132423412342314231";
   private static final String TEST_PHONE2 = "+48235324342423";
@@ -42,20 +41,21 @@ public class AggregationRepositoryTest {
   private static final String DATE_FIELD = "date";
   private static final String PRICE_FIELD = "price";
   private static final String ADDED_FIELD = "added";
-  private ProductGetDTO productGetDTO1;
-  private ProductGetDTO productGetDTO2;
-  private ProductGetDTO productGetDTO3;
-  private ProductGetDTO productGetDTO4;
-  private ProductGetDTO productGetDTO5;
-  private ProductGetDTO productGetDTO7;
-  private ProductGetDTO productGetDTO8;
-  private ProductGetDTO productGetDTO9;
-  private ProductGetDTO productGetDTO10;
-  private ProductGetDTO productGetDTO11;
-  private ProductGetDTO productGetDTO13;
-  private ProductGetDTO productGetDTO14;
-  private ProductGetDTO productGetDTO15;
-  private ProductGetDTO productGetDTO17;
+  private ProductDTO productDTO1;
+  private ProductDTO productDTO2;
+  private ProductDTO productDTO3;
+  private ProductDTO productDTO4;
+  private ProductDTO productDTO5;
+  private ProductDTO productDTO7;
+  private ProductDTO productDTO8;
+  private ProductDTO productDTO9;
+  private ProductDTO productDTO10;
+  private ProductDTO productDTO11;
+  private ProductDTO productDTO13;
+  private ProductDTO productDTO14;
+  private ProductDTO productDTO15;
+  private ProductDTO productDTO17;
+
   @Autowired private MongoTemplate mongoTemplate;
   @Autowired private CategoryRepository categoryRepository;
   @Autowired private ProductRepository productRepository;
@@ -1448,62 +1448,188 @@ public class AggregationRepositoryTest {
     blocked4.setExpiredAt(LocalDate.now().plusYears(1));
     blocked4.setProductId(product16.getId());
     mongoTemplate.save(blocked4);
-    productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(product1);
-    productGetDTO1.setPromotion(promotion1);
-    productGetDTO1.setBlocked(null);
-    productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(product2);
-    productGetDTO2.setPromotion(promotion2);
-    productGetDTO2.setBlocked(null);
-    productGetDTO3 = new ProductGetDTO();
-    productGetDTO3.setProduct(product3);
-    productGetDTO3.setPromotion(null);
-    productGetDTO3.setBlocked(blocked1);
-    productGetDTO4 = new ProductGetDTO();
-    productGetDTO4.setProduct(product4);
-    productGetDTO4.setPromotion(promotion3);
-    productGetDTO4.setBlocked(null);
-    productGetDTO5 = new ProductGetDTO();
-    productGetDTO5.setProduct(product5);
-    productGetDTO5.setPromotion(null);
-    productGetDTO5.setBlocked(null);
-    productGetDTO7 = new ProductGetDTO();
-    productGetDTO7.setProduct(product7);
-    productGetDTO7.setPromotion(null);
-    productGetDTO7.setBlocked(null);
-    productGetDTO8 = new ProductGetDTO();
-    productGetDTO8.setProduct(product8);
-    productGetDTO8.setPromotion(null);
-    productGetDTO8.setBlocked(null);
-    productGetDTO9 = new ProductGetDTO();
-    productGetDTO9.setProduct(product9);
-    productGetDTO9.setPromotion(null);
-    productGetDTO9.setBlocked(null);
-    productGetDTO10 = new ProductGetDTO();
-    productGetDTO10.setProduct(product10);
-    productGetDTO10.setPromotion(null);
-    productGetDTO10.setBlocked(null);
-    productGetDTO11 = new ProductGetDTO();
-    productGetDTO11.setProduct(product11);
-    productGetDTO11.setPromotion(null);
-    productGetDTO11.setBlocked(null);
-    productGetDTO13 = new ProductGetDTO();
-    productGetDTO13.setProduct(product13);
-    productGetDTO13.setPromotion(null);
-    productGetDTO13.setBlocked(null);
-    productGetDTO14 = new ProductGetDTO();
-    productGetDTO14.setProduct(product14);
-    productGetDTO14.setPromotion(null);
-    productGetDTO14.setBlocked(null);
-    productGetDTO15 = new ProductGetDTO();
-    productGetDTO15.setProduct(product15);
-    productGetDTO15.setPromotion(null);
-    productGetDTO15.setBlocked(null);
-    productGetDTO17 = new ProductGetDTO();
-    productGetDTO17.setProduct(product17);
-    productGetDTO17.setPromotion(null);
-    productGetDTO17.setBlocked(null);
+    productDTO1 = new ProductDTO();
+    productDTO1.setProductId(product1.getId().toString());
+    productDTO1.setProductName(product1.getName());
+    productDTO1.setActive(true);
+    productDTO1.setAmount(product1.getAmount());
+    productDTO1.setBarcode(product1.getBarcode());
+    productDTO1.setDescription(product1.getDescription());
+    productDTO1.setShopId(product1.getShopId());
+    productDTO1.setCountPromotion(promotion1.getCount());
+    productDTO1.setAmountPromotion(promotion1.getAmount());
+    productDTO1.setProductImageUrl(product1.getImageUrl());
+    productDTO1.setStartAtPromotion(promotion1.getStartAt());
+    productDTO1.setExpiredAtPromotion(promotion1.getExpiredAt());
+    productDTO2 = new ProductDTO();
+    productDTO2.setProductName(product2.getName());
+    productDTO2.setProductId(product2.getId().toString());
+    productDTO2.setActive(true);
+    productDTO2.setAmount(product2.getAmount());
+    productDTO2.setBarcode(product2.getBarcode());
+    productDTO2.setDescription(product2.getDescription());
+    productDTO2.setShopId(product2.getShopId());
+    productDTO2.setCountPromotion(promotion2.getCount());
+    productDTO2.setAmountPromotion(promotion2.getAmount());
+    productDTO2.setProductImageUrl(product2.getImageUrl());
+    productDTO2.setStartAtPromotion(promotion2.getStartAt());
+    productDTO2.setExpiredAtPromotion(promotion2.getExpiredAt());
+    productDTO3 = new ProductDTO();
+    productDTO3.setProductId(product3.getId().toString());
+    productDTO3.setProductName(product3.getName());
+    productDTO3.setActive(false);
+    productDTO3.setAmount(product3.getAmount());
+    productDTO3.setBarcode(product3.getBarcode());
+    productDTO3.setDescription(product3.getDescription());
+    productDTO3.setShopId(product3.getShopId());
+    productDTO3.setCountPromotion(0);
+    productDTO3.setAmountPromotion(0);
+    productDTO3.setProductImageUrl(product3.getImageUrl());
+    productDTO3.setStartAtPromotion(null);
+    productDTO3.setExpiredAtPromotion(null);
+    productDTO4 = new ProductDTO();
+    productDTO4.setProductId(product4.getId().toString());
+    productDTO4.setProductName(product4.getName());
+    productDTO4.setActive(true);
+    productDTO4.setAmount(product4.getAmount());
+    productDTO4.setBarcode(product4.getBarcode());
+    productDTO4.setDescription(product4.getDescription());
+    productDTO4.setShopId(product4.getShopId());
+    productDTO4.setCountPromotion(promotion3.getCount());
+    productDTO4.setAmountPromotion(promotion3.getAmount());
+    productDTO4.setProductImageUrl(product4.getImageUrl());
+    productDTO4.setStartAtPromotion(promotion3.getStartAt());
+    productDTO4.setExpiredAtPromotion(promotion3.getExpiredAt());
+    productDTO5 = new ProductDTO();
+    productDTO5.setProductId(product5.getId().toString());
+    productDTO5.setProductName(product5.getName());
+    productDTO5.setActive(true);
+    productDTO5.setAmount(product5.getAmount());
+    productDTO5.setBarcode(product5.getBarcode());
+    productDTO5.setDescription(product5.getDescription());
+    productDTO5.setShopId(product5.getShopId());
+    productDTO5.setCountPromotion(0);
+    productDTO5.setAmountPromotion(0);
+    productDTO5.setProductImageUrl(product5.getImageUrl());
+    productDTO5.setStartAtPromotion(null);
+    productDTO5.setExpiredAtPromotion(null);
+    productDTO7 = new ProductDTO();
+    productDTO7.setProductId(product7.getId().toString());
+    productDTO7.setProductName(product7.getName());
+    productDTO7.setActive(true);
+    productDTO7.setAmount(product7.getAmount());
+    productDTO7.setBarcode(product7.getBarcode());
+    productDTO7.setDescription(product7.getDescription());
+    productDTO7.setShopId(product7.getShopId());
+    productDTO7.setCountPromotion(0);
+    productDTO7.setAmountPromotion(0);
+    productDTO7.setProductImageUrl(product7.getImageUrl());
+    productDTO7.setStartAtPromotion(null);
+    productDTO7.setExpiredAtPromotion(null);
+    productDTO8 = new ProductDTO();
+    productDTO8.setProductId(product8.getId().toString());
+    productDTO8.setProductName(product8.getName());
+    productDTO8.setActive(true);
+    productDTO8.setAmount(product8.getAmount());
+    productDTO8.setBarcode(product8.getBarcode());
+    productDTO8.setDescription(product8.getDescription());
+    productDTO8.setShopId(product8.getShopId());
+    productDTO8.setCountPromotion(0);
+    productDTO8.setAmountPromotion(0);
+    productDTO8.setProductImageUrl(product8.getImageUrl());
+    productDTO8.setStartAtPromotion(null);
+    productDTO8.setExpiredAtPromotion(null);
+    productDTO9 = new ProductDTO();
+    productDTO9.setProductId(product9.getId().toString());
+    productDTO9.setProductName(product9.getName());
+    productDTO9.setActive(true);
+    productDTO9.setAmount(product9.getAmount());
+    productDTO9.setBarcode(product9.getBarcode());
+    productDTO9.setDescription(product9.getDescription());
+    productDTO9.setShopId(product9.getShopId());
+    productDTO9.setCountPromotion(0);
+    productDTO9.setAmountPromotion(0);
+    productDTO9.setProductImageUrl(product9.getImageUrl());
+    productDTO9.setStartAtPromotion(null);
+    productDTO9.setExpiredAtPromotion(null);
+    productDTO10 = new ProductDTO();
+    productDTO10.setProductId(product10.getId().toString());
+    productDTO10.setProductName(product10.getName());
+    productDTO10.setActive(true);
+    productDTO10.setAmount(product10.getAmount());
+    productDTO10.setBarcode(product10.getBarcode());
+    productDTO10.setDescription(product10.getDescription());
+    productDTO10.setShopId(product10.getShopId());
+    productDTO10.setCountPromotion(0);
+    productDTO10.setAmountPromotion(0);
+    productDTO10.setProductImageUrl(product10.getImageUrl());
+    productDTO10.setStartAtPromotion(null);
+    productDTO10.setExpiredAtPromotion(null);
+    productDTO11 = new ProductDTO();
+    productDTO11.setProductId(product11.getId().toString());
+    productDTO11.setProductName(product11.getName());
+    productDTO11.setActive(true);
+    productDTO11.setAmount(product11.getAmount());
+    productDTO11.setBarcode(product11.getBarcode());
+    productDTO11.setDescription(product11.getDescription());
+    productDTO11.setShopId(product11.getShopId());
+    productDTO11.setCountPromotion(0);
+    productDTO11.setAmountPromotion(0);
+    productDTO11.setProductImageUrl(product11.getImageUrl());
+    productDTO11.setStartAtPromotion(null);
+    productDTO11.setExpiredAtPromotion(null);
+    productDTO13 = new ProductDTO();
+    productDTO13.setProductId(product13.getId().toString());
+    productDTO13.setProductName(product13.getName());
+    productDTO13.setActive(true);
+    productDTO13.setAmount(product13.getAmount());
+    productDTO13.setBarcode(product13.getBarcode());
+    productDTO13.setDescription(product13.getDescription());
+    productDTO13.setShopId(product13.getShopId());
+    productDTO13.setCountPromotion(0);
+    productDTO13.setAmountPromotion(0);
+    productDTO13.setProductImageUrl(product13.getImageUrl());
+    productDTO13.setStartAtPromotion(null);
+    productDTO13.setExpiredAtPromotion(null);
+    productDTO14 = new ProductDTO();
+    productDTO14.setProductId(product14.getId().toString());
+    productDTO14.setProductName(product14.getName());
+    productDTO14.setActive(true);
+    productDTO14.setAmount(product14.getAmount());
+    productDTO14.setBarcode(product14.getBarcode());
+    productDTO14.setDescription(product14.getDescription());
+    productDTO14.setShopId(product14.getShopId());
+    productDTO14.setCountPromotion(0);
+    productDTO14.setAmountPromotion(0);
+    productDTO14.setProductImageUrl(product14.getImageUrl());
+    productDTO14.setStartAtPromotion(null);
+    productDTO14.setExpiredAtPromotion(null);
+    productDTO15 = new ProductDTO();
+    productDTO15.setProductId(product15.getId().toString());
+    productDTO15.setProductName(product15.getName());
+    productDTO15.setActive(true);
+    productDTO15.setAmount(product15.getAmount());
+    productDTO15.setBarcode(product15.getBarcode());
+    productDTO15.setDescription(product15.getDescription());
+    productDTO15.setShopId(product15.getShopId());
+    productDTO15.setCountPromotion(0);
+    productDTO15.setAmountPromotion(0);
+    productDTO15.setProductImageUrl(product15.getImageUrl());
+    productDTO15.setStartAtPromotion(null);
+    productDTO15.setExpiredAtPromotion(null);
+    productDTO17 = new ProductDTO();
+    productDTO17.setProductId(product17.getId().toString());
+    productDTO17.setProductName(product17.getName());
+    productDTO17.setActive(true);
+    productDTO17.setAmount(product17.getAmount());
+    productDTO17.setBarcode(product17.getBarcode());
+    productDTO17.setDescription(product17.getDescription());
+    productDTO17.setShopId(product17.getShopId());
+    productDTO17.setCountPromotion(0);
+    productDTO17.setAmountPromotion(0);
+    productDTO17.setProductImageUrl(product17.getImageUrl());
+    productDTO17.setStartAtPromotion(null);
+    productDTO17.setExpiredAtPromotion(null);
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
@@ -1524,7 +1650,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO1, productGetDTO2, productGetDTO3),
+        List.of(productDTO1, productDTO2, productDTO3),
         aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, ""));
   }
 
@@ -1532,7 +1658,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsAscendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO3, productGetDTO2, productGetDTO1),
+        List.of(productDTO3, productDTO2, productDTO1),
         aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, false, ""));
   }
 
@@ -1540,7 +1666,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenDateFieldAndIsDescendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO2, productGetDTO1, productGetDTO3),
+        List.of(productDTO2, productDTO1, productDTO3),
         aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, true, ""));
   }
 
@@ -1548,7 +1674,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenDateFieldAndIsAscendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO3, productGetDTO1, productGetDTO2),
+        List.of(productDTO3, productDTO1, productDTO2),
         aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, false, ""));
   }
 
@@ -1556,7 +1682,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsDescendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO1, productGetDTO3, productGetDTO2),
+        List.of(productDTO1, productDTO3, productDTO2),
         aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, true, ""));
   }
 
@@ -1564,7 +1690,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsAscendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO2, productGetDTO3, productGetDTO1),
+        List.of(productDTO2, productDTO3, productDTO1),
         aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, false, ""));
   }
 
@@ -1572,7 +1698,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenAddedFieldAndIsDescendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO3, productGetDTO2, productGetDTO1),
+        List.of(productDTO3, productDTO2, productDTO1),
         aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, true, ""));
   }
 
@@ -1580,7 +1706,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenAddedFieldAndIsAscendingWithoutText() {
     assertEquals(
-        List.of(productGetDTO1, productGetDTO2, productGetDTO3),
+        List.of(productDTO1, productDTO2, productDTO3),
         aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, false, ""));
   }
 
@@ -1588,7 +1714,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithText() {
     assertEquals(
-        List.of(productGetDTO1, productGetDTO3),
+        List.of(productDTO1, productDTO3),
         aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME));
   }
 
@@ -1597,18 +1723,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO17,
-            productGetDTO15,
-            productGetDTO14,
-            productGetDTO13,
-            productGetDTO11,
-            productGetDTO10,
-            productGetDTO9,
-            productGetDTO8,
-            productGetDTO7,
-            productGetDTO5,
-            productGetDTO1,
-            productGetDTO4),
+            productDTO17,
+            productDTO15,
+            productDTO14,
+            productDTO13,
+            productDTO11,
+            productDTO10,
+            productDTO9,
+            productDTO8,
+            productDTO7,
+            productDTO5,
+            productDTO1,
+            productDTO4),
         aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, ""));
   }
 
@@ -1617,18 +1743,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsAscendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO2,
-            productGetDTO4,
-            productGetDTO1,
-            productGetDTO5,
-            productGetDTO7,
-            productGetDTO8,
-            productGetDTO9,
-            productGetDTO10,
-            productGetDTO11,
-            productGetDTO13,
-            productGetDTO14,
-            productGetDTO15),
+            productDTO2,
+            productDTO4,
+            productDTO1,
+            productDTO5,
+            productDTO7,
+            productDTO8,
+            productDTO9,
+            productDTO10,
+            productDTO11,
+            productDTO13,
+            productDTO14,
+            productDTO15),
         aggregationRepository.getProducts(null, 0, COUNT_FIELD, false, ""));
   }
 
@@ -1637,18 +1763,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenDateFieldAndIsDescendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO13,
-            productGetDTO14,
-            productGetDTO15,
-            productGetDTO10,
-            productGetDTO11,
-            productGetDTO9,
-            productGetDTO8,
-            productGetDTO7,
-            productGetDTO5,
-            productGetDTO4,
-            productGetDTO2,
-            productGetDTO1),
+            productDTO13,
+            productDTO14,
+            productDTO15,
+            productDTO10,
+            productDTO11,
+            productDTO9,
+            productDTO8,
+            productDTO7,
+            productDTO5,
+            productDTO4,
+            productDTO2,
+            productDTO1),
         aggregationRepository.getProducts(null, 0, DATE_FIELD, true, ""));
   }
 
@@ -1656,18 +1782,18 @@ public class AggregationRepositoryTest {
   public void shouldReturnListOfProductGetDTOAtGetProductsWhenDateFieldAndIsAscendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO17,
-            productGetDTO1,
-            productGetDTO2,
-            productGetDTO4,
-            productGetDTO5,
-            productGetDTO7,
-            productGetDTO8,
-            productGetDTO9,
-            productGetDTO11,
-            productGetDTO10,
-            productGetDTO15,
-            productGetDTO14),
+            productDTO17,
+            productDTO1,
+            productDTO2,
+            productDTO4,
+            productDTO5,
+            productDTO7,
+            productDTO8,
+            productDTO9,
+            productDTO11,
+            productDTO10,
+            productDTO15,
+            productDTO14),
         aggregationRepository.getProducts(null, 0, DATE_FIELD, false, ""));
   }
 
@@ -1676,18 +1802,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsDescendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO1,
-            productGetDTO2,
-            productGetDTO14,
-            productGetDTO10,
-            productGetDTO17,
-            productGetDTO15,
-            productGetDTO13,
-            productGetDTO11,
-            productGetDTO9,
-            productGetDTO8,
-            productGetDTO7,
-            productGetDTO5),
+            productDTO1,
+            productDTO2,
+            productDTO14,
+            productDTO10,
+            productDTO17,
+            productDTO15,
+            productDTO13,
+            productDTO11,
+            productDTO9,
+            productDTO8,
+            productDTO7,
+            productDTO5),
         aggregationRepository.getProducts(null, 0, PRICE_FIELD, true, ""));
   }
 
@@ -1696,18 +1822,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsAscendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO4,
-            productGetDTO5,
-            productGetDTO7,
-            productGetDTO8,
-            productGetDTO9,
-            productGetDTO11,
-            productGetDTO13,
-            productGetDTO15,
-            productGetDTO17,
-            productGetDTO10,
-            productGetDTO14,
-            productGetDTO2),
+            productDTO4,
+            productDTO5,
+            productDTO7,
+            productDTO8,
+            productDTO9,
+            productDTO11,
+            productDTO13,
+            productDTO15,
+            productDTO17,
+            productDTO10,
+            productDTO14,
+            productDTO2),
         aggregationRepository.getProducts(null, 0, PRICE_FIELD, false, ""));
   }
 
@@ -1716,18 +1842,18 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenAddedFieldAndIsDescendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO17,
-            productGetDTO14,
-            productGetDTO15,
-            productGetDTO11,
-            productGetDTO13,
-            productGetDTO10,
-            productGetDTO9,
-            productGetDTO8,
-            productGetDTO7,
-            productGetDTO5,
-            productGetDTO4,
-            productGetDTO2),
+            productDTO17,
+            productDTO14,
+            productDTO15,
+            productDTO11,
+            productDTO13,
+            productDTO10,
+            productDTO9,
+            productDTO8,
+            productDTO7,
+            productDTO5,
+            productDTO4,
+            productDTO2),
         aggregationRepository.getProducts(null, 0, ADDED_FIELD, true, ""));
   }
 
@@ -1736,25 +1862,25 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenAddedFieldAndIsAscendingWithoutText() {
     assertEquals(
         List.of(
-            productGetDTO1,
-            productGetDTO2,
-            productGetDTO4,
-            productGetDTO5,
-            productGetDTO7,
-            productGetDTO8,
-            productGetDTO9,
-            productGetDTO10,
-            productGetDTO13,
-            productGetDTO11,
-            productGetDTO15,
-            productGetDTO14),
+            productDTO1,
+            productDTO2,
+            productDTO4,
+            productDTO5,
+            productDTO7,
+            productDTO8,
+            productDTO9,
+            productDTO10,
+            productDTO13,
+            productDTO11,
+            productDTO15,
+            productDTO14),
         aggregationRepository.getProducts(null, 0, ADDED_FIELD, false, ""));
   }
 
   @Test
   public void shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithText() {
     assertEquals(
-        List.of(productGetDTO17, productGetDTO7, productGetDTO5, productGetDTO1),
+        List.of(productDTO17, productDTO7, productDTO5, productDTO1),
         aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME));
   }
 

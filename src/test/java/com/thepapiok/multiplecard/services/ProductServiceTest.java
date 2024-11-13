@@ -18,12 +18,12 @@ import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
-import com.thepapiok.multiplecard.collections.Promotion;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
-import com.thepapiok.multiplecard.dto.ProductWithPromotionDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
@@ -31,6 +31,7 @@ import com.thepapiok.multiplecard.repositories.BlockedRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +51,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ProductServiceTest {
   private static final String TEST_ID = "103451789009876547211492";
+  private static final String TEST_ID1 = "123456789012345678904312";
+  private static final String TEST_ID2 = "023456589012345178904387";
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
+  private static final ObjectId TEST_PRODUCT1_ID = new ObjectId(TEST_ID1);
+  private static final ObjectId TEST_PRODUCT2_ID = new ObjectId(TEST_ID2);
   private static final String TEST_PRODUCT_NAME = "name";
   private static final String TEST_BARCODE = "12345678901234567890123";
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123451789012345678901234");
@@ -61,7 +66,11 @@ public class ProductServiceTest {
   private static final String TEST_CATEGORY_NAME1 = "category1";
   private static final String TEST_CATEGORY_NAME2 = "category2";
   private static final String TEST_CATEGORY_NAME3 = "category3";
+  private static final String TEST_SHOP_NAME = "shopName";
+  private static final String TEST_SHOP_IMAGE_URL = "shopImageUrl";
   private static final String TEST_URL = "url";
+  private static final String COUNT_FILED = "count";
+
   private static final LocalDateTime TEST_DATE = LocalDateTime.now();
   private static Category testCategory;
   private static Category testExpectedCategory;
@@ -83,6 +92,7 @@ public class ProductServiceTest {
   @Mock private OrderRepository orderRepository;
   @Mock private BlockedRepository blockedRepository;
   @Mock private CategoryRepository categoryRepository;
+  @Mock private ShopRepository shopRepository;
 
   @BeforeEach
   public void setUp() {
@@ -100,7 +110,8 @@ public class ProductServiceTest {
             promotionService,
             orderRepository,
             blockedRepository,
-            categoryRepository);
+            categoryRepository,
+            shopRepository);
   }
 
   @Test
@@ -622,9 +633,51 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductGetDTOAtGetProductsWhenEverythingOk() {
-    final ObjectId productId1 = new ObjectId("123456789012345678904312");
-    final ObjectId productId2 = new ObjectId("023456589012345178904387");
+  public void shouldReturnListOfProductDTOAtGetProductsWhenEverythingOk() {
+    List<ProductDTO> expectedProducts = setDataProductsDTO();
+
+    when(aggregationRepository.getProducts(TEST_PHONE, 1, COUNT_FILED, true, ""))
+        .thenReturn(expectedProducts);
+
+    assertEquals(
+        expectedProducts, productService.getProducts(TEST_PHONE, 1, COUNT_FILED, true, ""));
+  }
+
+  @Test
+  public void shouldReturnListOfProductWithShopDTOAtGetProductsByIdsWhenEverythingOk() {
+    List<ProductDTO> productDTOS = setDataProductsDTO();
+    ProductWithShopDTO product1 =
+        new ProductWithShopDTO(productDTOS.get(0), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+    ProductWithShopDTO product2 =
+        new ProductWithShopDTO(productDTOS.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+
+    when(productRepository.findProductsByIds(List.of(TEST_PRODUCT1_ID, TEST_PRODUCT2_ID), 0))
+        .thenReturn(List.of(product1, product2));
+
+    assertEquals(
+        List.of(product1, product2),
+        productService.getProductsByIds(List.of(TEST_ID1, TEST_ID2), 0));
+  }
+
+  @Test
+  public void shouldReturnListOfProductWithShopDTOAtGetProductsWithShopsWhenEverythingOk() {
+    List<ProductDTO> productDTOS = setDataProductsDTO();
+    ProductWithShopDTO product1 =
+        new ProductWithShopDTO(productDTOS.get(0), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+    ProductWithShopDTO product2 =
+        new ProductWithShopDTO(productDTOS.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+    Shop shop = new Shop();
+    shop.setName(TEST_SHOP_NAME);
+    shop.setImageUrl(TEST_SHOP_IMAGE_URL);
+
+    when(aggregationRepository.getProducts(null, 1, COUNT_FILED, true, "")).thenReturn(productDTOS);
+    when(shopRepository.findImageUrlAndNameById(TEST_OWNER_ID)).thenReturn(shop);
+
+    assertEquals(
+        List.of(product1, product2), productService.getProductsWithShops(1, COUNT_FILED, true, ""));
+  }
+
+  private List<ProductDTO> setDataProductsDTO() {
     final int testAmountProduct1 = 10;
     final int testAmountProduct2 = 222;
     final int testAmountPromotion1 = 5;
@@ -634,67 +687,36 @@ public class ProductServiceTest {
     final int testYearExpiredAtPromotion1 = 2015;
     final int testMonthExpiredAtPromotion1 = 2;
     final int testDayExpiredAtPromotion1 = 3;
-    final String countField = "count";
-    List<ObjectId> categories = List.of(new ObjectId("153456489019345178004311"));
-    Product product1 = new Product();
-    product1.setImageUrl("url1");
-    product1.setBarcode("barcode1");
-    product1.setDescription("description1");
-    product1.setName("name1");
-    product1.setShopId(TEST_OWNER_ID);
-    product1.setId(productId1);
-    product1.setCategories(categories);
-    product1.setAmount(testAmountProduct1);
-    Product product2 = new Product();
-    product2.setAmount(testAmountProduct2);
-    product2.setDescription("description2");
-    product2.setBarcode("barcode2");
-    product2.setShopId(TEST_OWNER_ID);
-    product2.setImageUrl("url2");
-    product2.setName("name2");
-    product2.setCategories(categories);
-    product2.setId(productId2);
-    Promotion promotion1 = new Promotion();
-    promotion1.setId(new ObjectId("923426389512345172904181"));
-    promotion1.setAmount(testAmountPromotion1);
-    promotion1.setProductId(productId1);
-    promotion1.setStartAt(
+    ProductDTO productDTO1 = new ProductDTO();
+    productDTO1.setActive(true);
+    productDTO1.setProductId(TEST_ID1);
+    productDTO1.setProductName("name1");
+    productDTO1.setBarcode("barcode1");
+    productDTO1.setAmount(testAmountProduct1);
+    productDTO1.setDescription("description1");
+    productDTO1.setProductImageUrl("url1");
+    productDTO1.setShopId(TEST_OWNER_ID);
+    productDTO1.setStartAtPromotion(
         LocalDate.of(
             testYearStartAtPromotion1, testMonthStartAtPromotion1, testDayStartAtPromotion1));
-    promotion1.setExpiredAt(
+    productDTO1.setExpiredAtPromotion(
         LocalDate.of(
             testYearExpiredAtPromotion1, testMonthExpiredAtPromotion1, testDayExpiredAtPromotion1));
-    ProductGetDTO productGetDTO1 = new ProductGetDTO();
-    productGetDTO1.setProduct(product1);
-    productGetDTO1.setPromotion(promotion1);
-    ProductGetDTO productGetDTO2 = new ProductGetDTO();
-    productGetDTO2.setProduct(product2);
-    productGetDTO2.setPromotion(null);
-    List<ProductGetDTO> expectedProducts = List.of(productGetDTO1, productGetDTO2);
-
-    when(aggregationRepository.getProducts(TEST_PHONE, 1, countField, true, ""))
-        .thenReturn(expectedProducts);
-
-    assertEquals(expectedProducts, productService.getProducts(TEST_PHONE, 1, countField, true, ""));
-  }
-
-  @Test
-  public void shouldReturnListOfProductWithPromotionDTOAtGetProductsByIdsWhenEverythingOk() {
-    final String testOtherId = "123451789112345678901234";
-    final ObjectId testOtherProductId = new ObjectId(testOtherId);
-    Promotion promotion = new Promotion();
-    promotion.setProductId(TEST_PRODUCT_ID);
-    ProductWithPromotionDTO product1 = new ProductWithPromotionDTO();
-    product1.setId(TEST_ID);
-    product1.setPromotion(promotion);
-    ProductWithPromotionDTO product2 = new ProductWithPromotionDTO();
-    product2.setId(testOtherId);
-
-    when(productRepository.findProductsByIds(List.of(TEST_PRODUCT_ID, testOtherProductId), 0))
-        .thenReturn(List.of(product1, product2));
-
-    assertEquals(
-        List.of(product1, product2),
-        productService.getProductsByIds(List.of(TEST_ID, testOtherId), 0));
+    productDTO1.setAmountPromotion(testAmountPromotion1);
+    productDTO1.setCountPromotion(0);
+    ProductDTO productDTO2 = new ProductDTO();
+    productDTO2.setActive(false);
+    productDTO2.setProductId(TEST_ID2);
+    productDTO2.setProductName("name2");
+    productDTO2.setBarcode("barcode2");
+    productDTO2.setAmount(testAmountProduct2);
+    productDTO2.setDescription("description2");
+    productDTO2.setProductImageUrl("url2");
+    productDTO2.setShopId(TEST_OWNER_ID);
+    productDTO2.setStartAtPromotion(null);
+    productDTO2.setExpiredAtPromotion(null);
+    productDTO2.setAmountPromotion(0);
+    productDTO2.setCountPromotion(0);
+    return List.of(productDTO1, productDTO2);
   }
 }

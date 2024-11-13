@@ -6,20 +6,19 @@
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/results.css">
-    <link rel="stylesheet" href="/css/confirmation.css">
     <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/shopInfo.css">
     <link rel="stylesheet" href="/css/buyProductsPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
 <body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}', false)|">
 <script src="/js/page.js"></script>
 <script src="/js/results.js"></script>
-<script src="/js/promotions.js"></script>
 <script src="/js/products.js"></script>
 <script src="/js/productsId.js"></script>
+<script src="/js/shopInfo.js"></script>
 <script src="/js/buyProductsPage.js"></script>
 <script th:inline="javascript">
-    let promotions = /*[[${promotions}]]*/ [];
     resetBasket();
 </script>
 <div id="header">
@@ -28,7 +27,6 @@
     </a>
 </div>
 <div id="body">
-    <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <p class="title" th:text="#{products.text}"></p>
     <div id="searchBar">
         <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
@@ -59,47 +57,54 @@
     <p id="success" th:text="${successMessage}"></p>
     <div id="allResults">
         <div id="results">
-            <div class="result" th:if="${productsSize} > 0" th:each="product : ${products}">
+            <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}">
                 <div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
-                        <span class="name" th:text="${product.product.name}"></span>
+                        <span class="name" th:text="${product.productName}"></span>
                         <span class="amount">0</span>
                         <a class="resultIcons"
-                           th:attr="onclick=|addProduct('${product.product.id}', this.previousElementSibling)|">
+                           th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling)|">
                             <img src="/images/plus.png" alt="add">
                         </a>
                         <a class="resultIcons"
-                           th:attr="onclick=|deleteProduct('${product.product.id}', this.previousElementSibling.previousElementSibling)|">
+                           th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling)|">
                             <img src="/images/minus.png" alt="minus">
                         </a>
                     </div>
                     <div class="result-horizontal imageContainer">
-                        <img id="productImage" th:src="${product.product.imageUrl}" alt="product">
-                        <div class="description" th:text="${product.product.description}">
+                        <div class="shopLogo" th:title="${product.shopName}">
+                            <img class="shopImage" th:src="${product.shopImageUrl}">
+                        </div>
+                        <img id="productImage" th:src="${product.productImageUrl}" alt="product"
+                             onmouseenter="hideLogo(this.previousElementSibling)"
+                             onmouseleave="showLogo(this.previousElementSibling)">
+                        <div class="description" th:text="${product.description}">
                         </div>
                     </div>
-                    <div class="result-horizontal notImageContainer price" th:data-id="${product.product.id}">
-                        <span class="amount fullAmount" th:text="${product.product.amount}/100 + 'zł'"></span>
-                        <div hidden class="promotionContainer">
+                    <div class="result-horizontal notImageContainer price">
+                        <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
+                              th:if="${product.startAtPromotion} == null"></span>
+                        <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
                             <div class="result-horizontal">
                                 <div class="result-vertical promotionInfo">
                                     <div class="date">
-                                        <span></span>
+                                        <span th:text="${product.startAtPromotion}"></span>
                                         <span>-</span>
-                                        <span></span>
+                                        <span th:text="${product.expiredAtPromotion}"></span>
                                     </div>
-                                    <span class="productsLeft"></span>
+                                    <span class="productsLeft" th:if="${product.countPromotion} != 0"
+                                          th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
                                 </div>
                                 <div class="promotionAmount">
-                                    <span class="amount promotion" th:text="${product.product.amount}/100"></span>
-                                    <span class="amount"></span>
+                                    <span class="amount promotion" th:text="${product.amount}/100"></span>
+                                    <span class="amount" th:text="${product.amountPromotion}/100 + 'zł'"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <span th:data-results-size="${productsSize}" th:text="#{select.no_results}" id="noResults"></span>
+            <span th:data-results-empty="${productsEmpty}" th:text="#{select.no_results}" id="noResults"></span>
         </div>
     </div>
     <div id="pages">
@@ -109,43 +114,12 @@
         </a>
         <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
-                  th:if="${productsSize} != 0" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+                  th:if="${productsEmpty} != true" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
         </div>
         <a>
             <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
                     th:attr="onclick=|nextPage('${maxPage}')|"></button>
         </a>
-    </div>
-    <div id="delete" class="confirmation" hidden data-id="">
-        <div class="confirmationChoice">
-            <p th:text="#{productsPage.delete.title}" class="confirmationTitle"></p>
-            <div>
-                <a>
-                    <button type="button" class="darkGreenButton" th:text="#{button.yes}"
-                            th:attr="onclick=|deleteProduct()|"></button>
-                </a>
-                <a>
-                    <button type="button" class="redButton" th:text="#{button.no}"
-                            onclick="showOrHideDeleteProduct()"></button>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div id="block" class="confirmation" hidden data-id="">
-        <div class="confirmationChoice">
-            <p th:text="#{productsPage.block.title}" class="confirmationTitle"></p>
-            <div>
-                <a>
-                    <button type="button" class="darkGreenButton" th:text="#{button.yes}"
-                            th:attr="onclick=|blockProduct()|"></button>
-                </a>
-                <a>
-                    <button type="button" class="redButton" th:text="#{button.no}"
-                            onclick="showOrHideBlockProduct()"></button>
-                </a>
-            </div>
-            <p th:text="#{productsPage.block.info}" id="blockInfo"></p>
-        </div>
     </div>
 </div>
 <div id="footer">

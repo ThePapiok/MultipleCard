@@ -10,7 +10,7 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.skip
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 
 import com.mongodb.BasicDBObject;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.misc.CustomProjectAggregationOperation;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class AggregationRepository {
     this.mongoTemplate = mongoTemplate;
   }
 
-  public List<ProductGetDTO> getProducts(
+  public List<ProductDTO> getProducts(
       String phone, int page, String field, boolean isDescending, String text) {
     final int countReviewsAtPage = 12;
     final String createdAtField = "order.createdAt";
@@ -62,41 +62,6 @@ public class AggregationRepository {
     if (phone != null) {
       shopId = accountRepository.findIdByPhone(phone).getId();
     }
-    String lookupWithPipeline =
-        """
-                          {
-                              $lookup: {
-                                "from": "orders",
-                                "localField": "_id",
-                                "foreignField": "productId",
-                                "as": "order",
-                                "pipeline": [{
-                                  $project: {
-                                    "_id": 0,
-                                    "createdAt": 1
-                                  }
-                                }
-                                ]
-                              }
-                            }
-                        """;
-
-    String addFields =
-        """
-                          {
-                                 $addFields: {
-                                   "isNull": {
-                                     $cond: {
-                                       if: {
-                                         $eq: ["$date", null]
-                                       },
-                                       then: 1,
-                                       else: 0,
-                                     }
-                                   }
-                                 }
-                               }
-                        """;
     List<AggregationOperation> stages = new ArrayList<>();
     if (phone != null) {
       if ("".equals(text)) {
@@ -165,10 +130,44 @@ public class AggregationRepository {
     }
     if (hasOrders) {
       stages.add(project(ID_FIELD));
-      stages.add(new CustomProjectAggregationOperation(lookupWithPipeline));
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+                          {
+                              $lookup: {
+                                "from": "orders",
+                                "localField": "_id",
+                                "foreignField": "productId",
+                                "as": "order",
+                                "pipeline": [{
+                                  $project: {
+                                    "_id": 0,
+                                    "createdAt": 1
+                                  }
+                                }
+                                ]
+                              }
+                            }
+                        """));
       stages.add(unwind("order", true));
       stages.add(groupOperation);
-      stages.add(new CustomProjectAggregationOperation(addFields));
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+                          {
+                                 $addFields: {
+                                   "isNull": {
+                                     $cond: {
+                                       if: {
+                                         $eq: ["$date", null]
+                                       },
+                                       then: 1,
+                                       else: 0,
+                                     }
+                                   }
+                                 }
+                               }
+                        """));
       stages.add(sortOperation);
       stages.add(lookup(PRODUCTS_COLLECTION, ID_FIELD, ID_FIELD, productField));
       stages.add(unwind(productField, true));
@@ -178,7 +177,7 @@ public class AggregationRepository {
           new CustomProjectAggregationOperation(
               """
               {
-                $project: {
+                $addFields: {
                   "product._id": "$_id",
                   "product.name": "$name",
                   "product.description": "$description",
@@ -192,6 +191,24 @@ public class AggregationRepository {
                 }
               }
               """));
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+                      {
+                        $project: {
+                          "product._id": 1,
+                          "product.name": 1,
+                          "product.description": 1,
+                          "product.imageUrl": 1,
+                          "product.barcode": 1,
+                          "product.categories": 1,
+                          "product.amount": 1,
+                          "product.shopId": 1,
+                          "product.updatedAt": 1,
+                          "product._class": 1
+                        }
+                      }
+                      """));
     }
     stages.add(lookup("promotions", ID_FIELD, productIdField, promotionField));
     stages.add(unwind(promotionField, true));
@@ -206,9 +223,55 @@ public class AggregationRepository {
       stages.add(skip((long) countReviewsAtPage * page));
       stages.add(limit(countReviewsAtPage));
     }
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+              {
+                $addFields: {
+                  "productId": "$product._id",
+                  "productName": "$product.name",
+                  "description": "$product.description",
+                  "productImageUrl": "$product.imageUrl",
+                  "barcode": "$product.barcode",
+                  "amount": "$product.amount",
+                  "shopId": "$product.shopId",
+                  "startAtPromotion": "$promotion.startAt",
+                  "expiredAtPromotion": "$promotion.expiredAt",
+                  "countPromotion": "$promotion.count",
+                  "amountPromotion": "$promotion.amount",
+                  "isActive": {
+                    $cond: {
+                      if: {$lte: ["$blocked", null]},
+                      then: true,
+                      else: false
+                    }
+                  }
+                }
+              }
+            """));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                      {
+                        $project: {
+                          "productId": 1,
+                          "productName": 1,
+                          "description": 1,
+                          "productImageUrl": 1,
+                          "barcode": 1,
+                          "amount": 1,
+                          "shopId": 1,
+                          "startAtPromotion": 1,
+                          "expiredAtPromotion": 1,
+                          "countPromotion": 1,
+                          "amountPromotion": 1,
+                          "isActive": 1
+                        }
+                      }
+                    """));
     Aggregation aggregation = newAggregation(stages);
     return mongoTemplate
-        .aggregate(aggregation, PRODUCTS_COLLECTION, ProductGetDTO.class)
+        .aggregate(aggregation, PRODUCTS_COLLECTION, ProductDTO.class)
         .getMappedResults();
   }
 
