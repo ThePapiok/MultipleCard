@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PromotionDTOTest {
-
   private static final String AMOUNT_PARAM = "amount";
   private static ValidatorFactory validatorFactory;
   private static Validator validator;

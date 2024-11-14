@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Profile("prod")
 public class Schedule {
-
   private final BlockedRepository blockedRepository;
   private final ProductService productService;
 

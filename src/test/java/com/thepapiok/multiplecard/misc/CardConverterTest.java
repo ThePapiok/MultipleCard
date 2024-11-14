@@ -12,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class CardConverterTest {
-
   @Mock private PasswordEncoder passwordEncoder;
   private CardConverter cardConverter;
 

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/reviews")
 public class ReviewController {
-
   private final MessageSource messageSource;
   private final ReviewService reviewService;
   private final ResultService resultService;

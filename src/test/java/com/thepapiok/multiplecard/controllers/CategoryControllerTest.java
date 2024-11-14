@@ -5,7 +5,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.thepapiok.multiplecard.services.ResultService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thepapiok.multiplecard.services.CategoryService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +21,26 @@ import org.springframework.test.web.servlet.MvcResult;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-public class ResultControllerTest {
-  @MockBean private ResultService resultService;
-  @Autowired private MockMvc mvc;
+public class CategoryControllerTest {
+  @Autowired private MockMvc mockMvc;
+  @MockBean private CategoryService categoryService;
 
   @Test
-  public void shouldReturnResponseOfListPagesAtGetPagesWhenEverythingOk() throws Exception {
-    final int maxPage = 5;
-    final List<Integer> pages = List.of(1, 2, 3, 4, 5);
+  public void shouldReturnListOfCategoryNamesAtGetShopNamesWhenEverythingOk() throws Exception {
+    final String prefix = "category";
+    List<String> expectedCategoryNames = List.of("category1", "category2");
 
-    when(resultService.getPages(1, maxPage)).thenReturn(pages);
+    when(categoryService.getCategoriesByPrefix(prefix)).thenReturn(expectedCategoryNames);
 
     MvcResult mvcResult =
-        mvc.perform(post("/get_pages").param("page", "0").param("maxPage", "5"))
+        mockMvc
+            .perform(post("/get_categories").param("prefix", prefix))
             .andExpect(status().isOk())
             .andReturn();
-    assertEquals(
-        pages.toString().replaceAll(" ", ""), mvcResult.getResponse().getContentAsString());
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<String> categoryNames =
+        objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(), new TypeReference<List<String>>() {});
+    assertEquals(expectedCategoryNames, categoryNames);
   }
 }

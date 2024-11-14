@@ -38,7 +38,7 @@
             <option th:text="#{select_option.latest_add}" value="6"></option>
             <option th:text="#{select_option.oldest_add}" value="7"></option>
         </select>
-        <div id="searchButton" onclick="setParams('/products')">
+        <div id="searchButton" onclick="setParams('/products', false)">
             <img id="searchImage" src="/images/search.png" alt="search">
         </div>
         <a href="/add_product" id="addProduct">

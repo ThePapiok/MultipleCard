@@ -15,11 +15,10 @@ import org.mockito.MockitoAnnotations;
 
 public class PromotionConverterTest {
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId("123456789012345678901234");
-
-  @Mock private PromotionRepository promotionRepository;
-  private PromotionConverter promotionConverter;
   private Promotion promotion;
   private PromotionDTO promotionDTO;
+  @Mock private PromotionRepository promotionRepository;
+  private PromotionConverter promotionConverter;
 
   @BeforeEach
   public void setUp() {

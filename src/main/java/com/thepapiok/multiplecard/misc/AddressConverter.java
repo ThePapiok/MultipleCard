@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AddressConverter {
-
   public AddressDTO getDTO(Address address) {
     AddressDTO addressDTO = new AddressDTO();
     addressDTO.setCountry(address.getCountry());

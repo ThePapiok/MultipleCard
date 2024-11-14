@@ -35,11 +35,7 @@ public class PromotionControllerTest {
   private static final String TEST_PRODUCT_ID = "123456789012345678901234";
   private static final String IS_OWNER_PARAM = "isOwner";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-  private static final String ERROR_NOT_OWNER_MESSAGE = "Nie posiadasz tego produktu";
-  private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
-  private static final String ERROR_PARAM = "error";
   private static final String PROMOTION_PARAM = "promotion";
-  private static final String ORIGINAL_AMOUNT_PARAM = "originalAmount";
   private static final String PRODUCT_ID_PARAM = "productId";
   private static final String PROMOTIONS_URL = "/promotions";
   private static final String PROMOTIONS_ID_URL = "/promotions?id=";
@@ -48,7 +44,6 @@ public class PromotionControllerTest {
   private static final String ID_PARAM = "id";
   private static final LocalDate TEST_DATE1 = LocalDate.now();
   private static final LocalDate TEST_DATE2 = LocalDate.now().plusYears(1);
-
   @Autowired private MockMvc mockMvc;
   @MockBean private ProductService productService;
   @MockBean private PromotionService promotionService;
@@ -80,7 +75,7 @@ public class PromotionControllerTest {
     when(productService.isProductOwner(TEST_PHONE, TEST_PRODUCT_ID)).thenReturn(false);
 
     mockMvc
-        .perform(get(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID).param(ERROR_PARAM, ""))
+        .perform(get(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID).param("error", ""))
         .andExpect(model().attribute(IS_OWNER_PARAM, false))
         .andExpect(model().attribute(PROMOTION_PARAM, promotionDTO))
         .andExpect(model().attribute(PRODUCT_ID_PARAM, TEST_PRODUCT_ID))
@@ -103,7 +98,7 @@ public class PromotionControllerTest {
         .perform(
             get(PROMOTIONS_URL)
                 .param(ID_PARAM, TEST_PRODUCT_ID)
-                .param(ERROR_PARAM, "")
+                .param("error", "")
                 .session(httpSession))
         .andExpect(model().attribute(IS_OWNER_PARAM, false))
         .andExpect(model().attribute(PROMOTION_PARAM, promotionDTO))
@@ -132,7 +127,7 @@ public class PromotionControllerTest {
         .andExpect(model().attribute(IS_OWNER_PARAM, true))
         .andExpect(model().attribute(PROMOTION_PARAM, promotionDTO))
         .andExpect(model().attribute(PRODUCT_ID_PARAM, TEST_PRODUCT_ID))
-        .andExpect(model().attribute(ORIGINAL_AMOUNT_PARAM, amount))
+        .andExpect(model().attribute("originalAmount", amount))
         .andExpect(view().name(ADD_PROMOTION_PAGE));
   }
 
@@ -163,7 +158,7 @@ public class PromotionControllerTest {
 
     mockMvc
         .perform(delete(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID))
-        .andExpect(content().string(ERROR_NOT_OWNER_MESSAGE));
+        .andExpect(content().string("Nie posiadasz tego produktu"));
   }
 
   @Test
@@ -175,7 +170,7 @@ public class PromotionControllerTest {
 
     mockMvc
         .perform(delete(PROMOTIONS_URL).param(ID_PARAM, TEST_PRODUCT_ID))
-        .andExpect(content().string(ERROR_UNEXPECTED_MESSAGE));
+        .andExpect(content().string("Nieoczekiwany błąd"));
   }
 
   @Test
@@ -283,7 +278,7 @@ public class PromotionControllerTest {
 
     performPostAddPromotion(
         ERROR_MESSAGE_PARAM,
-        ERROR_NOT_OWNER_MESSAGE,
+        "Nie posiadasz tego produktu",
         PROMOTIONS_ID_URL + TEST_PRODUCT_ID + ERROR_URL_PARAM,
         promotionDTO);
   }
@@ -352,7 +347,7 @@ public class PromotionControllerTest {
     when(promotionService.upsertPromotion(expectedPromotionDTO)).thenReturn(false);
 
     performPostAddPromotion(
-        ERROR_MESSAGE_PARAM, ERROR_UNEXPECTED_MESSAGE, "/products?error", promotionDTO);
+        ERROR_MESSAGE_PARAM, "Nieoczekiwany błąd", "/products?error", promotionDTO);
   }
 
   @Test

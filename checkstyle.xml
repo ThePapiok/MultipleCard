@@ -40,6 +40,7 @@
         <module name="ModifiedControlVariable"/>
         <module name="MultipleStringLiterals">
             <property name="ignoreStringsRegexp" value='^(("")|(" "))$'/>
+            <property name="allowedDuplicates" value="2"/>
         </module>
         <module name="MultipleVariableDeclarations"/>
         <module name="NoArrayTrailingComma"/>

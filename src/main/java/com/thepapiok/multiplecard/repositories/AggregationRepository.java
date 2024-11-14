@@ -30,10 +30,9 @@ import org.springframework.stereotype.Repository;
 public class AggregationRepository {
   private static final String COUNT_FIELD = "count";
   private static final String ID_FIELD = "_id";
-  private static final String SHOP_ID_FIELD = "shopId";
   private static final String PRODUCTS_COLLECTION = "products";
-  private static final String TEXT_OPERATOR = "$text";
-  private static final String SEARCH_OPERATOR = "$search";
+  private static final String BLOCKED_FIELD = "blocked";
+  private static final String PRODUCT_ID_FIELD = "productId";
   private final AccountRepository accountRepository;
   private final MongoTemplate mongoTemplate;
 
@@ -44,7 +43,13 @@ public class AggregationRepository {
   }
 
   public List<ProductDTO> getProducts(
-      String phone, int page, String field, boolean isDescending, String text) {
+      String phone,
+      int page,
+      String field,
+      boolean isDescending,
+      String text,
+      String category,
+      String shopName) {
     final int countReviewsAtPage = 12;
     final String createdAtField = "order.createdAt";
     final String dateField = "date";
@@ -53,35 +58,11 @@ public class AggregationRepository {
     final String isNullField = "isNull";
     final String productField = "product";
     final String promotionField = "promotion";
-    final String blockedField = "blocked";
-    final String productIdField = "productId";
-    ObjectId shopId = null;
     GroupOperation groupOperation = null;
     SortOperation sortOperation = null;
     boolean hasOrders = false;
-    if (phone != null) {
-      shopId = accountRepository.findIdByPhone(phone).getId();
-    }
     List<AggregationOperation> stages = new ArrayList<>();
-    if (phone != null) {
-      if ("".equals(text)) {
-        stages.add(match(Criteria.where(SHOP_ID_FIELD).is(shopId)));
-      } else {
-        stages.add(
-            match(
-                Criteria.where(TEXT_OPERATOR)
-                    .is(new BasicDBObject(SEARCH_OPERATOR, text))
-                    .and(SHOP_ID_FIELD)
-                    .is(shopId)));
-      }
-    } else {
-      if (!"".equals(text)) {
-        stages.add(
-            match(Criteria.where(TEXT_OPERATOR).is(new BasicDBObject(SEARCH_OPERATOR, text))));
-      }
-      stages.add(lookup(blockedField, ID_FIELD, productIdField, blockedField));
-      stages.add(match(Criteria.where(blockedField).size(0)));
-    }
+    matchByTextCategoryOrShopName(stages, text, category, shopName, phone);
     switch (field) {
       case COUNT_FIELD:
         groupOperation =
@@ -183,7 +164,6 @@ public class AggregationRepository {
                   "product.description": "$description",
                   "product.imageUrl": "$imageUrl",
                   "product.barcode": "$barcode",
-                  "product.categories": "$categories",
                   "product.amount": "$amount",
                   "product.shopId": "$shopId",
                   "product.updatedAt": "$updatedAt",
@@ -201,7 +181,6 @@ public class AggregationRepository {
                           "product.description": 1,
                           "product.imageUrl": 1,
                           "product.barcode": 1,
-                          "product.categories": 1,
                           "product.amount": 1,
                           "product.shopId": 1,
                           "product.updatedAt": 1,
@@ -210,19 +189,15 @@ public class AggregationRepository {
                       }
                       """));
     }
-    stages.add(lookup("promotions", ID_FIELD, productIdField, promotionField));
+    stages.add(lookup("promotions", ID_FIELD, PRODUCT_ID_FIELD, promotionField));
     stages.add(unwind(promotionField, true));
     if (phone != null) {
-      stages.add(lookup(blockedField, ID_FIELD, productIdField, blockedField));
-      stages.add(unwind(blockedField, true));
-      stages.add(project(productField, promotionField, blockedField).andExclude(ID_FIELD));
-      stages.add(skip((long) countReviewsAtPage * page));
-      stages.add(limit(countReviewsAtPage));
-    } else {
-      stages.add(project(productField, promotionField).andExclude(ID_FIELD));
-      stages.add(skip((long) countReviewsAtPage * page));
-      stages.add(limit(countReviewsAtPage));
+      stages.add(lookup(BLOCKED_FIELD, ID_FIELD, PRODUCT_ID_FIELD, BLOCKED_FIELD));
+      stages.add(unwind(BLOCKED_FIELD, true));
     }
+    stages.add(project(productField, promotionField, BLOCKED_FIELD).andExclude(ID_FIELD));
+    stages.add(skip((long) countReviewsAtPage * page));
+    stages.add(limit(countReviewsAtPage));
     stages.add(
         new CustomProjectAggregationOperation(
             """
@@ -275,27 +250,10 @@ public class AggregationRepository {
         .getMappedResults();
   }
 
-  public int getMaxPage(String text, String phone) {
+  public int getMaxPage(String text, String phone, String category, String shopName) {
     final float countProductsAtPage = 12.0F;
     List<AggregationOperation> stages = new ArrayList<>();
-    if (phone != null) {
-      ObjectId shopId = accountRepository.findIdByPhone(phone).getId();
-      if ("".equals(text)) {
-        stages.add(match(Criteria.where(SHOP_ID_FIELD).is(shopId)));
-      } else {
-        stages.add(
-            Aggregation.match(
-                Criteria.where(TEXT_OPERATOR)
-                    .is(new BasicDBObject(SEARCH_OPERATOR, text))
-                    .and(SHOP_ID_FIELD)
-                    .is(shopId)));
-      }
-    } else {
-      if (!"".equals(text)) {
-        stages.add(
-            match(Criteria.where(TEXT_OPERATOR).is(new BasicDBObject(SEARCH_OPERATOR, text))));
-      }
-    }
+    matchByTextCategoryOrShopName(stages, text, category, shopName, phone);
     stages.add(group("id").count().as(COUNT_FIELD));
     stages.add(project(COUNT_FIELD).andExclude(ID_FIELD));
     Aggregation aggregation = newAggregation(stages);
@@ -311,5 +269,79 @@ public class AggregationRepository {
       pages = 0;
     }
     return (int) Math.ceil(pages / countProductsAtPage);
+  }
+
+  private void matchByTextCategoryOrShopName(
+      List<AggregationOperation> stages,
+      String text,
+      String category,
+      String shopName,
+      String phone) {
+    if (phone != null) {
+      ObjectId shopId = accountRepository.findIdByPhone(phone).getId();
+      if ("".equals(text)) {
+        stages.add(match(Criteria.where("shopId").is(shopId)));
+      } else {
+        stages.add(
+            match(
+                Criteria.where("$text")
+                    .is(new BasicDBObject("$search", text))
+                    .and("shopId")
+                    .is(shopId)));
+      }
+    } else {
+      if (!"".equals(text)) {
+        stages.add(match(Criteria.where("$text").is(new BasicDBObject("$search", text))));
+      }
+      stages.add(lookup(BLOCKED_FIELD, ID_FIELD, PRODUCT_ID_FIELD, BLOCKED_FIELD));
+      stages.add(match(Criteria.where(BLOCKED_FIELD).size(0)));
+    }
+    if (!"".equals(category)) {
+      stages.add(unwind("categories", true));
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+                       {
+                         $lookup: {
+                           "from": "categories",
+                           "localField": "categories",
+                           "foreignField": "_id",
+                           "as": "category",
+                           "pipeline": [
+                             {
+                               $project: {
+                                 "name": 1
+                               }
+                             }
+                           ]
+                         }
+                       }
+                       """));
+      stages.add(unwind("category", true));
+      stages.add(match(Criteria.where("category.name").is(category)));
+    }
+    if (!"".equals(shopName)) {
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+                {
+                  $lookup: {
+                    "from": "shops",
+                    "localField": "shopId",
+                    "foreignField": "_id",
+                    "as": "shop",
+                    "pipeline": [
+                      {
+                        $project: {
+                          "name": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+                """));
+      stages.add(unwind("shop", true));
+      stages.add(match(Criteria.where("shop.name").is(shopName)));
+    }
   }
 }

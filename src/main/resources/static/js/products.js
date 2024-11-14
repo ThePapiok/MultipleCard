@@ -1,4 +1,4 @@
-function setParams(url) {
+function setParams(url, type) {
     const value = parseInt(document.getElementById("searchSelect").value);
     const text = document.getElementById("searchInput").value;
     let sort = null;
@@ -38,6 +38,24 @@ function setParams(url) {
             url += ("?text=" + text);
         } else {
             url += ("&text=" + text);
+        }
+    }
+    if (type) {
+        const category = document.getElementById("categoryInput").value;
+        const shopName = document.getElementById("shopNameInput").value;
+        if (category !== "") {
+            if (url.indexOf("?") === -1) {
+                url += ("?category=" + category);
+            } else {
+                url += ("&category=" + category);
+            }
+        }
+        if (shopName !== "") {
+            if (url.indexOf("?") === -1) {
+                url += ("?shopName=" + shopName);
+            } else {
+                url += ("&shopName=" + shopName);
+            }
         }
     }
     window.location = url;

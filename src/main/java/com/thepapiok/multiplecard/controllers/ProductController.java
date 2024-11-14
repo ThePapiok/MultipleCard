@@ -36,22 +36,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ProductController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String ERROR_VALIDATION_MESSAGE = "validation.incorrect_data";
-  private static final String ERROR_CATEGORY_BAD_SIZE_MESSAGE = "error.category.bad_size";
-  private static final String ERROR_CATEGORY_NOT_UNIQUE_MESSAGE = "error.category.unique";
-  private static final String ERROR_BAD_FILE_MESSAGE = "error.bad_file";
-  private static final String ERROR_CATEGORY_TOO_MANY_MESSAGE = "error.category.too_many";
-  private static final String ERROR_PRODUCT_THE_SAME_NAME_MESSAGE = "error.product.the_same_name";
-  private static final String ERROR_BARCODE_THE_SAME_NAME_MESSAGE =
-      "error.product.the_same_barcode";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
-  private static final String REDIRECT_PRODUCTS_ERROR = "redirect:/products?error";
-  private static final String REDIRECT_PRODUCTS_SUCCESS = "redirect:/products?success";
   private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String SUCCESS_OK_MESSAGE = "ok";
-  private static final String CATEGORIES_PARAM = "categories";
-  private static final Pattern PATTERN_CATEGORY =
-      Pattern.compile("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$");
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -104,8 +92,8 @@ public class ProductController {
     }
     if (id == null) {
       List<ProductDTO> products =
-          productService.getProducts(phone, page, field, isDescending, text);
-      maxPage = productService.getMaxPage(text, phone);
+          productService.getProducts(phone, page, field, isDescending, text, "", "");
+      maxPage = productService.getMaxPage(text, phone, "", "");
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
       model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
@@ -119,7 +107,7 @@ public class ProductController {
         return "redirect:/products";
       }
       Product product = productService.getProductById(id);
-      model.addAttribute(CATEGORIES_PARAM, categoryService.getAllNames());
+      model.addAttribute("categories", categoryService.getAllNames());
       model.addAttribute("productCategories", productService.getCategoriesNames(product));
       model.addAttribute("product", productService.getEditProductDTO(product));
       model.addAttribute("id", id);
@@ -137,7 +125,7 @@ public class ProductController {
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
       }
     }
-    model.addAttribute(CATEGORIES_PARAM, categoryService.getAllNames());
+    model.addAttribute("categories", categoryService.getAllNames());
     model.addAttribute("addProduct", new AddProductDTO());
     return "addProductPage";
   }
@@ -157,27 +145,32 @@ public class ProductController {
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
-    } else if (!categories.stream().allMatch(e -> PATTERN_CATEGORY.matcher(e).matches())) {
+    } else if (!categories.stream()
+        .allMatch(
+            e ->
+                Pattern.compile("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
+                    .matcher(e)
+                    .matches())) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
     } else if (categories.size() == 0 || categories.size() > maxSize) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_BAD_SIZE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.bad_size", null, locale);
     } else if (new HashSet<>(categories).size() != categories.size()) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_NOT_UNIQUE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.unique", null, locale);
     } else if (!shopService.checkImage(addProductDTO.getFile())) {
       error = true;
-      message = messageSource.getMessage(ERROR_BAD_FILE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.bad_file", null, locale);
     } else if (categoryService.checkOwnerHas20Categories(ownerId, categories)) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_TOO_MANY_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.too_many", null, locale);
     } else if (productService.checkOwnerHasTheSameNameProduct(ownerId, addProductDTO.getName())) {
       error = true;
-      message = messageSource.getMessage(ERROR_PRODUCT_THE_SAME_NAME_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.product.the_same_name", null, locale);
     } else if (productService.checkOwnerHasTheSameBarcode(ownerId, addProductDTO.getBarcode())) {
       error = true;
-      message = messageSource.getMessage(ERROR_BARCODE_THE_SAME_NAME_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.product.the_same_barcode", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
@@ -186,12 +179,12 @@ public class ProductController {
     if (!productService.addProduct(addProductDTO, ownerId, categories)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
-      return REDIRECT_PRODUCTS_ERROR;
+      return "redirect:/products?error";
     }
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("addProductPage.success.add_product", null, locale));
-    return REDIRECT_PRODUCTS_SUCCESS;
+    return "redirect:/products?success";
   }
 
   @DeleteMapping("/products")
@@ -250,30 +243,35 @@ public class ProductController {
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
-    } else if (!categories.stream().allMatch(e -> PATTERN_CATEGORY.matcher(e).matches())) {
+    } else if (!categories.stream()
+        .allMatch(
+            e ->
+                Pattern.compile("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
+                    .matcher(e)
+                    .matches())) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
     } else if (categories.size() == 0 || categories.size() > maxSize) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_BAD_SIZE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.bad_size", null, locale);
     } else if (new HashSet<>(categories).size() != categories.size()) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_NOT_UNIQUE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.unique", null, locale);
     } else if (categoryService.checkOwnerHas20Categories(ownerId, categories)) {
       error = true;
-      message = messageSource.getMessage(ERROR_CATEGORY_TOO_MANY_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.category.too_many", null, locale);
     } else if (!originalProduct.getName().equals(name)
         && productService.checkOwnerHasTheSameNameProduct(ownerId, name)) {
       error = true;
-      message = messageSource.getMessage(ERROR_PRODUCT_THE_SAME_NAME_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.product.the_same_name", null, locale);
     } else if (!originalProduct.getBarcode().equals(barcode)
         && productService.checkOwnerHasTheSameBarcode(ownerId, barcode)) {
       error = true;
-      message = messageSource.getMessage(ERROR_BARCODE_THE_SAME_NAME_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.product.the_same_barcode", null, locale);
     } else if (editProductDTO.getFile() != null
         && !shopService.checkImage(editProductDTO.getFile())) {
       error = true;
-      message = messageSource.getMessage(ERROR_BAD_FILE_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.bad_file", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
@@ -282,12 +280,12 @@ public class ProductController {
     if (!productService.editProduct(editProductDTO, ownerId, categories)) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
-      return REDIRECT_PRODUCTS_ERROR;
+      return "redirect:/products?error";
     }
     httpSession.setAttribute(
         SUCCESS_MESSAGE_PARAM,
         messageSource.getMessage("productPage.success.edit_product", null, locale));
-    return REDIRECT_PRODUCTS_SUCCESS;
+    return "redirect:/products?success";
   }
 
   @PostMapping("/get_products")

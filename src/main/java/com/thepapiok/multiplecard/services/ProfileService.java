@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
-
   private final AccountRepository accountRepository;
   private final UserRepository userRepository;
   private final ProfileConverter profileConverter;

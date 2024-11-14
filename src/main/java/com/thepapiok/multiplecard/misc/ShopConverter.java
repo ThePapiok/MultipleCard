@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ShopConverter {
-
   private final AddressConverter addressConverter;
 
   @Autowired

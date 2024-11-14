@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReviewConverter {
-
   public Review getEntity(ReviewDTO reviewDTO) {
     Review review = new Review();
     review.setDescription(reviewDTO.getDescription());

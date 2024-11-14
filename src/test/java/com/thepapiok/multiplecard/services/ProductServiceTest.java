@@ -54,8 +54,6 @@ public class ProductServiceTest {
   private static final String TEST_ID1 = "123456789012345678904312";
   private static final String TEST_ID2 = "023456589012345178904387";
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
-  private static final ObjectId TEST_PRODUCT1_ID = new ObjectId(TEST_ID1);
-  private static final ObjectId TEST_PRODUCT2_ID = new ObjectId(TEST_ID2);
   private static final String TEST_PRODUCT_NAME = "name";
   private static final String TEST_BARCODE = "12345678901234567890123";
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123451789012345678901234");
@@ -70,16 +68,11 @@ public class ProductServiceTest {
   private static final String TEST_SHOP_IMAGE_URL = "shopImageUrl";
   private static final String TEST_URL = "url";
   private static final String COUNT_FILED = "count";
-
   private static final LocalDateTime TEST_DATE = LocalDateTime.now();
-  private static Category testCategory;
-  private static Category testExpectedCategory;
   private static List<String> testNameOfCategories;
   private static Product testProduct;
   private static Product testExpectedProduct;
   private static EditProductDTO testEditProductDTO;
-  private ProductService productService;
-
   @Mock private CategoryService categoryService;
   @Mock private ProductConverter productConverter;
   @Mock private CloudinaryService cloudinaryService;
@@ -93,6 +86,7 @@ public class ProductServiceTest {
   @Mock private BlockedRepository blockedRepository;
   @Mock private CategoryRepository categoryRepository;
   @Mock private ShopRepository shopRepository;
+  private ProductService productService;
 
   @BeforeEach
   public void setUp() {
@@ -234,9 +228,9 @@ public class ProductServiceTest {
   public void shouldReturn12AtGetMaxPageWhenEverythingOk() {
     final int maxPage = 12;
 
-    when(aggregationRepository.getMaxPage("", TEST_PHONE)).thenReturn(maxPage);
+    when(aggregationRepository.getMaxPage("", TEST_PHONE, "", "")).thenReturn(maxPage);
 
-    assertEquals(maxPage, productService.getMaxPage("", TEST_PHONE));
+    assertEquals(maxPage, productService.getMaxPage("", TEST_PHONE, "", ""));
   }
 
   @Test
@@ -597,10 +591,10 @@ public class ProductServiceTest {
   }
 
   private void setDataForEditProduct() {
-    testCategory = new Category();
+    Category testCategory = new Category();
     testCategory.setName(TEST_CATEGORY_NAME3);
     testCategory.setOwnerId(TEST_OWNER_ID);
-    testExpectedCategory = new Category();
+    Category testExpectedCategory = new Category();
     testExpectedCategory.setId(TEST_CATEGORY_ID3);
     testExpectedCategory.setName(TEST_CATEGORY_NAME3);
     testExpectedCategory.setOwnerId(TEST_OWNER_ID);
@@ -636,11 +630,11 @@ public class ProductServiceTest {
   public void shouldReturnListOfProductDTOAtGetProductsWhenEverythingOk() {
     List<ProductDTO> expectedProducts = setDataProductsDTO();
 
-    when(aggregationRepository.getProducts(TEST_PHONE, 1, COUNT_FILED, true, ""))
+    when(aggregationRepository.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", ""))
         .thenReturn(expectedProducts);
 
     assertEquals(
-        expectedProducts, productService.getProducts(TEST_PHONE, 1, COUNT_FILED, true, ""));
+        expectedProducts, productService.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", ""));
   }
 
   @Test
@@ -651,7 +645,8 @@ public class ProductServiceTest {
     ProductWithShopDTO product2 =
         new ProductWithShopDTO(productDTOS.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
 
-    when(productRepository.findProductsByIds(List.of(TEST_PRODUCT1_ID, TEST_PRODUCT2_ID), 0))
+    when(productRepository.findProductsByIds(
+            List.of(new ObjectId(TEST_ID1), new ObjectId(TEST_ID2)), 0))
         .thenReturn(List.of(product1, product2));
 
     assertEquals(
@@ -670,11 +665,13 @@ public class ProductServiceTest {
     shop.setName(TEST_SHOP_NAME);
     shop.setImageUrl(TEST_SHOP_IMAGE_URL);
 
-    when(aggregationRepository.getProducts(null, 1, COUNT_FILED, true, "")).thenReturn(productDTOS);
+    when(aggregationRepository.getProducts(null, 1, COUNT_FILED, true, "", "", ""))
+        .thenReturn(productDTOS);
     when(shopRepository.findImageUrlAndNameById(TEST_OWNER_ID)).thenReturn(shop);
 
     assertEquals(
-        List.of(product1, product2), productService.getProductsWithShops(1, COUNT_FILED, true, ""));
+        List.of(product1, product2),
+        productService.getProductsWithShops(1, COUNT_FILED, true, "", "", ""));
   }
 
   private List<ProductDTO> setDataProductsDTO() {

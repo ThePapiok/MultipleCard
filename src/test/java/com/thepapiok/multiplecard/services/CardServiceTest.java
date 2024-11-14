@@ -30,7 +30,6 @@ public class CardServiceTest {
   private static final String TEST_PHONE = "12323234112";
   private static final String TEST_CARD_NAME = "card";
   private static final String TEST_PIN = "1111";
-  private static final String TEST_URL = "dasdas1231231@sdfasdfds";
   @Mock private AccountRepository accountRepository;
   @Mock private CardRepository cardRepository;
   @Mock private CloudinaryService cloudinaryService;
@@ -38,7 +37,6 @@ public class CardServiceTest {
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private QrCodeService qrCodeService;
   @Mock private CardConverter cardConverter;
-
   private CardService cardService;
 
   @BeforeEach
@@ -122,7 +120,7 @@ public class CardServiceTest {
     expectedCardWithIdAndImageUrl.setPin(TEST_PIN);
     expectedCardWithIdAndImageUrl.setAttempts(0);
     expectedCardWithIdAndImageUrl.setUserId(TEST_ID);
-    expectedCardWithIdAndImageUrl.setImageUrl(TEST_URL);
+    expectedCardWithIdAndImageUrl.setImageUrl("dasdas1231231@sdfasdfds");
     expectedCardWithIdAndImageUrl.setId(TEST_CARD_ID);
 
     Account account = new Account();
@@ -133,7 +131,8 @@ public class CardServiceTest {
     when(cardConverter.getEntity(orderCardDTO)).thenReturn(card);
     when(mongoTemplate.save(expectedCard)).thenReturn(expectedCardWithId);
     when(qrCodeService.generateQrCode("nullcard?id=" + TEST_CARD_ID)).thenReturn(bytes);
-    when(cloudinaryService.addImage(bytes, TEST_CARD_ID.toString())).thenReturn(TEST_URL);
+    when(cloudinaryService.addImage(bytes, TEST_CARD_ID.toString()))
+        .thenReturn("dasdas1231231@sdfasdfds");
 
     assertTrue(cardService.createCard(orderCardDTO, TEST_PHONE));
     verify(mongoTemplate).save(expectedCard);

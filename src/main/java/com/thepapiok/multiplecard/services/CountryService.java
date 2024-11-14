@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CountryService {
-
   private final RestTemplate restTemplate;
 
   @Autowired

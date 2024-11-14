@@ -28,25 +28,12 @@ import org.springframework.web.client.RestTemplate;
 @Import(DbConfig.class)
 public class AccountRepositoryTest {
   private static final String TEST_PHONE1 = "+21413241234";
-  private static final String TEST_PHONE2 = "+76546545343";
-  private static final String TEST_EMAIL1 = "email1";
-  private static final String TEST_EMAIL2 = "email2";
-  private static final String TEST_PASSWORD1 = "Zasdq1!2dss";
-  private static final String TEST_CITY = "city1";
-  private static final String TEST_STREET = "street1";
-  private static final String TEST_COUNTRY = "country1";
-  private static final String TEST_PROVINCE = "province1";
-  private static final String TEST_POSTAL_CODE = "postalCode1";
-  private static final String TEST_HOUSE_NUMBER = "houseNumber1";
   private static final String TEST_SHOP_NAME1 = "shop1";
-  private static final String TEST_SHOP_NAME2 = "shop2";
   private static final String TEST_ACCOUNT_NUMBER1 = "132345346457568657342343464575685667";
-  private static final String TEST_ACCOUNT_NUMBER2 = "12312312312312312312312312312312312312";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private Account account1;
   private Account account2;
   private Address address1;
-  private Address address2;
   @Autowired private AccountRepository accountRepository;
   @Autowired private ShopRepository shopRepository;
   @Autowired private MongoTemplate mongoTemplate;
@@ -57,18 +44,18 @@ public class AccountRepositoryTest {
     final ObjectId otherIdTest = new ObjectId("123456789012345678901235");
     account1 = new Account();
     account1.setPhone(TEST_PHONE1);
-    account1.setEmail(TEST_EMAIL1);
+    account1.setEmail("email1");
     account1.setId(TEST_ID);
-    account1.setPassword(TEST_PASSWORD1);
+    account1.setPassword("Zasdq1!2dss");
     account1.setActive(true);
     account1.setRole(Role.ROLE_USER);
     address1 = new Address();
-    address1.setCity(TEST_CITY);
-    address1.setStreet(TEST_STREET);
-    address1.setCountry(TEST_COUNTRY);
-    address1.setProvince(TEST_PROVINCE);
-    address1.setPostalCode(TEST_POSTAL_CODE);
-    address1.setHouseNumber(TEST_HOUSE_NUMBER);
+    address1.setCity("city1");
+    address1.setStreet("street1");
+    address1.setCountry("country1");
+    address1.setProvince("province1");
+    address1.setPostalCode("postalCode1");
+    address1.setHouseNumber("houseNumber1");
     address1.setApartmentNumber(1);
     Shop shop1 = new Shop();
     shop1.setFirstName("firstName1");
@@ -80,7 +67,7 @@ public class AccountRepositoryTest {
     shop1.setPoints(List.of(address1));
     shop1.setAccountNumber(TEST_ACCOUNT_NUMBER1);
     mongoTemplate.save(shop1);
-    address2 = new Address();
+    Address address2 = new Address();
     address2.setCity("city2");
     address2.setStreet("street2");
     address2.setCountry("country2");
@@ -92,15 +79,15 @@ public class AccountRepositoryTest {
     shop2.setId(otherIdTest);
     shop2.setFirstName("firstName2");
     shop2.setLastName("lastName2");
-    shop2.setName(TEST_SHOP_NAME2);
+    shop2.setName("shop2");
     shop2.setTotalAmount(0L);
     shop2.setImageUrl("safddb123vberewrr");
     shop2.setPoints(List.of(address2));
-    shop2.setAccountNumber(TEST_ACCOUNT_NUMBER2);
+    shop2.setAccountNumber("12312312312312312312312312312312312312");
     mongoTemplate.save(shop2);
     account2 = new Account();
-    account2.setPhone(TEST_PHONE2);
-    account2.setEmail(TEST_EMAIL2);
+    account2.setPhone("+76546545343");
+    account2.setEmail("email2");
     account2.setId(otherIdTest);
     account2.setPassword("asdaZ12!asd");
     account2.setActive(true);
@@ -120,7 +107,7 @@ public class AccountRepositoryTest {
     Account expectedAccount1 = new Account();
     expectedAccount1.setPhone(TEST_PHONE1);
     Account expectedAccount2 = new Account();
-    expectedAccount2.setPhone(TEST_PHONE2);
+    expectedAccount2.setPhone("+76546545343");
     List<Account> expectedAccounts = List.of(expectedAccount1, expectedAccount2);
 
     assertEquals(expectedAccounts, accountRepository.findAllPhones());
@@ -129,9 +116,9 @@ public class AccountRepositoryTest {
   @Test
   public void shouldReturnListOfAccountEntitiesWithOnlyFieldEmailAtFindAllEmailsWhenEverythingOk() {
     Account expectedAccount1 = new Account();
-    expectedAccount1.setEmail(TEST_EMAIL1);
+    expectedAccount1.setEmail("email1");
     Account expectedAccount2 = new Account();
-    expectedAccount2.setEmail(TEST_EMAIL2);
+    expectedAccount2.setEmail("email2");
     List<Account> expectedAccounts = List.of(expectedAccount1, expectedAccount2);
     accountRepository.save(account1);
     accountRepository.save(account2);
@@ -151,7 +138,7 @@ public class AccountRepositoryTest {
   public void
       shouldReturnAccountEntityWithOnlyFieldPasswordAtFindPasswordByPhoneWhenEverythingOk() {
     Account expecetedAccount = new Account();
-    expecetedAccount.setPassword(TEST_PASSWORD1);
+    expecetedAccount.setPassword("Zasdq1!2dss");
 
     assertEquals(expecetedAccount, accountRepository.findPasswordByPhone(TEST_PHONE1));
   }

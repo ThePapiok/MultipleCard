@@ -51,12 +51,10 @@ public class ProductControllerTest {
   private static final String TEST_PHONE = "+4324234234234234";
   private static final String TEST_BAD_CATEGORY1_NAME = "category1";
   private static final String TEST_BAD_CATEGORY2_NAME = "category2";
-  private static final String TEST_BAD_CATEGORY3_NAME = "category3";
   private static final String TEST_FILE_NAME = "file";
   private static final String TEST_PRODUCT_NAME = "Addd";
   private static final String TEST_BARCODE = "1234567890123";
   private static final String TEST_AMOUNT = "123.12zł";
-  private static final String TEST_AMOUNT_WITHOUT_CURRENCY = "123.12";
   private static final String TEST_DESCRIPTION = "asdfds";
   private static final String TEST_CATEGORY1_NAME = "Kategoria";
   private static final String TEST_CATEGORY2_NAME = "Kateegoria";
@@ -68,7 +66,6 @@ public class ProductControllerTest {
   private static final String ERROR_PARAM = "error";
   private static final String ID_PARAM = "id";
   private static final String ERROR_MESSAGE = "error!";
-  private static final String SUCCESS_PARAM = "success";
   private static final String ADD_PRODUCT_PARAM = "addProduct";
   private static final String CATEGORIES_PARAM = "categories";
   private static final String NAME_PARAM = "name";
@@ -78,9 +75,7 @@ public class ProductControllerTest {
   private static final String CATEGORY0_PARAM = "category[0]";
   private static final String CATEGORY1_PARAM = "category[1]";
   private static final String CATEGORY2_PARAM = "category[2]";
-  private static final String CATEGORY3_PARAM = "category[3]";
   private static final String PRODUCTS_URL = "/products";
-  private static final String PRODUCTS_ERROR_URL = "/products?error";
   private static final String PRODUCTS_SUCCESS_URL = "/products?success";
   private static final String PRODUCTS_ID_URL = "/products?id=";
   private static final String ERROR_URL_PARAM = "&error";
@@ -102,23 +97,13 @@ public class ProductControllerTest {
   private static final Integer TEST_PRODUCT_SIZE = 2;
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_NOT_OWNER_MESSAGE = "Nie posiadasz tego produktu";
-  private static final String ERROR_CATEGORY_NOT_UNIQUE_MESSAGE = "Kategorie muszą być unikalne";
-  private static final String ERROR_CATEGORY_TOO_MANY_MESSAGE =
-      "Za dużo stworzyłeś nowych kategorii";
-  private static final String ERROR_PRODUCT_THE_SAME_NAME_MESSAGE =
-      "Posiadasz już produkt o takiej nazwie";
-  private static final String ERROR_PRODUCT_THE_SAME_BARCODE_MESSAGE =
-      "Posiadasz już produkt o takim kodzie kreskowym";
-  private static final String ERROR_BAD_FILE_MESSAGE = "Niepoprawny plik";
   private static final String SUCCESS_OK_MESSAGE = "ok";
   private static final String SUCCESS_EDIT_PRODUCT_MESSAGE = "Pomyślnie edytowano produkt";
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId("123456789012345678904312");
-
   private Product testProduct1;
   private Product testProduct2;
   private List<Integer> testPages;
   private List<ProductDTO> testProducts;
-
   @Autowired private MockMvc mockMvc;
   @MockBean private CategoryService categoryService;
   @MockBean private AccountRepository accountRepository;
@@ -215,7 +200,7 @@ public class ProductControllerTest {
     setDataForProductsPage();
 
     mockMvc
-        .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, ""))
+        .perform(get(PRODUCTS_URL).param("success", ""))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
@@ -235,7 +220,7 @@ public class ProductControllerTest {
     setDataForProductsPage();
 
     mockMvc
-        .perform(get(PRODUCTS_URL).param(SUCCESS_PARAM, "").session(httpSession))
+        .perform(get(PRODUCTS_URL).param("success", "").session(httpSession))
         .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, testPages))
@@ -327,8 +312,9 @@ public class ProductControllerTest {
     testProducts = List.of(productDTO1, productDTO2);
     testPages = List.of(1);
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "")).thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE)).thenReturn(1);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", ""))
+        .thenReturn(testProducts);
+    when(productService.getMaxPage("", TEST_PHONE, "", "")).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
   }
 
@@ -390,7 +376,7 @@ public class ProductControllerTest {
     addProductDTO.setAmount("123");
     addProductDTO.setDescription("asdf");
     addProductDTO.setCategory(
-        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -408,7 +394,7 @@ public class ProductControllerTest {
     addProductDTO.setAmount(TEST_AMOUNT);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
-        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -443,7 +429,7 @@ public class ProductControllerTest {
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .param(CATEGORY2_PARAM, categories.get(2))
-                .param(CATEGORY3_PARAM, categories.get(index3))
+                .param("category[3]", categories.get(index3))
                 .param(AMOUNT_PARAM, addProductDTO.getAmount())
                 .session(httpSession))
         .andExpect(redirectedUrl(ADD_PRODUCT_ERROR_URL));
@@ -465,7 +451,7 @@ public class ProductControllerTest {
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME));
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(ERROR_CATEGORY_NOT_UNIQUE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals("Kategorie muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -478,7 +464,7 @@ public class ProductControllerTest {
     when(shopService.checkImage(multipartFile)).thenReturn(false);
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(ERROR_BAD_FILE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals("Niepoprawny plik", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -494,7 +480,8 @@ public class ProductControllerTest {
         .thenReturn(true);
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(ERROR_CATEGORY_TOO_MANY_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(
+        "Za dużo stworzyłeś nowych kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -513,7 +500,7 @@ public class ProductControllerTest {
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
     assertEquals(
-        ERROR_PRODUCT_THE_SAME_NAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+        "Posiadasz już produkt o takiej nazwie", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -534,7 +521,8 @@ public class ProductControllerTest {
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
     assertEquals(
-        ERROR_PRODUCT_THE_SAME_BARCODE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+        "Posiadasz już produkt o takim kodzie kreskowym",
+        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -546,7 +534,7 @@ public class ProductControllerTest {
     AddProductDTO expectedAddProductDTO = new AddProductDTO();
     expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
     expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setAmount(TEST_AMOUNT_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setAmount("123.12");
     expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
     expectedAddProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
@@ -563,7 +551,7 @@ public class ProductControllerTest {
             expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
         .thenReturn(false);
 
-    performPostAddProduct(addProductDTO, httpSession, PRODUCTS_ERROR_URL, multipartFile);
+    performPostAddProduct(addProductDTO, httpSession, "/products?error", multipartFile);
     assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -576,7 +564,7 @@ public class ProductControllerTest {
     AddProductDTO expectedAddProductDTO = new AddProductDTO();
     expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
     expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setAmount(TEST_AMOUNT_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setAmount("123.12");
     expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
     expectedAddProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
@@ -798,7 +786,7 @@ public class ProductControllerTest {
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .param(CATEGORY2_PARAM, categories.get(2))
-                .param(CATEGORY3_PARAM, categories.get(categoryIndex3))
+                .param("category[3]", categories.get(categoryIndex3))
                 .session(httpSession))
         .andExpect(redirectedUrl(PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -831,7 +819,7 @@ public class ProductControllerTest {
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .session(httpSession))
         .andExpect(redirectedUrl(PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM));
-    assertEquals(ERROR_CATEGORY_NOT_UNIQUE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals("Kategorie muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -847,7 +835,7 @@ public class ProductControllerTest {
         editProductDTO,
         PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
         ERROR_MESSAGE_PARAM,
-        ERROR_CATEGORY_TOO_MANY_MESSAGE);
+        "Za dużo stworzyłeś nowych kategorii");
   }
 
   @Test
@@ -865,7 +853,7 @@ public class ProductControllerTest {
         editProductDTO,
         PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
         ERROR_MESSAGE_PARAM,
-        ERROR_PRODUCT_THE_SAME_NAME_MESSAGE);
+        "Posiadasz już produkt o takiej nazwie");
   }
 
   @Test
@@ -885,7 +873,7 @@ public class ProductControllerTest {
         editProductDTO,
         PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
         ERROR_MESSAGE_PARAM,
-        ERROR_PRODUCT_THE_SAME_BARCODE_MESSAGE);
+        "Posiadasz już produkt o takim kodzie kreskowym");
   }
 
   @Test
@@ -905,7 +893,7 @@ public class ProductControllerTest {
         editProductDTO,
         PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
         ERROR_MESSAGE_PARAM,
-        ERROR_BAD_FILE_MESSAGE);
+        "Niepoprawny plik");
   }
 
   @Test
@@ -924,7 +912,7 @@ public class ProductControllerTest {
         .thenReturn(false);
 
     performPostForEditProduct(
-        editProductDTO, PRODUCTS_ERROR_URL, ERROR_MESSAGE_PARAM, ERROR_UNEXPECTED_MESSAGE);
+        editProductDTO, "/products?error", ERROR_MESSAGE_PARAM, ERROR_UNEXPECTED_MESSAGE);
   }
 
   @Test

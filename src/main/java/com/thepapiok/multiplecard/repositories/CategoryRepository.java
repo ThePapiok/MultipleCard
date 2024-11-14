@@ -115,4 +115,24 @@ public interface CategoryRepository extends MongoRepository<Category, ObjectId> 
 
   @Query(value = "{'name': ?0}", fields = "{'_id': 1}")
   Category findIdByName(String name);
+
+  @Aggregation(
+      pipeline = {
+        """
+    {
+        $match: {
+            "name": {$regex: ?0, $options:  "i"}
+        }
+    }
+""",
+        """
+    {
+        $project: {
+            "name": 1,
+            "_id": 0
+        }
+    }
+"""
+      })
+  List<String> getCategoryNamesByPrefix(String pattern);
 }

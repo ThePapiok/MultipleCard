@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.misc.AddressConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,9 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ShopService {
-
   private final AddressConverter addressConverter;
   private final AccountRepository accountRepository;
+  private final ShopRepository shopRepository;
   private final RestTemplate restTemplate;
 
   @Value("${IBANAPI_API_KEY}")
@@ -33,9 +34,11 @@ public class ShopService {
   public ShopService(
       AddressConverter addressConverter,
       AccountRepository accountRepository,
+      ShopRepository shopRepository,
       RestTemplate restTemplate) {
     this.addressConverter = addressConverter;
     this.accountRepository = accountRepository;
+    this.shopRepository = shopRepository;
     this.restTemplate = restTemplate;
   }
 
@@ -107,5 +110,12 @@ public class ShopService {
       }
     }
     return emptyFiles == 1;
+  }
+
+  public List<String> getShopNamesByPrefix(String prefix) {
+    if ("".equals(prefix)) {
+      return List.of();
+    }
+    return shopRepository.getShopNamesByPrefix("^" + prefix);
   }
 }

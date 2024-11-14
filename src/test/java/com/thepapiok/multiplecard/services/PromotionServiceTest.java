@@ -23,10 +23,10 @@ import org.mockito.MockitoAnnotations;
 public class PromotionServiceTest {
   private static final String TEST_ID = "123456789012345678901234";
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
+  private Promotion expectedPromotion;
   @Mock private PromotionRepository promotionRepository;
   @Mock private PromotionConverter promotionConverter;
   private PromotionService promotionService;
-  private Promotion expectedPromotion;
 
   @BeforeEach
   public void setUp() {

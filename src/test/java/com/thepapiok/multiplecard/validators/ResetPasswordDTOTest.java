@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 public class ResetPasswordDTOTest {
   private static final String CODE_PARAM = "code";
-
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
 

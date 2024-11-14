@@ -86,4 +86,18 @@ public class CategoryServiceTest {
 
     assertFalse(categoryService.checkOwnerHas20Categories(TEST_OWNER_ID, TEST_NAME_CATEGORIES));
   }
+
+  @Test
+  public void shouldReturnListOfCategoryNamesAtGetCategoriesByPrefixWhenEverythingOk() {
+    List<String> categoryNames = List.of("Kebab");
+
+    when(categoryRepository.getCategoryNamesByPrefix("^Ke")).thenReturn(categoryNames);
+
+    assertEquals(categoryNames, categoryService.getCategoriesByPrefix("Ke"));
+  }
+
+  @Test
+  public void shouldReturnEmptyListAtGetCategoriesByPrefixWhenPrefixIsBlank() {
+    assertEquals(List.of(), categoryService.getCategoriesByPrefix(""));
+  }
 }

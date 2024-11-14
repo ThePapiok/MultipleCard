@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
-
   private final LocaleChanger localeChanger;
   private final MessageSource messageSource;
 

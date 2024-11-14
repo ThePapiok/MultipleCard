@@ -57,20 +57,16 @@ public class ProfileServiceTest {
   private static final String TEST_PHONE = "+48755775676767";
   private static final String ID_PARAM = "_id";
   private static final String CARD_ID_PARAM = "cardId";
-  private static final String REVIEW_USER_ID_PARAM = "reviewUserId";
-  private static final String USER_ID_PARAM = "userId";
   private static final ObjectId TEST_PRODUCT_ID1 = new ObjectId("123132123312123312312577");
   private static final ObjectId TEST_PRODUCT_ID2 = new ObjectId("123132103312123310312577");
   private static final ObjectId TEST_PRODUCT_ID3 = new ObjectId("423132303311123310772591");
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static final String TEST_SHOP_NAME = "shopName";
   private static final Long TEST_TOTAL_AMOUNT = 3300L;
-  private static final String TEST_IMAGE_URL = "url";
   private static final String TEST_FIRST_NAME = "firstNameShop";
   private static final String TEST_LAST_NAME = "lastNameShop";
   private static final String TEST_ACCOUNT_NUMBER = "accountNumberShop";
   private static final String PRODUCT_ID_PARAM = "productId";
-
   private static Address address;
   private static User user;
   private static Shop shop;
@@ -132,7 +128,7 @@ public class ProfileServiceTest {
     shop.setId(TEST_ID);
     shop.setName(TEST_SHOP_NAME);
     shop.setTotalAmount(TEST_TOTAL_AMOUNT);
-    shop.setImageUrl(TEST_IMAGE_URL);
+    shop.setImageUrl("url");
     shop.setFirstName(TEST_FIRST_NAME);
     shop.setLastName(TEST_LAST_NAME);
     shop.setAccountNumber(TEST_ACCOUNT_NUMBER);
@@ -383,8 +379,8 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(account);
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), User.class);
-    verify(mongoTemplate).remove(query(where(REVIEW_USER_ID_PARAM).is(TEST_ID)), Like.class);
-    verify(mongoTemplate).remove(query(where(USER_ID_PARAM).is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("reviewUserId").is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("userId").is(TEST_ID)), Like.class);
   }
 
   @Test
@@ -402,8 +398,8 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(account);
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), User.class);
-    verify(mongoTemplate).remove(query(where(REVIEW_USER_ID_PARAM).is(TEST_ID)), Like.class);
-    verify(mongoTemplate).remove(query(where(USER_ID_PARAM).is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("reviewUserId").is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("userId").is(TEST_ID)), Like.class);
     verify(mongoTemplate).remove(query(where(CARD_ID_PARAM).is(cardId)), Order.class);
     verify(mongoTemplate).remove(card);
     verify(cloudinaryService).deleteImage(card.getId().toString());

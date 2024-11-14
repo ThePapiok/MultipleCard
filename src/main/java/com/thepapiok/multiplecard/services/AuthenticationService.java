@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AuthenticationService {
-
   private final AccountRepository accountRepository;
   private final UserConverter userConverter;
   private final AccountConverter accountConverter;

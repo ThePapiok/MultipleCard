@@ -28,7 +28,6 @@ public class ProfileConverterTest {
   private static final String TEST_FIRST_NAME = "firstName";
   private static final String TEST_LAST_NAME = "lastName";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
-
   private static Address address;
   private static AddressDTO addressDTO;
   private static User user;

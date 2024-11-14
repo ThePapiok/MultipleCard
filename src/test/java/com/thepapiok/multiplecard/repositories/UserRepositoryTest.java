@@ -33,15 +33,10 @@ public class UserRepositoryTest {
   private static final ObjectId TEST_ID1 = new ObjectId("123456789012345678901234");
   private static final ObjectId TEST_ID2 = new ObjectId("123456789012345678901235");
   private static final ObjectId TEST_ID3 = new ObjectId("123456789012345678901236");
-  private static final ObjectId TEST_ID4 = new ObjectId("123456789012345678901237");
   private static final String TEST1_TEXT = "Test1";
-  private static final String TEST2_TEXT = "Test2";
-  private static final String TEST3_TEXT = "Test3";
-  private static final String TEST4_TEXT = "Test4";
   private static final String FIELD_COUNT = "count";
   private static final String FIELD_CREATED_ADT = "review.createdAt";
   private static final String FIELD_RATING = "review.rating";
-
   private static ReviewGetDTO reviewGetDTO1;
   private static ReviewGetDTO reviewGetDTO2;
   private static ReviewGetDTO reviewGetDTO3;
@@ -114,7 +109,7 @@ public class UserRepositoryTest {
     address2.setProvince("province2");
     address2.setStreet("street2");
     User user2 = new User();
-    user2.setFirstName(TEST2_TEXT);
+    user2.setFirstName("Test2");
     user2.setId(TEST_ID2);
     user2.setReview(review2);
     user2.setLastName("last2");
@@ -133,7 +128,7 @@ public class UserRepositoryTest {
     address3.setProvince("province3");
     address3.setStreet("street3");
     User user3 = new User();
-    user3.setFirstName(TEST3_TEXT);
+    user3.setFirstName("Test3");
     user3.setId(TEST_ID3);
     user3.setReview(review3);
     user3.setLastName("last3");
@@ -148,8 +143,8 @@ public class UserRepositoryTest {
     address4.setProvince("province4");
     address4.setStreet("street4");
     User user4 = new User();
-    user4.setFirstName(TEST4_TEXT);
-    user4.setId(TEST_ID4);
+    user4.setFirstName("Test4");
+    user4.setId(new ObjectId("123456789012345678901237"));
     user4.setLastName("last4");
     user4.setAddress(address4);
     user4.setCardId(null);
@@ -174,14 +169,14 @@ public class UserRepositoryTest {
     reviewGetDTO1.setOwner(true);
     reviewGetDTO1.setReview(review1);
     reviewGetDTO2 = new ReviewGetDTO();
-    reviewGetDTO2.setFirstName(TEST2_TEXT);
+    reviewGetDTO2.setFirstName("Test2");
     reviewGetDTO2.setCount(count2);
     reviewGetDTO2.setId(TEST_ID2);
     reviewGetDTO2.setIsAdded(0);
     reviewGetDTO2.setReview(review2);
     reviewGetDTO2.setOwner(false);
     reviewGetDTO3 = new ReviewGetDTO();
-    reviewGetDTO3.setFirstName(TEST3_TEXT);
+    reviewGetDTO3.setFirstName("Test3");
     reviewGetDTO3.setCount(0);
     reviewGetDTO3.setId(TEST_ID3);
     reviewGetDTO3.setIsAdded(0);

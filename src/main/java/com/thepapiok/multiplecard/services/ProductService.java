@@ -122,8 +122,8 @@ public class ProductService {
     return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
   }
 
-  public int getMaxPage(String text, String phone) {
-    return aggregationRepository.getMaxPage(text, phone);
+  public int getMaxPage(String text, String phone, String category, String shopName) {
+    return aggregationRepository.getMaxPage(text, phone, category, shopName);
   }
 
   public boolean isProductOwner(String phone, String id) {
@@ -285,8 +285,15 @@ public class ProductService {
   }
 
   public List<ProductDTO> getProducts(
-      String phone, int page, String field, boolean isDescending, String text) {
-    return aggregationRepository.getProducts(phone, page, field, isDescending, text);
+      String phone,
+      int page,
+      String field,
+      boolean isDescending,
+      String text,
+      String category,
+      String shopName) {
+    return aggregationRepository.getProducts(
+        phone, page, field, isDescending, text, category, shopName);
   }
 
   public List<ProductWithShopDTO> getProductsByIds(List<String> productsId, int page) {
@@ -296,8 +303,9 @@ public class ProductService {
   }
 
   public List<ProductWithShopDTO> getProductsWithShops(
-      int page, String field, boolean isDescending, String text) {
-    List<ProductDTO> productDTOS = getProducts(null, page, field, isDescending, text);
+      int page, String field, boolean isDescending, String text, String category, String shopName) {
+    List<ProductDTO> productDTOS =
+        getProducts(null, page, field, isDescending, text, category, shopName);
     List<ProductWithShopDTO> products = new ArrayList<>();
     for (ProductDTO productDTO : productDTOS) {
       Shop shop = shopRepository.findImageUrlAndNameById(productDTO.getShopId());

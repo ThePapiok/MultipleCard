@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Profile("prod")
 public class HealthController {
-
   @GetMapping("/health")
   public ResponseEntity<String> getStatus() {
     return ResponseEntity.status(HttpStatus.OK).body("Server is running");

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PromotionConverter {
-
   private final PromotionRepository promotionRepository;
 
   @Autowired

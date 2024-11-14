@@ -31,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.MongoTransactionManager;
-import org.springframework.data.mongodb.core.MongoTemplate;
 
 public class ReviewServiceTest {
   private static final ObjectId TEST_ID1 = new ObjectId("123456789012345678901234");
@@ -41,8 +40,6 @@ public class ReviewServiceTest {
   private static final String TEST_PHONE = "1231231231";
   private static final String TEST1_TEXT = "test1";
   private static final String TEST2_TEXT = "test2";
-  private static final String TEST3_TEXT = "test3";
-  private static final String TEST4_TEXT = "test4";
   private static final String TEST_FIELD = "count";
   private static final int TEST_PAGE = 1;
   private static final int COUNT_REVIEWS_AT_PAGE = 12;
@@ -56,8 +53,6 @@ public class ReviewServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private LikeRepository likeRepository;
   @Mock private MongoTransactionManager mongoTransactionManager;
-  @Mock private MongoTemplate mongoTemplate;
-  @Mock private ResultService resultService;
   private ReviewService reviewService;
 
   @BeforeAll
@@ -75,8 +70,7 @@ public class ReviewServiceTest {
             accountRepository,
             userRepository,
             likeRepository,
-            mongoTransactionManager,
-            mongoTemplate);
+            mongoTransactionManager);
     reviewDTO = new ReviewDTO();
     reviewDTO.setRating(TEST_RATING);
     reviewDTO.setDescription(TEST_DESCRIPTION);
@@ -441,10 +435,10 @@ public class ReviewServiceTest {
     reviewGetDTO2.setFirstName(TEST2_TEXT);
     reviewGetDTO2.setCount(count2);
     ReviewGetDTO reviewGetDTO3 = new ReviewGetDTO();
-    reviewGetDTO3.setFirstName(TEST3_TEXT);
+    reviewGetDTO3.setFirstName("test3");
     reviewGetDTO3.setCount(count3);
     ReviewGetDTO reviewGetDTO4 = new ReviewGetDTO();
-    reviewGetDTO4.setFirstName(TEST4_TEXT);
+    reviewGetDTO4.setFirstName("test4");
     reviewGetDTO4.setCount(count4);
     List<ReviewGetDTO> list = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3, reviewGetDTO4);
     List<ReviewGetDTO> expected = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3);
@@ -501,11 +495,11 @@ public class ReviewServiceTest {
     reviewGetDTO2.setCount(count2);
     reviewGetDTO2.setReview(review);
     ReviewGetDTO reviewGetDTO3 = new ReviewGetDTO();
-    reviewGetDTO3.setFirstName(TEST3_TEXT);
+    reviewGetDTO3.setFirstName("test3");
     reviewGetDTO3.setCount(count3);
     reviewGetDTO3.setReview(review);
     ReviewGetDTO reviewGetDTO4 = new ReviewGetDTO();
-    reviewGetDTO4.setFirstName(TEST4_TEXT);
+    reviewGetDTO4.setFirstName("test4");
     reviewGetDTO4.setCount(count4);
     reviewGetDTO4.setReview(review);
     List<ReviewGetDTO> list = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3, reviewGetDTO4);

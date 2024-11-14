@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SmsService {
-
   @Value("${TWILIO_ACCOUNT_SID}")
   private String accountSID;
 

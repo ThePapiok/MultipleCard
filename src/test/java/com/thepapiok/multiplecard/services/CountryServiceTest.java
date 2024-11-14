@@ -16,8 +16,8 @@ import org.springframework.web.client.RestTemplate;
 public class CountryServiceTest {
   private static final String COUNTRIES_URL =
       "https://restcountries.com/v3.1/all?fields=idd,cca2,name,area,population";
-  private CountryService countryService;
   @Mock private RestTemplate restTemplate;
+  private CountryService countryService;
 
   @BeforeEach
   public void setUp() {

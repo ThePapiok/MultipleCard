@@ -30,6 +30,21 @@
     <p class="title" th:text="#{products.text}"></p>
     <div id="searchBar">
         <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+        <div class="select">
+            <input type="text" id="categoryInput" th:placeholder="#{product_category.text}"
+                   onfocus="showCategories(this.nextElementSibling)"
+                   onfocusout="hideCategories(this.nextElementSibling)"
+                   oninput="getCategories(this.nextElementSibling, this)" th:value="${param.category}">
+            <ul class="options" hidden>
+            </ul>
+        </div>
+        <div class="select">
+            <input type="text" id="shopNameInput" th:placeholder="#{name_shop.text}"
+                   onfocus="showShopNames(this.nextElementSibling)" onfocusout="hideShopNames(this.nextElementSibling)"
+                   oninput="getShopNames(this.nextElementSibling, this)" th:value="${param.shopName}">
+            <ul class="options" hidden>
+            </ul>
+        </div>
         <select id="searchSelect">
             <option th:text="#{select_option.most}" value="0"></option>
             <option th:text="#{select_option.least}" value="1"></option>
@@ -40,7 +55,7 @@
             <option th:text="#{select_option.latest_add}" value="6"></option>
             <option th:text="#{select_option.oldest_add}" value="7"></option>
         </select>
-        <div id="searchButton" th:attr="onclick=|setParams('/cards?id=' + ${id})|">
+        <div id="searchButton" th:attr="onclick=|setParams('/cards?id=' + ${id}, true)|">
             <img id="searchImage" src="/images/search.png" alt="search">
         </div>
         <div id="basket">

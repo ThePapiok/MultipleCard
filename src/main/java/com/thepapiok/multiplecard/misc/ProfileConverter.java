@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProfileConverter {
-
   private final UserRepository userRepository;
   private final AccountRepository accountRepository;
   private final AddressConverter addressConverter;

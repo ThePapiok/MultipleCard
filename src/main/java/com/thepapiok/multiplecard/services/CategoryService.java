@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryService {
-
   private final CategoryRepository categoryRepository;
 
   @Autowired
@@ -36,5 +35,12 @@ public class CategoryService {
     }
     Boolean find = categoryRepository.countByOwnerIsGTE20(ownerId, nameOfCategories.size() - count);
     return find != null && find;
+  }
+
+  public List<String> getCategoriesByPrefix(String prefix) {
+    if ("".equals(prefix)) {
+      return List.of();
+    }
+    return categoryRepository.getCategoryNamesByPrefix("^" + prefix);
   }
 }

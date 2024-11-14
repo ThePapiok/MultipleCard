@@ -9,6 +9,7 @@
 
 .basketUrl {
     height: 100%;
+    width: 40px;
 }
 
 #notEmptyBasket {
@@ -23,6 +24,7 @@
 #basket {
     padding-left: 5px;
     position: relative;
+    width: 40px;
 }
 
 #basketAmount[data-empty="true"] ~ #emptyBasket {
@@ -49,6 +51,52 @@
 
 .result-vertical {
     justify-content: normal;
+}
+
+#searchBar{
+    width: 95%;
+}
+
+#searchInput{
+    width: 25%;
+}
+
+.select{
+    width: 25%;
+}
+
+#categoryInput, #shopNameInput{
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    font-family: "Inter", cursive;
+    font-size: 20px;
+    padding-left: 10px;
+    font-weight: 700;
+    border: 1px solid #B3B6B7;
+}
+
+.options{
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    background-color: white;
+    border: 1px solid gray;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.option{
+    cursor: pointer;
+    list-style-type: none;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    padding-left: 5px;
+}
+
+.option:hover{
+    background-color: gray;
 }
 
 @media only screen and (max-width: 768px) {

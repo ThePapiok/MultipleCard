@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class QrCodeService {
-
   public byte[] generateQrCode(String link) throws WriterException, IOException {
     final int width = 420;
     final int height = 420;

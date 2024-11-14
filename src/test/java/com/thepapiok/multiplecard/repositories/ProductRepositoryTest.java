@@ -29,6 +29,8 @@ import org.springframework.web.client.RestTemplate;
 @Import(DbConfig.class)
 public class ProductRepositoryTest {
   private static Shop testShop;
+  private Product product;
+  private Category category;
 
   @Autowired private ProductRepository productRepository;
   @Autowired private CategoryRepository categoryRepository;
@@ -37,8 +39,6 @@ public class ProductRepositoryTest {
   @Autowired private BlockedRepository blockedRepository;
   @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
-  private Product product;
-  private Category category;
 
   @BeforeEach
   public void setUp() {

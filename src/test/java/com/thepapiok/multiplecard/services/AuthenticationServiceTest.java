@@ -48,7 +48,6 @@ public class AuthenticationServiceTest {
   private static final String TEST_SHOP_NAME = "shopName";
   private static final String TEST_ACCOUNT_NUMBER = "12342132134132443212314431224323414132";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
-
   private AuthenticationService authenticationService;
   private RegisterDTO registerDTO;
   private User expectedUser;
