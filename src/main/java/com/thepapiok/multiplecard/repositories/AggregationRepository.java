@@ -121,6 +121,11 @@ public class AggregationRepository {
                                 "foreignField": "productId",
                                 "as": "order",
                                 "pipeline": [{
+                                  $match: {
+                                    "isUsed": true
+                                  }
+                                },
+                                {
                                   $project: {
                                     "_id": 0,
                                     "createdAt": 1

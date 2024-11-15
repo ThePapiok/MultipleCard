@@ -62,7 +62,6 @@ public class AccountRepositoryTest {
     shop1.setLastName("lastName1");
     shop1.setId(TEST_ID);
     shop1.setName(TEST_SHOP_NAME1);
-    shop1.setTotalAmount(0L);
     shop1.setImageUrl("sadf12312fsddfbwerewr");
     shop1.setPoints(List.of(address1));
     shop1.setAccountNumber(TEST_ACCOUNT_NUMBER1);
@@ -80,7 +79,6 @@ public class AccountRepositoryTest {
     shop2.setFirstName("firstName2");
     shop2.setLastName("lastName2");
     shop2.setName("shop2");
-    shop2.setTotalAmount(0L);
     shop2.setImageUrl("safddb123vberewrr");
     shop2.setPoints(List.of(address2));
     shop2.setAccountNumber("12312312312312312312312312312312312312");

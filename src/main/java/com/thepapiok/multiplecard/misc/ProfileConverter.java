@@ -6,6 +6,7 @@ import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Optional;
@@ -18,17 +19,20 @@ public class ProfileConverter {
   private final AccountRepository accountRepository;
   private final AddressConverter addressConverter;
   private final ShopRepository shopRepository;
+  private final OrderRepository orderRepository;
 
   @Autowired
   public ProfileConverter(
       UserRepository userRepository,
       AccountRepository accountRepository,
       AddressConverter addressConverter,
-      ShopRepository shopRepository) {
+      ShopRepository shopRepository,
+      OrderRepository orderRepository) {
     this.userRepository = userRepository;
     this.accountRepository = accountRepository;
     this.addressConverter = addressConverter;
     this.shopRepository = shopRepository;
+    this.orderRepository = orderRepository;
   }
 
   public ProfileDTO getDTO(User user) {
@@ -42,7 +46,7 @@ public class ProfileConverter {
   }
 
   public ProfileShopDTO getDTO(Shop shop) {
-    final float centsPerZloty = 100.0F;
+    final double centsPerZl = 100;
     ProfileShopDTO profileShopDTO = new ProfileShopDTO();
     profileShopDTO.setFirstName(shop.getFirstName());
     profileShopDTO.setLastName(shop.getLastName());
@@ -50,7 +54,12 @@ public class ProfileConverter {
     profileShopDTO.setAccountNumber(shop.getAccountNumber());
     profileShopDTO.setAddress(addressConverter.getDTOs(shop.getPoints()));
     profileShopDTO.setImageUrl(shop.getImageUrl());
-    profileShopDTO.setTotalAmount(String.valueOf(shop.getTotalAmount() / centsPerZloty));
+    Long totalAmount = orderRepository.sumAmountForShop(shop.getId());
+    if (totalAmount == null) {
+      profileShopDTO.setTotalAmount("0");
+    } else {
+      profileShopDTO.setTotalAmount(String.valueOf(totalAmount / centsPerZl));
+    }
     return profileShopDTO;
   }
 

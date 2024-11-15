@@ -127,7 +127,6 @@ public class ProfileServiceTest {
     shop = new Shop();
     shop.setId(TEST_ID);
     shop.setName(TEST_SHOP_NAME);
-    shop.setTotalAmount(TEST_TOTAL_AMOUNT);
     shop.setImageUrl("url");
     shop.setFirstName(TEST_FIRST_NAME);
     shop.setLastName(TEST_LAST_NAME);
@@ -288,18 +287,6 @@ public class ProfileServiceTest {
     order3.setAmount(amount3);
     order3.setCardId(cardId3);
     order3.setUsed(false);
-    Order order1AfterDelete = new Order();
-    order1AfterDelete.setAmount(amount1);
-    order1AfterDelete.setCardId(cardId1);
-    order1AfterDelete.setUsed(true);
-    Order order2AfterDelete = new Order();
-    order2AfterDelete.setAmount(amount2);
-    order2AfterDelete.setCardId(cardId2);
-    order2AfterDelete.setUsed(true);
-    Order order3AfterDelete = new Order();
-    order3AfterDelete.setAmount(amount3);
-    order3AfterDelete.setCardId(cardId3);
-    order3AfterDelete.setUsed(true);
     orders.add(order1);
     orders.add(order2);
     orders.add(order3);
@@ -315,9 +302,9 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
-    verify(mongoTemplate).save(order1AfterDelete);
-    verify(mongoTemplate).save(order2AfterDelete);
-    verify(mongoTemplate).save(order3AfterDelete);
+    verify(mongoTemplate).remove(order1);
+    verify(mongoTemplate).remove(order2);
+    verify(mongoTemplate).remove(order3);
     verify(mongoTemplate).remove(product1);
     verify(mongoTemplate).remove(product2);
     verify(mongoTemplate).remove(product3);
@@ -495,7 +482,6 @@ public class ProfileServiceTest {
     Shop expectedShopWithNewUrl = new Shop();
     expectedShopWithNewUrl.setId(TEST_ID);
     expectedShopWithNewUrl.setName(TEST_SHOP_NAME);
-    expectedShopWithNewUrl.setTotalAmount(TEST_TOTAL_AMOUNT);
     expectedShopWithNewUrl.setImageUrl(otherImageUrlTest);
     expectedShopWithNewUrl.setFirstName(TEST_FIRST_NAME);
     expectedShopWithNewUrl.setLastName(TEST_LAST_NAME);

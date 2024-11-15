@@ -70,7 +70,6 @@ public class ProductRepositoryTest {
     shop.setImageUrl("shopImageUrl1");
     shop.setFirstName("firstName1");
     shop.setLastName("lastName1");
-    shop.setTotalAmount(0L);
     shop.setAccountNumber("accountNumber1");
     shop.setPoints(List.of(address));
     testShop = mongoTemplate.save(shop);
@@ -140,7 +139,6 @@ public class ProductRepositoryTest {
     shop.setImageUrl("shopImageUrl2");
     shop.setFirstName("firstName2");
     shop.setLastName("lastName2");
-    shop.setTotalAmount(0L);
     shop.setAccountNumber("accountNumber2");
     shop.setPoints(List.of(address));
     shop = mongoTemplate.save(shop);

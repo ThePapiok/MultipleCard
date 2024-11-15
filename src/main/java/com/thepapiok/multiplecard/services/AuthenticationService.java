@@ -150,7 +150,6 @@ public class AuthenticationService {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
               Shop shop = shopConverter.getEntity(registerShopDTO);
-              shop.setTotalAmount(0L);
               shop = mongoTemplate.save(shop);
               try {
                 Path path = Path.of(filePath);

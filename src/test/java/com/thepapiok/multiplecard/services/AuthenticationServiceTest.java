@@ -277,21 +277,18 @@ public class AuthenticationServiceTest {
     expectedShop.setAccountNumber(TEST_ACCOUNT_NUMBER);
     expectedShop.setImageUrl("");
     expectedShop.setPoints(addresses);
-    expectedShop.setTotalAmount(0L);
     Shop expectedShopWithId = new Shop();
     expectedShopWithId.setId(TEST_ID);
     expectedShopWithId.setName(TEST_SHOP_NAME);
     expectedShopWithId.setAccountNumber(TEST_ACCOUNT_NUMBER);
     expectedShopWithId.setImageUrl("");
     expectedShopWithId.setPoints(addresses);
-    expectedShopWithId.setTotalAmount(0L);
     Shop expectedShopWithIdAndUrl = new Shop();
     expectedShopWithIdAndUrl.setId(TEST_ID);
     expectedShopWithIdAndUrl.setImageUrl(url);
     expectedShopWithIdAndUrl.setName(TEST_SHOP_NAME);
     expectedShopWithIdAndUrl.setAccountNumber(TEST_ACCOUNT_NUMBER);
     expectedShopWithIdAndUrl.setPoints(addresses);
-    expectedShopWithIdAndUrl.setTotalAmount(0L);
     Account account = new Account();
     account.setPassword(TEST_ENCODE_PASSWORD);
     account.setPhone(TEST_PHONE);
@@ -342,7 +339,6 @@ public class AuthenticationServiceTest {
     expectedShopWithId.setAccountNumber(TEST_ACCOUNT_NUMBER);
     expectedShopWithId.setImageUrl("");
     expectedShopWithId.setPoints(addresses);
-    expectedShopWithId.setTotalAmount(0L);
 
     when(shopConverter.getEntity(registerShopDTO)).thenReturn(shop);
     when(mongoTemplate.save(expectedShopWithId)).thenThrow(MongoWriteException.class);

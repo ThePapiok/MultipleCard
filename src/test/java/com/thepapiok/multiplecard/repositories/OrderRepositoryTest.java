@@ -1,12 +1,15 @@
 package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
@@ -20,13 +23,17 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles("test")
 @Import(DbConfig.class)
 public class OrderRepositoryTest {
+  private static final ObjectId TEST_PRODUCT_ID = new ObjectId("123456789012345678901234");
+  private static final ObjectId TEST_SHOP_ID = new ObjectId("123456789012345178901231");
+  private Order order1;
+  private Order order2;
 
   @Autowired private OrderRepository orderRepository;
   @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
 
-  @Test
-  public void shouldReturn() {
+  @BeforeEach
+  public void setUp() {
     final int testAmount1 = 555;
     final int testAmount2 = 111;
     final int testYearOfCreatedAt = 2024;
@@ -35,7 +42,6 @@ public class OrderRepositoryTest {
     final int testHourOfCreatedAt = 5;
     final int testMinuteOfCreatedAt = 1;
     final int testSecondOfCreatedAt = 1;
-    final ObjectId testProduct1Id = new ObjectId("123456789012345678901234");
     final ObjectId testProduct2Id = new ObjectId("123456789012345678901236");
     final ObjectId testCardId = new ObjectId("123456789012345678901231");
     final LocalDateTime localDateTime =
@@ -46,38 +52,69 @@ public class OrderRepositoryTest {
             testHourOfCreatedAt,
             testMinuteOfCreatedAt,
             testSecondOfCreatedAt);
-    Order order1 = new Order();
+    order1 = new Order();
     order1.setUsed(false);
     order1.setAmount(testAmount1);
     order1.setCreatedAt(localDateTime);
-    order1.setProductId(testProduct1Id);
+    order1.setProductId(TEST_PRODUCT_ID);
     order1.setCardId(testCardId);
+    order1.setShopId(TEST_SHOP_ID);
     mongoTemplate.save(order1);
-    Order order2 = new Order();
+    order2 = new Order();
     order2.setUsed(false);
     order2.setAmount(testAmount1);
     order2.setCreatedAt(localDateTime);
-    order2.setProductId(testProduct1Id);
+    order2.setProductId(TEST_PRODUCT_ID);
     order2.setCardId(testCardId);
+    order2.setShopId(TEST_SHOP_ID);
     mongoTemplate.save(order2);
     Order order3 = new Order();
     order3.setUsed(true);
     order3.setAmount(testAmount2);
     order3.setCreatedAt(localDateTime);
-    order3.setProductId(testProduct1Id);
+    order3.setProductId(TEST_PRODUCT_ID);
     order3.setCardId(testCardId);
+    order3.setShopId(TEST_SHOP_ID);
     mongoTemplate.save(order3);
     Order order4 = new Order();
-    order4.setUsed(false);
+    order4.setUsed(true);
     order4.setAmount(testAmount2);
     order4.setCreatedAt(localDateTime);
     order4.setProductId(testProduct2Id);
     order4.setCardId(testCardId);
+    order4.setShopId(TEST_SHOP_ID);
     mongoTemplate.save(order4);
+  }
 
+  @AfterEach
+  public void cleanUp() {
+    orderRepository.deleteAll();
+  }
+
+  @Test
+  public void shouldReturnListOf2OrdersAtFindAllByProductIdAndIsUsedWhenEverythingOk() {
     assertEquals(
         List.of(order1, order2),
-        orderRepository.findAllByProductIdAndIsUsed(testProduct1Id, false));
-    orderRepository.deleteAll();
+        orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID, false));
+  }
+
+  @Test
+  public void shouldReturnEmptyListAtFindAllByProductIdAndIsUsedWhenNotFound() {
+    assertEquals(
+        List.of(),
+        orderRepository.findAllByProductIdAndIsUsed(
+            new ObjectId("098765432112345678901234"), false));
+  }
+
+  @Test
+  public void shouldReturn222AtSumAmountForShopWhenEverythingOk() {
+    final Long amount = 222L;
+
+    assertEquals(amount, orderRepository.sumAmountForShop(TEST_SHOP_ID));
+  }
+
+  @Test
+  public void shouldReturnNullAtSumAmountForShopWhenNotFound() {
+    assertNull(orderRepository.sumAmountForShop(new ObjectId("098765432112345678901234")));
   }
 }

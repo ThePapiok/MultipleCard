@@ -173,8 +173,7 @@ public class ProductService {
                       query(where("cardId").is(order.getCardId())),
                       new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
                       User.class);
-                  order.setUsed(true);
-                  mongoTemplate.save(order);
+                  mongoTemplate.remove(order);
                 }
                 cloudinaryService.deleteImage(productId);
               } catch (IOException e) {

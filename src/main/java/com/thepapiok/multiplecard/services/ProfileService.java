@@ -135,8 +135,7 @@ public class ProfileService {
                         query(where(cardIdParam).is(order.getCardId())),
                         new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
                         User.class);
-                    order.setUsed(true);
-                    mongoTemplate.save(order);
+                    mongoTemplate.remove(order);
                   }
                   try {
                     cloudinaryService.deleteImage(product.getId().toString());

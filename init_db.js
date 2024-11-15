@@ -48,7 +48,7 @@ db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "accountNumber", "name", "totalAmount", "imageUrl", "points", "_class"],
+            "required": ["_id", "firstName", "lastName", "accountNumber", "name", "imageUrl", "points", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -66,11 +66,6 @@ db.createCollection("shops", {
                 "name": {
                     "bsonType": "string",
                     "description": "name is required and must be string"
-                },
-                "totalAmount": {
-                    "bsonType": "long",
-                    "minimum": 0,
-                    "description": "totalAmount is required and must be greater or equal 0"
                 },
                 "imageUrl": {
                     "bsonType": "string",
@@ -195,7 +190,7 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "amount", "_class"],
+            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "amount", "shopId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -205,6 +200,10 @@ db.createCollection("orders", {
                 "cardId": {
                     "bsonType": "objectId",
                     "description": "cardId is required and must be objectId"
+                },
+                "shopId": {
+                    "bsonType": "objectId",
+                    "description": "shopId is required and must be objectId"
                 },
                 "productId": {
                     "bsonType": "objectId",

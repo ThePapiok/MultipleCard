@@ -356,21 +356,6 @@ public class ProductServiceTest {
     order3.setProductId(productId);
     order3.setCardId(cardId3);
     order3.setAmount(amount3);
-    Order order1AfterDelete = new Order();
-    order1AfterDelete.setUsed(true);
-    order1AfterDelete.setProductId(productId);
-    order1AfterDelete.setCardId(cardId1);
-    order1AfterDelete.setAmount(amount1);
-    Order order2AfterDelete = new Order();
-    order2AfterDelete.setUsed(true);
-    order2AfterDelete.setProductId(productId);
-    order2AfterDelete.setCardId(cardId2);
-    order2AfterDelete.setAmount(amount2);
-    Order order3AfterDelete = new Order();
-    order3AfterDelete.setUsed(true);
-    order3AfterDelete.setProductId(productId);
-    order3AfterDelete.setCardId(cardId3);
-    order3AfterDelete.setAmount(amount3);
     List<Order> orders = List.of(order1, order2, order3);
 
     when(orderRepository.findAllByProductIdAndIsUsed(productId, false)).thenReturn(orders);
@@ -391,9 +376,9 @@ public class ProductServiceTest {
             query(where(cardIdField).is(cardId3)),
             new Update().inc(pointsField, (Math.round(amount3 / centsPerZloty))),
             User.class);
-    verify(mongoTemplate).save(order1AfterDelete);
-    verify(mongoTemplate).save(order2AfterDelete);
-    verify(mongoTemplate).save(order3AfterDelete);
+    verify(mongoTemplate).remove(order1);
+    verify(mongoTemplate).remove(order2);
+    verify(mongoTemplate).remove(order3);
     verify(cloudinaryService).deleteImage(TEST_ID);
     verify(promotionService).deletePromotion(TEST_ID);
     verify(productRepository).deleteById(productId);

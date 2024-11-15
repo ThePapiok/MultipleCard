@@ -32,7 +32,6 @@ public class ShopRepositoryTest {
 
   @BeforeEach
   public void setUp() {
-    final Long amount1 = 100L;
     Address address = new Address();
     address.setApartmentNumber(null);
     address.setPostalCode("87-100");
@@ -46,7 +45,6 @@ public class ShopRepositoryTest {
     shop1.setName("name1");
     shop1.setLastName("lastName1");
     shop1.setFirstName("firstName1");
-    shop1.setTotalAmount(amount1);
     shop1.setAccountNumber("account1");
     shop1.setPoints(List.of(address));
     shop1 = mongoTemplate.save(shop1);
@@ -55,7 +53,6 @@ public class ShopRepositoryTest {
     shop2.setName("Name2");
     shop2.setLastName("lastName2");
     shop2.setFirstName("firstName2");
-    shop2.setTotalAmount(amount1);
     shop2.setAccountNumber("account2");
     shop2.setPoints(List.of(address));
     shop2 = mongoTemplate.save(shop2);
@@ -64,7 +61,6 @@ public class ShopRepositoryTest {
     shop3.setName("other3");
     shop3.setLastName("lastName3");
     shop3.setFirstName("firstName3");
-    shop3.setTotalAmount(amount1);
     shop3.setAccountNumber("account3");
     shop3.setPoints(List.of(address));
     shop3 = mongoTemplate.save(shop3);
