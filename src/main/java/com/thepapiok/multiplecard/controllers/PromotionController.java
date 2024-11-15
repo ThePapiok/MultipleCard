@@ -114,7 +114,6 @@ public class PromotionController {
       return "redirect:/promotions?id=" + id + "&error";
     }
     if (!promotionService.upsertPromotion(promotion)) {
-      System.out.println(promotion);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
       return "redirect:/products?error";

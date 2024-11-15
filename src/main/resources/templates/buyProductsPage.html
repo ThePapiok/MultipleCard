@@ -110,7 +110,7 @@
                                             <span>-</span>
                                             <span th:text="${product.expiredAtPromotion}"></span>
                                         </div>
-                                        <span class="productsLeft" th:if="${product.countPromotion} != 0"
+                                        <span class="productsLeft" th:if="${product.countPromotion} != null"
                                               th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
                                     </div>
                                     <div class="promotionAmount">

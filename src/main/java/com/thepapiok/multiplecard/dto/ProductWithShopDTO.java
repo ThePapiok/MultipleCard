@@ -20,7 +20,7 @@ public class ProductWithShopDTO {
   private ObjectId shopId;
   private LocalDate startAtPromotion;
   private LocalDate expiredAtPromotion;
-  private int countPromotion;
+  private Integer countPromotion;
   private int amountPromotion;
   private String shopName;
   private String shopImageUrl;

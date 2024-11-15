@@ -43,7 +43,7 @@ public class PromotionConverter {
     promotion.setStartAt(promotionDTO.getStartAt());
     promotion.setExpiredAt(promotionDTO.getExpiredAt());
     if ("".equals(promotionDTO.getCount())) {
-      promotion.setCount(0);
+      promotion.setCount(null);
     } else {
       promotion.setCount(Integer.parseInt(promotionDTO.getCount()));
     }

@@ -7,13 +7,11 @@ function focusedAmount(e) {
 }
 
 function unfocusedAmount(e) {
-    if (ok[2] || ok[2] == null) {
-        if (!e.value.toString().includes(".")) {
-            e.value += ".00";
-        }
-        if (!e.value.toString().includes("zł")) {
-            e.value += "zł";
-        }
+    if (!e.value.toString().includes(".")) {
+        e.value += ".00";
+    }
+    if (!e.value.toString().includes("zł")) {
+        e.value += "zł";
     }
     checkAmount(e);
 }

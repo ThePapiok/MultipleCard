@@ -359,11 +359,11 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCount0() {
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountNothing() {
     final int amountPromotion = 2000;
     Promotion promotion = new Promotion();
     promotion.setAmount(amountPromotion);
-    promotion.setCount(0);
+    promotion.setCount(null);
     promotion.setProductId(TEST_PRODUCT_ID);
     setDataForBuyProducts(amountPromotion, promotion);
 

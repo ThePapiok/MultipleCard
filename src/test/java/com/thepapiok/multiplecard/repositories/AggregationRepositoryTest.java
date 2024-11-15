@@ -1706,7 +1706,7 @@ public class AggregationRepositoryTest {
     productDTO3.setBarcode(product3.getBarcode());
     productDTO3.setDescription(product3.getDescription());
     productDTO3.setShopId(product3.getShopId());
-    productDTO3.setCountPromotion(0);
+    productDTO3.setCountPromotion(null);
     productDTO3.setAmountPromotion(0);
     productDTO3.setProductImageUrl(product3.getImageUrl());
     productDTO3.setStartAtPromotion(null);
@@ -1732,7 +1732,7 @@ public class AggregationRepositoryTest {
     productDTO5.setBarcode(product5.getBarcode());
     productDTO5.setDescription(product5.getDescription());
     productDTO5.setShopId(product5.getShopId());
-    productDTO5.setCountPromotion(0);
+    productDTO5.setCountPromotion(null);
     productDTO5.setAmountPromotion(0);
     productDTO5.setProductImageUrl(product5.getImageUrl());
     productDTO5.setStartAtPromotion(null);
@@ -1745,7 +1745,7 @@ public class AggregationRepositoryTest {
     productDTO7.setBarcode(product7.getBarcode());
     productDTO7.setDescription(product7.getDescription());
     productDTO7.setShopId(product7.getShopId());
-    productDTO7.setCountPromotion(0);
+    productDTO7.setCountPromotion(null);
     productDTO7.setAmountPromotion(0);
     productDTO7.setProductImageUrl(product7.getImageUrl());
     productDTO7.setStartAtPromotion(null);
@@ -1758,7 +1758,7 @@ public class AggregationRepositoryTest {
     productDTO8.setBarcode(product8.getBarcode());
     productDTO8.setDescription(product8.getDescription());
     productDTO8.setShopId(product8.getShopId());
-    productDTO8.setCountPromotion(0);
+    productDTO8.setCountPromotion(null);
     productDTO8.setAmountPromotion(0);
     productDTO8.setProductImageUrl(product8.getImageUrl());
     productDTO8.setStartAtPromotion(null);
@@ -1771,7 +1771,7 @@ public class AggregationRepositoryTest {
     productDTO9.setBarcode(product9.getBarcode());
     productDTO9.setDescription(product9.getDescription());
     productDTO9.setShopId(product9.getShopId());
-    productDTO9.setCountPromotion(0);
+    productDTO9.setCountPromotion(null);
     productDTO9.setAmountPromotion(0);
     productDTO9.setProductImageUrl(product9.getImageUrl());
     productDTO9.setStartAtPromotion(null);
@@ -1784,7 +1784,7 @@ public class AggregationRepositoryTest {
     productDTO10.setBarcode(product10.getBarcode());
     productDTO10.setDescription(product10.getDescription());
     productDTO10.setShopId(product10.getShopId());
-    productDTO10.setCountPromotion(0);
+    productDTO10.setCountPromotion(null);
     productDTO10.setAmountPromotion(0);
     productDTO10.setProductImageUrl(product10.getImageUrl());
     productDTO10.setStartAtPromotion(null);
@@ -1797,7 +1797,7 @@ public class AggregationRepositoryTest {
     productDTO11.setBarcode(product11.getBarcode());
     productDTO11.setDescription(product11.getDescription());
     productDTO11.setShopId(product11.getShopId());
-    productDTO11.setCountPromotion(0);
+    productDTO11.setCountPromotion(null);
     productDTO11.setAmountPromotion(0);
     productDTO11.setProductImageUrl(product11.getImageUrl());
     productDTO11.setStartAtPromotion(null);
@@ -1810,7 +1810,7 @@ public class AggregationRepositoryTest {
     productDTO13.setBarcode(product13.getBarcode());
     productDTO13.setDescription(product13.getDescription());
     productDTO13.setShopId(product13.getShopId());
-    productDTO13.setCountPromotion(0);
+    productDTO13.setCountPromotion(null);
     productDTO13.setAmountPromotion(0);
     productDTO13.setProductImageUrl(product13.getImageUrl());
     productDTO13.setStartAtPromotion(null);
@@ -1823,7 +1823,7 @@ public class AggregationRepositoryTest {
     productDTO14.setBarcode(product14.getBarcode());
     productDTO14.setDescription(product14.getDescription());
     productDTO14.setShopId(product14.getShopId());
-    productDTO14.setCountPromotion(0);
+    productDTO14.setCountPromotion(null);
     productDTO14.setAmountPromotion(0);
     productDTO14.setProductImageUrl(product14.getImageUrl());
     productDTO14.setStartAtPromotion(null);
@@ -1836,7 +1836,7 @@ public class AggregationRepositoryTest {
     productDTO15.setBarcode(product15.getBarcode());
     productDTO15.setDescription(product15.getDescription());
     productDTO15.setShopId(product15.getShopId());
-    productDTO15.setCountPromotion(0);
+    productDTO15.setCountPromotion(null);
     productDTO15.setAmountPromotion(0);
     productDTO15.setProductImageUrl(product15.getImageUrl());
     productDTO15.setStartAtPromotion(null);
@@ -1849,7 +1849,7 @@ public class AggregationRepositoryTest {
     productDTO17.setBarcode(product17.getBarcode());
     productDTO17.setDescription(product17.getDescription());
     productDTO17.setShopId(product17.getShopId());
-    productDTO17.setCountPromotion(0);
+    productDTO17.setCountPromotion(null);
     productDTO17.setAmountPromotion(0);
     productDTO17.setProductImageUrl(product17.getImageUrl());
     productDTO17.setStartAtPromotion(null);

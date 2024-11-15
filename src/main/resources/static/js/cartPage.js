@@ -91,8 +91,8 @@ function atStart(page) {
                                         <span>-</span>
                                         <span>` + product.expiredAtPromotion + `</span>
                                     </div>`;
-                     if(!product.countPromotion === 0){
-                         innerHtml += "<span className='productsLeft'>" + product.countPromotion + ' ' + document.getElementById("textLeftProducts") + "</span>";
+                     if(product.countPromotion != null){
+                         innerHtml += "<span class='productsLeft'>" + product.countPromotion + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
                      }
                      innerHtml += `</div>
                                 <div class="promotionAmount">

@@ -154,7 +154,7 @@ public class ProductRepositoryTest {
     product1 = mongoTemplate.save(product1);
     Promotion promotion = new Promotion();
     promotion.setProductId(product1.getId());
-    promotion.setCount(0);
+    promotion.setCount(null);
     promotion.setAmount(amountPromotion);
     promotion.setStartAt(LocalDate.now());
     promotion.setExpiredAt(LocalDate.now().plusYears(1));
@@ -169,7 +169,7 @@ public class ProductRepositoryTest {
     productWithShopDTO1.setProductImageUrl(product.getImageUrl());
     productWithShopDTO1.setActive(true);
     productWithShopDTO1.setAmountPromotion(0);
-    productWithShopDTO1.setCountPromotion(0);
+    productWithShopDTO1.setCountPromotion(null);
     productWithShopDTO1.setStartAtPromotion(null);
     productWithShopDTO1.setExpiredAtPromotion(null);
     productWithShopDTO1.setShopName(testShop.getName());

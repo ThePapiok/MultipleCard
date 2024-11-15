@@ -424,7 +424,7 @@ db.createCollection("promotions", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "startAt", "expiredAt", "amount", "productId", "count", "_class"],
+            "required": ["_id", "startAt", "expiredAt", "amount", "productId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -445,7 +445,7 @@ db.createCollection("promotions", {
                     "description": "amount is required and must be greater or equal 0"
                 },
                 "count": {
-                    "bsonType": "int",
+                    "bsonType": ["null", "int"],
                     "minimum": 0,
                     "maximum": 99999,
                     "description": "count is required and must be greater or equal 0"

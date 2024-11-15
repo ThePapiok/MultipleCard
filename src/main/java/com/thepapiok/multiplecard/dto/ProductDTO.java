@@ -16,6 +16,6 @@ public class ProductDTO {
   private ObjectId shopId;
   private LocalDate startAtPromotion;
   private LocalDate expiredAtPromotion;
-  private int countPromotion;
+  private Integer countPromotion;
   private int amountPromotion;
 }

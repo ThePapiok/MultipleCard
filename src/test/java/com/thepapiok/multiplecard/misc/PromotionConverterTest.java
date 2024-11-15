@@ -59,7 +59,7 @@ public class PromotionConverterTest {
   @Test
   public void shouldReturnPromotionAtGetEntityWhenPromotionNotExists() {
     Promotion expectedPromotion = new Promotion();
-    expectedPromotion.setCount(promotion.getCount());
+    expectedPromotion.setCount(null);
     expectedPromotion.setAmount(promotion.getAmount());
     expectedPromotion.setProductId(promotion.getProductId());
     expectedPromotion.setStartAt(promotion.getStartAt());
