@@ -36,21 +36,36 @@ public class CardControllerTest {
   private static final String TEST_CODE = "111 222";
   private static final String TEST_PIN = "1234";
   private static final String TEST_NAME = "test";
+  private static final String ID_PARAM = "id";
+  private static final String FIELD_PARAM = "field";
+  private static final String IS_DESCENDING_PARAM = "isDescending";
+  private static final String COUNT_FIELD = "count";
+  private static final String CARD_EXISTS_PARAM = "cardExists";
   private static final String TEST_PHONE = "12312312312323";
+  private static final String TEST_CARD_ID = "523956189032345658901294";
   private static final String PHONE_PARAM = "phone";
   private static final String CARD_PARAM = "card";
   private static final String ERROR_PARAM = "error";
   private static final String NEW_CARD_URL = "/new_card";
   private static final String USER_ERROR_URL = "/user?error";
+  private static final String CARDS_URL = "/cards";
   private static final String BLOCK_CARD_URL = "/block_card";
   private static final String NEW_CARD_ERROR_URL = "/new_card?error";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
+  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
+  private static final String ERROR_MESSAGE = "error!";
   private static final String CODE_SMS_ORDER_PARAM = "codeSmsOrder";
   private static final String CODE_SMS_BLOCK_PARAM = "codeSmsBlock";
   private static final String VERIFICATION_NUMBER_SMS_PARAM = "verificationNumberSms";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String ORDER_PARAM = "order";
+  private static final String PAGES_PARAM = "pages";
+  private static final String PAGE_SELECTED_PARAM = "pageSelected";
+  private static final String PRODUCTS_PARAM = "products";
+  private static final String PRODUCTS_EMPTY_PARAM = "productsEmpty";
+  private static final String MAX_PAGE_PARAM = "maxPage";
   private static final String NEW_CARD_PAGE = "newCardPage";
+  private static final String BUY_PRODUCTS_PAGE = "buyProductsPage";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
   @Autowired private MockMvc mockMvc;
   @MockBean private PasswordEncoder passwordEncoder;
@@ -87,15 +102,14 @@ public class CardControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE)
   public void shouldReturnNewCardPageAtNewCardPageWhenParamErrorWithMessage() throws Exception {
-    final String message = "error!";
     OrderCardDTO orderCardDTO = new OrderCardDTO();
     MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
     httpSession.setAttribute(ORDER_PARAM, orderCardDTO);
 
     mockMvc
         .perform(get(NEW_CARD_URL).param(ERROR_PARAM, "").session(httpSession))
-        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, message))
+        .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
         .andExpect(model().attribute(PHONE_PARAM, TEST_PHONE))
         .andExpect(model().attribute(CARD_PARAM, orderCardDTO))
         .andExpect(view().name(NEW_CARD_PAGE));
@@ -109,7 +123,7 @@ public class CardControllerTest {
 
     mockMvc
         .perform(get(NEW_CARD_URL).param("reset", "").session(httpSession))
-        .andExpect(redirectedUrl("/user"));
+        .andExpect(redirectedUrl("/profile"));
     checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
   }
 
@@ -140,8 +154,8 @@ public class CardControllerTest {
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(cardService.createCard(orderCardDTO, TEST_PHONE)).thenReturn(true);
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, "/user?success");
-    assertEquals("Pomyślnie utworzono nową kartę", httpSession.getAttribute("successMessage"));
+    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, "/profile?success");
+    assertEquals("Pomyślnie utworzono nową kartę", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
     checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
   }
 
@@ -281,7 +295,7 @@ public class CardControllerTest {
 
     mockMvc
         .perform(get(BLOCK_CARD_URL).param("reset", "").session(httpSession))
-        .andExpect(redirectedUrl("/user"));
+        .andExpect(redirectedUrl("/profile"));
 
     checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
   }
@@ -300,9 +314,9 @@ public class CardControllerTest {
             post(BLOCK_CARD_URL)
                 .session(httpSession)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE))
-        .andExpect(redirectedUrl("/user?success"));
+        .andExpect(redirectedUrl("/profile?success"));
     checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
-    assertEquals("Pomyślnie zastrzeżono kartę", httpSession.getAttribute("successMessage"));
+    assertEquals("Pomyślnie zastrzeżono kartę", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
   }
 
   @Test
@@ -393,10 +407,113 @@ public class CardControllerTest {
   }
 
   @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsWhenCardNotFound() throws Exception {
+    when(cardService.cardExists(TEST_CARD_ID)).thenReturn(false);
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(CARD_EXISTS_PARAM, false))
+        .andExpect(view().name(BUY_PRODUCTS_PAGE));
+  }
+
+  @Test
   public void shouldReturnBuyProductsPageAtBuyProductsPageWhenEverythingOk() throws Exception {
+    final int size = 3;
+    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(CARD_EXISTS_PARAM, true))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(view().name(BUY_PRODUCTS_PAGE));
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithoutMessage()
+      throws Exception {
+    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+
+    performPostAtBuyProductsWithParamWithoutMessage(products, "error");
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithMessage()
+      throws Exception {
+    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+
+    performPostAtBuyProductsWithParamWithMessage(products, ERROR_PARAM, ERROR_MESSAGE, httpSession);
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithoutMessage()
+      throws Exception {
+    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+
+    performPostAtBuyProductsWithParamWithoutMessage(products, "success");
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithMessage()
+      throws Exception {
+    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, "success!");
+
+    performPostAtBuyProductsWithParamWithMessage(products, "success", "success!", httpSession);
+  }
+
+  private void performPostAtBuyProductsWithParamWithoutMessage(
+      List<ProductWithShopDTO> products, String param) throws Exception {
+    final int size = 3;
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID).param(param, ""))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(CARD_EXISTS_PARAM, true))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(view().name(BUY_PRODUCTS_PAGE));
+  }
+
+  private void performPostAtBuyProductsWithParamWithMessage(
+      List<ProductWithShopDTO> products, String param, String message, MockHttpSession httpSession)
+      throws Exception {
+    final String paramMessage = param + "Message";
+    final int size = 3;
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID).param(param, "").session(httpSession))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(CARD_EXISTS_PARAM, true))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(paramMessage, message))
+        .andExpect(view().name(BUY_PRODUCTS_PAGE));
+    assertNull(httpSession.getAttribute(paramMessage));
+  }
+
+  private List<ProductWithShopDTO> getProductsForBuyProducts() {
     final int testAmount = 500;
     final int testCount = 5;
-    final int size = 3;
     final LocalDate testStartAt = LocalDate.now();
     final LocalDate testExpiredAt = LocalDate.now().plusYears(1);
     final String testShopImageUrl = "url";
@@ -424,30 +541,22 @@ public class CardControllerTest {
     productDTO3.setStartAtPromotion(null);
     productDTO3.setShopName(TEST_NAME);
     productDTO3.setShopImageUrl(testShopImageUrl);
-    List<ProductWithShopDTO> productDTOS = List.of(productDTO1, productDTO2, productDTO3);
+    List<ProductWithShopDTO> products = List.of(productDTO1, productDTO2, productDTO3);
 
-    when(productService.getProductsWithShops(0, "count", true, "", "", "")).thenReturn(productDTOS);
+    when(productService.getProductsWithShops(0, COUNT_FIELD, true, "", "", ""))
+        .thenReturn(products);
     when(productService.getMaxPage("", null, "", "")).thenReturn(1);
     when(resultService.getPages(1, 1)).thenReturn(List.of(1));
+    when(cardService.cardExists(TEST_CARD_ID)).thenReturn(true);
 
-    mockMvc
-        .perform(get("/cards").param("id", "523956189032345658901294"))
-        .andExpect(model().attribute("field", "count"))
-        .andExpect(model().attribute("isDescending", true))
-        .andExpect(model().attribute("pages", List.of(1)))
-        .andExpect(model().attribute("pageSelected", 1))
-        .andExpect(model().attribute("products", List.of(productDTO1, productDTO2, productDTO3)))
-        .andExpect(model().attribute("productsEmpty", size == 0))
-        .andExpect(model().attribute("maxPage", 1))
-        .andExpect(model().attribute("id", "523956189032345658901294"))
-        .andExpect(view().name("buyProductsPage"));
+    return products;
   }
 
   @Test
   public void shouldReturnCartPageAtCartPageWhenEverythingOk() throws Exception {
     mockMvc
         .perform(get("/cart"))
-        .andExpect(model().attribute("pageSelected", 0))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 0))
         .andExpect(view().name("cartPage"));
   }
 }

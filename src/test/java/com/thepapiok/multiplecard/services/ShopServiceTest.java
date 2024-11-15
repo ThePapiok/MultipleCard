@@ -3,9 +3,15 @@ package com.thepapiok.multiplecard.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.thepapiok.multiplecard.collections.Address;
+import com.thepapiok.multiplecard.collections.Order;
+import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.misc.AddressConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -17,13 +23,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -42,17 +57,42 @@ public class ShopServiceTest {
   private static final String TEST_FILE3_NAME = "file3";
   private static final String TEST_FILE4_NAME = "file4";
   private static final String TEST_OTHER_CONTENT_TYPE = "application/pdf";
+  private static final String TEST_CARD_ID = "523456789012341678901234";
+  private static final ObjectId TEST_PRODUCT_ID = new ObjectId("123456789012341678901234");
+  private static final LocalDateTime TEST_LOCALE_DATE_TIME = LocalDateTime.of(2024, 12, 2, 2, 2);
+  private static MockedStatic<LocalDateTime> localDateTimeMockedStatic;
+  private Order order;
+  private Map<String, Integer> productsId;
   @Mock private AddressConverter addressConverter;
   @Mock private RestTemplate restTemplate;
   @Mock private AccountRepository accountRepository;
   @Mock private ShopRepository shopRepository;
+  @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private MongoTemplate mongoTemplate;
   private ShopService shopService;
+
+  @BeforeAll
+  public static void setStatic() {
+    localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_LOCALE_DATE_TIME);
+  }
+
+  @AfterAll
+  public static void cleanStatic() {
+    localDateTimeMockedStatic.close();
+  }
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     shopService =
-        new ShopService(addressConverter, accountRepository, shopRepository, restTemplate);
+        new ShopService(
+            addressConverter,
+            accountRepository,
+            shopRepository,
+            restTemplate,
+            mongoTransactionManager,
+            mongoTemplate);
   }
 
   @Test
@@ -222,7 +262,6 @@ public class ShopServiceTest {
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
 
     String filePath = shopService.saveTempFile(multipartFile);
-    System.out.println(filePath);
     assertTrue(filePath.contains("upload_"));
     assertTrue(filePath.contains(".tmp"));
 
@@ -293,5 +332,98 @@ public class ShopServiceTest {
   @Test
   public void shouldReturnEmptyListAtGetShopNamesByPrefixWhenPrefixIsBlank() {
     assertEquals(List.of(), shopService.getShopNamesByPrefix(""));
+  }
+
+  @Test
+  public void shouldReturnFalseAtBuyProductsWhenGetException() {
+    assertFalse(shopService.buyProducts(Map.of(), "1234"));
+  }
+
+  @Test
+  public void shouldReturnFalseAtBuyProductsWhenNotFoundProduct() {
+    Map<String, Integer> productsId = Map.of(TEST_PRODUCT_ID.toString(), 1);
+
+    when(mongoTemplate.findOne(query(Criteria.where("id").is(TEST_PRODUCT_ID)), Product.class))
+        .thenReturn(null);
+
+    assertFalse(shopService.buyProducts(productsId, "523456789012341678901234"));
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenPromotionNotFound() {
+    final int amount = 3000;
+    setDataForBuyProducts(amount, null);
+
+    assertTrue(shopService.buyProducts(productsId, TEST_CARD_ID));
+    verify(mongoTemplate).save(order);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCount0() {
+    final int amountPromotion = 2000;
+    Promotion promotion = new Promotion();
+    promotion.setAmount(amountPromotion);
+    promotion.setCount(0);
+    promotion.setProductId(TEST_PRODUCT_ID);
+    setDataForBuyProducts(amountPromotion, promotion);
+
+    assertTrue(shopService.buyProducts(productsId, TEST_CARD_ID));
+    verify(mongoTemplate).save(order);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountLast() {
+    final int amountPromotion = 2000;
+    Promotion promotion = new Promotion();
+    promotion.setAmount(amountPromotion);
+    promotion.setCount(1);
+    promotion.setProductId(TEST_PRODUCT_ID);
+    setDataForBuyProducts(amountPromotion, promotion);
+
+    assertTrue(shopService.buyProducts(productsId, TEST_CARD_ID));
+    verify(mongoTemplate).save(order);
+    verify(mongoTemplate).remove(promotion);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountNotLast() {
+    final int amountPromotion = 2000;
+    Promotion promotion = new Promotion();
+    promotion.setAmount(amountPromotion);
+    promotion.setCount(2);
+    promotion.setProductId(TEST_PRODUCT_ID);
+    Promotion expectedPromotion = new Promotion();
+    expectedPromotion.setAmount(amountPromotion);
+    expectedPromotion.setCount(1);
+    expectedPromotion.setProductId(TEST_PRODUCT_ID);
+    setDataForBuyProducts(amountPromotion, promotion);
+
+    assertTrue(shopService.buyProducts(productsId, TEST_CARD_ID));
+    verify(mongoTemplate).save(order);
+    verify(mongoTemplate).save(expectedPromotion);
+  }
+
+  private void setDataForBuyProducts(int orderPromotion, Promotion promotion) {
+    final int amount = 3000;
+    final ObjectId testCardId = new ObjectId(TEST_CARD_ID);
+    final ObjectId testShopId = new ObjectId("123456789011541678901234");
+    productsId = Map.of(TEST_PRODUCT_ID.toString(), 1);
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setShopId(testShopId);
+    product.setAmount(amount);
+    order = new Order();
+    order.setUsed(false);
+    order.setCreatedAt(TEST_LOCALE_DATE_TIME);
+    order.setCardId(testCardId);
+    order.setProductId(TEST_PRODUCT_ID);
+    order.setShopId(testShopId);
+    order.setAmount(orderPromotion);
+
+    when(mongoTemplate.findOne(query(Criteria.where("id").is(TEST_PRODUCT_ID)), Product.class))
+        .thenReturn(product);
+    when(mongoTemplate.findOne(
+            query(Criteria.where("productId").is(TEST_PRODUCT_ID)), Promotion.class))
+        .thenReturn(promotion);
   }
 }

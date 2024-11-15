@@ -28,113 +28,117 @@
 </div>
 <div id="body">
     <p class="title" th:text="#{products.text}"></p>
-    <div id="searchBar">
-        <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
-        <div class="select">
-            <input type="text" id="categoryInput" th:placeholder="#{product_category.text}"
-                   onfocus="showCategories(this.nextElementSibling)"
-                   onfocusout="hideCategories(this.nextElementSibling)"
-                   oninput="getCategories(this.nextElementSibling, this)" th:value="${param.category}">
-            <ul class="options" hidden>
-            </ul>
+    <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
+    <div th:if="${cardExists} == true">
+        <div id="searchBar">
+            <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+            <div class="select">
+                <input type="text" id="categoryInput" th:placeholder="#{product_category.text}"
+                       onfocus="showCategories(this.nextElementSibling)"
+                       onfocusout="hideCategories(this.nextElementSibling)"
+                       oninput="getCategories(this.nextElementSibling, this)" th:value="${param.category}">
+                <ul class="options" hidden>
+                </ul>
+            </div>
+            <div class="select">
+                <input type="text" id="shopNameInput" th:placeholder="#{name_shop.text}"
+                       onfocus="showShopNames(this.nextElementSibling)"
+                       onfocusout="hideShopNames(this.nextElementSibling)"
+                       oninput="getShopNames(this.nextElementSibling, this)" th:value="${param.shopName}">
+                <ul class="options" hidden>
+                </ul>
+            </div>
+            <select id="searchSelect">
+                <option th:text="#{select_option.most}" value="0"></option>
+                <option th:text="#{select_option.least}" value="1"></option>
+                <option th:text="#{select_option.latest}" value="2"></option>
+                <option th:text="#{select_option.oldest}" value="3"></option>
+                <option th:text="#{select_option.most_expensive}" value="4"></option>
+                <option th:text="#{select_option.cheapest}" value="5"></option>
+                <option th:text="#{select_option.latest_add}" value="6"></option>
+                <option th:text="#{select_option.oldest_add}" value="7"></option>
+            </select>
+            <div id="searchButton" th:attr="onclick=|setParams('/cards?id=${id}', true)|">
+                <img id="searchImage" src="/images/search.png" alt="search">
+            </div>
+            <div id="basket">
+                <span id="basketAmount" data-empty="true">0</span>
+                <a class="basketUrl" id="emptyBasket">
+                    <img class="basketImage" src="/images/basket_empty.png" alt="basket">
+                </a>
+                <a class="basketUrl" id="notEmptyBasket" th:attr="onclick=|goToBasket('${id}')|">
+                    <img class="basketImage" src="/images/basket.png" alt="basket">
+                </a>
+            </div>
         </div>
-        <div class="select">
-            <input type="text" id="shopNameInput" th:placeholder="#{name_shop.text}"
-                   onfocus="showShopNames(this.nextElementSibling)" onfocusout="hideShopNames(this.nextElementSibling)"
-                   oninput="getShopNames(this.nextElementSibling, this)" th:value="${param.shopName}">
-            <ul class="options" hidden>
-            </ul>
-        </div>
-        <select id="searchSelect">
-            <option th:text="#{select_option.most}" value="0"></option>
-            <option th:text="#{select_option.least}" value="1"></option>
-            <option th:text="#{select_option.latest}" value="2"></option>
-            <option th:text="#{select_option.oldest}" value="3"></option>
-            <option th:text="#{select_option.most_expensive}" value="4"></option>
-            <option th:text="#{select_option.cheapest}" value="5"></option>
-            <option th:text="#{select_option.latest_add}" value="6"></option>
-            <option th:text="#{select_option.oldest_add}" value="7"></option>
-        </select>
-        <div id="searchButton" th:attr="onclick=|setParams('/cards?id=' + ${id}, true)|">
-            <img id="searchImage" src="/images/search.png" alt="search">
-        </div>
-        <div id="basket">
-            <span id="basketAmount" data-empty="true">0</span>
-            <a class="basketUrl" id="emptyBasket">
-                <img class="basketImage" src="/images/basket_empty.png" alt="basket">
-            </a>
-            <a class="basketUrl" id="notEmptyBasket" th:attr="onclick=|goToBasket('${id}')|">
-                <img class="basketImage" src="/images/basket.png" alt="basket">
-            </a>
-        </div>
-    </div>
-    <p id="error" th:text="${errorMessage}"></p>
-    <p id="success" th:text="${successMessage}"></p>
-    <div id="allResults">
-        <div id="results">
-            <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}">
-                <div class="result-vertical">
-                    <div class="result-horizontal notImageContainer">
-                        <span class="name" th:text="${product.productName}"></span>
-                        <span class="amount">0</span>
-                        <a class="resultIcons"
-                           th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling)|">
-                            <img src="/images/plus.png" alt="add">
-                        </a>
-                        <a class="resultIcons"
-                           th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling)|">
-                            <img src="/images/minus.png" alt="minus">
-                        </a>
-                    </div>
-                    <div class="result-horizontal imageContainer">
-                        <div class="shopLogo" th:title="${product.shopName}">
-                            <img class="shopImage" th:src="${product.shopImageUrl}">
+        <p id="error" th:text="${errorMessage}"></p>
+        <p id="success" th:text="${successMessage}"></p>
+        <div id="allResults">
+            <div id="results">
+                <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}">
+                    <div class="result-vertical">
+                        <div class="result-horizontal notImageContainer">
+                            <span class="name" th:text="${product.productName}"></span>
+                            <span class="amount">0</span>
+                            <a class="resultIcons"
+                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling)|">
+                                <img src="/images/plus.png" alt="add">
+                            </a>
+                            <a class="resultIcons"
+                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling)|">
+                                <img src="/images/minus.png" alt="minus">
+                            </a>
                         </div>
-                        <img id="productImage" th:src="${product.productImageUrl}" alt="product"
-                             onmouseenter="hideLogo(this.previousElementSibling)"
-                             onmouseleave="showLogo(this.previousElementSibling)">
-                        <div class="description" th:text="${product.description}">
+                        <div class="result-horizontal imageContainer">
+                            <div class="shopLogo" th:title="${product.shopName}">
+                                <img class="shopImage" th:src="${product.shopImageUrl}">
+                            </div>
+                            <img id="productImage" th:src="${product.productImageUrl}" alt="product"
+                                 onmouseenter="hideLogo(this.previousElementSibling)"
+                                 onmouseleave="showLogo(this.previousElementSibling)">
+                            <div class="description" th:text="${product.description}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="result-horizontal notImageContainer price">
+                        <div class="result-horizontal notImageContainer price">
                         <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
                               th:if="${product.startAtPromotion} == null"></span>
-                        <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
-                            <div class="result-horizontal">
-                                <div class="result-vertical promotionInfo">
-                                    <div class="date">
-                                        <span th:text="${product.startAtPromotion}"></span>
-                                        <span>-</span>
-                                        <span th:text="${product.expiredAtPromotion}"></span>
+                            <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
+                                <div class="result-horizontal">
+                                    <div class="result-vertical promotionInfo">
+                                        <div class="date">
+                                            <span th:text="${product.startAtPromotion}"></span>
+                                            <span>-</span>
+                                            <span th:text="${product.expiredAtPromotion}"></span>
+                                        </div>
+                                        <span class="productsLeft" th:if="${product.countPromotion} != 0"
+                                              th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
                                     </div>
-                                    <span class="productsLeft" th:if="${product.countPromotion} != 0"
-                                          th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
-                                </div>
-                                <div class="promotionAmount">
-                                    <span class="amount promotion" th:text="${product.amount}/100"></span>
-                                    <span class="amount" th:text="${product.amountPromotion}/100 + 'zł'"></span>
+                                    <div class="promotionAmount">
+                                        <span class="amount promotion" th:text="${product.amount}/100"></span>
+                                        <span class="amount" th:text="${product.amountPromotion}/100 + 'zł'"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <span th:data-results-empty="${productsEmpty}" th:text="#{select.no_results}" id="noResults"></span>
             </div>
-            <span th:data-results-empty="${productsEmpty}" th:text="#{select.no_results}" id="noResults"></span>
         </div>
-    </div>
-    <div id="pages">
-        <a>
-            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
-                    onclick="previousPage()"></button>
-        </a>
-        <div id="pagesSelect">
+        <div id="pages">
+            <a>
+                <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                        onclick="previousPage()"></button>
+            </a>
+            <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
                   th:if="${productsEmpty} != true" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+            </div>
+            <a>
+                <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
+                        th:attr="onclick=|nextPage('${maxPage}')|"></button>
+            </a>
         </div>
-        <a>
-            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
-                    th:attr="onclick=|nextPage('${maxPage}')|"></button>
-        </a>
     </div>
 </div>
 <div id="footer">

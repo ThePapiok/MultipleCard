@@ -1,6 +1,3 @@
-let categoryHidden = true;
-let shopNamesHidden = true;
-
 function addProduct(id, e) {
     if (addProductId(id, e)) {
         let basketAmount = document.getElementById("basketAmount");

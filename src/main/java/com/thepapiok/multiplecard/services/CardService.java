@@ -7,6 +7,7 @@ import com.thepapiok.multiplecard.misc.CardConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import java.io.IOException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.MongoTransactionManager;
@@ -107,5 +108,13 @@ public class CardService {
   public boolean isBlocked(String phone) {
     final int maxAttempts = 3;
     return getCard(phone).getAttempts() != maxAttempts;
+  }
+
+  public boolean cardExists(String cardId) {
+    try {
+      return cardRepository.existsCardById(new ObjectId(cardId));
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

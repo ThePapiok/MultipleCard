@@ -29,9 +29,10 @@ function atStart(page) {
     checkLanguage();
     productsSession = sessionStorage.getItem("productsId");
     if (productsSession == null) {
+        document.getElementById("buyButton").className = "grayButton";
         return;
     }
-    document.getElementById("noResults").dataset.resultsSize = "1";
+    document.getElementById("noResults").dataset.resultsEmpty = "false";
     productsId = new Map(Object.entries(JSON.parse(productsSession)));
     productsId.forEach((value, key) => productKeys.push(key));
     maxPage = Math.ceil(productKeys.length / 12.0);
@@ -170,4 +171,29 @@ function removeProduct(id, e) {
     e.remove();
     sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
     location.reload();
+}
+
+function buyProducts(){
+    const cardId = sessionStorage.getItem("cardId");
+    if (productsId.size === 0){
+        return;
+    }
+    fetch("/buy_products?cardId=" + cardId, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(Object.fromEntries(productsId))
+    })
+        .then(content => {
+            if (content.status === 200){
+                window.location = "/cards?id=" + cardId + "&success";
+            }
+            else {
+                window.location = "/cards?id=" + cardId + "&error";
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }

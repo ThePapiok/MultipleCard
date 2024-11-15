@@ -30,6 +30,7 @@ public class CardController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String REDIRECT_USER_ERROR = "redirect:/user?error";
   private static final String ORDER_PARAM = "order";
+  private static final String SUCCESS_MESSAGE = "successMessage";
   private final PasswordEncoder passwordEncoder;
   private final MessageSource messageSource;
   private final CardService cardService;
@@ -68,7 +69,7 @@ public class CardController {
       }
     } else if (reset != null) {
       authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
-      return "redirect:/user";
+      return "redirect:/profile";
     } else {
       authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
     }
@@ -117,9 +118,9 @@ public class CardController {
     }
     authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
     httpSession.setAttribute(
-        "successMessage",
+        SUCCESS_MESSAGE,
         messageSource.getMessage("newCardPage.success.create_new_card", null, locale));
-    return "redirect:/user?success";
+    return "redirect:/profile?success";
   }
 
   private String redirectErrorPage(
@@ -150,7 +151,7 @@ public class CardController {
       }
     } else if (reset != null) {
       authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
-      return "redirect:/user";
+      return "redirect:/profile";
     } else {
       authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
     }
@@ -196,9 +197,9 @@ public class CardController {
     }
     authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
     httpSession.setAttribute(
-        "successMessage",
+        SUCCESS_MESSAGE,
         messageSource.getMessage("blockCardPage.success.block_card", null, locale));
-    return "redirect:/user?success";
+    return "redirect:/profile?success";
   }
 
   @GetMapping("/cards")
@@ -210,19 +211,40 @@ public class CardController {
       @RequestParam(defaultValue = "") String category,
       @RequestParam(defaultValue = "") String shopName,
       @RequestParam String id,
+      @RequestParam(required = false) String error,
+      @RequestParam(required = false) String success,
+      HttpSession httpSession,
       Model model) {
     int maxPage;
-    List<ProductWithShopDTO> products =
-        productService.getProductsWithShops(page, field, isDescending, text, category, shopName);
-    maxPage = productService.getMaxPage(text, null, category, shopName);
-    model.addAttribute("field", field);
-    model.addAttribute("isDescending", isDescending);
-    model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
-    model.addAttribute("pageSelected", page + 1);
-    model.addAttribute("products", products);
-    model.addAttribute("productsEmpty", products.size() == 0);
-    model.addAttribute("maxPage", maxPage);
-    model.addAttribute("id", id);
+    if (!cardService.cardExists(id)) {
+      model.addAttribute("cardExists", false);
+    } else {
+      if (error != null) {
+        String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
+        if (message != null) {
+          model.addAttribute(ERROR_MESSAGE_PARAM, message);
+          httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+        }
+      } else if (success != null) {
+        String message = (String) httpSession.getAttribute(SUCCESS_MESSAGE);
+        if (message != null) {
+          model.addAttribute(SUCCESS_MESSAGE, message);
+          httpSession.removeAttribute(SUCCESS_MESSAGE);
+        }
+      }
+      List<ProductWithShopDTO> products =
+          productService.getProductsWithShops(page, field, isDescending, text, category, shopName);
+      maxPage = productService.getMaxPage(text, null, category, shopName);
+      model.addAttribute("field", field);
+      model.addAttribute("cardExists", true);
+      model.addAttribute("isDescending", isDescending);
+      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+      model.addAttribute("pageSelected", page + 1);
+      model.addAttribute("products", products);
+      model.addAttribute("productsEmpty", products.size() == 0);
+      model.addAttribute("maxPage", maxPage);
+      model.addAttribute("id", id);
+    }
     return "buyProductsPage";
   }
 

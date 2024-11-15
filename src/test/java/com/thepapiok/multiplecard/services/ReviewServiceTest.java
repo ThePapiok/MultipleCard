@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ public class ReviewServiceTest {
   private static final int TEST_PAGE = 1;
   private static final int COUNT_REVIEWS_AT_PAGE = 12;
   private static final LocalDateTime TEST_DATE = LocalDateTime.of(2024, 8, 30, 20, 14);
+  private static MockedStatic<LocalDateTime> localDateTimeMockedStatic;
   private ReviewDTO reviewDTO;
   private Review review;
   private Account account;
@@ -57,8 +59,13 @@ public class ReviewServiceTest {
 
   @BeforeAll
   public static void setStaticMethods() {
-    MockedStatic<LocalDateTime> localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
     localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_DATE);
+  }
+
+  @AfterAll
+  public static void cleanStaticMethods() {
+    localDateTimeMockedStatic.close();
   }
 
   @BeforeEach

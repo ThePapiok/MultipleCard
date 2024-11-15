@@ -204,4 +204,23 @@ public class CardServiceTest {
 
     assertFalse(cardService.isBlocked(TEST_PHONE));
   }
+
+  @Test
+  public void shouldReturnTrueAtCardExistsWhenCardFound() {
+    when(cardRepository.existsCardById(TEST_CARD_ID)).thenReturn(true);
+
+    assertTrue(cardService.cardExists(TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCardExistsWhenCardNotFound() {
+    when(cardRepository.existsCardById(TEST_CARD_ID)).thenReturn(false);
+
+    assertFalse(cardService.cardExists(TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCardExistsWhenBadId() {
+    assertFalse(cardService.cardExists("1234"));
+  }
 }
