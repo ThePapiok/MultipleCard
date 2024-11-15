@@ -490,6 +490,38 @@ db.createCollection("blockedProducts", {
         }
     }
 });
+db.createCollection("reservedProducts", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "expiredAt", "promotionId", "cardId", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "promotionId": {
+                    "bsonType": "objectId",
+                    "description": "promotionId is required and must be objectId"
+                },
+                "cardId": {
+                    "bsonType": "objectId",
+                    "description": "cardId is required and must be objectId"
+                },
+                "expiredAt": {
+                    "bsonType": "date",
+                    "description": "expiredAt is required and must be date"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
@@ -502,3 +534,5 @@ db.products.createIndex({"description": "text", "name": "text"}, {"default_langu
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
+db.reservedProducts.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
+
