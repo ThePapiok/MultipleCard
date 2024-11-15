@@ -15,7 +15,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
@@ -243,11 +243,11 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test
@@ -334,11 +334,11 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test

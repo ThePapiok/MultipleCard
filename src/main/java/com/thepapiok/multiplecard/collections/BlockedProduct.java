@@ -7,8 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "blocked")
-public class Blocked {
+@Document(collection = "blockedProducts")
+public class BlockedProduct {
   @Id private ObjectId id;
   private ObjectId productId;
   private LocalDate expiredAt;

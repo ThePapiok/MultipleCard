@@ -31,7 +31,7 @@ public class AggregationRepository {
   private static final String COUNT_FIELD = "count";
   private static final String ID_FIELD = "_id";
   private static final String PRODUCTS_COLLECTION = "products";
-  private static final String BLOCKED_FIELD = "blocked";
+  private static final String BLOCKED_FIELD = "blockedProducts";
   private static final String PRODUCT_ID_FIELD = "productId";
   private final AccountRepository accountRepository;
   private final MongoTemplate mongoTemplate;
@@ -221,7 +221,7 @@ public class AggregationRepository {
                   "amountPromotion": "$promotion.amount",
                   "isActive": {
                     $cond: {
-                      if: {$lte: ["$blocked", null]},
+                      if: {$lte: ["$blockedProducts", null]},
                       then: true,
                       else: false
                     }

@@ -4,7 +4,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
@@ -127,7 +127,8 @@ public class ProfileService {
                 for (Product product : products) {
                   productId = product.getId();
                   mongoTemplate.remove(query(where(productIdParam).is(productId)), Promotion.class);
-                  mongoTemplate.remove(query(where(productIdParam).is(productId)), Blocked.class);
+                  mongoTemplate.remove(
+                      query(where(productIdParam).is(productId)), BlockedProduct.class);
                   List<Order> orders =
                       orderRepository.findAllByProductIdAndIsUsed(productId, false);
                   for (Order order : orders) {

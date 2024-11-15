@@ -462,7 +462,7 @@ db.createCollection("promotions", {
         }
     }
 });
-db.createCollection("blocked", {
+db.createCollection("blockedProducts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
@@ -489,7 +489,7 @@ db.createCollection("blocked", {
 
         }
     }
-})
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
@@ -501,4 +501,4 @@ db.shops.createIndex({"accountNumber": 1}, {"unique": true});
 db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"});
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
-db.blocked.createIndex({"productId": 1}, {"unique": true});
+db.blockedProducts.createIndex({"productId": 1}, {"unique": true});

@@ -13,7 +13,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
@@ -420,52 +420,52 @@ public class ProductServiceTest {
   @Test
   public void shouldReturnTrueAtBlockProductWhenEverythingOk() {
     final int month = 30;
-    Blocked expectedBlocked = new Blocked();
-    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
-    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+    BlockedProduct expectedBlockedProduct = new BlockedProduct();
+    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     assertTrue(productService.blockProduct(TEST_ID));
-    verify(blockedRepository).save(expectedBlocked);
+    verify(blockedRepository).save(expectedBlockedProduct);
   }
 
   @Test
   public void shouldReturnFalseAtBlockProductWhenGetException() {
     final int month = 30;
-    Blocked expectedBlocked = new Blocked();
-    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
-    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+    BlockedProduct expectedBlockedProduct = new BlockedProduct();
+    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.save(expectedBlocked)).thenThrow(MongoWriteException.class);
+    when(blockedRepository.save(expectedBlockedProduct)).thenThrow(MongoWriteException.class);
 
     assertFalse(productService.blockProduct(TEST_ID));
-    verify(blockedRepository).save(expectedBlocked);
+    verify(blockedRepository).save(expectedBlockedProduct);
   }
 
   @Test
   public void shouldReturnTrueAtUnblockProductWhenEverythingOk() {
     final int month = 30;
-    Blocked expectedBlocked = new Blocked();
-    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
-    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+    BlockedProduct expectedBlockedProduct = new BlockedProduct();
+    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlocked);
+    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlockedProduct);
 
     assertTrue(productService.unblockProduct(TEST_ID));
-    verify(blockedRepository).delete(expectedBlocked);
+    verify(blockedRepository).delete(expectedBlockedProduct);
   }
 
   @Test
   public void shouldReturnFalseAtUnblockProductWhenGetException() {
     final int month = 30;
-    Blocked expectedBlocked = new Blocked();
-    expectedBlocked.setExpiredAt(LocalDate.now().plusDays(month));
-    expectedBlocked.setProductId(TEST_PRODUCT_ID);
+    BlockedProduct expectedBlockedProduct = new BlockedProduct();
+    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlocked);
-    doThrow(MongoWriteException.class).when(blockedRepository).delete(expectedBlocked);
+    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlockedProduct);
+    doThrow(MongoWriteException.class).when(blockedRepository).delete(expectedBlockedProduct);
 
     assertFalse(productService.unblockProduct(TEST_ID));
-    verify(blockedRepository).delete(expectedBlocked);
+    verify(blockedRepository).delete(expectedBlockedProduct);
   }
 
   @Test

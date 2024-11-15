@@ -1,6 +1,6 @@
 package com.thepapiok.multiplecard.misc;
 
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.repositories.BlockedRepository;
 import com.thepapiok.multiplecard.services.ProductService;
 import java.time.LocalDate;
@@ -32,8 +32,9 @@ public class Schedule {
 
   @Scheduled(fixedRate = 86400000)
   public void checkBlocked() {
-    for (Blocked blocked : blockedRepository.findAllByExpiredAtIsBefore(LocalDate.now())) {
-      productService.deleteProduct(blocked.getProductId().toString());
+    for (BlockedProduct blockedProduct :
+        blockedRepository.findAllByExpiredAtIsBefore(LocalDate.now())) {
+      productService.deleteProduct(blockedProduct.getProductId().toString());
     }
   }
 }

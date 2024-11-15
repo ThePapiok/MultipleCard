@@ -3,7 +3,7 @@ package com.thepapiok.multiplecard.services;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
@@ -194,10 +194,10 @@ public class ProductService {
   public boolean blockProduct(String id) {
     try {
       final int month = 30;
-      Blocked blocked = new Blocked();
-      blocked.setProductId(new ObjectId(id));
-      blocked.setExpiredAt(LocalDate.now().plusDays(month));
-      blockedRepository.save(blocked);
+      BlockedProduct blockedProduct = new BlockedProduct();
+      blockedProduct.setProductId(new ObjectId(id));
+      blockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+      blockedRepository.save(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
@@ -206,8 +206,8 @@ public class ProductService {
 
   public boolean unblockProduct(String id) {
     try {
-      Blocked blocked = blockedRepository.findByProductId(new ObjectId(id));
-      blockedRepository.delete(blocked);
+      BlockedProduct blockedProduct = blockedRepository.findByProductId(new ObjectId(id));
+      blockedRepository.delete(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
