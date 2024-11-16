@@ -18,6 +18,9 @@ services:
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
       IBANAPI_API_KEY: ${IBANAPI_API_KEY}
+      PAYU_CLIENT_SECRET: ${PAYU_CLIENT_SECRET}
+      PAYU_CLIENT_ID: ${PAYU_CLIENT_ID}
+      PAYU_KEY_MD5: ${PAYU_KEY_MD5}
     command: [ "java", "-jar", "multipleCard.jar", "--spring.profiles.active=dev" ]
     depends_on:
       - db
