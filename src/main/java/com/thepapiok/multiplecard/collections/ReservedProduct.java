@@ -12,5 +12,5 @@ public class ReservedProduct {
   @Id private ObjectId id;
   private ObjectId promotionId;
   private ObjectId cardId;
-  private LocalDateTime expiredAt;
+  private String encryptedIp;
 }
