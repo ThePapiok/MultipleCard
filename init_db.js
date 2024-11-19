@@ -494,7 +494,7 @@ db.createCollection("reservedProducts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "encryptedIp", "promotionId", "cardId", "_class"],
+            "required": ["_id", "encryptedIp", "promotionId", "expiredAt", "cardId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -512,6 +512,10 @@ db.createCollection("reservedProducts", {
                 "encryptedIp": {
                     "bsonType": "string",
                     "description": "encryptedIp is required and must be string"
+                },
+                "expiredAt": {
+                    "bsonType": "date",
+                    "description": "expiredAt is required and must be date"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -534,4 +538,6 @@ db.products.createIndex({"description": "text", "name": "text"}, {"default_langu
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
+db.reservedProducts.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
+
 
