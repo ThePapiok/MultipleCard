@@ -1,7 +1,20 @@
-
-
-class Product{
-    constructor({isActive, productId, productName, description, productImageUrl, barcode, amount, shopId, startAtPromotion, expiredAtPromotion, countPromotion, amountPromotion, shopName, shopImageUrl}) {
+class Product {
+    constructor({
+                    isActive,
+                    productId,
+                    productName,
+                    description,
+                    productImageUrl,
+                    barcode,
+                    amount,
+                    shopId,
+                    startAtPromotion,
+                    expiredAtPromotion,
+                    countPromotion,
+                    amountPromotion,
+                    shopName,
+                    shopImageUrl
+                }) {
         this.isActive = isActive;
         this.productId = productId;
         this.productName = productName;
@@ -26,45 +39,102 @@ function atStart(page) {
     let product;
     let productsSession;
     let maxPage;
+    let hasPromotion;
+    let amount;
+    let countPromotion;
+    let productId;
+    let productIdWithoutPromotion;
+    let productInfo;
+    let incAmount;
+    let related;
     checkLanguage();
+    if (sessionStorage.getItem("newOrder") != null) {
+        sessionStorage.removeItem("newOrder");
+        document.getElementById("error").hidden = false;
+    }
     productsSession = sessionStorage.getItem("productsId");
     if (productsSession == null) {
         document.getElementById("buyButton").className = "grayButton";
         return;
     }
-    document.getElementById("noResults").dataset.resultsEmpty = "false";
     productsId = new Map(Object.entries(JSON.parse(productsSession)));
     productsId.forEach((value, key) => productKeys.push(key));
-    maxPage = Math.ceil(productKeys.length / 12.0);
     fetch("/get_products", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/json"
         },
-        body: new URLSearchParams({
-            "productsId": productKeys,
-            "page": page
-        })
+        body: JSON.stringify(productKeys)
     })
         .then(response => response.json())
         .then(response => {
+            if (response.length !== 0) {
+                document.getElementById("noResults").dataset.resultsEmpty = "false";
+            } else {
+                document.getElementById("buyButton").className = "grayButton";
+            }
             for (let i = 0; i < response.length; i++) {
-                result = document.createElement("div")
-                result.className = "result";
                 product = new Product(response[i]);
+                productId = product.productId;
+                result = document.createElement("div")
+                result.id = "product" + productId;
+                countPromotion = product.countPromotion;
+                productInfo = new ProductInfo(productId, product.startAtPromotion != null).toString()
+                amount = productsId.get(productInfo);
+                if (countPromotion != null) {
+                    if (countPromotion === 0) {
+                        productsId.delete(productInfo);
+                        productIdWithoutPromotion = new ProductInfo(productId, false).toString();
+                        if (productsId.has(productIdWithoutPromotion)) {
+                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + amount);
+                        } else {
+                            productsId.set(productIdWithoutPromotion, amount);
+                        }
+                        sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
+                        sessionStorage.setItem("newOrder", "1");
+                        amount = countPromotion;
+                        continue;
+                    } else if (countPromotion < amount) {
+                        incAmount = (amount - countPromotion);
+                        productIdWithoutPromotion = new ProductInfo(productId, false).toString();
+                        productsId.set(productInfo, productsId.get(productInfo) - incAmount);
+                        if (productsId.has(productIdWithoutPromotion)) {
+                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + incAmount);
+                        } else {
+                            productsId.set(productIdWithoutPromotion, incAmount);
+                        }
+                        sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
+                        sessionStorage.setItem("newOrder", "1");
+                        amount = countPromotion;
+                    } else if (countPromotion > amount) {
+
+                    } else if (((amount - countPromotion) === 0) && productsId.has(new ProductInfo(productId, false).toString())) {
+                        result.style.pointerEvents = "none";
+                        result.style.opacity = "40%";
+                    }
+                }
+                hasPromotion = (countPromotion != null);
+                if (!hasPromotion && product.startAtPromotion == null && productsId.has(new ProductInfo(productId, true).toString())) {
+                    related = true;
+                    hasPromotion = false;
+                    result.className = "result related";
+                } else {
+                    result.className = "result";
+                    related = false;
+                }
                 let innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.productName + `</span>
-                        <span class="amount">` + productsId.get(product.productId) + `</span>
+                        <span class="amount">` + amount + `</span>
                         <a class="resultIcons"
-                           onclick="addProduct('` + product.productId + `', this.previousElementSibling, this.parentElement.parentElement.parentElement)">
+                           onclick="addProduct('` + productId + `', this.previousElementSibling, ` + hasPromotion + `, this.parentElement.parentElement.parentElement, ` + related + `, true)">
                             <img src="/images/plus.png" alt="add">
                         </a>
                         <a class="resultIcons"
-                           onclick="deleteProduct('` + product.productId + `', this.previousElementSibling.previousElementSibling, this.parentElement.parentElement.parentElement)">
+                           onclick="deleteProduct('` + productId + `', this.previousElementSibling.previousElementSibling, ` + hasPromotion + `, this.parentElement.parentElement.parentElement, ` + related + `)">
                             <img src="/images/minus.png" alt="minus">
                         </a>
-                        <a class="resultIcons" onclick="removeProduct('` + product.productId + `' , this.parentElement.parentElement.parentElement)">
+                        <a class="resultIcons" onclick="removeProduct('` + productId + `' , this.parentElement.parentElement.parentElement,` + (product.startAtPromotion != null) + `)">
                             <img src="/images/close.png" alt="close">
                         </a>
                     </div>
@@ -72,16 +142,16 @@ function atStart(page) {
                         <div class="shopLogo" title="` + product.shopName + `">
                             <img class="shopImage" src="` + product.shopImageUrl + `">
                         </div>
-                        <img id="productImage" src="` + product.productImageUrl + `" alt="product" onmouseenter="hideLogo(this.previousElementSibling)" onmouseleave="showLogo(this.previousElementSibling)">
+                        <img class="productImage" src="` + product.productImageUrl + `" alt="product" onmouseenter="hideLogo(this.previousElementSibling)" onmouseleave="showLogo(this.previousElementSibling)">
                         <div class="description">` + product.description + `
                         </div>
                     </div>
                     <div class='result-horizontal notImageContainer price'>
+                    <span hidden class='realAmount'>` + product.amount / 100 + `zł</span>
                     `;
-                if(product.startAtPromotion == null){
+                if (product.startAtPromotion == null) {
                     innerHtml += "<span class='amount fullAmount'>" + product.amount / 100 + "zł</span></div></div>";
-                }
-                else{
+                } else {
                     innerHtml += `
                          <div class="promotionContainer">
                             <div class="result-horizontal">
@@ -91,10 +161,10 @@ function atStart(page) {
                                         <span>-</span>
                                         <span>` + product.expiredAtPromotion + `</span>
                                     </div>`;
-                     if(product.countPromotion != null){
-                         innerHtml += "<span class='productsLeft'>" + product.countPromotion + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
-                     }
-                     innerHtml += `</div>
+                    if (countPromotion != null) {
+                        innerHtml += "<span class='productsLeft' data-actual-value='" + (countPromotion - amount) + "' data-start-value='" + (countPromotion - amount) + "' id='" + "count" + productId + "'>" + (countPromotion - amount) + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
+                    }
+                    innerHtml += `</div>
                                 <div class="promotionAmount">
                                     <span class="amount promotion">` + product.amount / 100 + `</span>
                                     <span class="amount">` + product.amountPromotion / 100 + 'zł' + `</span>
@@ -108,40 +178,9 @@ function atStart(page) {
                 result.innerHTML = innerHtml;
                 results.appendChild(result);
             }
-            let newPage;
-            let indexPage;
-            let pagesSelect = document.getElementById("pagesSelect");
-            fetch("/get_pages", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    "page": page,
-                    "maxPage": maxPage,
-                })
-            })
-                .then(response => response.json())
-                .then(response => {
-                    for (let i = 0; i < response.length; i++) {
-                        indexPage = (i + 1).toString();
-                        newPage = document.createElement("span");
-                        newPage.className = "numberPage"
-                        if (i === parseInt(page)) {
-                            newPage.classList.add("selectedPage");
-                        }
-                        newPage.id = "page" + indexPage
-                        newPage.textContent = indexPage;
-                        newPage.onclick = () => setPage(maxPage, page);
-                        pagesSelect.appendChild(newPage);
-                    }
-                    document.getElementById("nextPage").onclick = () => nextPage(maxPage);
-                    checkButtonPages((parseInt(page) + 1).toString(), maxPage.toString());
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-
+            if (sessionStorage.getItem("newOrder") != null) {
+                location.reload();
+            }
         })
         .catch((error) => {
             console.error(error);
@@ -149,49 +188,53 @@ function atStart(page) {
 }
 
 
-function addProduct(id, amount, e) {
-    if (addProductId(id, amount)) {
-        e.style.opacity = "100%";
+function addProduct(id, e, hasPromotion, product, related, isCart) {
+    if (addProductId(id, e, hasPromotion, product, related, isCart)) {
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
     }
 }
 
 
-function deleteProduct(id, amount, e) {
-    if (deleteProductId(id, amount)) {
+function deleteProduct(id, e, hasPromotion, product, related) {
+    if (deleteProductId(id, e, hasPromotion, product, related)) {
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
-        if (amount.textContent === "0") {
-            e.style.opacity = "40%";
+        if (e.textContent === "0") {
+            removeProduct(id, product, hasPromotion);
         }
     }
 }
 
-function removeProduct(id, e) {
-    productsId.delete(id);
+function removeProduct(productId, e, hasPromotion) {
+    let parentProduct;
+    productsId.delete(new ProductInfo(productId, hasPromotion).toString());
+    if (productsId.size === 0) {
+        document.getElementById("noResults").dataset.resultsEmpty = "true";
+        document.getElementById("buyButton").className = "grayButton";
+    }
+    if (e.classList.contains("related")) {
+        parentProduct = document.getElementById("product" + productId);
+        parentProduct.style.pointerEvents = "auto";
+        parentProduct.style.opacity = "100%";
+    }
     e.remove();
     sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
-    location.reload();
 }
 
-function buyProducts(){
+function buyProducts() {
     const cardId = sessionStorage.getItem("cardId");
-    if (productsId.size === 0){
+    if (productsId.size === 0) {
         return;
     }
-    fetch("/buy_products?cardId=" + cardId, {
+    fetch("/make_order?cardId=" + cardId, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(Object.fromEntries(productsId))
     })
+        .then(content => content.text())
         .then(content => {
-            if (content.status === 200){
-                window.location = "/cards?id=" + cardId + "&success";
-            }
-            else {
-                window.location = "/cards?id=" + cardId + "&error";
-            }
+            window.location = content;
         })
         .catch(error => {
             console.error(error);

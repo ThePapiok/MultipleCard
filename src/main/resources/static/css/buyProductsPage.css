@@ -53,19 +53,19 @@
     justify-content: normal;
 }
 
-#searchBar{
+#searchBar {
     width: 95%;
 }
 
-#searchInput{
+#searchInput {
     width: 25%;
 }
 
-.select{
+.select {
     width: 25%;
 }
 
-#categoryInput, #shopNameInput{
+#categoryInput, #shopNameInput {
     width: 100%;
     box-sizing: border-box;
     height: 40px;
@@ -76,7 +76,7 @@
     border: 1px solid #B3B6B7;
 }
 
-.options{
+.options {
     padding: 0;
     margin: 0;
     position: relative;
@@ -87,7 +87,7 @@
     overflow-y: auto;
 }
 
-.option{
+.option {
     cursor: pointer;
     list-style-type: none;
     font-size: 20px;
@@ -95,11 +95,11 @@
     padding-left: 5px;
 }
 
-.option:hover{
+.option:hover {
     background-color: gray;
 }
 
-#errorCardNotFound{
+#errorCardNotFound {
     margin-left: 5%;
     font-family: "Inter", sans-serif;
     font-size: 20px;

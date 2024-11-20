@@ -13,7 +13,6 @@
 </head>
 <body th:attr="onload=|atStart('${pageSelected}')|">
 <script src="/js/page.js"></script>
-<script src="/js/results.js"></script>
 <script src="/js/productsId.js"></script>
 <script src="/js/shopInfo.js"></script>
 <script src="/js/cartPage.js"></script>
@@ -30,21 +29,11 @@
             <button id="buyButton" class="greenButton" th:text="#{cartPage.button.buy_products}"></button>
         </a>
     </div>
+    <p id="error" th:text="#{cartPage.error.new_count_promotion}" hidden></p>
     <div id="allResults">
         <div id="results">
             <span data-results-empty="true" th:text="#{select.no_results}" id="noResults"></span>
         </div>
-    </div>
-    <div id="pages">
-        <a>
-            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
-                    onclick="previousPage()"></button>
-        </a>
-        <div id="pagesSelect">
-        </div>
-        <a>
-            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"></button>
-        </a>
     </div>
 </div>
 <div id="footer">

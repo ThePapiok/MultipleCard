@@ -63,8 +63,13 @@
                            th:unless="${product.active}">
                             <img src="/images/unblock.png" alt="unblock">
                         </a>
-                        <a th:href="@{'/promotions?id=' + ${product.productId}}" class="resultIcons">
-                            <img src="/images/discount.png" alt="discount" id="discountIcon">
+                        <a th:href="@{'/promotions?id=' + ${product.productId}}" class="resultIcons"
+                           th:if="${product.startAtPromotion} == null">
+                            <img src="/images/discount.png" alt="discount">
+                        </a>
+                        <a th:href="@{'/promotions?id=' + ${product.productId}}" class="resultIcons"
+                           th:unless="${product.startAtPromotion} == null">
+                            <img src="/images/discount_fill.png" alt="discount">
                         </a>
                         <a class="resultIcons"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
@@ -73,7 +78,7 @@
                     </div>
                     <div class="result-horizontal imageContainer"
                          th:attr="onclick=|productInfo('${product.productId}')|">
-                        <img id="productImage" th:src="${product.productImageUrl}" alt="product">
+                        <img class="productImage" th:src="${product.productImageUrl}" alt="product">
                         <div class="description" th:text="${product.description}">
                         </div>
                     </div>

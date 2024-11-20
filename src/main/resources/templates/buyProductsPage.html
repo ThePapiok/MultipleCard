@@ -27,6 +27,7 @@
     </a>
 </div>
 <div id="body">
+    <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <p class="title" th:text="#{products.text}"></p>
     <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
     <div th:if="${cardExists} == true">
@@ -75,17 +76,18 @@
         <p id="success" th:text="${successMessage}"></p>
         <div id="allResults">
             <div id="results">
-                <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}">
+                <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}"
+                     th:id="'product' + ${product.productId}">
                     <div class="result-vertical">
                         <div class="result-horizontal notImageContainer">
                             <span class="name" th:text="${product.productName}"></span>
                             <span class="amount">0</span>
                             <a class="resultIcons"
-                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling)|">
+                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.countPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
                                 <img src="/images/plus.png" alt="add">
                             </a>
                             <a class="resultIcons"
-                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling)|">
+                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.countPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
                                 <img src="/images/minus.png" alt="minus">
                             </a>
                         </div>
@@ -93,15 +95,16 @@
                             <div class="shopLogo" th:title="${product.shopName}">
                                 <img class="shopImage" th:src="${product.shopImageUrl}">
                             </div>
-                            <img id="productImage" th:src="${product.productImageUrl}" alt="product"
+                            <img class="productImage" th:src="${product.productImageUrl}" alt="product"
                                  onmouseenter="hideLogo(this.previousElementSibling)"
                                  onmouseleave="showLogo(this.previousElementSibling)">
                             <div class="description" th:text="${product.description}">
                             </div>
                         </div>
                         <div class="result-horizontal notImageContainer price">
-                        <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
-                              th:if="${product.startAtPromotion} == null"></span>
+                            <span hidden class="realAmount" th:text="${product.amount}/100 + 'zł'"></span>
+                            <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
+                                  th:if="${product.startAtPromotion} == null"></span>
                             <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
                                 <div class="result-horizontal">
                                     <div class="result-vertical promotionInfo">
@@ -111,6 +114,9 @@
                                             <span th:text="${product.expiredAtPromotion}"></span>
                                         </div>
                                         <span class="productsLeft" th:if="${product.countPromotion} != null"
+                                              th:data-actual-value="${product.countPromotion}"
+                                              th:data-start-value="${product.countPromotion}"
+                                              th:id="'count' + ${product.productId}"
                                               th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
                                     </div>
                                     <div class="promotionAmount">

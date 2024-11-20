@@ -1,13 +1,13 @@
-function addProduct(id, e) {
-    if (addProductId(id, e)) {
+function addProduct(id, e, hasPromotion, product, related, isCart) {
+    if (addProductId(id, e, hasPromotion, product, related, isCart)) {
         let basketAmount = document.getElementById("basketAmount");
         basketAmount.dataset.empty = "false";
         basketAmount.textContent = (parseInt(basketAmount.textContent) + 1).toString();
     }
 }
 
-function deleteProduct(id, e) {
-    if (deleteProductId(id, e)) {
+function deleteProduct(id, e, hasPromotion, product, related) {
+    if (deleteProductId(id, e, hasPromotion, product, related)) {
         let basketAmount = document.getElementById("basketAmount");
         basketAmount.textContent = (parseInt(basketAmount.textContent) - 1).toString();
         if (basketAmount.textContent === "0") {
