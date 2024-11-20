@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -288,7 +290,6 @@ public class ProductControllerTest {
     productDTO1.setProductName(testProduct1.getName());
     productDTO1.setActive(true);
     productDTO1.setAmount(testProduct1.getAmount());
-    productDTO1.setBarcode(testProduct1.getBarcode());
     productDTO1.setDescription(testProduct1.getDescription());
     productDTO1.setShopId(testProduct1.getShopId());
     productDTO1.setCountPromotion(promotion1.getCount());
@@ -301,7 +302,6 @@ public class ProductControllerTest {
     productDTO2.setProductId(testProduct2.getId().toString());
     productDTO2.setActive(false);
     productDTO2.setAmount(testProduct2.getAmount());
-    productDTO2.setBarcode(testProduct2.getBarcode());
     productDTO2.setDescription(testProduct2.getDescription());
     productDTO2.setShopId(testProduct2.getShopId());
     productDTO2.setCountPromotion(0);
@@ -1051,12 +1051,10 @@ public class ProductControllerTest {
     final int amount = 500;
     final int amountOther = 5200;
     final String testProductId = "523456789012345678101254";
-    final String productsIdParam = "productsId";
     ProductWithShopDTO product1 = new ProductWithShopDTO();
     product1.setProductId(TEST_ID);
     product1.setProductName(TEST_PRODUCT_NAME);
     product1.setActive(true);
-    product1.setBarcode(TEST_BARCODE);
     product1.setDescription(TEST_DESCRIPTION);
     product1.setShopId(TEST_OBJECT_ID);
     product1.setAmount(amount);
@@ -1064,21 +1062,34 @@ public class ProductControllerTest {
     product1.setProductId(testProductId.toString());
     product1.setProductName(TEST_PRODUCT_NAME + "A");
     product1.setActive(true);
-    product1.setBarcode(TEST_BARCODE + "2");
     product1.setDescription(TEST_DESCRIPTION + "C");
     product1.setShopId(TEST_OBJECT_ID);
     product1.setAmount(amountOther);
     List<ProductWithShopDTO> products = List.of(product1, product2);
+    StringBuilder productsInfo1 = new StringBuilder();
+    StringBuilder productsInfo2 = new StringBuilder();
+    productsInfo1
+        .append("{\"productId\": \"")
+        .append(TEST_ID)
+        .append("\", \"hasPromotion\": false}");
+    productsInfo2
+        .append("{\"productId\": \"")
+        .append(testProductId)
+        .append("\", \"hasPromotion\": true}");
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    when(productService.getProductsByIds(List.of(TEST_ID, testProductId), 0)).thenReturn(products);
+    when(productService.getProductsByIds(
+            List.of(productsInfo1.toString(), productsInfo2.toString())))
+        .thenReturn(products);
 
     MvcResult mvcResult =
         mockMvc
             .perform(
                 post("/get_products")
-                    .param(productsIdParam, TEST_ID)
-                    .param(productsIdParam, testProductId)
-                    .param("page", "0"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(
+                            List.of(productsInfo1.toString(), productsInfo2.toString()))))
             .andExpect(status().isOk())
             .andReturn();
     assertNotNull(mvcResult.getResponse().getContentAsString());

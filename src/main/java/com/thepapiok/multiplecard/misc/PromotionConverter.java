@@ -21,7 +21,7 @@ public class PromotionConverter {
     final double centsPerZl = 100.0;
     PromotionDTO promotionDTO = new PromotionDTO();
     promotionDTO.setAmount(String.format(Locale.US, "%.2f", promotion.getAmount() / centsPerZl));
-    if (promotion.getCount() == 0) {
+    if (promotion.getCount() == null) {
       promotionDTO.setCount("");
     } else {
       promotionDTO.setCount(String.valueOf(promotion.getCount()));

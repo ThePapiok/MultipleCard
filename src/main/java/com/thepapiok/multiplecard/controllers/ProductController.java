@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -291,7 +293,7 @@ public class ProductController {
   @PostMapping("/get_products")
   @ResponseBody
   public ResponseEntity<List<ProductWithShopDTO>> getProducts(
-      @RequestParam List<String> productsId, @RequestParam int page) {
-    return new ResponseEntity<>(productService.getProductsByIds(productsId, page), HttpStatus.OK);
+      @RequestBody List<String> productsInfo) throws JsonProcessingException {
+    return new ResponseEntity<>(productService.getProductsByIds(productsInfo), HttpStatus.OK);
   }
 }

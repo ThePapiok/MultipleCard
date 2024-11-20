@@ -11,7 +11,6 @@ public class ProductDTO {
   private String productName;
   private String description;
   private String productImageUrl;
-  private String barcode;
   private int amount;
   private ObjectId shopId;
   private LocalDate startAtPromotion;

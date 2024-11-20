@@ -15,7 +15,6 @@ public class ProductWithShopDTO {
   private String productName;
   private String description;
   private String productImageUrl;
-  private String barcode;
   private int amount;
   private ObjectId shopId;
   private LocalDate startAtPromotion;
@@ -31,7 +30,6 @@ public class ProductWithShopDTO {
     productName = productDTO.getProductName();
     description = productDTO.getDescription();
     productImageUrl = productDTO.getProductImageUrl();
-    barcode = productDTO.getBarcode();
     amount = productDTO.getAmount();
     shopId = productDTO.getShopId();
     startAtPromotion = productDTO.getStartAtPromotion();

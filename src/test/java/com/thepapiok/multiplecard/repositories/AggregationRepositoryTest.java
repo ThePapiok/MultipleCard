@@ -9,10 +9,13 @@ import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
+import com.thepapiok.multiplecard.collections.ReservedProduct;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +60,8 @@ public class AggregationRepositoryTest {
   private ProductDTO productDTO14;
   private ProductDTO productDTO15;
   private ProductDTO productDTO17;
+  private Shop shop1;
+  private Shop shop3;
 
   @Autowired private MongoTemplate mongoTemplate;
   @Autowired private CategoryRepository categoryRepository;
@@ -64,6 +69,7 @@ public class AggregationRepositoryTest {
   @Autowired private AccountRepository accountRepository;
   @Autowired private PromotionRepository promotionRepository;
   @Autowired private ShopRepository shopRepository;
+  @Autowired private ReservedProductsRepository reservedProductsRepository;
   private AggregationRepository aggregationRepository;
   @MockBean private RestTemplate restTemplate;
 
@@ -100,6 +106,9 @@ public class AggregationRepositoryTest {
     final int testYearStartAtPromotion3 = 2020;
     final int testMonthStartAtPromotion3 = 12;
     final int testDayStartAtPromotion3 = 11;
+    final int testYearStartAtPromotion4 = 2010;
+    final int testMonthStartAtPromotion4 = 9;
+    final int testDayStartAtPromotion4 = 1;
     final int testYearExpiredAtPromotion1 = 2025;
     final int testMonthExpiredAtPromotion1 = 10;
     final int testDayExpiredAtPromotion1 = 9;
@@ -109,6 +118,9 @@ public class AggregationRepositoryTest {
     final int testYearExpiredAtPromotion3 = 2022;
     final int testMonthExpiredAtPromotion3 = 10;
     final int testDayExpiredAtPromotion3 = 9;
+    final int testYearExpiredAtPromotion4 = 2010;
+    final int testMonthExpiredAtPromotion4 = 11;
+    final int testDayExpiredAtPromotion4 = 1;
     final int testOrder1Amount = 100;
     final int testOrder2Amount = 123;
     final int testOrder3Amount = 1200;
@@ -203,6 +215,7 @@ public class AggregationRepositoryTest {
     final int testDay18 = 2;
     final int testHour18 = 3;
     final int testMinute18 = 10;
+    final int testPromotionCount = 5;
     final LocalDateTime testDate1 =
         LocalDateTime.of(testYear1, testMonth1, testDay1, testHour1, testMinute1);
     final LocalDateTime testDate2 =
@@ -268,7 +281,7 @@ public class AggregationRepositoryTest {
     address.setPostalCode("postalCode");
     address.setHouseNumber("house");
     address.setApartmentNumber(1);
-    Shop shop1 = new Shop();
+    shop1 = new Shop();
     shop1.setName(TEST_SHOP_NAME);
     shop1.setFirstName("firstNameShop1");
     shop1.setLastName("lastNameShop1");
@@ -284,7 +297,7 @@ public class AggregationRepositoryTest {
     shop2.setPoints(List.of(address));
     shop2.setAccountNumber("account2");
     shop2 = mongoTemplate.save(shop2);
-    Shop shop3 = new Shop();
+    shop3 = new Shop();
     shop3.setName("shop3");
     shop3.setFirstName("firstNameShop3");
     shop3.setLastName("lastNameShop3");
@@ -493,13 +506,37 @@ public class AggregationRepositoryTest {
     Promotion promotion3 = new Promotion();
     promotion3.setProductId(product4.getId());
     promotion3.setAmount(testPromotion3Amount);
+    promotion3.setCount(testPromotionCount);
     promotion3.setStartAt(
         LocalDate.of(
             testYearStartAtPromotion3, testMonthStartAtPromotion3, testDayStartAtPromotion3));
     promotion3.setExpiredAt(
         LocalDate.of(
             testYearExpiredAtPromotion3, testMonthExpiredAtPromotion3, testDayExpiredAtPromotion3));
-    mongoTemplate.save(promotion3);
+    promotion3 = mongoTemplate.save(promotion3);
+    Promotion promotion4 = new Promotion();
+    promotion4.setProductId(product7.getId());
+    promotion4.setAmount(testPromotion3Amount);
+    promotion4.setCount(1);
+    promotion4.setStartAt(
+        LocalDate.of(
+            testYearStartAtPromotion4, testMonthStartAtPromotion4, testDayStartAtPromotion4));
+    promotion4.setExpiredAt(
+        LocalDate.of(
+            testYearExpiredAtPromotion4, testMonthExpiredAtPromotion4, testDayExpiredAtPromotion4));
+    promotion4 = mongoTemplate.save(promotion4);
+    ReservedProduct reservedProduct1 = new ReservedProduct();
+    reservedProduct1.setPromotionId(promotion3.getId());
+    reservedProduct1.setCardId(new ObjectId());
+    reservedProduct1.setExpiredAt(LocalDateTime.now().plusHours(1));
+    reservedProduct1.setEncryptedIp("sdafasdfsfasfad");
+    mongoTemplate.save(reservedProduct1);
+    ReservedProduct reservedProduct2 = new ReservedProduct();
+    reservedProduct2.setPromotionId(promotion3.getId());
+    reservedProduct2.setCardId(new ObjectId());
+    reservedProduct2.setExpiredAt(LocalDateTime.now().plusHours(1));
+    reservedProduct2.setEncryptedIp("sgdfaasdfdas3");
+    mongoTemplate.save(reservedProduct2);
     Account account1 = new Account();
     account1.setId(shop1.getId());
     account1.setPhone(TEST_PHONE);
@@ -1677,7 +1714,6 @@ public class AggregationRepositoryTest {
     productDTO1.setProductName(product1.getName());
     productDTO1.setActive(true);
     productDTO1.setAmount(product1.getAmount());
-    productDTO1.setBarcode(product1.getBarcode());
     productDTO1.setDescription(product1.getDescription());
     productDTO1.setShopId(product1.getShopId());
     productDTO1.setCountPromotion(promotion1.getCount());
@@ -1690,7 +1726,6 @@ public class AggregationRepositoryTest {
     productDTO2.setProductId(product2.getId().toString());
     productDTO2.setActive(true);
     productDTO2.setAmount(product2.getAmount());
-    productDTO2.setBarcode(product2.getBarcode());
     productDTO2.setDescription(product2.getDescription());
     productDTO2.setShopId(product2.getShopId());
     productDTO2.setCountPromotion(promotion2.getCount());
@@ -1703,7 +1738,6 @@ public class AggregationRepositoryTest {
     productDTO3.setProductName(product3.getName());
     productDTO3.setActive(false);
     productDTO3.setAmount(product3.getAmount());
-    productDTO3.setBarcode(product3.getBarcode());
     productDTO3.setDescription(product3.getDescription());
     productDTO3.setShopId(product3.getShopId());
     productDTO3.setCountPromotion(null);
@@ -1716,10 +1750,9 @@ public class AggregationRepositoryTest {
     productDTO4.setProductName(product4.getName());
     productDTO4.setActive(true);
     productDTO4.setAmount(product4.getAmount());
-    productDTO4.setBarcode(product4.getBarcode());
     productDTO4.setDescription(product4.getDescription());
     productDTO4.setShopId(product4.getShopId());
-    productDTO4.setCountPromotion(promotion3.getCount());
+    productDTO4.setCountPromotion(promotion3.getCount() - 2);
     productDTO4.setAmountPromotion(promotion3.getAmount());
     productDTO4.setProductImageUrl(product4.getImageUrl());
     productDTO4.setStartAtPromotion(promotion3.getStartAt());
@@ -1729,7 +1762,6 @@ public class AggregationRepositoryTest {
     productDTO5.setProductName(product5.getName());
     productDTO5.setActive(true);
     productDTO5.setAmount(product5.getAmount());
-    productDTO5.setBarcode(product5.getBarcode());
     productDTO5.setDescription(product5.getDescription());
     productDTO5.setShopId(product5.getShopId());
     productDTO5.setCountPromotion(null);
@@ -1742,20 +1774,18 @@ public class AggregationRepositoryTest {
     productDTO7.setProductName(product7.getName());
     productDTO7.setActive(true);
     productDTO7.setAmount(product7.getAmount());
-    productDTO7.setBarcode(product7.getBarcode());
     productDTO7.setDescription(product7.getDescription());
     productDTO7.setShopId(product7.getShopId());
-    productDTO7.setCountPromotion(null);
-    productDTO7.setAmountPromotion(0);
+    productDTO7.setCountPromotion(promotion4.getCount());
+    productDTO7.setAmountPromotion(promotion4.getAmount());
     productDTO7.setProductImageUrl(product7.getImageUrl());
-    productDTO7.setStartAtPromotion(null);
-    productDTO7.setExpiredAtPromotion(null);
+    productDTO7.setStartAtPromotion(promotion4.getStartAt());
+    productDTO7.setExpiredAtPromotion(promotion4.getExpiredAt());
     productDTO8 = new ProductDTO();
     productDTO8.setProductId(product8.getId().toString());
     productDTO8.setProductName(product8.getName());
     productDTO8.setActive(true);
     productDTO8.setAmount(product8.getAmount());
-    productDTO8.setBarcode(product8.getBarcode());
     productDTO8.setDescription(product8.getDescription());
     productDTO8.setShopId(product8.getShopId());
     productDTO8.setCountPromotion(null);
@@ -1768,7 +1798,6 @@ public class AggregationRepositoryTest {
     productDTO9.setProductName(product9.getName());
     productDTO9.setActive(true);
     productDTO9.setAmount(product9.getAmount());
-    productDTO9.setBarcode(product9.getBarcode());
     productDTO9.setDescription(product9.getDescription());
     productDTO9.setShopId(product9.getShopId());
     productDTO9.setCountPromotion(null);
@@ -1781,7 +1810,6 @@ public class AggregationRepositoryTest {
     productDTO10.setProductName(product10.getName());
     productDTO10.setActive(true);
     productDTO10.setAmount(product10.getAmount());
-    productDTO10.setBarcode(product10.getBarcode());
     productDTO10.setDescription(product10.getDescription());
     productDTO10.setShopId(product10.getShopId());
     productDTO10.setCountPromotion(null);
@@ -1794,7 +1822,6 @@ public class AggregationRepositoryTest {
     productDTO11.setProductName(product11.getName());
     productDTO11.setActive(true);
     productDTO11.setAmount(product11.getAmount());
-    productDTO11.setBarcode(product11.getBarcode());
     productDTO11.setDescription(product11.getDescription());
     productDTO11.setShopId(product11.getShopId());
     productDTO11.setCountPromotion(null);
@@ -1807,7 +1834,6 @@ public class AggregationRepositoryTest {
     productDTO13.setProductName(product13.getName());
     productDTO13.setActive(true);
     productDTO13.setAmount(product13.getAmount());
-    productDTO13.setBarcode(product13.getBarcode());
     productDTO13.setDescription(product13.getDescription());
     productDTO13.setShopId(product13.getShopId());
     productDTO13.setCountPromotion(null);
@@ -1820,7 +1846,6 @@ public class AggregationRepositoryTest {
     productDTO14.setProductName(product14.getName());
     productDTO14.setActive(true);
     productDTO14.setAmount(product14.getAmount());
-    productDTO14.setBarcode(product14.getBarcode());
     productDTO14.setDescription(product14.getDescription());
     productDTO14.setShopId(product14.getShopId());
     productDTO14.setCountPromotion(null);
@@ -1833,7 +1858,6 @@ public class AggregationRepositoryTest {
     productDTO15.setProductName(product15.getName());
     productDTO15.setActive(true);
     productDTO15.setAmount(product15.getAmount());
-    productDTO15.setBarcode(product15.getBarcode());
     productDTO15.setDescription(product15.getDescription());
     productDTO15.setShopId(product15.getShopId());
     productDTO15.setCountPromotion(null);
@@ -1846,7 +1870,6 @@ public class AggregationRepositoryTest {
     productDTO17.setProductName(product17.getName());
     productDTO17.setActive(true);
     productDTO17.setAmount(product17.getAmount());
-    productDTO17.setBarcode(product17.getBarcode());
     productDTO17.setDescription(product17.getDescription());
     productDTO17.setShopId(product17.getShopId());
     productDTO17.setCountPromotion(null);
@@ -1870,6 +1893,7 @@ public class AggregationRepositoryTest {
     productRepository.deleteAll();
     shopRepository.deleteAll();
     categoryRepository.deleteAll();
+    reservedProductsRepository.deleteAll();
   }
 
   @Test
@@ -2165,5 +2189,94 @@ public class AggregationRepositoryTest {
   @Test
   public void shouldReturn2AtGetMaxPageWhenCount4ProductsAtGetAllProductsAndText() {
     assertEquals(1, aggregationRepository.getMaxPage(TEST_PRODUCT_NAME, null, "", ""));
+  }
+
+  @Test
+  public void shouldReturnListOfProductWithShopDTOAtFindProductsByIdsAndTypeWhenEverythingOk() {
+    ProductInfo productInfo1 = new ProductInfo(productDTO1.getProductId(), true);
+    ProductInfo productInfo2 = new ProductInfo(productDTO4.getProductId(), true);
+    ProductInfo productInfo3 = new ProductInfo(productDTO7.getProductId(), true);
+    ProductInfo productInfo4 = new ProductInfo(productDTO7.getProductId(), false);
+    ProductInfo productInfo5 = new ProductInfo(productDTO3.getProductId(), false);
+    ProductWithShopDTO productWithShopDTO1 = new ProductWithShopDTO();
+    productWithShopDTO1.setProductId(productDTO1.getProductId());
+    productWithShopDTO1.setProductName(productDTO1.getProductName());
+    productWithShopDTO1.setActive(true);
+    productWithShopDTO1.setAmount(productDTO1.getAmount());
+    productWithShopDTO1.setDescription(productDTO1.getDescription());
+    productWithShopDTO1.setShopId(productDTO1.getShopId());
+    productWithShopDTO1.setCountPromotion(productDTO1.getCountPromotion());
+    productWithShopDTO1.setAmountPromotion(productDTO1.getAmountPromotion());
+    productWithShopDTO1.setProductImageUrl(productDTO1.getProductImageUrl());
+    productWithShopDTO1.setStartAtPromotion(productDTO1.getStartAtPromotion());
+    productWithShopDTO1.setExpiredAtPromotion(productDTO1.getExpiredAtPromotion());
+    productWithShopDTO1.setShopName(shop1.getName());
+    productWithShopDTO1.setShopImageUrl(shop1.getImageUrl());
+    ProductWithShopDTO productWithShopDTO2 = new ProductWithShopDTO();
+    productWithShopDTO2.setProductId(productDTO4.getProductId());
+    productWithShopDTO2.setProductName(productDTO4.getProductName());
+    productWithShopDTO2.setActive(true);
+    productWithShopDTO2.setAmount(productDTO4.getAmount());
+    productWithShopDTO2.setDescription(productDTO4.getDescription());
+    productWithShopDTO2.setShopId(productDTO4.getShopId());
+    productWithShopDTO2.setCountPromotion(productDTO4.getCountPromotion());
+    productWithShopDTO2.setAmountPromotion(productDTO4.getAmountPromotion());
+    productWithShopDTO2.setProductImageUrl(productDTO4.getProductImageUrl());
+    productWithShopDTO2.setStartAtPromotion(productDTO4.getStartAtPromotion());
+    productWithShopDTO2.setExpiredAtPromotion(productDTO4.getExpiredAtPromotion());
+    productWithShopDTO2.setShopName(shop3.getName());
+    productWithShopDTO2.setShopImageUrl(shop3.getImageUrl());
+    ProductWithShopDTO productWithShopDTO3 = new ProductWithShopDTO();
+    productWithShopDTO3.setProductId(productDTO7.getProductId());
+    productWithShopDTO3.setProductName(productDTO7.getProductName());
+    productWithShopDTO3.setActive(true);
+    productWithShopDTO3.setAmount(productDTO7.getAmount());
+    productWithShopDTO3.setDescription(productDTO7.getDescription());
+    productWithShopDTO3.setShopId(productDTO7.getShopId());
+    productWithShopDTO3.setCountPromotion(productDTO7.getCountPromotion());
+    productWithShopDTO3.setAmountPromotion(productDTO7.getAmountPromotion());
+    productWithShopDTO3.setProductImageUrl(productDTO7.getProductImageUrl());
+    productWithShopDTO3.setStartAtPromotion(productDTO7.getStartAtPromotion());
+    productWithShopDTO3.setExpiredAtPromotion(productDTO7.getExpiredAtPromotion());
+    productWithShopDTO3.setShopName(shop3.getName());
+    productWithShopDTO3.setShopImageUrl(shop3.getImageUrl());
+    ProductWithShopDTO productWithShopDTO4 = new ProductWithShopDTO();
+    productWithShopDTO4.setProductId(productDTO7.getProductId());
+    productWithShopDTO4.setProductName(productDTO7.getProductName());
+    productWithShopDTO4.setActive(true);
+    productWithShopDTO4.setAmount(productDTO7.getAmount());
+    productWithShopDTO4.setDescription(productDTO7.getDescription());
+    productWithShopDTO4.setShopId(productDTO7.getShopId());
+    productWithShopDTO4.setCountPromotion(null);
+    productWithShopDTO4.setAmountPromotion(0);
+    productWithShopDTO4.setProductImageUrl(productDTO7.getProductImageUrl());
+    productWithShopDTO4.setStartAtPromotion(null);
+    productWithShopDTO4.setExpiredAtPromotion(null);
+    productWithShopDTO4.setShopName(shop3.getName());
+    productWithShopDTO4.setShopImageUrl(shop3.getImageUrl());
+    ProductWithShopDTO productWithShopDTO5 = new ProductWithShopDTO();
+    productWithShopDTO5.setProductId(productDTO3.getProductId());
+    productWithShopDTO5.setProductName(productDTO3.getProductName());
+    productWithShopDTO5.setActive(true);
+    productWithShopDTO5.setAmount(productDTO3.getAmount());
+    productWithShopDTO5.setDescription(productDTO3.getDescription());
+    productWithShopDTO5.setShopId(productDTO3.getShopId());
+    productWithShopDTO5.setCountPromotion(null);
+    productWithShopDTO5.setAmountPromotion(0);
+    productWithShopDTO5.setProductImageUrl(productDTO3.getProductImageUrl());
+    productWithShopDTO5.setStartAtPromotion(null);
+    productWithShopDTO5.setExpiredAtPromotion(null);
+    productWithShopDTO5.setShopName(shop1.getName());
+    productWithShopDTO5.setShopImageUrl(shop1.getImageUrl());
+
+    assertEquals(
+        List.of(
+            productWithShopDTO1,
+            productWithShopDTO5,
+            productWithShopDTO2,
+            productWithShopDTO3,
+            productWithShopDTO4),
+        aggregationRepository.findProductsByIdsAndType(
+            List.of(productInfo1, productInfo2, productInfo3, productInfo4, productInfo5)));
   }
 }

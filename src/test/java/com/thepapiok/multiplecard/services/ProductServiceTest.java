@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
@@ -25,12 +26,14 @@ import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
-import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -86,9 +89,10 @@ public class ProductServiceTest {
   @Mock private AggregationRepository aggregationRepository;
   @Mock private PromotionService promotionService;
   @Mock private OrderRepository orderRepository;
-  @Mock private BlockedRepository blockedRepository;
+  @Mock private BlockedProductRepository blockedProductRepository;
   @Mock private CategoryRepository categoryRepository;
   @Mock private ShopRepository shopRepository;
+  @Mock private PromotionRepository promotionRepository;
   private ProductService productService;
 
   @BeforeAll
@@ -117,9 +121,10 @@ public class ProductServiceTest {
             aggregationRepository,
             promotionService,
             orderRepository,
-            blockedRepository,
+            blockedProductRepository,
             categoryRepository,
-            shopRepository);
+            shopRepository,
+            promotionRepository);
   }
 
   @Test
@@ -393,7 +398,7 @@ public class ProductServiceTest {
     verify(cloudinaryService).deleteImage(TEST_ID);
     verify(promotionService).deletePromotion(TEST_ID);
     verify(productRepository).deleteById(productId);
-    verify(blockedRepository).deleteByProductId(productId);
+    verify(blockedProductRepository).deleteByProductId(productId);
   }
 
   @Test
@@ -405,14 +410,14 @@ public class ProductServiceTest {
 
   @Test
   public void shouldReturnTrueAtHasBlockWhenProductIsBlocked() {
-    when(blockedRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(true);
+    when(blockedProductRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(true);
 
     assertTrue(productService.hasBlock(TEST_ID));
   }
 
   @Test
   public void shouldReturnFalseAtHasBlockWhenProductIsNotBlocked() {
-    when(blockedRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(false);
+    when(blockedProductRepository.existsByProductId(TEST_PRODUCT_ID)).thenReturn(false);
 
     assertFalse(productService.hasBlock(TEST_ID));
   }
@@ -425,7 +430,7 @@ public class ProductServiceTest {
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     assertTrue(productService.blockProduct(TEST_ID));
-    verify(blockedRepository).save(expectedBlockedProduct);
+    verify(blockedProductRepository).save(expectedBlockedProduct);
   }
 
   @Test
@@ -435,10 +440,11 @@ public class ProductServiceTest {
     expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.save(expectedBlockedProduct)).thenThrow(MongoWriteException.class);
+    when(blockedProductRepository.save(expectedBlockedProduct))
+        .thenThrow(MongoWriteException.class);
 
     assertFalse(productService.blockProduct(TEST_ID));
-    verify(blockedRepository).save(expectedBlockedProduct);
+    verify(blockedProductRepository).save(expectedBlockedProduct);
   }
 
   @Test
@@ -448,10 +454,11 @@ public class ProductServiceTest {
     expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlockedProduct);
+    when(blockedProductRepository.findByProductId(TEST_PRODUCT_ID))
+        .thenReturn(expectedBlockedProduct);
 
     assertTrue(productService.unblockProduct(TEST_ID));
-    verify(blockedRepository).delete(expectedBlockedProduct);
+    verify(blockedProductRepository).delete(expectedBlockedProduct);
   }
 
   @Test
@@ -461,11 +468,14 @@ public class ProductServiceTest {
     expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
-    when(blockedRepository.findByProductId(TEST_PRODUCT_ID)).thenReturn(expectedBlockedProduct);
-    doThrow(MongoWriteException.class).when(blockedRepository).delete(expectedBlockedProduct);
+    when(blockedProductRepository.findByProductId(TEST_PRODUCT_ID))
+        .thenReturn(expectedBlockedProduct);
+    doThrow(MongoWriteException.class)
+        .when(blockedProductRepository)
+        .delete(expectedBlockedProduct);
 
     assertFalse(productService.unblockProduct(TEST_ID));
-    verify(blockedRepository).delete(expectedBlockedProduct);
+    verify(blockedProductRepository).delete(expectedBlockedProduct);
   }
 
   @Test
@@ -625,20 +635,30 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductWithShopDTOAtGetProductsByIdsWhenEverythingOk() {
+  public void shouldReturnListOfProductWithShopDTOAtGetProductsByIdsWhenEverythingOk()
+      throws JsonProcessingException {
     List<ProductDTO> productDTOS = setDataProductsDTO();
     ProductWithShopDTO product1 =
         new ProductWithShopDTO(productDTOS.get(0), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
     ProductWithShopDTO product2 =
         new ProductWithShopDTO(productDTOS.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+    String productsInfo1JSON = "{\"productId\": \"" + TEST_ID1 + "\", \"hasPromotion\": true}";
+    String productsInfo2JSON = "{\"productId\": \"" + TEST_ID2 + "\", \"hasPromotion\": false}";
+    ProductInfo productInfo1 = new ProductInfo(TEST_ID1, true);
+    ProductInfo productInfo2 = new ProductInfo(TEST_ID2, false);
 
-    when(productRepository.findProductsByIds(
-            List.of(new ObjectId(TEST_ID1), new ObjectId(TEST_ID2)), 0))
+    when(aggregationRepository.findProductsByIdsAndType(List.of(productInfo1, productInfo2)))
         .thenReturn(List.of(product1, product2));
 
     assertEquals(
         List.of(product1, product2),
-        productService.getProductsByIds(List.of(TEST_ID1, TEST_ID2), 0));
+        productService.getProductsByIds(List.of(productsInfo1JSON, productsInfo2JSON)));
+  }
+
+  @Test
+  public void shouldReturnEmptyListAtGetProductsByIdsWhenNoProductsInfo()
+      throws JsonProcessingException {
+    assertEquals(List.of(), productService.getProductsByIds(List.of()));
   }
 
   @Test
@@ -675,7 +695,6 @@ public class ProductServiceTest {
     productDTO1.setActive(true);
     productDTO1.setProductId(TEST_ID1);
     productDTO1.setProductName("name1");
-    productDTO1.setBarcode("barcode1");
     productDTO1.setAmount(testAmountProduct1);
     productDTO1.setDescription("description1");
     productDTO1.setProductImageUrl("url1");
@@ -692,7 +711,6 @@ public class ProductServiceTest {
     productDTO2.setActive(false);
     productDTO2.setProductId(TEST_ID2);
     productDTO2.setProductName("name2");
-    productDTO2.setBarcode("barcode2");
     productDTO2.setAmount(testAmountProduct2);
     productDTO2.setDescription("description2");
     productDTO2.setProductImageUrl("url2");

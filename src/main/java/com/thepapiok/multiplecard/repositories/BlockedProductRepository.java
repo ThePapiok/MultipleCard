@@ -6,7 +6,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface BlockedRepository extends MongoRepository<BlockedProduct, ObjectId> {
+public interface BlockedProductRepository extends MongoRepository<BlockedProduct, ObjectId> {
   boolean existsByProductId(ObjectId productId);
 
   BlockedProduct findByProductId(ObjectId productId);

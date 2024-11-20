@@ -3,6 +3,8 @@ package com.thepapiok.multiplecard.services;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
@@ -14,12 +16,14 @@ import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
-import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -50,9 +54,10 @@ public class ProductService {
   private final AggregationRepository aggregationRepository;
   private final PromotionService promotionService;
   private final OrderRepository orderRepository;
-  private final BlockedRepository blockedRepository;
+  private final BlockedProductRepository blockedProductRepository;
   private final CategoryRepository categoryRepository;
   private final ShopRepository shopRepository;
+  private final PromotionRepository promotionRepository;
 
   @Autowired
   public ProductService(
@@ -66,9 +71,10 @@ public class ProductService {
       AggregationRepository aggregationRepository,
       PromotionService promotionService,
       OrderRepository orderRepository,
-      BlockedRepository blockedRepository,
+      BlockedProductRepository blockedProductRepository,
       CategoryRepository categoryRepository,
-      ShopRepository shopRepository) {
+      ShopRepository shopRepository,
+      PromotionRepository promotionRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -79,9 +85,10 @@ public class ProductService {
     this.aggregationRepository = aggregationRepository;
     this.promotionService = promotionService;
     this.orderRepository = orderRepository;
-    this.blockedRepository = blockedRepository;
+    this.blockedProductRepository = blockedProductRepository;
     this.categoryRepository = categoryRepository;
     this.shopRepository = shopRepository;
+    this.promotionRepository = promotionRepository;
   }
 
   public boolean addProduct(
@@ -166,7 +173,7 @@ public class ProductService {
                 final float centsPerZloty = 100;
                 promotionService.deletePromotion(productId);
                 productRepository.deleteById(objectId);
-                blockedRepository.deleteByProductId(objectId);
+                blockedProductRepository.deleteByProductId(objectId);
                 List<Order> orders = orderRepository.findAllByProductIdAndIsUsed(objectId, false);
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
@@ -188,7 +195,7 @@ public class ProductService {
   }
 
   public boolean hasBlock(String id) {
-    return blockedRepository.existsByProductId(new ObjectId(id));
+    return blockedProductRepository.existsByProductId(new ObjectId(id));
   }
 
   public boolean blockProduct(String id) {
@@ -197,7 +204,7 @@ public class ProductService {
       BlockedProduct blockedProduct = new BlockedProduct();
       blockedProduct.setProductId(new ObjectId(id));
       blockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
-      blockedRepository.save(blockedProduct);
+      blockedProductRepository.save(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
@@ -206,8 +213,8 @@ public class ProductService {
 
   public boolean unblockProduct(String id) {
     try {
-      BlockedProduct blockedProduct = blockedRepository.findByProductId(new ObjectId(id));
-      blockedRepository.delete(blockedProduct);
+      BlockedProduct blockedProduct = blockedProductRepository.findByProductId(new ObjectId(id));
+      blockedProductRepository.delete(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
@@ -295,10 +302,17 @@ public class ProductService {
         phone, page, field, isDescending, text, category, shopName);
   }
 
-  public List<ProductWithShopDTO> getProductsByIds(List<String> productsId, int page) {
-    final int countProductsAtPage = 12;
-    return productRepository.findProductsByIds(
-        productsId.stream().map(ObjectId::new).toList(), page * countProductsAtPage);
+  public List<ProductWithShopDTO> getProductsByIds(List<String> productsInfo)
+      throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<ProductInfo> products = new ArrayList<>();
+    if (productsInfo.size() == 0) {
+      return List.of();
+    }
+    for (String json : productsInfo) {
+      products.add(objectMapper.readValue(json, ProductInfo.class));
+    }
+    return aggregationRepository.findProductsByIdsAndType(products);
   }
 
   public List<ProductWithShopDTO> getProductsWithShops(

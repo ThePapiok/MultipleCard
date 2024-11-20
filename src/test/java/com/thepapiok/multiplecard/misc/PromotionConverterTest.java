@@ -22,7 +22,6 @@ public class PromotionConverterTest {
 
   @BeforeEach
   public void setUp() {
-    final int count = 0;
     final int amount = 3422;
     final ObjectId promotionId = new ObjectId("723456229012345678901231");
     final LocalDate startAt = LocalDate.of(2024, 12, 5);
@@ -30,7 +29,7 @@ public class PromotionConverterTest {
     MockitoAnnotations.openMocks(this);
     promotionConverter = new PromotionConverter(promotionRepository);
     promotion = new Promotion();
-    promotion.setCount(count);
+    promotion.setCount(null);
     promotion.setAmount(amount);
     promotion.setProductId(TEST_PRODUCT_ID);
     promotion.setStartAt(startAt);
