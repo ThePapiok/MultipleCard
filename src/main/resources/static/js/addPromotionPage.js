@@ -96,6 +96,7 @@ function atStart() {
         unfocusedAmount(amountInput);
         amount = amountInput.value;
         checkAmount(amountInput);
+        checkCount(document.getElementById("count"));
         amountInput.value = amountInput.value + " (" + originalAmount + "zł)";
     } else {
         ok.push(false, false, false, true);
