@@ -19,6 +19,7 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
     let result;
     let productInfo = new ProductInfo(id, hasPromotion).toString();
     let innerHtml;
+    let price;
     if (productsAmount < 100) {
         if (related) {
             if (amount < (10 - parseInt(document.getElementById("product" + id).getElementsByClassName("amount")[0].textContent))) {
@@ -47,6 +48,8 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                     product.style.opacity = "40%";
                     result = document.createElement("div")
                     result.className = "result related";
+                    price = product.getElementsByClassName("realAmount")[0].textContent;
+                    result.dataset.price = (parseInt(price.substring(0, price.length - 2)) * 100).toString();
                     innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.getElementsByClassName("name")[0].textContent + `</span>
@@ -78,7 +81,7 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                         </div>
                     </div>
                     <div class='result-horizontal notImageContainer price'>
-                        <span class='amount fullAmount'>` + product.getElementsByClassName("realAmount")[0].textContent + `</span>
+                        <span class='amount fullAmount'>` + price + `</span>
                     </div>
                 </div>`;
                     result.innerHTML = innerHtml;

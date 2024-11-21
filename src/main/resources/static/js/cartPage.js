@@ -32,6 +32,8 @@ class Product {
     }
 }
 
+let totalAmount = 0;
+
 function atStart(page) {
     let productKeys = [];
     let results = document.getElementById("results");
@@ -114,8 +116,6 @@ function atStart(page) {
                         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
                         sessionStorage.setItem("newOrder", "1");
                         amount = countPromotion;
-                    } else if (countPromotion > amount) {
-
                     } else if (((amount - countPromotion) === 0) && productsId.has(new ProductInfo(productId, false).toString())) {
                         result.style.pointerEvents = "none";
                         result.style.opacity = "40%";
@@ -130,6 +130,12 @@ function atStart(page) {
                     result.className = "result";
                     related = false;
                 }
+                if (product.startAtPromotion == null) {
+                    result.dataset.price = product.amount;
+                } else {
+                    result.dataset.price = product.amountPromotion;
+                }
+                totalAmount += (amount * result.dataset.price);
                 let innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.productName + `</span>
@@ -170,7 +176,7 @@ function atStart(page) {
                                         <span>` + product.expiredAtPromotion + `</span>
                                     </div>`;
                     if (countPromotion != null) {
-                        innerHtml += "<span class='productsLeft' data-actual-value='" + (countPromotion - amount) + "' data-start-value='" + (countPromotion - amount) + "' id='" + "count" + productId + "'>" + (countPromotion - amount) + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
+                        innerHtml += "<span class='productsLeft' data-actual-value='" + (countPromotion - amount) + "' data-start-value='" + countPromotion + "' id='" + "count" + productId + "'>" + (countPromotion - amount) + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
                     }
                     innerHtml += `</div>
                                 <div class="promotionAmount">
@@ -186,6 +192,7 @@ function atStart(page) {
                 result.innerHTML = innerHtml;
                 results.appendChild(result);
             }
+            document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
             if (sessionStorage.getItem("newOrder") != null) {
                 location.reload();
             }
@@ -200,6 +207,8 @@ function addProduct(id, e, hasPromotion, product, related, isCart) {
     if (addProductId(id, e, hasPromotion, product, related, isCart)) {
         productsAmount++;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
+        totalAmount += parseInt(product.dataset.price);
+        document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
     }
 }
 
@@ -211,13 +220,21 @@ function deleteProduct(id, e, hasPromotion, product, related) {
         if (e.textContent === "0") {
             removeProduct(id, product, hasPromotion);
         }
+        totalAmount -= parseInt(product.dataset.price);
+        document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
     }
 }
 
 function removeProduct(productId, e, hasPromotion) {
-    let parentProduct;
     const productInfo = new ProductInfo(productId, hasPromotion).toString();
-    productsAmount -= productsId.get(productInfo);
+    let amount = productsId.get(productInfo);
+    let parentProduct;
+    if (amount == null) {
+        amount = 0;
+    }
+    productsAmount -= amount;
+    totalAmount -= (parseInt(e.dataset.price) * amount);
+    document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
     productsId.delete(productInfo);
     if (productsId.size === 0) {
         document.getElementById("noResults").dataset.resultsEmpty = "true";
