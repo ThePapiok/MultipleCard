@@ -111,4 +111,19 @@
         top: 23px;
         left: 33px;
     }
+
+    #searchInput {
+        font-size: 10px;
+    }
+
+    #categoryInput {
+        padding: 1px;
+        font-size: 10px;
+    }
+
+    #shopNameInput {
+        padding: 1px;
+        font-size: 7px;
+    }
+
 }

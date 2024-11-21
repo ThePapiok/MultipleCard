@@ -32,9 +32,11 @@
     <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
     <div th:if="${cardExists} == true">
         <div id="searchBar">
-            <input type="text" id="searchInput" th:placeholder="#{search.text}" th:value="${param.text}">
+            <input type="text" id="searchInput" th:title="#{search.text}" th:placeholder="#{search.text}"
+                   th:value="${param.text}">
             <div class="select">
-                <input type="text" id="categoryInput" th:placeholder="#{product_category.text}"
+                <input type="text" id="categoryInput" th:title="#{product_category.text}"
+                       th:placeholder="#{product_category.text}"
                        onfocus="showCategories(this.nextElementSibling)"
                        onfocusout="hideCategories(this.nextElementSibling)"
                        oninput="getCategories(this.nextElementSibling, this)" th:value="${param.category}">
@@ -42,7 +44,7 @@
                 </ul>
             </div>
             <div class="select">
-                <input type="text" id="shopNameInput" th:placeholder="#{name_shop.text}"
+                <input type="text" id="shopNameInput" th:title="#{name_shop.text}" th:placeholder="#{name_shop.text}"
                        onfocus="showShopNames(this.nextElementSibling)"
                        onfocusout="hideShopNames(this.nextElementSibling)"
                        oninput="getShopNames(this.nextElementSibling, this)" th:value="${param.shopName}">
