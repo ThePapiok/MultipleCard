@@ -38,7 +38,6 @@ function atStart(page) {
     let result;
     let product;
     let productsSession;
-    let maxPage;
     let hasPromotion;
     let amount;
     let countPromotion;
@@ -47,18 +46,26 @@ function atStart(page) {
     let productInfo;
     let incAmount;
     let related;
+    let tooMany = false;
     checkLanguage();
     if (sessionStorage.getItem("newOrder") != null) {
         sessionStorage.removeItem("newOrder");
-        document.getElementById("error").hidden = false;
+        document.getElementById("error").textContent = document.getElementById("textGetNewCount").textContent;
     }
     productsSession = sessionStorage.getItem("productsId");
-    if (productsSession == null) {
-        document.getElementById("buyButton").className = "grayButton";
+    productsId = new Map(Object.entries(JSON.parse(productsSession)));
+    productsId.forEach((value, key) => {
+        productKeys.push(key);
+        if (value > 10) {
+            tooMany = true;
+            return;
+        }
+        productsAmount += value;
+    });
+    if (productsAmount > 100 || tooMany) {
+        document.getElementById("error").textContent = document.getElementById("textTooManyProducts").textContent;
         return;
     }
-    productsId = new Map(Object.entries(JSON.parse(productsSession)));
-    productsId.forEach((value, key) => productKeys.push(key));
     fetch("/get_products", {
         method: "POST",
         headers: {
@@ -70,6 +77,7 @@ function atStart(page) {
         .then(response => {
             if (response.length !== 0) {
                 document.getElementById("noResults").dataset.resultsEmpty = "false";
+                document.getElementById("buyButton").className = "greenButton";
             } else {
                 document.getElementById("buyButton").className = "grayButton";
             }
@@ -190,6 +198,7 @@ function atStart(page) {
 
 function addProduct(id, e, hasPromotion, product, related, isCart) {
     if (addProductId(id, e, hasPromotion, product, related, isCart)) {
+        productsAmount++;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
     }
 }
@@ -197,6 +206,7 @@ function addProduct(id, e, hasPromotion, product, related, isCart) {
 
 function deleteProduct(id, e, hasPromotion, product, related) {
     if (deleteProductId(id, e, hasPromotion, product, related)) {
+        productsAmount--;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
         if (e.textContent === "0") {
             removeProduct(id, product, hasPromotion);
@@ -206,7 +216,9 @@ function deleteProduct(id, e, hasPromotion, product, related) {
 
 function removeProduct(productId, e, hasPromotion) {
     let parentProduct;
-    productsId.delete(new ProductInfo(productId, hasPromotion).toString());
+    const productInfo = new ProductInfo(productId, hasPromotion).toString();
+    productsAmount -= productsId.get(productInfo);
+    productsId.delete(productInfo);
     if (productsId.size === 0) {
         document.getElementById("noResults").dataset.resultsEmpty = "true";
         document.getElementById("buyButton").className = "grayButton";
@@ -220,9 +232,9 @@ function removeProduct(productId, e, hasPromotion) {
     sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
 }
 
-function buyProducts() {
+function buyProducts(e) {
     const cardId = sessionStorage.getItem("cardId");
-    if (productsId.size === 0) {
+    if (productsId.size === 0 || e.className === "grayButton") {
         return;
     }
     fetch("/make_order?cardId=" + cardId, {

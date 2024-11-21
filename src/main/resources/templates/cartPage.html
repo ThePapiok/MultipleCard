@@ -23,13 +23,15 @@
 </div>
 <div id="body">
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
+    <span hidden th:text="#{cartPage.error.new_count_promotion}" id="textGetNewCount"></span>
+    <span hidden th:text="#{cartPage.error.too_many_products}" id="textTooManyProducts"></span>
     <p class="title" th:text="#{cartPage.title}"></p>
     <div id="buyContainer">
-        <a id="buyUrl" onclick="buyProducts()">
-            <button id="buyButton" class="greenButton" th:text="#{cartPage.button.buy_products}"></button>
+        <a id="buyUrl" onclick="buyProducts(this.firstElementChild)">
+            <button id="buyButton" class="grayButton" th:text="#{cartPage.button.buy_products}"></button>
         </a>
     </div>
-    <p id="error" th:text="#{cartPage.error.new_count_promotion}" hidden></p>
+    <p id="error"></p>
     <div id="allResults">
         <div id="results">
             <span data-results-empty="true" th:text="#{select.no_results}" id="noResults"></span>

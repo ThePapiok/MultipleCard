@@ -9,6 +9,7 @@ class ProductInfo {
     }
 }
 
+let productsAmount = 0;
 let productsId = new Map();
 
 
@@ -18,34 +19,35 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
     let result;
     let productInfo = new ProductInfo(id, hasPromotion).toString();
     let innerHtml;
-    if (related) {
-        if (amount < (10 - parseInt(document.getElementById("product" + id).getElementsByClassName("amount")[0].textContent))) {
-            amount++;
-            e.textContent = amount.toString();
-            if (!productsId.has(productInfo)) {
-                productsId.set(productInfo, 1);
-            } else {
-                productsId.set(productInfo, productsId.get(productInfo) + 1);
-            }
-            return true;
-        }
-        return false;
-    }
-    if (amount < 10) {
-        if (hasPromotion) {
-            let count = document.getElementById("count" + id);
-            if (count.dataset.actualValue !== "0") {
+    if (productsAmount < 100) {
+        if (related) {
+            if (amount < (10 - parseInt(document.getElementById("product" + id).getElementsByClassName("amount")[0].textContent))) {
                 amount++;
                 e.textContent = amount.toString();
-                newValue = (parseInt(count.dataset.actualValue) - 1).toString();
-                count.dataset.actualValue = newValue;
-                count.textContent = newValue + ' ' + document.getElementById("textLeftProducts").textContent;
-            } else {
-                product.style.pointerEvents = "none";
-                product.style.opacity = "40%";
-                result = document.createElement("div")
-                result.className = "result related";
-                innerHtml = `<div class="result-vertical">
+                if (!productsId.has(productInfo)) {
+                    productsId.set(productInfo, 1);
+                } else {
+                    productsId.set(productInfo, productsId.get(productInfo) + 1);
+                }
+                return true;
+            }
+            return false;
+        }
+        if (amount < 10) {
+            if (hasPromotion) {
+                let count = document.getElementById("count" + id);
+                if (count.dataset.actualValue !== "0") {
+                    amount++;
+                    e.textContent = amount.toString();
+                    newValue = (parseInt(count.dataset.actualValue) - 1).toString();
+                    count.dataset.actualValue = newValue;
+                    count.textContent = newValue + ' ' + document.getElementById("textLeftProducts").textContent;
+                } else {
+                    product.style.pointerEvents = "none";
+                    product.style.opacity = "40%";
+                    result = document.createElement("div")
+                    result.className = "result related";
+                    innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.getElementsByClassName("name")[0].textContent + `</span>
                         <span class="amount">0</span>
@@ -58,14 +60,14 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                             <img src="/images/minus.png" alt="minus">
                         </a>
                 `;
-                if (isCart) {
-                    innerHtml += `
+                    if (isCart) {
+                        innerHtml += `
                     <a class="resultIcons" onclick="removeProduct('` + id + `' , this.parentElement.parentElement.parentElement,` + false + `)">
                             <img src="/images/close.png" alt="close">
                         </a>
                     `;
-                }
-                innerHtml += `
+                    }
+                    innerHtml += `
                 </div>
                     <div class="result-horizontal imageContainer">
                         <div class="shopLogo" title="` + product.getElementsByClassName("shopLogo")[0].title + `">
@@ -79,24 +81,25 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                         <span class='amount fullAmount'>` + product.getElementsByClassName("realAmount")[0].textContent + `</span>
                     </div>
                 </div>`;
-                result.innerHTML = innerHtml;
-                product.after(result);
-                return false;
+                    result.innerHTML = innerHtml;
+                    product.after(result);
+                    return false;
+                }
+            } else {
+                amount++;
+                e.textContent = amount.toString();
+                if (product.getElementsByClassName("promotionContainer")[0] != null) {
+                    productInfo = new ProductInfo(id, true).toString();
+                }
             }
-        } else {
-            amount++;
-            e.textContent = amount.toString();
-            if (product.getElementsByClassName("promotionContainer")[0] != null) {
-                productInfo = new ProductInfo(id, true);
+            if (!productsId.has(productInfo)) {
+                productsId.set(productInfo, 1);
+            } else {
+                productsId.set(productInfo, productsId.get(productInfo) + 1);
             }
-        }
-        if (!productsId.has(productInfo)) {
-            productsId.set(productInfo, 1);
-        } else {
-            productsId.set(productInfo, productsId.get(productInfo) + 1);
-        }
-        return true;
+            return true;
 
+        }
     }
     return false;
 }
