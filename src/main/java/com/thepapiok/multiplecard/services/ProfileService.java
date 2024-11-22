@@ -134,7 +134,7 @@ public class ProfileService {
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),
-                        new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
+                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
                         User.class);
                     mongoTemplate.remove(order);
                   }

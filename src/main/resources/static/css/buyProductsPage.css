@@ -27,15 +27,15 @@
     width: 40px;
 }
 
-#basketAmount[data-empty="true"] ~ #emptyBasket {
+#basketQuantity[data-empty="true"] ~ #emptyBasket {
     display: block;
 }
 
-#basketAmount[data-empty="true"] ~ #notEmptyBasket {
+#basketQuantity[data-empty="true"] ~ #notEmptyBasket {
     display: none;
 }
 
-#basketAmount {
+#basketQuantity {
     position: absolute;
     left: 30px;
     top: 20px;
@@ -106,7 +106,7 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #basketAmount {
+    #basketQuantity {
         font-size: 13px;
         top: 23px;
         left: 33px;

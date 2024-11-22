@@ -11,16 +11,20 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwind;
 
 import com.mongodb.BasicDBObject;
+import com.thepapiok.multiplecard.collections.ReservedProduct;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.CustomProjectAggregationOperation;
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -28,6 +32,9 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Repository
 public class AggregationRepository {
@@ -41,11 +48,22 @@ public class AggregationRepository {
   private static final String SHOP_FIELD = "shop";
   private final AccountRepository accountRepository;
   private final MongoTemplate mongoTemplate;
+  private final MongoTransactionManager mongoTransactionManager;
+  private final PromotionRepository promotionRepository;
+  private final ReservedProductsRepository reservedProductsRepository;
 
   @Autowired
-  public AggregationRepository(AccountRepository accountRepository, MongoTemplate mongoTemplate) {
+  public AggregationRepository(
+      AccountRepository accountRepository,
+      MongoTemplate mongoTemplate,
+      MongoTransactionManager mongoTransactionManager,
+      PromotionRepository promotionRepository,
+      ReservedProductsRepository reservedProductsRepository) {
     this.accountRepository = accountRepository;
     this.mongoTemplate = mongoTemplate;
+    this.mongoTransactionManager = mongoTransactionManager;
+    this.promotionRepository = promotionRepository;
+    this.reservedProductsRepository = reservedProductsRepository;
   }
 
   public List<ProductDTO> getProducts(
@@ -59,7 +77,7 @@ public class AggregationRepository {
     final int countReviewsAtPage = 12;
     final String createdAtField = "order.createdAt";
     final String dateField = "date";
-    final String amountField = "amount";
+    final String priceField = "price";
     final String updatedAtField = "updatedAt";
     final String isNullField = "isNull";
     final String productField = "product";
@@ -99,9 +117,9 @@ public class AggregationRepository {
         break;
       case "price":
         if (isDescending) {
-          sortOperation = Aggregation.sort(Sort.by(amountField).descending());
+          sortOperation = Aggregation.sort(Sort.by(priceField).descending());
         } else {
-          sortOperation = Aggregation.sort(Sort.by(amountField).ascending());
+          sortOperation = Aggregation.sort(Sort.by(priceField).ascending());
         }
         break;
       case "added":
@@ -173,7 +191,7 @@ public class AggregationRepository {
                                         "product.name": "$name",
                                         "product.description": "$description",
                                         "product.imageUrl": "$imageUrl",
-                                        "product.amount": "$amount",
+                                        "product.price": "$price",
                                         "product.shopId": "$shopId",
                                         "product.updatedAt": "$updatedAt",
                                         "product._class": "$_class"
@@ -189,7 +207,7 @@ public class AggregationRepository {
                                         "product.name": 1,
                                         "product.description": 1,
                                         "product.imageUrl": 1,
-                                        "product.amount": 1,
+                                        "product.price": 1,
                                         "product.shopId": 1,
                                         "product.updatedAt": 1,
                                         "product._class": 1
@@ -213,14 +231,11 @@ public class AggregationRepository {
                                         "localField": "promotion._id",
                                         "foreignField": "promotionId",
                                         "as": "reservedProduct",
-                                        "let": {
-                                            "promotionId": "$promotion._id"
-                                        }
                                         "pipeline": [
                                             {
                                                 $group: {
                                                     "_id": "$promotionId",
-                                                    "count": {
+                                                    "quantity": {
                                                         $count: {}
                                                     }
                                                 }
@@ -241,14 +256,14 @@ public class AggregationRepository {
                                       "productName": "$product.name",
                                       "description": "$product.description",
                                       "productImageUrl": "$product.imageUrl",
-                                      "amount": "$product.amount",
+                                      "price": "$product.price",
                                       "shopId": "$product.shopId",
                                       "startAtPromotion": "$promotion.startAt",
                                       "expiredAtPromotion": "$promotion.expiredAt",
-                                      "countPromotion": {
-                                        $subtract: ["$promotion.count", {
-                                          $ifNull: ["$reservedProduct.count", 0]}]},
-                                      "amountPromotion": "$promotion.amount",
+                                      "quantityPromotion": {
+                                        $subtract: ["$promotion.quantity", {
+                                          $ifNull: ["$reservedProduct.quantity", 0]}]},
+                                      "newPricePromotion": "$promotion.newPrice",
                                       "isActive": {
                                         $cond: {
                                           if: {$lte: ["$blockedProducts", null]},
@@ -268,12 +283,12 @@ public class AggregationRepository {
                                       "productName": 1,
                                       "description": 1,
                                       "productImageUrl": 1,
-                                      "amount": 1,
+                                      "price": 1,
                                       "shopId": 1,
                                       "startAtPromotion": 1,
                                       "expiredAtPromotion": 1,
-                                      "countPromotion": 1,
-                                      "amountPromotion": 1,
+                                      "quantityPromotion": 1,
+                                      "newPricePromotion": 1,
                                       "isActive": 1
                                     }
                                   }
@@ -414,7 +429,7 @@ public class AggregationRepository {
                                                   "productName": 1,
                                                   "description": 1,
                                                   "productImageUrl": 1,
-                                                  "amount": 1,
+                                                  "price": 1,
                                                   "shopId": 1,
                                                   "isActive": 1,
                                                   "shopName": 1,
@@ -441,7 +456,7 @@ public class AggregationRepository {
                                                         {
                                                             $group: {
                                                                 "_id": "$promotionId",
-                                                                "count": {
+                                                                "quantity": {
                                                                     $count: {}
                                                                 }
                                                             }},{
@@ -466,10 +481,10 @@ public class AggregationRepository {
                                                   "productImageUrl": "$imageUrl",
                                                   "startAtPromotion": "$promotion.startAt",
                                                   "expiredAtPromotion": "$promotion.expiredAt",
-                                                  "countPromotion": {
-                                                    $subtract: ["$promotion.count", {
-                                                      $ifNull: ["$reservedProduct.count", 0]}]},
-                                                  "amountPromotion": "$promotion.amount",
+                                                  "quantityPromotion": {
+                                                    $subtract: ["$promotion.quantity", {
+                                                      $ifNull: ["$reservedProduct.quantity", 0]}]},
+                                                  "newPricePromotion": "$promotion.newPrice",
                                                   "isActive": true,
                                                   "shopName": "$shop.name",
                                                   "shopImageUrl": "$shop.imageUrl"
@@ -485,12 +500,12 @@ public class AggregationRepository {
                                                   "productName": 1,
                                                   "description": 1,
                                                   "productImageUrl": 1,
-                                                  "amount": 1,
+                                                  "price": 1,
                                                   "shopId": 1,
                                                   "startAtPromotion": 1,
                                                   "expiredAtPromotion": 1,
-                                                  "countPromotion": 1,
-                                                  "amountPromotion": 1,
+                                                  "quantityPromotion": 1,
+                                                  "newPricePromotion": 1,
                                                   "isActive": 1,
                                                   "shopName": 1,
                                                   "shopImageUrl": 1
@@ -547,7 +562,7 @@ public class AggregationRepository {
                                                             "productName": 1,
                                                             "description": 1,
                                                             "productImageUrl": 1,
-                                                            "amount": 1,
+                                                            "price": 1,
                                                             "shopId": 1,
                                                             "isActive": 1,
                                                             "shopName": 1,
@@ -613,7 +628,7 @@ public class AggregationRepository {
                                                     "pipeline": [{
                                                         $group: {
                                                             "_id": "$promotionId",
-                                                            "count": {
+                                                            "quantity": {
                                                                 $count: {}
                                                                 }
                                                             }
@@ -641,12 +656,12 @@ public class AggregationRepository {
                                                     "productImageUrl": "$imageUrl",
                                                     "startAtPromotion": "$promotion.startAt",
                                                     "expiredAtPromotion": "$promotion.expiredAt",
-                                                    "countPromotion": {
-                                                        $subtract: ["$promotion.count", {
-                                                            $ifNull: ["$reservedProduct.count", 0]}
+                                                    "quantityPromotion": {
+                                                        $subtract: ["$promotion.quantity", {
+                                                            $ifNull: ["$reservedProduct.quantity", 0]}
                                                             ]
                                                     },
-                                                    "amountPromotion": "$promotion.amount",
+                                                    "newPricePromotion": "$promotion.newPrice",
                                                     "isActive": true,
                                                     "shopName": "$shop.name",
                                                     "shopImageUrl": "$shop.imageUrl"
@@ -658,12 +673,12 @@ public class AggregationRepository {
                                                     "productName": 1,
                                                     "description": 1,
                                                     "productImageUrl": 1,
-                                                    "amount": 1,
+                                                    "price": 1,
                                                     "shopId": 1,
                                                     "startAtPromotion": 1,
                                                     "expiredAtPromotion": 1,
-                                                    "countPromotion": 1,
-                                                    "amountPromotion": 1,
+                                                    "quantityPromotion": 1,
+                                                    "newPricePromotion": 1,
                                                     "isActive": 1,
                                                     "shopName": 1,
                                                     "shopImageUrl": 1
@@ -679,6 +694,47 @@ public class AggregationRepository {
         .aggregate(newAggregation(stages), PRODUCTS_COLLECTION, ProductWithShopDTO.class)
         .getMappedResults();
   }
+
+  public boolean reservedProducts(
+      Map<ObjectId, Integer> reducedProducts, String encryptedIp, ObjectId cardId) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              final int maxTimeForReservedProductInMinutes = 20;
+              ObjectId productId;
+              LocalDateTime localDateTime;
+              ObjectId promotionId;
+              for (Map.Entry<ObjectId, Integer> entry : reducedProducts.entrySet()) {
+                productId = entry.getKey();
+                if (!promotionRepository.existsByProductIdAndQuantityIsNotNull(productId)) {
+                  continue;
+                }
+                localDateTime = LocalDateTime.now().plusMinutes(maxTimeForReservedProductInMinutes);
+                promotionId = promotionRepository.findIdByProductId(productId).getId();
+                for (int i = 1; i <= entry.getValue(); i++) {
+                  ReservedProduct reservedProduct = new ReservedProduct();
+                  reservedProduct.setCardId(cardId);
+                  reservedProduct.setEncryptedIp(encryptedIp);
+                  reservedProduct.setPromotionId(promotionId);
+                  reservedProduct.setExpiredAt(localDateTime);
+                  mongoTemplate.save(reservedProduct);
+                }
+                if (promotionRepository.findQuantityById(promotionId).getQuantity()
+                    < reservedProductsRepository.countByPromotionId(promotionId)) {
+                  throw new RuntimeException();
+                }
+              }
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
+  }
 }
 
 // TODO - don't reset basket
+// TODO - apply promotion for the lowest..

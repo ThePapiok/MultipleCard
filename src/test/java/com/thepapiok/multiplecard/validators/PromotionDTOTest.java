@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PromotionDTOTest {
-  private static final String AMOUNT_PARAM = "amount";
+  private static final String NEW_PRICE_PARAM = "newPrice";
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
 
@@ -30,62 +30,62 @@ public class PromotionDTOTest {
   }
 
   @Test
-  public void shouldSuccessAtAmount() {
+  public void shouldSuccessAtNewPrice() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("12.12zł (30.12zł)");
+    promotionDTO.setNewPrice("12.12zł (30.12zł)");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtAmountWhenNotContainsOriginalAmount() {
+  public void shouldFailAtNewPriceWhenNotContainsOriginalPrice() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("12.12zł");
+    promotionDTO.setNewPrice("12.12zł");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtAmountWhenNotContainsCurrency() {
+  public void shouldFailAtNewPriceWhenNotContainsCurrency() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("12.12 (30.12)");
+    promotionDTO.setNewPrice("12.12 (30.12)");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtAmountWhenNotContainsDecimalPart() {
+  public void shouldFailAtNewPriceWhenNotContainsDecimalPart() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("12zł (30zł)");
+    promotionDTO.setNewPrice("12zł (30zł)");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtAmountWhenContainsSpecialSymbols() {
+  public void shouldFailAtNewPriceWhenContainsSpecialSymbols() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("1!.12zł (30.12zł)");
+    promotionDTO.setNewPrice("1!.12zł (30.12zł)");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtAmountWhenContainsLetters() {
+  public void shouldFailAtNewPriceWhenContainsLetters() {
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount("1A.12zł (30.12zł)");
+    promotionDTO.setNewPrice("1A.12zł (30.12zł)");
 
     Set<ConstraintViolation<PromotionDTO>> violations =
-        validator.validateProperty(promotionDTO, AMOUNT_PARAM);
+        validator.validateProperty(promotionDTO, NEW_PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 }

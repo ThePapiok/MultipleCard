@@ -33,12 +33,13 @@ import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
-import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterAll;
@@ -92,7 +93,6 @@ public class ProductServiceTest {
   @Mock private BlockedProductRepository blockedProductRepository;
   @Mock private CategoryRepository categoryRepository;
   @Mock private ShopRepository shopRepository;
-  @Mock private PromotionRepository promotionRepository;
   private ProductService productService;
 
   @BeforeAll
@@ -123,8 +123,7 @@ public class ProductServiceTest {
             orderRepository,
             blockedProductRepository,
             categoryRepository,
-            shopRepository,
-            promotionRepository);
+            shopRepository);
   }
 
   @Test
@@ -141,12 +140,12 @@ public class ProductServiceTest {
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setCategory(categoryNames);
     addProductDTO.setBarcode("barcode");
-    addProductDTO.setAmount("11.23");
+    addProductDTO.setPrice("11.23");
     addProductDTO.setDescription("description");
     addProductDTO.setFile(new MockMultipartFile("file", new byte[0]));
     Product productAfterConverter = new Product();
     productAfterConverter.setName(addProductDTO.getName());
-    productAfterConverter.setAmount(cents);
+    productAfterConverter.setPrice(cents);
     productAfterConverter.setBarcode(addProductDTO.getBarcode());
     productAfterConverter.setDescription(addProductDTO.getDescription());
     Category category = new Category();
@@ -158,7 +157,7 @@ public class ProductServiceTest {
     expectedCategory.setId(categoryOtherId);
     Product productWithCategories = new Product();
     productWithCategories.setName(addProductDTO.getName());
-    productWithCategories.setAmount(cents);
+    productWithCategories.setPrice(cents);
     productWithCategories.setBarcode(addProductDTO.getBarcode());
     productWithCategories.setDescription(addProductDTO.getDescription());
     productWithCategories.setCategories(categories);
@@ -167,7 +166,7 @@ public class ProductServiceTest {
     productWithCategories.setUpdatedAt(TEST_DATE);
     Product productWithId = new Product();
     productWithId.setName(addProductDTO.getName());
-    productWithId.setAmount(cents);
+    productWithId.setPrice(cents);
     productWithId.setBarcode(addProductDTO.getBarcode());
     productWithId.setDescription(addProductDTO.getDescription());
     productWithId.setCategories(categories);
@@ -177,7 +176,7 @@ public class ProductServiceTest {
     productWithId.setUpdatedAt(TEST_DATE);
     Product expectedProduct = new Product();
     expectedProduct.setName(addProductDTO.getName());
-    expectedProduct.setAmount(cents);
+    expectedProduct.setPrice(cents);
     expectedProduct.setBarcode(addProductDTO.getBarcode());
     expectedProduct.setDescription(addProductDTO.getDescription());
     expectedProduct.setCategories(categories);
@@ -293,7 +292,7 @@ public class ProductServiceTest {
     final int amount = 3000;
     Product product = new Product();
     product.setId(TEST_PRODUCT_ID);
-    product.setAmount(amount);
+    product.setPrice(amount);
 
     when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
 
@@ -305,7 +304,7 @@ public class ProductServiceTest {
     final int amount = 3000;
     Product product = new Product();
     product.setId(TEST_PRODUCT_ID);
-    product.setAmount(amount);
+    product.setPrice(amount);
 
     when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
 
@@ -320,23 +319,23 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturn35dot91AtGetAmountWhenEverythingOk() {
+  public void shouldReturn35dot91AtGetPriceWhenEverythingOk() {
     final int amount = 3591;
     final double amountWithoutCents = 35.91;
     Product product = new Product();
     product.setId(TEST_PRODUCT_ID);
-    product.setAmount(amount);
+    product.setPrice(amount);
 
     when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
 
-    assertEquals(amountWithoutCents, productService.getAmount(TEST_ID));
+    assertEquals(amountWithoutCents, productService.getPrice(TEST_ID));
   }
 
   @Test
-  public void shouldReturnNull1AtGetAmountWhenProductNotFound() {
+  public void shouldReturnNull1AtGetPriceWhenProductNotFound() {
     when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.empty());
 
-    assertNull(productService.getAmount(TEST_ID));
+    assertNull(productService.getPrice(TEST_ID));
   }
 
   @Test
@@ -361,17 +360,17 @@ public class ProductServiceTest {
     order1.setUsed(false);
     order1.setProductId(productId);
     order1.setCardId(cardId1);
-    order1.setAmount(amount1);
+    order1.setPrice(amount1);
     Order order2 = new Order();
     order2.setUsed(false);
     order2.setProductId(productId);
     order2.setCardId(cardId2);
-    order2.setAmount(amount2);
+    order2.setPrice(amount2);
     Order order3 = new Order();
     order3.setUsed(false);
     order3.setProductId(productId);
     order3.setCardId(cardId3);
-    order3.setAmount(amount3);
+    order3.setPrice(amount3);
     List<Order> orders = List.of(order1, order2, order3);
 
     when(orderRepository.findAllByProductIdAndIsUsed(productId, false)).thenReturn(orders);
@@ -695,7 +694,7 @@ public class ProductServiceTest {
     productDTO1.setActive(true);
     productDTO1.setProductId(TEST_ID1);
     productDTO1.setProductName("name1");
-    productDTO1.setAmount(testAmountProduct1);
+    productDTO1.setPrice(testAmountProduct1);
     productDTO1.setDescription("description1");
     productDTO1.setProductImageUrl("url1");
     productDTO1.setShopId(TEST_OWNER_ID);
@@ -705,20 +704,143 @@ public class ProductServiceTest {
     productDTO1.setExpiredAtPromotion(
         LocalDate.of(
             testYearExpiredAtPromotion1, testMonthExpiredAtPromotion1, testDayExpiredAtPromotion1));
-    productDTO1.setAmountPromotion(testAmountPromotion1);
-    productDTO1.setCountPromotion(0);
+    productDTO1.setNewPricePromotion(testAmountPromotion1);
+    productDTO1.setQuantityPromotion(0);
     ProductDTO productDTO2 = new ProductDTO();
     productDTO2.setActive(false);
     productDTO2.setProductId(TEST_ID2);
     productDTO2.setProductName("name2");
-    productDTO2.setAmount(testAmountProduct2);
+    productDTO2.setPrice(testAmountProduct2);
     productDTO2.setDescription("description2");
     productDTO2.setProductImageUrl("url2");
     productDTO2.setShopId(TEST_OWNER_ID);
     productDTO2.setStartAtPromotion(null);
     productDTO2.setExpiredAtPromotion(null);
-    productDTO2.setAmountPromotion(0);
-    productDTO2.setCountPromotion(0);
+    productDTO2.setNewPricePromotion(0);
+    productDTO2.setQuantityPromotion(0);
     return List.of(productDTO1, productDTO2);
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckProductsQuantityWhenGetMoreThan10PerProducts() {
+    final int badSizeOfProducts = 11;
+    Map<ProductInfo, Integer> products = Map.of(new ProductInfo(TEST_ID, true), badSizeOfProducts);
+
+    assertFalse(productService.checkProductsQuantity(products));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckProductsQuantityWhenGetLessThan1Product() {
+    final int badSizeOfProducts = -5;
+    Map<ProductInfo, Integer> products = Map.of(new ProductInfo(TEST_ID, true), badSizeOfProducts);
+
+    assertFalse(productService.checkProductsQuantity(products));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckProductsQuantityWhenGetMoreThan100PerAllProducts() {
+    final int goodSizeOfProducts = 10;
+    final String testId3 = "123456789012345678904567";
+    final String testId4 = "723456789015345678904567";
+    final String testId5 = "923456780012145678904567";
+    Map<ProductInfo, Integer> products = new HashMap<>();
+    products.put(new ProductInfo(TEST_ID, true), goodSizeOfProducts);
+    products.put(new ProductInfo(TEST_ID, false), goodSizeOfProducts);
+    products.put(new ProductInfo(TEST_ID1, true), goodSizeOfProducts);
+    products.put(new ProductInfo(TEST_ID1, false), goodSizeOfProducts);
+    products.put(new ProductInfo(TEST_ID2, true), goodSizeOfProducts);
+    products.put(new ProductInfo(TEST_ID2, false), goodSizeOfProducts);
+    products.put(new ProductInfo(testId3, true), goodSizeOfProducts);
+    products.put(new ProductInfo(testId3, false), goodSizeOfProducts);
+    products.put(new ProductInfo(testId4, true), goodSizeOfProducts);
+    products.put(new ProductInfo(testId4, false), goodSizeOfProducts);
+    products.put(new ProductInfo(testId5, true), goodSizeOfProducts);
+    products.put(new ProductInfo(testId5, false), goodSizeOfProducts);
+
+    when(productRepository.existsById(new ObjectId(TEST_ID))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(TEST_ID1))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(TEST_ID2))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(testId3))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(testId4))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(testId5))).thenReturn(true);
+
+    assertFalse(productService.checkProductsQuantity(products));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckProductsQuantityWhenNotFoundProduct() {
+    final int goodSizeOfProducts = 10;
+    Map<ProductInfo, Integer> products = Map.of(new ProductInfo(TEST_ID, true), goodSizeOfProducts);
+
+    when(productRepository.existsById(new ObjectId(TEST_ID))).thenReturn(false);
+
+    assertFalse(productService.checkProductsQuantity(products));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckProductsQuantityWhenEverythingOk() {
+    final int goodSizeOfProducts1 = 10;
+    final int goodSizeOfProducts2 = 1;
+    final int goodSizeOfProducts3 = 7;
+    Map<ProductInfo, Integer> products = new HashMap<>();
+    products.put(new ProductInfo(TEST_ID, true), goodSizeOfProducts1);
+    products.put(new ProductInfo(TEST_ID1, false), goodSizeOfProducts2);
+    products.put(new ProductInfo(TEST_ID2, true), goodSizeOfProducts3);
+
+    when(productRepository.existsById(new ObjectId(TEST_ID))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(TEST_ID1))).thenReturn(true);
+    when(productRepository.existsById(new ObjectId(TEST_ID2))).thenReturn(true);
+
+    assertTrue(productService.checkProductsQuantity(products));
+  }
+
+  @Test
+  public void shouldReturnEmptyMapAtGetProductsInfoWhenGetEmptyMap() {
+    assertEquals(Map.of(), productService.getProductsInfo(Map.of()));
+  }
+
+  @Test
+  public void shouldReturnMapOfProductInfoAndIntegerAtGetProductsInfoWhenEverythingOk() {
+    String productInfo1JSON =
+        """
+            {
+              "productId": \""""
+            + TEST_ID
+            + "\","
+            + """
+              "hasPromotion": true
+            }
+            """;
+    String productInfo2JSON =
+        """
+            {
+              "productId": \""""
+            + TEST_ID1
+            + "\","
+            + """
+              "hasPromotion": false
+            }
+            """;
+    Map<String, Integer> products = Map.of(productInfo1JSON, 1, productInfo2JSON, 1);
+    Map<ProductInfo, Integer> expectedProducts =
+        Map.of(new ProductInfo(TEST_ID, true), 1, new ProductInfo(TEST_ID1, false), 1);
+
+    assertEquals(expectedProducts, productService.getProductsInfo(products));
+  }
+
+  @Test
+  public void shouldReturnEmptyMapAtGetProductsInfoWhenErrorAtObjectMapper() {
+    String badProductInfoJSON =
+        """
+            {
+              "productId": """
+            + TEST_ID
+            + ","
+            + """
+              "hasPromotion": true
+            }
+            """;
+
+    assertEquals(Map.of(), productService.getProductsInfo(Map.of(badProductInfoJSON, 1)));
   }
 }

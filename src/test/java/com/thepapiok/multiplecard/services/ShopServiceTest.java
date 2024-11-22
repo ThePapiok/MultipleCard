@@ -362,8 +362,8 @@ public class ShopServiceTest {
   public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountNothing() {
     final int amountPromotion = 2000;
     Promotion promotion = new Promotion();
-    promotion.setAmount(amountPromotion);
-    promotion.setCount(null);
+    promotion.setNewPrice(amountPromotion);
+    promotion.setQuantity(null);
     promotion.setProductId(TEST_PRODUCT_ID);
     setDataForBuyProducts(amountPromotion, promotion);
 
@@ -372,11 +372,11 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountLast() {
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndQuantityLast() {
     final int amountPromotion = 2000;
     Promotion promotion = new Promotion();
-    promotion.setAmount(amountPromotion);
-    promotion.setCount(1);
+    promotion.setNewPrice(amountPromotion);
+    promotion.setQuantity(1);
     promotion.setProductId(TEST_PRODUCT_ID);
     setDataForBuyProducts(amountPromotion, promotion);
 
@@ -386,15 +386,15 @@ public class ShopServiceTest {
   }
 
   @Test
-  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndCountNotLast() {
+  public void shouldReturnTrueAtBuyProductsWhenPromotionFoundAndQuantityNotLast() {
     final int amountPromotion = 2000;
     Promotion promotion = new Promotion();
-    promotion.setAmount(amountPromotion);
-    promotion.setCount(2);
+    promotion.setNewPrice(amountPromotion);
+    promotion.setQuantity(2);
     promotion.setProductId(TEST_PRODUCT_ID);
     Promotion expectedPromotion = new Promotion();
-    expectedPromotion.setAmount(amountPromotion);
-    expectedPromotion.setCount(1);
+    expectedPromotion.setNewPrice(amountPromotion);
+    expectedPromotion.setQuantity(1);
     expectedPromotion.setProductId(TEST_PRODUCT_ID);
     setDataForBuyProducts(amountPromotion, promotion);
 
@@ -411,14 +411,14 @@ public class ShopServiceTest {
     Product product = new Product();
     product.setId(TEST_PRODUCT_ID);
     product.setShopId(testShopId);
-    product.setAmount(amount);
+    product.setPrice(amount);
     order = new Order();
     order.setUsed(false);
     order.setCreatedAt(TEST_LOCALE_DATE_TIME);
     order.setCardId(testCardId);
     order.setProductId(TEST_PRODUCT_ID);
     order.setShopId(testShopId);
-    order.setAmount(orderPromotion);
+    order.setPrice(orderPromotion);
 
     when(mongoTemplate.findOne(query(Criteria.where("id").is(TEST_PRODUCT_ID)), Product.class))
         .thenReturn(product);

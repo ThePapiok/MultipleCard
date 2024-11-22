@@ -20,11 +20,12 @@ public class PromotionConverter {
   public PromotionDTO getDTO(Promotion promotion) {
     final double centsPerZl = 100.0;
     PromotionDTO promotionDTO = new PromotionDTO();
-    promotionDTO.setAmount(String.format(Locale.US, "%.2f", promotion.getAmount() / centsPerZl));
-    if (promotion.getCount() == null) {
-      promotionDTO.setCount("");
+    promotionDTO.setNewPrice(
+        String.format(Locale.US, "%.2f", promotion.getNewPrice() / centsPerZl));
+    if (promotion.getQuantity() == null) {
+      promotionDTO.setQuantity("");
     } else {
-      promotionDTO.setCount(String.valueOf(promotion.getCount()));
+      promotionDTO.setQuantity(String.valueOf(promotion.getQuantity()));
     }
     promotionDTO.setStartAt(promotion.getStartAt());
     promotionDTO.setExpiredAt(promotion.getExpiredAt());
@@ -42,12 +43,12 @@ public class PromotionConverter {
     promotion.setProductId(productId);
     promotion.setStartAt(promotionDTO.getStartAt());
     promotion.setExpiredAt(promotionDTO.getExpiredAt());
-    if ("".equals(promotionDTO.getCount())) {
-      promotion.setCount(null);
+    if ("".equals(promotionDTO.getQuantity())) {
+      promotion.setQuantity(null);
     } else {
-      promotion.setCount(Integer.parseInt(promotionDTO.getCount()));
+      promotion.setQuantity(Integer.parseInt(promotionDTO.getQuantity()));
     }
-    promotion.setAmount((int) (Double.parseDouble(promotionDTO.getAmount()) * centsPerZl));
+    promotion.setNewPrice((int) (Double.parseDouble(promotionDTO.getNewPrice()) * centsPerZl));
     return promotion;
   }
 }

@@ -2,10 +2,10 @@ let ok = [false, false, false, false, false, false];
 let previous = [false, false, false, false, false, false];
 const buttonId = "addButton";
 
-function checkAmount(e) {
+function checkPrice(e) {
     const input = e.value;
     const length = input.length;
-    check(3, (length >= 2 && length <= 7 && regAmount.test(input)), ok, previous, buttonId, success, true, true);
+    check(3, (length >= 5 && length <= 9 && regPrice.test(input)), ok, previous, buttonId, success, true, true);
 }
 
 function checkDescription(e, index) {

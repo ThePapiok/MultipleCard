@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 public class PromotionAspect {
   @Before(
       "execution(* com.thepapiok.multiplecard.controllers.PromotionController.addPromotion(..))")
-  public void removeZlFromAmount(JoinPoint joinPoint) {
+  public void removeZlFromPrice(JoinPoint joinPoint) {
     int index;
     PromotionDTO promotionDTO = (PromotionDTO) joinPoint.getArgs()[0];
-    promotionDTO.setAmount(promotionDTO.getAmount().replaceAll("zł ", ""));
-    index = promotionDTO.getAmount().indexOf("(");
-    promotionDTO.setAmount(promotionDTO.getAmount().substring(0, index));
+    promotionDTO.setNewPrice(promotionDTO.getNewPrice().replaceAll("zł ", ""));
+    index = promotionDTO.getNewPrice().indexOf("(");
+    promotionDTO.setNewPrice(promotionDTO.getNewPrice().substring(0, index));
   }
 }

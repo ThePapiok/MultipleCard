@@ -1,17 +1,17 @@
-const regAmount = new RegExp("^[0-9]*\\.?[0-9]{2}(zł)?$")
+const regPrice = new RegExp("^[0-9]*\\.?[0-9]{2}(zł)?$")
 
-function focusedAmount(e) {
+function focusedPrice(e) {
     if (e.value.toString().includes("zł")) {
         e.value = e.value.toString().replaceAll("zł", "");
     }
 }
 
-function unfocusedAmount(e) {
+function unfocusedPrice(e) {
     if (!e.value.toString().includes(".")) {
         e.value += ".00";
     }
     if (!e.value.toString().includes("zł")) {
         e.value += "zł";
     }
-    checkAmount(e);
+    checkPrice(e);
 }

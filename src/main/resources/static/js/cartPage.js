@@ -6,12 +6,12 @@ class Product {
                     description,
                     productImageUrl,
                     barcode,
-                    amount,
+                    price,
                     shopId,
                     startAtPromotion,
                     expiredAtPromotion,
-                    countPromotion,
-                    amountPromotion,
+                    quantityPromotion,
+                    newPricePromotion,
                     shopName,
                     shopImageUrl
                 }) {
@@ -21,12 +21,12 @@ class Product {
         this.description = description;
         this.productImageUrl = productImageUrl;
         this.barcode = barcode;
-        this.amount = amount;
+        this.price = price;
         this.shopId = shopId;
         this.startAtPromotion = startAtPromotion;
         this.expiredAtPromotion = expiredAtPromotion;
-        this.countPromotion = countPromotion;
-        this.amountPromotion = amountPromotion;
+        this.quantityPromotion = quantityPromotion;
+        this.newPricePromotion = newPricePromotion;
         this.shopName = shopName;
         this.shopImageUrl = shopImageUrl;
     }
@@ -41,18 +41,18 @@ function atStart(page) {
     let product;
     let productsSession;
     let hasPromotion;
-    let amount;
-    let countPromotion;
+    let quantity;
+    let quantityPromotion;
     let productId;
     let productIdWithoutPromotion;
     let productInfo;
-    let incAmount;
+    let diffQuantity;
     let related;
     let tooMany = false;
     checkLanguage();
     if (sessionStorage.getItem("newOrder") != null) {
         sessionStorage.removeItem("newOrder");
-        document.getElementById("error").textContent = document.getElementById("textGetNewCount").textContent;
+        document.getElementById("error").textContent = document.getElementById("textGetNewQuantity").textContent;
     }
     productsSession = sessionStorage.getItem("productsId");
     productsId = new Map(Object.entries(JSON.parse(productsSession)));
@@ -62,9 +62,9 @@ function atStart(page) {
             tooMany = true;
             return;
         }
-        productsAmount += value;
+        productsQuantity += value;
     });
-    if (productsAmount > 100 || tooMany) {
+    if (productsQuantity > 100 || tooMany) {
         document.getElementById("error").textContent = document.getElementById("textTooManyProducts").textContent;
         return;
     }
@@ -88,40 +88,40 @@ function atStart(page) {
                 productId = product.productId;
                 result = document.createElement("div")
                 result.id = "product" + productId;
-                countPromotion = product.countPromotion;
+                quantityPromotion = product.quantityPromotion;
                 productInfo = new ProductInfo(productId, product.startAtPromotion != null).toString()
-                amount = productsId.get(productInfo);
-                if (countPromotion != null) {
-                    if (countPromotion === 0) {
+                quantity = productsId.get(productInfo);
+                if (quantityPromotion != null) {
+                    if (quantityPromotion === 0) {
                         productsId.delete(productInfo);
                         productIdWithoutPromotion = new ProductInfo(productId, false).toString();
                         if (productsId.has(productIdWithoutPromotion)) {
-                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + amount);
+                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + quantity);
                         } else {
-                            productsId.set(productIdWithoutPromotion, amount);
+                            productsId.set(productIdWithoutPromotion, quantity);
                         }
                         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
                         sessionStorage.setItem("newOrder", "1");
-                        amount = countPromotion;
+                        quantity = quantityPromotion;
                         continue;
-                    } else if (countPromotion < amount) {
-                        incAmount = (amount - countPromotion);
+                    } else if (quantityPromotion < quantity) {
+                        diffQuantity = (quantity - quantityPromotion);
                         productIdWithoutPromotion = new ProductInfo(productId, false).toString();
-                        productsId.set(productInfo, productsId.get(productInfo) - incAmount);
+                        productsId.set(productInfo, productsId.get(productInfo) - diffQuantity);
                         if (productsId.has(productIdWithoutPromotion)) {
-                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + incAmount);
+                            productsId.set(productIdWithoutPromotion, productsId.get(productIdWithoutPromotion) + diffQuantity);
                         } else {
-                            productsId.set(productIdWithoutPromotion, incAmount);
+                            productsId.set(productIdWithoutPromotion, diffQuantity);
                         }
                         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
                         sessionStorage.setItem("newOrder", "1");
-                        amount = countPromotion;
-                    } else if (((amount - countPromotion) === 0) && productsId.has(new ProductInfo(productId, false).toString())) {
+                        quantity = quantityPromotion;
+                    } else if (((quantity - quantityPromotion) === 0) && productsId.has(new ProductInfo(productId, false).toString())) {
                         result.style.pointerEvents = "none";
                         result.style.opacity = "40%";
                     }
                 }
-                hasPromotion = (countPromotion != null);
+                hasPromotion = (quantityPromotion != null);
                 if (!hasPromotion && product.startAtPromotion == null && productsId.has(new ProductInfo(productId, true).toString())) {
                     related = true;
                     hasPromotion = false;
@@ -131,15 +131,15 @@ function atStart(page) {
                     related = false;
                 }
                 if (product.startAtPromotion == null) {
-                    result.dataset.price = product.amount;
+                    result.dataset.price = product.price;
                 } else {
-                    result.dataset.price = product.amountPromotion;
+                    result.dataset.price = product.newPricePromotion;
                 }
-                totalAmount += (amount * result.dataset.price);
+                totalAmount += (quantity * result.dataset.price);
                 let innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.productName + `</span>
-                        <span class="amount">` + amount + `</span>
+                        <span class="quantity">` + quantity + `</span>
                         <a class="resultIcons"
                            onclick="addProduct('` + productId + `', this.previousElementSibling, ` + hasPromotion + `, this.parentElement.parentElement.parentElement, ` + related + `, true)">
                             <img src="/images/plus.png" alt="add">
@@ -160,11 +160,11 @@ function atStart(page) {
                         <div class="description">` + product.description + `
                         </div>
                     </div>
-                    <div class='result-horizontal notImageContainer price'>
-                    <span hidden class='realAmount'>` + product.amount / 100 + `zł</span>
+                    <div class='result-horizontal notImageContainer'>
+                    <span hidden class='realPrice'>` + product.price / 100 + `zł</span>
                     `;
                 if (product.startAtPromotion == null) {
-                    innerHtml += "<span class='amount fullAmount'>" + product.amount / 100 + "zł</span></div></div>";
+                    innerHtml += "<span class='price fullPrice'>" + product.price / 100 + "zł</span></div></div>";
                 } else {
                     innerHtml += `
                          <div class="promotionContainer">
@@ -175,13 +175,13 @@ function atStart(page) {
                                         <span>-</span>
                                         <span>` + product.expiredAtPromotion + `</span>
                                     </div>`;
-                    if (countPromotion != null) {
-                        innerHtml += "<span class='productsLeft' data-actual-value='" + (countPromotion - amount) + "' data-start-value='" + countPromotion + "' id='" + "count" + productId + "'>" + (countPromotion - amount) + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
+                    if (quantityPromotion != null) {
+                        innerHtml += "<span class='productsLeft' data-actual-value='" + (quantityPromotion - quantity) + "' data-start-value='" + quantityPromotion + "' id='" + "count" + productId + "'>" + (quantityPromotion - quantity) + ' ' + document.getElementById("textLeftProducts").textContent + "</span>";
                     }
                     innerHtml += `</div>
-                                <div class="promotionAmount">
-                                    <span class="amount promotion">` + product.amount / 100 + `</span>
-                                    <span class="amount">` + product.amountPromotion / 100 + 'zł' + `</span>
+                                <div class="promotionPrice">
+                                    <span class="price promotion">` + product.price / 100 + `</span>
+                                    <span class="price">` + product.newPricePromotion / 100 + 'zł' + `</span>
                                 </div>
                             </div>
                         </div>
@@ -205,7 +205,7 @@ function atStart(page) {
 
 function addProduct(id, e, hasPromotion, product, related, isCart) {
     if (addProductId(id, e, hasPromotion, product, related, isCart)) {
-        productsAmount++;
+        productsQuantity++;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
         totalAmount += parseInt(product.dataset.price);
         document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
@@ -215,7 +215,7 @@ function addProduct(id, e, hasPromotion, product, related, isCart) {
 
 function deleteProduct(id, e, hasPromotion, product, related) {
     if (deleteProductId(id, e, hasPromotion, product, related)) {
-        productsAmount--;
+        productsQuantity--;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
         if (e.textContent === "0") {
             removeProduct(id, product, hasPromotion);
@@ -227,13 +227,13 @@ function deleteProduct(id, e, hasPromotion, product, related) {
 
 function removeProduct(productId, e, hasPromotion) {
     const productInfo = new ProductInfo(productId, hasPromotion).toString();
-    let amount = productsId.get(productInfo);
+    let quantity = productsId.get(productInfo);
     let parentProduct;
-    if (amount == null) {
-        amount = 0;
+    if (quantity == null) {
+        quantity = 0;
     }
-    productsAmount -= amount;
-    totalAmount -= (parseInt(e.dataset.price) * amount);
+    productsQuantity -= quantity;
+    totalAmount -= (parseInt(e.dataset.price) * quantity);
     document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
     productsId.delete(productInfo);
     if (productsId.size === 0) {
@@ -263,9 +263,14 @@ function buyProducts(e) {
     })
         .then(content => content.text())
         .then(content => {
-            window.location = content;
+            if(content.includes("https://merch-prod.snd.payu.com")){
+                window.location = content;
+            }
+            else {
+                document.getElementById("error").textContent = content;
+            }
         })
         .catch(error => {
-            console.error(error);
+            console.log(error);
         });
 }

@@ -65,7 +65,7 @@
                 <img id="searchImage" src="/images/search.png" alt="search">
             </div>
             <div id="basket">
-                <span id="basketAmount" data-empty="true">0</span>
+                <span id="basketQuantity" data-empty="true">0</span>
                 <a class="basketUrl" id="emptyBasket">
                     <img class="basketImage" src="/images/basket_empty.png" alt="basket">
                 </a>
@@ -83,13 +83,13 @@
                     <div class="result-vertical">
                         <div class="result-horizontal notImageContainer">
                             <span class="name" th:text="${product.productName}"></span>
-                            <span class="amount">0</span>
+                            <span class="quantity">0</span>
                             <a class="resultIcons"
-                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.countPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
+                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
                                 <img src="/images/plus.png" alt="add">
                             </a>
                             <a class="resultIcons"
-                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.countPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
+                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
                                 <img src="/images/minus.png" alt="minus">
                             </a>
                         </div>
@@ -103,9 +103,9 @@
                             <div class="description" th:text="${product.description}">
                             </div>
                         </div>
-                        <div class="result-horizontal notImageContainer price">
-                            <span hidden class="realAmount" th:text="${product.amount}/100 + 'zł'"></span>
-                            <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
+                        <div class="result-horizontal notImageContainer">
+                            <span hidden class="realPrice" th:text="${product.price}/100 + 'zł'"></span>
+                            <span class="price fullPrice" th:text="${product.price}/100 + 'zł'"
                                   th:if="${product.startAtPromotion} == null"></span>
                             <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
                                 <div class="result-horizontal">
@@ -115,15 +115,15 @@
                                             <span>-</span>
                                             <span th:text="${product.expiredAtPromotion}"></span>
                                         </div>
-                                        <span class="productsLeft" th:if="${product.countPromotion} != null"
-                                              th:data-actual-value="${product.countPromotion}"
-                                              th:data-start-value="${product.countPromotion}"
+                                        <span class="productsLeft" th:if="${product.quantityPromotion} != null"
+                                              th:data-actual-value="${product.quantityPromotion}"
+                                              th:data-start-value="${product.quantityPromotion}"
                                               th:id="'count' + ${product.productId}"
-                                              th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
+                                              th:text="${product.quantityPromotion} + ' ' + #{promotion.left_products}"></span>
                                     </div>
-                                    <div class="promotionAmount">
-                                        <span class="amount promotion" th:text="${product.amount}/100"></span>
-                                        <span class="amount" th:text="${product.amountPromotion}/100 + 'zł'"></span>
+                                    <div class="promotionPrice">
+                                        <span class="price promotion" th:text="${product.price}/100"></span>
+                                        <span class="price" th:text="${product.newPricePromotion}/100 + 'zł'"></span>
                                     </div>
                                 </div>
                             </div>

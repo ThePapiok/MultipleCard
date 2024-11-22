@@ -62,7 +62,6 @@ public class ProfileServiceTest {
   private static final ObjectId TEST_PRODUCT_ID3 = new ObjectId("423132303311123310772591");
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static final String TEST_SHOP_NAME = "shopName";
-  private static final Long TEST_TOTAL_AMOUNT = 3300L;
   private static final String TEST_FIRST_NAME = "firstNameShop";
   private static final String TEST_LAST_NAME = "lastNameShop";
   private static final String TEST_ACCOUNT_NUMBER = "accountNumberShop";
@@ -258,9 +257,9 @@ public class ProfileServiceTest {
     final ObjectId cardId1 = new ObjectId("123132123312123312312579");
     final ObjectId cardId2 = new ObjectId("123132103312123310312579");
     final ObjectId cardId3 = new ObjectId("423132303311123310772599");
-    final int amount1 = 10;
-    final int amount2 = 20;
-    final int amount3 = 30;
+    final int price1 = 10;
+    final int price2 = 20;
+    final int price3 = 30;
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -276,15 +275,15 @@ public class ProfileServiceTest {
     products.add(product3);
     List<Order> orders = new ArrayList<>();
     Order order1 = new Order();
-    order1.setAmount(amount1);
+    order1.setPrice(price1);
     order1.setCardId(cardId1);
     order1.setUsed(false);
     Order order2 = new Order();
-    order2.setAmount(amount2);
+    order2.setPrice(price2);
     order2.setCardId(cardId2);
     order2.setUsed(false);
     Order order3 = new Order();
-    order3.setAmount(amount3);
+    order3.setPrice(price3);
     order3.setCardId(cardId3);
     order3.setUsed(false);
     orders.add(order1);
@@ -315,17 +314,17 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId1)),
-            new Update().inc(pointsParam, (amount1 / centsPerZloty)),
+            new Update().inc(pointsParam, (price1 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId2)),
-            new Update().inc(pointsParam, (amount2 / centsPerZloty)),
+            new Update().inc(pointsParam, (price2 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId3)),
-            new Update().inc(pointsParam, (amount3 / centsPerZloty)),
+            new Update().inc(pointsParam, (price3 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);

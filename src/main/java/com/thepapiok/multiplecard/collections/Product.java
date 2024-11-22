@@ -16,7 +16,7 @@ public class Product {
   private String imageUrl;
   private String barcode;
   private List<ObjectId> categories;
-  private int amount;
+  private int price;
   private ObjectId shopId;
   private LocalDateTime updatedAt;
 }

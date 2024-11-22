@@ -17,7 +17,7 @@
 <script src="/js/forms.js"></script>
 <script src="/js/image.js"></script>
 <script src="/js/edit.js"></script>
-<script src="/js/amount.js"></script>
+<script src="/js/price.js"></script>
 <script src="/js/categories.js"></script>
 <script src="/js/productPage.js"></script>
 <script th:inline="javascript">
@@ -82,23 +82,23 @@
             </div>
         </div>
         <div class="block-horizontally">
-            <label id="Amount">
+            <label id="Price">
                 <label class="placeholderWithInput">
-                    <label class="placeholderInput" th:text="#{product_amount.text}">
+                    <label class="placeholderInput" th:text="#{product_price.text}">
                     </label>
                     <label class="inputs">
-                        <input th:field="*{amount}" type="text" required th:value="*{amount}"
-                               oninput="checkAmount(this)" minlength="2" maxlength="7"
-                               onmouseenter="showValidation(this, 'Amount')"
-                               onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)"
-                               onfocus="focusedAmount(this)">
+                        <input th:field="*{price}" type="text" required th:value="*{price}"
+                               oninput="checkPrice(this)" minlength="2" maxlength="7"
+                               onmouseenter="showValidation(this, 'Price')"
+                               onmouseleave="hideValidation('Price')" onfocusout="unfocusedPrice(this)"
+                               onfocus="focusedPrice(this)">
                         <img hidden id="close3" src="/images/close.png" alt="close">
                         <img hidden id="check3" src="/images/check.png" alt="check">
                     </label>
                 </label>
             </label>
             <div class="validation">
-                <span th:text="#{product_amount.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{product_price.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
                     <li th:text="#{validation.not_negative}"></li>

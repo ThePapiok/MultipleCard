@@ -150,7 +150,7 @@ public class ShopService {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
               productsId.forEach(
                   (productId, amount) -> {
-                    Integer promotionCount;
+                    Integer promotionQuantity;
                     ObjectId objectProductId = new ObjectId(productId);
                     Product product =
                         mongoTemplate.findOne(
@@ -170,18 +170,18 @@ public class ShopService {
                               query(Criteria.where("productId").is(objectProductId)),
                               Promotion.class);
                       if (promotion != null) {
-                        order.setAmount(promotion.getAmount());
-                        promotionCount = promotion.getCount();
-                        if (promotionCount != null) {
-                          if (promotionCount - 1 == 0) {
+                        order.setPrice(promotion.getNewPrice());
+                        promotionQuantity = promotion.getQuantity();
+                        if (promotionQuantity != null) {
+                          if (promotionQuantity - 1 == 0) {
                             mongoTemplate.remove(promotion);
                           } else {
-                            promotion.setCount(promotionCount - 1);
+                            promotion.setQuantity(promotionQuantity - 1);
                             mongoTemplate.save(promotion);
                           }
                         }
                       } else {
-                        order.setAmount(product.getAmount());
+                        order.setPrice(product.getPrice());
                       }
                       mongoTemplate.save(order);
                     }

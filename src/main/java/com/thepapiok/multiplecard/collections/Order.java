@@ -15,5 +15,5 @@ public class Order {
   private ObjectId shopId;
   private LocalDateTime createdAt;
   private boolean isUsed;
-  private int amount;
+  private int price;
 }

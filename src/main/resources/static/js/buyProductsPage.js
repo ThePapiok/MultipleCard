@@ -1,19 +1,19 @@
 function addProduct(id, e, hasPromotion, product, related, isCart) {
     if (addProductId(id, e, hasPromotion, product, related, isCart)) {
-        let basketAmount = document.getElementById("basketAmount");
-        basketAmount.dataset.empty = "false";
-        basketAmount.textContent = (parseInt(basketAmount.textContent) + 1).toString();
-        productsAmount++;
+        let basketQuantity = document.getElementById("basketQuantity");
+        basketQuantity.dataset.empty = "false";
+        basketQuantity.textContent = (parseInt(basketQuantity.textContent) + 1).toString();
+        productsQuantity++;
     }
 }
 
 function deleteProduct(id, e, hasPromotion, product, related) {
     if (deleteProductId(id, e, hasPromotion, product, related)) {
-        let basketAmount = document.getElementById("basketAmount");
-        basketAmount.textContent = (parseInt(basketAmount.textContent) - 1).toString();
-        productsAmount--;
-        if (basketAmount.textContent === "0") {
-            basketAmount.dataset.empty = "true";
+        let basketQuantity = document.getElementById("basketQuantity");
+        basketQuantity.textContent = (parseInt(basketQuantity.textContent) - 1).toString();
+        productsQuantity--;
+        if (basketQuantity.textContent === "0") {
+            basketQuantity.dataset.empty = "true";
         }
     }
 }

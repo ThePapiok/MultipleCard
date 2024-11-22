@@ -56,7 +56,7 @@ public class ProductControllerTest {
   private static final String TEST_FILE_NAME = "file";
   private static final String TEST_PRODUCT_NAME = "Addd";
   private static final String TEST_BARCODE = "1234567890123";
-  private static final String TEST_AMOUNT = "123.12zł";
+  private static final String TEST_PRICE = "123.12zł";
   private static final String TEST_DESCRIPTION = "asdfds";
   private static final String TEST_CATEGORY1_NAME = "Kategoria";
   private static final String TEST_CATEGORY2_NAME = "Kateegoria";
@@ -73,7 +73,7 @@ public class ProductControllerTest {
   private static final String NAME_PARAM = "name";
   private static final String DESCRIPTION_PARAM = "description";
   private static final String BARCODE_PARAM = "barcode";
-  private static final String AMOUNT_PARAM = "amount";
+  private static final String PRICE_PARAM = "price";
   private static final String CATEGORY0_PARAM = "category[0]";
   private static final String CATEGORY1_PARAM = "category[1]";
   private static final String CATEGORY2_PARAM = "category[2]";
@@ -127,9 +127,9 @@ public class ProductControllerTest {
     testProduct1.setShopId(TEST_OBJECT_ID);
     testProduct1.setId(TEST_PRODUCT_ID);
     testProduct1.setCategories(categories);
-    testProduct1.setAmount(testAmount);
+    testProduct1.setPrice(testAmount);
     testProduct2 = new Product();
-    testProduct2.setAmount(testOtherAmount);
+    testProduct2.setPrice(testOtherAmount);
     testProduct2.setDescription("description2");
     testProduct2.setBarcode("barcode2");
     testProduct2.setShopId(TEST_OBJECT_ID);
@@ -281,7 +281,7 @@ public class ProductControllerTest {
     LocalDate expiredAt = LocalDate.of(testYearExpiredAt, testMonthExpiredAt, testDayExpiredAt);
     Promotion promotion1 = new Promotion();
     promotion1.setId(new ObjectId("923426389512345172904181"));
-    promotion1.setAmount(testPromotionAmount);
+    promotion1.setNewPrice(testPromotionAmount);
     promotion1.setProductId(TEST_PRODUCT_ID);
     promotion1.setStartAt(startAt);
     promotion1.setExpiredAt(expiredAt);
@@ -289,11 +289,11 @@ public class ProductControllerTest {
     productDTO1.setProductId(testProduct1.getId().toString());
     productDTO1.setProductName(testProduct1.getName());
     productDTO1.setActive(true);
-    productDTO1.setAmount(testProduct1.getAmount());
+    productDTO1.setPrice(testProduct1.getPrice());
     productDTO1.setDescription(testProduct1.getDescription());
     productDTO1.setShopId(testProduct1.getShopId());
-    productDTO1.setCountPromotion(promotion1.getCount());
-    productDTO1.setAmountPromotion(promotion1.getAmount());
+    productDTO1.setQuantityPromotion(promotion1.getQuantity());
+    productDTO1.setNewPricePromotion(promotion1.getNewPrice());
     productDTO1.setProductImageUrl(testProduct1.getImageUrl());
     productDTO1.setStartAtPromotion(promotion1.getStartAt());
     productDTO1.setExpiredAtPromotion(promotion1.getExpiredAt());
@@ -301,11 +301,11 @@ public class ProductControllerTest {
     productDTO2.setProductName(testProduct2.getName());
     productDTO2.setProductId(testProduct2.getId().toString());
     productDTO2.setActive(false);
-    productDTO2.setAmount(testProduct2.getAmount());
+    productDTO2.setPrice(testProduct2.getPrice());
     productDTO2.setDescription(testProduct2.getDescription());
     productDTO2.setShopId(testProduct2.getShopId());
-    productDTO2.setCountPromotion(0);
-    productDTO2.setAmountPromotion(0);
+    productDTO2.setQuantityPromotion(0);
+    productDTO2.setNewPricePromotion(0);
     productDTO2.setProductImageUrl(testProduct2.getImageUrl());
     productDTO2.setStartAtPromotion(null);
     productDTO2.setExpiredAtPromotion(null);
@@ -373,7 +373,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName("gg123213123123123");
     addProductDTO.setBarcode("aa");
-    addProductDTO.setAmount("123");
+    addProductDTO.setPrice("123");
     addProductDTO.setDescription("asdf");
     addProductDTO.setCategory(
         List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
@@ -391,7 +391,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setAmount(TEST_AMOUNT);
+    addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
         List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
@@ -409,7 +409,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setAmount(TEST_AMOUNT);
+    addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME, "Kateeeegoria"));
@@ -430,7 +430,7 @@ public class ProductControllerTest {
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .param(CATEGORY2_PARAM, categories.get(2))
                 .param("category[3]", categories.get(index3))
-                .param(AMOUNT_PARAM, addProductDTO.getAmount())
+                .param(PRICE_PARAM, addProductDTO.getPrice())
                 .session(httpSession))
         .andExpect(redirectedUrl(ADD_PRODUCT_ERROR_URL));
     assertEquals("Zła ilość kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -445,7 +445,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setAmount(TEST_AMOUNT);
+    addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME));
@@ -534,7 +534,7 @@ public class ProductControllerTest {
     AddProductDTO expectedAddProductDTO = new AddProductDTO();
     expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
     expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setAmount("123.12");
+    expectedAddProductDTO.setPrice("123.12");
     expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
     expectedAddProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
@@ -564,7 +564,7 @@ public class ProductControllerTest {
     AddProductDTO expectedAddProductDTO = new AddProductDTO();
     expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
     expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setAmount("123.12");
+    expectedAddProductDTO.setPrice("123.12");
     expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
     expectedAddProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
@@ -589,7 +589,7 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setAmount(TEST_AMOUNT);
+    addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
         List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
@@ -619,7 +619,7 @@ public class ProductControllerTest {
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .param(CATEGORY2_PARAM, categories.get(2))
-                .param(AMOUNT_PARAM, addProductDTO.getAmount())
+                .param(PRICE_PARAM, addProductDTO.getPrice())
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
   }
@@ -782,7 +782,7 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, editProductDTO.getName())
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(AMOUNT_PARAM, editProductDTO.getAmount())
+                .param(PRICE_PARAM, editProductDTO.getPrice())
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .param(CATEGORY2_PARAM, categories.get(2))
@@ -814,7 +814,7 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, editProductDTO.getName())
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(AMOUNT_PARAM, editProductDTO.getAmount())
+                .param(PRICE_PARAM, editProductDTO.getPrice())
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .param(CATEGORY1_PARAM, categories.get(1))
                 .session(httpSession))
@@ -999,7 +999,7 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, editProductDTO.getName())
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(AMOUNT_PARAM, editProductDTO.getAmount())
+                .param(PRICE_PARAM, editProductDTO.getPrice())
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .session(httpSession))
         .andExpect(redirectedUrl(PRODUCTS_SUCCESS_URL));
@@ -1012,7 +1012,7 @@ public class ProductControllerTest {
     editProductDTO.setName(TEST_PRODUCT_NAME);
     editProductDTO.setDescription(TEST_DESCRIPTION);
     editProductDTO.setBarcode(TEST_BARCODE);
-    editProductDTO.setAmount(TEST_AMOUNT);
+    editProductDTO.setPrice(TEST_PRICE);
     editProductDTO.setCategory(List.of(TEST_CATEGORY1_NAME));
     editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0]));
     return editProductDTO;
@@ -1038,7 +1038,7 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, editProductDTO.getName())
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(AMOUNT_PARAM, editProductDTO.getAmount())
+                .param(PRICE_PARAM, editProductDTO.getPrice())
                 .param(CATEGORY0_PARAM, categories.get(0))
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
@@ -1057,14 +1057,14 @@ public class ProductControllerTest {
     product1.setActive(true);
     product1.setDescription(TEST_DESCRIPTION);
     product1.setShopId(TEST_OBJECT_ID);
-    product1.setAmount(amount);
+    product1.setPrice(amount);
     ProductWithShopDTO product2 = new ProductWithShopDTO();
     product1.setProductId(testProductId.toString());
     product1.setProductName(TEST_PRODUCT_NAME + "A");
     product1.setActive(true);
     product1.setDescription(TEST_DESCRIPTION + "C");
     product1.setShopId(TEST_OBJECT_ID);
-    product1.setAmount(amountOther);
+    product1.setPrice(amountOther);
     List<ProductWithShopDTO> products = List.of(product1, product2);
     StringBuilder productsInfo1 = new StringBuilder();
     StringBuilder productsInfo2 = new StringBuilder();

@@ -26,7 +26,7 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
                     $group: {
                       "_id": "_id",
                       "sum": {
-                        $sum: "$amount"
+                        $sum: "$price"
                       }
                     }
                   }
@@ -40,5 +40,5 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
         }
 """
       })
-  Long sumAmountForShop(ObjectId shopId);
+  Long sumTotalAmountForShop(ObjectId shopId);
 }

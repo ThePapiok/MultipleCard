@@ -512,31 +512,31 @@ public class CardControllerTest {
   }
 
   private List<ProductWithShopDTO> getProductsForBuyProducts() {
-    final int testAmount = 500;
-    final int testCount = 5;
+    final int testPrice = 500;
+    final int testQuantity = 5;
     final LocalDate testStartAt = LocalDate.now();
     final LocalDate testExpiredAt = LocalDate.now().plusYears(1);
     final String testShopImageUrl = "url";
     ProductWithShopDTO productDTO1 = new ProductWithShopDTO();
     productDTO1.setProductId("213956789315345618901231");
-    productDTO1.setAmountPromotion(testAmount);
-    productDTO1.setCountPromotion(testCount);
+    productDTO1.setNewPricePromotion(testPrice);
+    productDTO1.setQuantityPromotion(testQuantity);
     productDTO1.setExpiredAtPromotion(testExpiredAt);
     productDTO1.setStartAtPromotion(testStartAt);
     productDTO1.setShopName(TEST_NAME);
     productDTO1.setShopImageUrl(testShopImageUrl);
     ProductWithShopDTO productDTO2 = new ProductWithShopDTO();
     productDTO2.setProductId("213956789315345618901242");
-    productDTO2.setAmountPromotion(0);
-    productDTO2.setCountPromotion(0);
+    productDTO2.setNewPricePromotion(0);
+    productDTO2.setQuantityPromotion(0);
     productDTO2.setExpiredAtPromotion(null);
     productDTO2.setStartAtPromotion(null);
     productDTO2.setShopName(TEST_NAME);
     productDTO2.setShopImageUrl(testShopImageUrl);
     ProductWithShopDTO productDTO3 = new ProductWithShopDTO();
     productDTO3.setProductId("213956789315345618901111");
-    productDTO3.setAmountPromotion(0);
-    productDTO3.setCountPromotion(0);
+    productDTO3.setNewPricePromotion(0);
+    productDTO3.setQuantityPromotion(0);
     productDTO3.setExpiredAtPromotion(null);
     productDTO3.setStartAtPromotion(null);
     productDTO3.setShopName(TEST_NAME);

@@ -135,7 +135,7 @@ public class ProfileConverterTest {
     expectedProfileShopDTO.setTotalAmount(String.valueOf(totalAmount / centsPerZloty));
     expectedProfileShopDTO.setAddress(List.of(addressDTO));
 
-    when(orderRepository.sumAmountForShop(shop.getId())).thenReturn(totalAmount);
+    when(orderRepository.sumTotalAmountForShop(shop.getId())).thenReturn(totalAmount);
     when(addressConverter.getDTOs(List.of(address))).thenReturn(List.of(addressDTO));
 
     assertEquals(expectedProfileShopDTO, profileConverter.getDTO(shop));

@@ -15,12 +15,12 @@ public class ProductWithShopDTO {
   private String productName;
   private String description;
   private String productImageUrl;
-  private int amount;
+  private int price;
   private ObjectId shopId;
   private LocalDate startAtPromotion;
   private LocalDate expiredAtPromotion;
-  private Integer countPromotion;
-  private int amountPromotion;
+  private Integer quantityPromotion;
+  private int newPricePromotion;
   private String shopName;
   private String shopImageUrl;
 
@@ -30,12 +30,12 @@ public class ProductWithShopDTO {
     productName = productDTO.getProductName();
     description = productDTO.getDescription();
     productImageUrl = productDTO.getProductImageUrl();
-    amount = productDTO.getAmount();
+    price = productDTO.getPrice();
     shopId = productDTO.getShopId();
     startAtPromotion = productDTO.getStartAtPromotion();
     expiredAtPromotion = productDTO.getExpiredAtPromotion();
-    countPromotion = productDTO.getCountPromotion();
-    amountPromotion = productDTO.getAmountPromotion();
+    quantityPromotion = productDTO.getQuantityPromotion();
+    newPricePromotion = productDTO.getNewPricePromotion();
     this.shopName = shopName;
     this.shopImageUrl = shopImageUrl;
   }

@@ -82,8 +82,8 @@
                         <div class="description" th:text="${product.description}">
                         </div>
                     </div>
-                    <div class="result-horizontal notImageContainer price">
-                        <span class="amount fullAmount" th:text="${product.amount}/100 + 'zł'"
+                    <div class="result-horizontal notImageContainer">
+                        <span class="price fullPrice" th:text="${product.price}/100 + 'zł'"
                               th:if="${product.startAtPromotion} == null"></span>
                         <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
                             <div class="result-horizontal">
@@ -93,12 +93,12 @@
                                         <span>-</span>
                                         <span th:text="${product.expiredAtPromotion}"></span>
                                     </div>
-                                    <span class="productsLeft" th:if="${product.countPromotion} != null"
-                                          th:text="${product.countPromotion} + ' ' + #{promotion.left_products}"></span>
+                                    <span class="productsLeft" th:if="${product.quantityPromotion} != null"
+                                          th:text="${product.quantityPromotion} + ' ' + #{promotion.left_products}"></span>
                                 </div>
-                                <div class="promotionAmount">
-                                    <span class="amount promotion" th:text="${product.amount}/100"></span>
-                                    <span class="amount" th:text="${product.amountPromotion}/100 + 'zł'"></span>
+                                <div class="promotionPrice">
+                                    <span class="price promotion" th:text="${product.price}/100"></span>
+                                    <span class="price" th:text="${product.newPricePromotion}/100 + 'zł'"></span>
                                 </div>
                             </div>
                         </div>

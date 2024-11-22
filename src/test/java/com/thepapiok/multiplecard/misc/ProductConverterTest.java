@@ -36,12 +36,12 @@ public class ProductConverterTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setAmount("13.45");
+    addProductDTO.setPrice("13.45");
     addProductDTO.setDescription(TEST_DESCRIPTION);
     Product expectedProduct = new Product();
     expectedProduct.setName(addProductDTO.getName());
     expectedProduct.setBarcode(addProductDTO.getBarcode());
-    expectedProduct.setAmount(TEST_CENTS);
+    expectedProduct.setPrice(TEST_CENTS);
     expectedProduct.setDescription(addProductDTO.getDescription());
 
     assertEquals(expectedProduct, productConverter.getEntity(addProductDTO));
@@ -52,7 +52,7 @@ public class ProductConverterTest {
     EditProductDTO editProductDTO = new EditProductDTO();
     editProductDTO.setName(TEST_PRODUCT_NAME);
     editProductDTO.setBarcode(TEST_BARCODE);
-    editProductDTO.setAmount("13.45");
+    editProductDTO.setPrice("13.45");
     editProductDTO.setDescription(TEST_DESCRIPTION);
     editProductDTO.setId(TEST_ID);
     Product product = new Product();
@@ -61,7 +61,7 @@ public class ProductConverterTest {
     expectedProduct.setId(TEST_PRODUCT_ID);
     expectedProduct.setName(editProductDTO.getName());
     expectedProduct.setBarcode(editProductDTO.getBarcode());
-    expectedProduct.setAmount(TEST_CENTS);
+    expectedProduct.setPrice(TEST_CENTS);
     expectedProduct.setDescription(editProductDTO.getDescription());
 
     when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
@@ -85,14 +85,14 @@ public class ProductConverterTest {
     Product product = new Product();
     product.setImageUrl(testUrl);
     product.setName(TEST_PRODUCT_NAME);
-    product.setAmount(TEST_CENTS);
+    product.setPrice(TEST_CENTS);
     product.setDescription(TEST_DESCRIPTION);
     product.setBarcode(TEST_BARCODE);
     product.setId(TEST_PRODUCT_ID);
     EditProductDTO expectedEditProductDTO = new EditProductDTO();
     expectedEditProductDTO.setId(TEST_ID);
     expectedEditProductDTO.setDescription(TEST_DESCRIPTION);
-    expectedEditProductDTO.setAmount(String.valueOf(TEST_CENTS));
+    expectedEditProductDTO.setPrice(String.valueOf(TEST_CENTS));
     expectedEditProductDTO.setBarcode(TEST_BARCODE);
     expectedEditProductDTO.setImageUrl(testUrl);
     expectedEditProductDTO.setName(TEST_PRODUCT_NAME);

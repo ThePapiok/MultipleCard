@@ -15,4 +15,7 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
 
   @Query(value = "{'_id': ?0}", fields = "{'shopId': 1, '_id': 0}")
   Product findShopIdById(ObjectId productId);
+
+  @Query(value = "{'_id': ?0}", fields = "{'_id': 0, 'price': 1}")
+  Product findPriceById(ObjectId productId);
 }

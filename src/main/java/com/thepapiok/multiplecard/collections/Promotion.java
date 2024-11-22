@@ -12,7 +12,7 @@ public class Promotion {
   @Id private ObjectId id;
   private LocalDate startAt;
   private LocalDate expiredAt;
-  private int amount;
+  private int newPrice;
   private ObjectId productId;
-  private Integer count;
+  private Integer quantity;
 }

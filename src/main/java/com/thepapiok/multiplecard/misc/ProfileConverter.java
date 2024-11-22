@@ -54,7 +54,7 @@ public class ProfileConverter {
     profileShopDTO.setAccountNumber(shop.getAccountNumber());
     profileShopDTO.setAddress(addressConverter.getDTOs(shop.getPoints()));
     profileShopDTO.setImageUrl(shop.getImageUrl());
-    Long totalAmount = orderRepository.sumAmountForShop(shop.getId());
+    Long totalAmount = orderRepository.sumTotalAmountForShop(shop.getId());
     if (totalAmount == null) {
       profileShopDTO.setTotalAmount("0");
     } else {

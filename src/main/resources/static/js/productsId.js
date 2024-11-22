@@ -9,22 +9,22 @@ class ProductInfo {
     }
 }
 
-let productsAmount = 0;
+let productsQuantity = 0;
 let productsId = new Map();
 
 
 function addProductId(id, e, hasPromotion, product, related, isCart) {
-    let amount = parseInt(e.textContent);
+    let quantity = parseInt(e.textContent);
     let newValue;
     let result;
     let productInfo = new ProductInfo(id, hasPromotion).toString();
     let innerHtml;
     let price;
-    if (productsAmount < 100) {
+    if (productsQuantity < 100) {
         if (related) {
-            if (amount < (10 - parseInt(document.getElementById("product" + id).getElementsByClassName("amount")[0].textContent))) {
-                amount++;
-                e.textContent = amount.toString();
+            if (quantity < (10 - parseInt(document.getElementById("product" + id).getElementsByClassName("quantity")[0].textContent))) {
+                quantity++;
+                e.textContent = quantity.toString();
                 if (!productsId.has(productInfo)) {
                     productsId.set(productInfo, 1);
                 } else {
@@ -34,12 +34,12 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
             }
             return false;
         }
-        if (amount < 10) {
+        if (quantity < 10) {
             if (hasPromotion) {
                 let count = document.getElementById("count" + id);
                 if (count.dataset.actualValue !== "0") {
-                    amount++;
-                    e.textContent = amount.toString();
+                    quantity++;
+                    e.textContent = quantity.toString();
                     newValue = (parseInt(count.dataset.actualValue) - 1).toString();
                     count.dataset.actualValue = newValue;
                     count.textContent = newValue + ' ' + document.getElementById("textLeftProducts").textContent;
@@ -48,12 +48,12 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                     product.style.opacity = "40%";
                     result = document.createElement("div")
                     result.className = "result related";
-                    price = product.getElementsByClassName("realAmount")[0].textContent;
+                    price = product.getElementsByClassName("realPrice")[0].textContent;
                     result.dataset.price = (parseInt(price.substring(0, price.length - 2)) * 100).toString();
                     innerHtml = `<div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.getElementsByClassName("name")[0].textContent + `</span>
-                        <span class="amount">0</span>
+                        <span class="quantity">0</span>
                         <a class="resultIcons"
                            onclick="addProduct('` + id + `', this.previousElementSibling, false, this.parentElement.parentElement.parentElement, true, ` + isCart + `)">
                             <img src="/images/plus.png" alt="add">
@@ -80,8 +80,8 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                         <div class="description">` + product.getElementsByClassName("description")[0].textContent + `
                         </div>
                     </div>
-                    <div class='result-horizontal notImageContainer price'>
-                        <span class='amount fullAmount'>` + price + `</span>
+                    <div class='result-horizontal notImageContainer'>
+                        <span class='price fullPrice'>` + price + `</span>
                     </div>
                 </div>`;
                     result.innerHTML = innerHtml;
@@ -89,8 +89,8 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                     return false;
                 }
             } else {
-                amount++;
-                e.textContent = amount.toString();
+                quantity++;
+                e.textContent = quantity.toString();
                 if (product.getElementsByClassName("promotionContainer")[0] != null) {
                     productInfo = new ProductInfo(id, true).toString();
                 }
@@ -108,23 +108,23 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
 }
 
 function deleteProductId(id, e, hasPromotion, product, related) {
-    let amount = parseInt(e.textContent);
+    let quantity = parseInt(e.textContent);
     let size;
     let newValue;
     let productInfo = new ProductInfo(id, hasPromotion).toString();
-    if (related && amount === 0) {
+    if (related && quantity === 0) {
         let result = document.getElementById("product" + id)
         result.style.pointerEvents = "auto";
         result.style.opacity = "100%";
         product.remove();
         return false;
     }
-    if (amount > 0) {
-        amount--;
-        e.textContent = amount.toString();
+    if (quantity > 0) {
+        quantity--;
+        e.textContent = quantity.toString();
         if (hasPromotion) {
             let count = document.getElementById("count" + id);
-            if (amount < parseInt(count.dataset.startValue)) {
+            if (quantity < parseInt(count.dataset.startValue)) {
                 newValue = (parseInt(count.dataset.actualValue) + 1).toString();
                 count.dataset.actualValue = newValue;
                 count.textContent = newValue + ' ' + document.getElementById("textLeftProducts").textContent;

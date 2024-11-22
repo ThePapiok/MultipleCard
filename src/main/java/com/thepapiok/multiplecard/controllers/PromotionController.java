@@ -56,9 +56,9 @@ public class PromotionController {
       }
     }
     if (productService.isProductOwner(principal.getName(), id)) {
-      Double amount = productService.getAmount(id);
-      if (amount != null) {
-        model.addAttribute("originalAmount", amount);
+      Double price = productService.getPrice(id);
+      if (price != null) {
+        model.addAttribute("originalPrice", price);
       }
       model.addAttribute(isOwnerParam, true);
       promotionDTO = promotionService.getPromotionDTO(id);
@@ -105,9 +105,9 @@ public class PromotionController {
     } else if (!promotionService.checkNewStartAtIsPresent(startAt, id)) {
       error = true;
       message = messageSource.getMessage("addPromotion.error.startAt_not_present", null, locale);
-    } else if (!productService.isLessThanOriginalPrice(promotion.getAmount(), id)) {
+    } else if (!productService.isLessThanOriginalPrice(promotion.getNewPrice(), id)) {
       error = true;
-      message = messageSource.getMessage("addPromotion.error.amount_too_less", null, locale);
+      message = messageSource.getMessage("addPromotion.error.new_price_too_less", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);

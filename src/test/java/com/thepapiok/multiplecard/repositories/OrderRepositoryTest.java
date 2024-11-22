@@ -34,8 +34,8 @@ public class OrderRepositoryTest {
 
   @BeforeEach
   public void setUp() {
-    final int testAmount1 = 555;
-    final int testAmount2 = 111;
+    final int testPrice1 = 555;
+    final int testPrice2 = 111;
     final int testYearOfCreatedAt = 2024;
     final int testMonthOfCreatedAt = 5;
     final int testDayOfCreatedAt = 5;
@@ -54,7 +54,7 @@ public class OrderRepositoryTest {
             testSecondOfCreatedAt);
     order1 = new Order();
     order1.setUsed(false);
-    order1.setAmount(testAmount1);
+    order1.setPrice(testPrice1);
     order1.setCreatedAt(localDateTime);
     order1.setProductId(TEST_PRODUCT_ID);
     order1.setCardId(testCardId);
@@ -62,7 +62,7 @@ public class OrderRepositoryTest {
     mongoTemplate.save(order1);
     order2 = new Order();
     order2.setUsed(false);
-    order2.setAmount(testAmount1);
+    order2.setPrice(testPrice1);
     order2.setCreatedAt(localDateTime);
     order2.setProductId(TEST_PRODUCT_ID);
     order2.setCardId(testCardId);
@@ -70,7 +70,7 @@ public class OrderRepositoryTest {
     mongoTemplate.save(order2);
     Order order3 = new Order();
     order3.setUsed(true);
-    order3.setAmount(testAmount2);
+    order3.setPrice(testPrice2);
     order3.setCreatedAt(localDateTime);
     order3.setProductId(TEST_PRODUCT_ID);
     order3.setCardId(testCardId);
@@ -78,7 +78,7 @@ public class OrderRepositoryTest {
     mongoTemplate.save(order3);
     Order order4 = new Order();
     order4.setUsed(true);
-    order4.setAmount(testAmount2);
+    order4.setPrice(testPrice2);
     order4.setCreatedAt(localDateTime);
     order4.setProductId(testProduct2Id);
     order4.setCardId(testCardId);
@@ -107,14 +107,14 @@ public class OrderRepositoryTest {
   }
 
   @Test
-  public void shouldReturn222AtSumAmountForShopWhenEverythingOk() {
-    final Long amount = 222L;
+  public void shouldReturn222AtSumTotalAmountForShopWhenEverythingOk() {
+    final Long totalAmount = 222L;
 
-    assertEquals(amount, orderRepository.sumAmountForShop(TEST_SHOP_ID));
+    assertEquals(totalAmount, orderRepository.sumTotalAmountForShop(TEST_SHOP_ID));
   }
 
   @Test
-  public void shouldReturnNullAtSumAmountForShopWhenNotFound() {
-    assertNull(orderRepository.sumAmountForShop(new ObjectId("098765432112345678901234")));
+  public void shouldReturnNullAtSumTotalAmountForShopWhenNotFound() {
+    assertNull(orderRepository.sumTotalAmountForShop(new ObjectId("098765432112345678901234")));
   }
 }

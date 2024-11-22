@@ -23,13 +23,14 @@ import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
-import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,6 @@ public class ProductService {
   private final BlockedProductRepository blockedProductRepository;
   private final CategoryRepository categoryRepository;
   private final ShopRepository shopRepository;
-  private final PromotionRepository promotionRepository;
 
   @Autowired
   public ProductService(
@@ -73,8 +73,7 @@ public class ProductService {
       OrderRepository orderRepository,
       BlockedProductRepository blockedProductRepository,
       CategoryRepository categoryRepository,
-      ShopRepository shopRepository,
-      PromotionRepository promotionRepository) {
+      ShopRepository shopRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -88,7 +87,6 @@ public class ProductService {
     this.blockedProductRepository = blockedProductRepository;
     this.categoryRepository = categoryRepository;
     this.shopRepository = shopRepository;
-    this.promotionRepository = promotionRepository;
   }
 
   public boolean addProduct(
@@ -141,24 +139,24 @@ public class ProductService {
     return accountRepository.findIdByPhone(phone).getId().equals(product.getShopId());
   }
 
-  public boolean isLessThanOriginalPrice(String amount, String productId) {
+  public boolean isLessThanOriginalPrice(String price, String productId) {
     final int centsPerZl = 100;
-    final int amountCents = (int) (Double.parseDouble(amount) * centsPerZl);
+    final int amountCents = (int) (Double.parseDouble(price) * centsPerZl);
     Optional<Product> product = productRepository.findById(new ObjectId(productId));
     if (product.isEmpty()) {
       return false;
     }
-    return product.get().getAmount() > amountCents;
+    return product.get().getPrice() > amountCents;
   }
 
-  public Double getAmount(String productId) {
+  public Double getPrice(String productId) {
     final double centsPerZl = 100.0;
     Optional<Product> product = productRepository.findById(new ObjectId(productId));
     if (product.isEmpty()) {
       return null;
     }
 
-    return (product.get().getAmount() / centsPerZl);
+    return (product.get().getPrice() / centsPerZl);
   }
 
   public boolean deleteProduct(String productId) {
@@ -178,7 +176,7 @@ public class ProductService {
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
                       query(where("cardId").is(order.getCardId())),
-                      new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
+                      new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
                       User.class);
                   mongoTemplate.remove(order);
                 }
@@ -304,11 +302,11 @@ public class ProductService {
 
   public List<ProductWithShopDTO> getProductsByIds(List<String> productsInfo)
       throws JsonProcessingException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    List<ProductInfo> products = new ArrayList<>();
     if (productsInfo.size() == 0) {
       return List.of();
     }
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<ProductInfo> products = new ArrayList<>();
     for (String json : productsInfo) {
       products.add(objectMapper.readValue(json, ProductInfo.class));
     }
@@ -325,5 +323,40 @@ public class ProductService {
       products.add(new ProductWithShopDTO(productDTO, shop.getName(), shop.getImageUrl()));
     }
     return products;
+  }
+
+  public boolean checkProductsQuantity(Map<ProductInfo, Integer> products) {
+    final int maxQuantityPerProduct = 10;
+    final int maxQuantityPerAllProducts = 100;
+    int totalQuantity = 0;
+    int quantity;
+    for (Map.Entry<ProductInfo, Integer> entry : products.entrySet()) {
+      quantity = entry.getValue();
+      if (quantity > maxQuantityPerProduct || quantity <= 0) {
+        return false;
+      } else if (!productRepository.existsById(entry.getKey().getProductId())) {
+        return false;
+      } else {
+        totalQuantity += quantity;
+      }
+    }
+    return totalQuantity <= maxQuantityPerAllProducts;
+  }
+
+  public Map<ProductInfo, Integer> getProductsInfo(Map<String, Integer> productsId) {
+    try {
+      if (productsId.size() == 0) {
+        return Map.of();
+      }
+      ObjectMapper objectMapper = new ObjectMapper();
+      Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+      for (Map.Entry<String, Integer> entry : productsId.entrySet()) {
+        productsInfo.put(
+            objectMapper.readValue(entry.getKey(), ProductInfo.class), entry.getValue());
+      }
+      return productsInfo;
+    } catch (Exception e) {
+      return Map.of();
+    }
   }
 }

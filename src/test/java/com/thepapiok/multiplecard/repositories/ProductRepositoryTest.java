@@ -38,7 +38,7 @@ public class ProductRepositoryTest {
 
   @BeforeEach
   public void setUp() {
-    final int amount = 500;
+    final int price = 500;
     final int testYearOfCreatedAt = 2024;
     final int testMonthOfCreatedAt = 5;
     final int testDayOfCreatedAt = 5;
@@ -79,7 +79,7 @@ public class ProductRepositoryTest {
     product.setName("name");
     product.setBarcode("barcode");
     product.setDescription("description");
-    product.setAmount(amount);
+    product.setPrice(price);
     product.setCategories(List.of(category.getId()));
     product.setUpdatedAt(localDateTime);
     product = mongoTemplate.save(product);
@@ -102,5 +102,14 @@ public class ProductRepositoryTest {
     expectedProduct.setShopId(testShop.getId());
 
     assertEquals(expectedProduct, productRepository.findShopIdById(productId));
+  }
+
+  @Test
+  public void shouldReturnProductWithOnlyPriceFieldAtFindPriceByIdWhenEverythingOk() {
+    final int expectedPrice = 500;
+    Product expectedProduct = new Product();
+    expectedProduct.setPrice(expectedPrice);
+
+    assertEquals(expectedProduct, productRepository.findPriceById(product.getId()));
   }
 }

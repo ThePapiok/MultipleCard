@@ -22,22 +22,22 @@ public class PromotionConverterTest {
 
   @BeforeEach
   public void setUp() {
-    final int amount = 3422;
+    final int price = 3422;
     final ObjectId promotionId = new ObjectId("723456229012345678901231");
     final LocalDate startAt = LocalDate.of(2024, 12, 5);
     final LocalDate expiredAt = LocalDate.of(2026, 9, 24);
     MockitoAnnotations.openMocks(this);
     promotionConverter = new PromotionConverter(promotionRepository);
     promotion = new Promotion();
-    promotion.setCount(null);
-    promotion.setAmount(amount);
+    promotion.setQuantity(null);
+    promotion.setNewPrice(price);
     promotion.setProductId(TEST_PRODUCT_ID);
     promotion.setStartAt(startAt);
     promotion.setExpiredAt(expiredAt);
     promotion.setId(promotionId);
     promotionDTO = new PromotionDTO();
-    promotionDTO.setCount("");
-    promotionDTO.setAmount("34.22");
+    promotionDTO.setQuantity("");
+    promotionDTO.setNewPrice("34.22");
     promotionDTO.setProductId(TEST_PRODUCT_ID.toString());
     promotionDTO.setStartAt(startAt);
     promotionDTO.setExpiredAt(expiredAt);
@@ -58,8 +58,8 @@ public class PromotionConverterTest {
   @Test
   public void shouldReturnPromotionAtGetEntityWhenPromotionNotExists() {
     Promotion expectedPromotion = new Promotion();
-    expectedPromotion.setCount(null);
-    expectedPromotion.setAmount(promotion.getAmount());
+    expectedPromotion.setQuantity(null);
+    expectedPromotion.setNewPrice(promotion.getNewPrice());
     expectedPromotion.setProductId(promotion.getProductId());
     expectedPromotion.setStartAt(promotion.getStartAt());
     expectedPromotion.setExpiredAt(promotion.getExpiredAt());

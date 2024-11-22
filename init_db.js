@@ -131,7 +131,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "updatedAt", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "price", "shopId", "updatedAt", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -164,10 +164,10 @@ db.createCollection("products", {
                         "description": "categories must be objectId"
                     }
                 },
-                "amount": {
+                "price": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "price is required and must be greater or equal 0"
                 },
                 "updatedAt": {
                     "bsonType": "date",
@@ -190,7 +190,7 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "amount", "shopId", "_class"],
+            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "shopId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -217,10 +217,10 @@ db.createCollection("orders", {
                     "bsonType": "bool",
                     "description": "isUsed is required and must be bool"
                 }, 
-                "amount": {
+                "price": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "price is required and must be greater or equal 0"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -424,7 +424,7 @@ db.createCollection("promotions", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "startAt", "expiredAt", "amount", "productId", "_class"],
+            "required": ["_id", "startAt", "expiredAt", "newPrice", "productId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -439,16 +439,16 @@ db.createCollection("promotions", {
                     "bsonType": "date",
                     "description": "expiredAt is required and must be date"
                 },
-                "amount": {
+                "newPrice": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "newPrice is required and must be greater or equal 0"
                 },
-                "count": {
+                "quantity": {
                     "bsonType": ["null", "int"],
                     "minimum": 0,
                     "maximum": 99999,
-                    "description": "count is required and must be greater or equal 0"
+                    "description": "quantity must be greater or equal 0"
                 },
                 "productId": {
                     "bsonType": "objectId",

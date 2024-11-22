@@ -4,9 +4,9 @@ let buttonId = "promotionButton";
 let edit;
 let startAt;
 let expiredAt;
-let amount;
-let count;
-let originalAmount;
+let price;
+let quantity;
+let originalPrice;
 let deleteProm = false;
 let today = new Date();
 
@@ -44,18 +44,18 @@ function checkExpiredAt(e, oneTime) {
     }
 }
 
-function checkAmount(e) {
+function checkPrice(e) {
     const input = e.value;
     const length = input.length;
-    let cond = (length >= 2 && length <= 7 && regAmount.test(input) && parseFloat(input.toString().replace("zł", "")) < originalAmount);
+    let cond = (length >= 5 && length <= 9 && regPrice.test(input) && parseFloat(input.toString().replace("zł", "")) < originalPrice);
     if (edit) {
-        checkOnlyIfOther(input, cond, 3, amount, true, e);
+        checkOnlyIfOther(input, cond, 3, price, true, e);
     } else {
         check(3, cond, ok, previous, buttonId, success, true, true);
     }
 }
 
-function checkCount(e) {
+function checkQuantity(e) {
     let input = e.value;
     if (input === "0") {
         input = "";
@@ -63,7 +63,7 @@ function checkCount(e) {
     }
     const cond = (input === "" || (input.length <= 5 && regNumber.test(input)));
     if (edit) {
-        checkOnlyIfOther(input, cond, 4, count, true, e);
+        checkOnlyIfOther(input, cond, 4, quantity, true, e);
     } else {
         check(4, cond, ok, previous, buttonId, success, true, true);
     }
@@ -72,38 +72,39 @@ function checkCount(e) {
 function atStart() {
     let suffix;
     today.setHours(0, 0, 0, 0);
-    originalAmount = parseFloat(document.getElementById("originalAmount").textContent);
-    suffix = originalAmount.toString().substring(originalAmount.length - 3, originalAmount.length);
+    originalPrice = (parseFloat(document.getElementById("originalPrice").textContent)).toString();
+    suffix = originalPrice.substring(originalPrice.length - 1, originalPrice.length);
     if (suffix.charAt(1) === ".") {
-        originalAmount += "0";
+        originalPrice += "0";
     } else if (suffix.charAt(2) === ".") {
-        originalAmount += "00";
+        originalPrice += "00";
     } else if (!suffix.includes(".")) {
-        originalAmount += ".00";
+        originalPrice += ".00";
     }
+    originalPrice = parseFloat(originalPrice);
     checkLanguage();
     document.getElementById("startAt").value = document.getElementById("dateStartAt").textContent;
     document.getElementById("expiredAt").value = document.getElementById("dateExpiredAt").textContent;
     if (document.getElementById("hasPromotion").textContent === "true") {
-        let amountInput = document.getElementById("amount");
+        let priceInput = document.getElementById("price");
         ok.push(null, null, null, null);
         previous.push(null, null, null, null);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonEditPromotion").textContent;
         edit = true;
         startAt = document.getElementById("startAt").value;
         expiredAt = document.getElementById("expiredAt").value;
-        count = document.getElementById("count").value;
-        unfocusedAmount(amountInput);
-        amount = amountInput.value;
-        checkAmount(amountInput);
-        checkCount(document.getElementById("count"));
-        amountInput.value = amountInput.value + " (" + originalAmount + "zł)";
+        quantity = document.getElementById("quantity").value;
+        unfocusedPrice(priceInput);
+        price = priceInput.value;
+        checkPrice(priceInput);
+        checkQuantity(document.getElementById("quantity"));
+        priceInput.value = priceInput.value + " (" + originalPrice + "zł)";
     } else {
         ok.push(false, false, false, true);
         previous.push(false, false, false, true);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonAddPromotion").textContent;
         edit = false;
-        document.getElementById("amount").value = "";
+        document.getElementById("newPrice").value = "";
     }
 
 }
@@ -136,18 +137,18 @@ function deletePromotion(id) {
 }
 
 function focused(e) {
-    focusedAmount(e);
+    focusedPrice(e);
     e.value = e.value.toString().substring(0, e.value.toString().indexOf("(") - 1);
 }
 
 function unfocused(e) {
     const index = e.value.indexOf("%");
     if (index === -1) {
-        unfocusedAmount(e);
+        unfocusedPrice(e);
     } else if (index === (e.value.length - 1) && index === e.value.lastIndexOf("%")) {
-        e.value = parseFloat(originalAmount) * parseInt(e.value.substring(0, index)) / 100.0.toFixed(2);
-        checkAmount(e);
-        unfocusedAmount(e);
+        e.value = parseFloat(originalPrice) * parseInt(e.value.substring(0, index)) / 100.0.toFixed(2);
+        checkPrice(e);
+        unfocusedPrice(e);
     }
-    e.value = e.value + " (" + originalAmount + "zł)";
+    e.value = e.value + " (" + originalPrice + "zł)";
 }
