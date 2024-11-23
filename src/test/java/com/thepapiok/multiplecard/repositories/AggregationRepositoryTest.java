@@ -42,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
 @Import(DbConfig.class)
 public class AggregationRepositoryTest {
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123456789012345678901234");
+  private static final ObjectId TEST_ORDER_ID = new ObjectId("123459789012345678901211");
   private static final String TEST_PHONE = "+48132423412342314231";
   private static final String TEST_PHONE3 = "+48135304342921";
   private static final String TEST_PRODUCT_NAME = "product";
@@ -539,14 +540,14 @@ public class AggregationRepositoryTest {
     promotion4 = mongoTemplate.save(promotion4);
     ReservedProduct reservedProduct1 = new ReservedProduct();
     reservedProduct1.setPromotionId(promotion3.getId());
+    reservedProduct1.setOrderId(new ObjectId());
     reservedProduct1.setCardId(new ObjectId());
-    reservedProduct1.setExpiredAt(LocalDateTime.now().plusHours(1));
     reservedProduct1.setEncryptedIp("sdafasdfsfasfad");
     mongoTemplate.save(reservedProduct1);
     ReservedProduct reservedProduct2 = new ReservedProduct();
     reservedProduct2.setPromotionId(promotion3.getId());
+    reservedProduct2.setOrderId(new ObjectId());
     reservedProduct2.setCardId(new ObjectId());
-    reservedProduct2.setExpiredAt(LocalDateTime.now().plusHours(1));
     reservedProduct2.setEncryptedIp("sgdfaasdfdas3");
     mongoTemplate.save(reservedProduct2);
     Account account1 = new Account();
@@ -592,6 +593,7 @@ public class AggregationRepositoryTest {
     order1.setUsed(true);
     order1.setCreatedAt(testDate1);
     order1.setShopId(shop1.getId());
+    order1.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order1);
     Order order2 = new Order();
     order2.setCardId(testCardId);
@@ -600,6 +602,7 @@ public class AggregationRepositoryTest {
     order2.setUsed(true);
     order2.setCreatedAt(testDate2);
     order2.setShopId(shop1.getId());
+    order2.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order2);
     Order order3 = new Order();
     order3.setCardId(testCardId);
@@ -608,6 +611,7 @@ public class AggregationRepositoryTest {
     order3.setUsed(true);
     order3.setCreatedAt(testDate3);
     order3.setShopId(shop1.getId());
+    order3.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order3);
     Order order4 = new Order();
     order4.setCardId(testOtherCardId);
@@ -616,6 +620,7 @@ public class AggregationRepositoryTest {
     order4.setUsed(true);
     order4.setCreatedAt(testDate4);
     order4.setShopId(shop3.getId());
+    order4.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order4);
     Order order139 = new Order();
     order139.setCardId(testOtherCardId);
@@ -624,6 +629,7 @@ public class AggregationRepositoryTest {
     order139.setUsed(false);
     order139.setCreatedAt(testDate4);
     order139.setShopId(shop3.getId());
+    order139.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order139);
     Order order140 = new Order();
     order140.setCardId(testOtherCardId);
@@ -632,6 +638,7 @@ public class AggregationRepositoryTest {
     order140.setUsed(false);
     order140.setCreatedAt(testDate4);
     order140.setShopId(shop3.getId());
+    order140.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order140);
     Order order5 = new Order();
     order5.setCardId(testOtherCardId);
@@ -640,6 +647,7 @@ public class AggregationRepositoryTest {
     order5.setUsed(true);
     order5.setCreatedAt(testDate5);
     order5.setShopId(shop3.getId());
+    order5.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order5);
     Order order6 = new Order();
     order6.setCardId(testOtherCardId);
@@ -648,6 +656,7 @@ public class AggregationRepositoryTest {
     order6.setUsed(true);
     order6.setCreatedAt(testDate5);
     order6.setShopId(shop3.getId());
+    order6.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order6);
     Order order8 = new Order();
     order8.setCardId(testOtherCardId);
@@ -656,6 +665,7 @@ public class AggregationRepositoryTest {
     order8.setUsed(true);
     order8.setCreatedAt(testDate6);
     order8.setShopId(shop3.getId());
+    order8.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order8);
     Order order9 = new Order();
     order9.setCardId(testOtherCardId);
@@ -664,6 +674,7 @@ public class AggregationRepositoryTest {
     order9.setUsed(true);
     order9.setCreatedAt(testDate6);
     order9.setShopId(shop3.getId());
+    order9.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order9);
     Order order10 = new Order();
     order10.setCardId(testOtherCardId);
@@ -672,6 +683,7 @@ public class AggregationRepositoryTest {
     order10.setUsed(true);
     order10.setCreatedAt(testDate6);
     order10.setShopId(shop3.getId());
+    order10.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order10);
     Order order11 = new Order();
     order11.setCardId(testOtherCardId);
@@ -680,6 +692,7 @@ public class AggregationRepositoryTest {
     order11.setUsed(true);
     order11.setCreatedAt(testDate6);
     order11.setShopId(shop3.getId());
+    order11.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order11);
     Order order141 = new Order();
     order141.setCardId(testOtherCardId);
@@ -688,6 +701,7 @@ public class AggregationRepositoryTest {
     order141.setUsed(false);
     order141.setCreatedAt(testDate6);
     order141.setShopId(shop3.getId());
+    order141.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order141);
     Order order142 = new Order();
     order142.setCardId(testOtherCardId);
@@ -696,6 +710,7 @@ public class AggregationRepositoryTest {
     order142.setUsed(false);
     order142.setCreatedAt(testDate6);
     order142.setShopId(shop3.getId());
+    order142.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order142);
     Order order12 = new Order();
     order12.setCardId(testOtherCardId);
@@ -704,6 +719,7 @@ public class AggregationRepositoryTest {
     order12.setUsed(true);
     order12.setCreatedAt(testDate7);
     order12.setShopId(shop3.getId());
+    order12.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order12);
     Order order13 = new Order();
     order13.setCardId(testOtherCardId);
@@ -712,6 +728,7 @@ public class AggregationRepositoryTest {
     order13.setUsed(true);
     order13.setCreatedAt(testDate7);
     order13.setShopId(shop3.getId());
+    order13.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order13);
     Order order14 = new Order();
     order14.setCardId(testOtherCardId);
@@ -720,6 +737,7 @@ public class AggregationRepositoryTest {
     order14.setUsed(true);
     order14.setCreatedAt(testDate7);
     order14.setShopId(shop3.getId());
+    order14.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order14);
     Order order15 = new Order();
     order15.setCardId(testOtherCardId);
@@ -728,6 +746,7 @@ public class AggregationRepositoryTest {
     order15.setUsed(true);
     order15.setCreatedAt(testDate7);
     order15.setShopId(shop3.getId());
+    order15.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order15);
     Order order16 = new Order();
     order16.setCardId(testOtherCardId);
@@ -736,6 +755,7 @@ public class AggregationRepositoryTest {
     order16.setUsed(true);
     order16.setCreatedAt(testDate7);
     order16.setShopId(shop3.getId());
+    order16.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order16);
     Order order17 = new Order();
     order17.setCardId(testOtherCardId);
@@ -744,6 +764,7 @@ public class AggregationRepositoryTest {
     order17.setUsed(true);
     order17.setCreatedAt(testDate8);
     order17.setShopId(shop3.getId());
+    order17.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order17);
     Order order18 = new Order();
     order18.setCardId(testOtherCardId);
@@ -752,6 +773,7 @@ public class AggregationRepositoryTest {
     order18.setUsed(true);
     order18.setCreatedAt(testDate8);
     order18.setShopId(shop3.getId());
+    order18.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order18);
     Order order19 = new Order();
     order19.setCardId(testOtherCardId);
@@ -760,6 +782,7 @@ public class AggregationRepositoryTest {
     order19.setUsed(true);
     order19.setCreatedAt(testDate8);
     order19.setShopId(shop3.getId());
+    order19.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order19);
     Order order20 = new Order();
     order20.setCardId(testOtherCardId);
@@ -768,6 +791,7 @@ public class AggregationRepositoryTest {
     order20.setUsed(true);
     order20.setCreatedAt(testDate8);
     order20.setShopId(shop3.getId());
+    order20.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order20);
     Order order21 = new Order();
     order21.setCardId(testOtherCardId);
@@ -776,6 +800,7 @@ public class AggregationRepositoryTest {
     order21.setUsed(true);
     order21.setCreatedAt(testDate8);
     order21.setShopId(shop3.getId());
+    order21.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order21);
     Order order22 = new Order();
     order22.setCardId(testOtherCardId);
@@ -784,6 +809,7 @@ public class AggregationRepositoryTest {
     order22.setUsed(true);
     order22.setCreatedAt(testDate8);
     order22.setShopId(shop3.getId());
+    order22.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order22);
     Order order23 = new Order();
     order23.setCardId(testOtherCardId);
@@ -792,6 +818,7 @@ public class AggregationRepositoryTest {
     order23.setUsed(true);
     order23.setCreatedAt(testDate9);
     order23.setShopId(shop3.getId());
+    order23.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order23);
     Order order24 = new Order();
     order24.setCardId(testOtherCardId);
@@ -800,6 +827,7 @@ public class AggregationRepositoryTest {
     order24.setUsed(true);
     order24.setCreatedAt(testDate9);
     order24.setShopId(shop3.getId());
+    order24.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order24);
     Order order25 = new Order();
     order25.setCardId(testOtherCardId);
@@ -808,6 +836,7 @@ public class AggregationRepositoryTest {
     order25.setUsed(true);
     order25.setCreatedAt(testDate9);
     order25.setShopId(shop3.getId());
+    order25.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order25);
     Order order26 = new Order();
     order26.setCardId(testOtherCardId);
@@ -816,6 +845,7 @@ public class AggregationRepositoryTest {
     order26.setUsed(true);
     order26.setCreatedAt(testDate9);
     order26.setShopId(shop3.getId());
+    order26.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order26);
     Order order27 = new Order();
     order27.setCardId(testOtherCardId);
@@ -824,6 +854,7 @@ public class AggregationRepositoryTest {
     order27.setUsed(true);
     order27.setCreatedAt(testDate9);
     order27.setShopId(shop3.getId());
+    order27.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order27);
     Order order28 = new Order();
     order28.setCardId(testOtherCardId);
@@ -832,6 +863,7 @@ public class AggregationRepositoryTest {
     order28.setUsed(true);
     order28.setCreatedAt(testDate9);
     order28.setShopId(shop3.getId());
+    order28.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order28);
     Order order29 = new Order();
     order29.setCardId(testOtherCardId);
@@ -840,6 +872,7 @@ public class AggregationRepositoryTest {
     order29.setUsed(true);
     order29.setCreatedAt(testDate9);
     order29.setShopId(shop3.getId());
+    order29.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order29);
     Order order30 = new Order();
     order30.setCardId(testOtherCardId);
@@ -848,6 +881,7 @@ public class AggregationRepositoryTest {
     order30.setUsed(true);
     order30.setCreatedAt(testDate10);
     order30.setShopId(shop3.getId());
+    order30.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order30);
     Order order31 = new Order();
     order31.setCardId(testOtherCardId);
@@ -856,6 +890,7 @@ public class AggregationRepositoryTest {
     order31.setUsed(true);
     order31.setCreatedAt(testDate10);
     order31.setShopId(shop3.getId());
+    order31.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order31);
     Order order32 = new Order();
     order32.setCardId(testOtherCardId);
@@ -864,6 +899,7 @@ public class AggregationRepositoryTest {
     order32.setUsed(true);
     order32.setCreatedAt(testDate10);
     order32.setShopId(shop3.getId());
+    order32.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order32);
     Order order33 = new Order();
     order33.setCardId(testOtherCardId);
@@ -872,6 +908,7 @@ public class AggregationRepositoryTest {
     order33.setUsed(true);
     order33.setCreatedAt(testDate10);
     order33.setShopId(shop3.getId());
+    order33.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order33);
     Order order34 = new Order();
     order34.setCardId(testOtherCardId);
@@ -880,6 +917,7 @@ public class AggregationRepositoryTest {
     order34.setUsed(true);
     order34.setCreatedAt(testDate10);
     order34.setShopId(shop3.getId());
+    order34.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order34);
     Order order36 = new Order();
     order36.setCardId(testOtherCardId);
@@ -888,6 +926,7 @@ public class AggregationRepositoryTest {
     order36.setUsed(true);
     order36.setCreatedAt(testDate10);
     order36.setShopId(shop3.getId());
+    order36.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order36);
     Order order37 = new Order();
     order37.setCardId(testOtherCardId);
@@ -896,6 +935,7 @@ public class AggregationRepositoryTest {
     order37.setUsed(true);
     order37.setCreatedAt(testDate10);
     order37.setShopId(shop3.getId());
+    order37.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order37);
     Order order38 = new Order();
     order38.setCardId(testOtherCardId);
@@ -904,6 +944,7 @@ public class AggregationRepositoryTest {
     order38.setUsed(true);
     order38.setCreatedAt(testDate10);
     order38.setShopId(shop3.getId());
+    order38.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order38);
     Order order39 = new Order();
     order39.setCardId(testOtherCardId);
@@ -912,6 +953,7 @@ public class AggregationRepositoryTest {
     order39.setUsed(true);
     order39.setCreatedAt(testDate11);
     order39.setShopId(shop3.getId());
+    order39.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order39);
     Order order40 = new Order();
     order40.setCardId(testOtherCardId);
@@ -920,6 +962,7 @@ public class AggregationRepositoryTest {
     order40.setUsed(true);
     order40.setCreatedAt(testDate11);
     order40.setShopId(shop3.getId());
+    order40.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order40);
     Order order41 = new Order();
     order41.setCardId(testOtherCardId);
@@ -928,6 +971,7 @@ public class AggregationRepositoryTest {
     order41.setUsed(true);
     order41.setCreatedAt(testDate11);
     order41.setShopId(shop3.getId());
+    order41.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order41);
     Order order42 = new Order();
     order42.setCardId(testOtherCardId);
@@ -936,6 +980,7 @@ public class AggregationRepositoryTest {
     order42.setUsed(true);
     order42.setCreatedAt(testDate11);
     order42.setShopId(shop3.getId());
+    order42.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order42);
     Order order43 = new Order();
     order43.setCardId(testOtherCardId);
@@ -944,6 +989,7 @@ public class AggregationRepositoryTest {
     order43.setUsed(true);
     order43.setCreatedAt(testDate11);
     order43.setShopId(shop3.getId());
+    order43.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order43);
     Order order44 = new Order();
     order44.setCardId(testOtherCardId);
@@ -952,6 +998,7 @@ public class AggregationRepositoryTest {
     order44.setUsed(true);
     order44.setCreatedAt(testDate11);
     order44.setShopId(shop3.getId());
+    order44.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order44);
     Order order45 = new Order();
     order45.setCardId(testOtherCardId);
@@ -960,6 +1007,7 @@ public class AggregationRepositoryTest {
     order45.setUsed(true);
     order45.setCreatedAt(testDate11);
     order45.setShopId(shop3.getId());
+    order45.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order45);
     Order order46 = new Order();
     order46.setCardId(testOtherCardId);
@@ -968,6 +1016,7 @@ public class AggregationRepositoryTest {
     order46.setUsed(true);
     order46.setCreatedAt(testDate11);
     order46.setShopId(shop3.getId());
+    order46.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order46);
     Order order47 = new Order();
     order47.setCardId(testOtherCardId);
@@ -976,6 +1025,7 @@ public class AggregationRepositoryTest {
     order47.setUsed(true);
     order47.setCreatedAt(testDate11);
     order47.setShopId(shop3.getId());
+    order47.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order47);
     Order order48 = new Order();
     order48.setCardId(testOtherCardId);
@@ -984,6 +1034,7 @@ public class AggregationRepositoryTest {
     order48.setUsed(true);
     order48.setCreatedAt(testDate12);
     order48.setShopId(shop3.getId());
+    order48.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order48);
     Order order49 = new Order();
     order49.setCardId(testOtherCardId);
@@ -992,6 +1043,7 @@ public class AggregationRepositoryTest {
     order49.setUsed(true);
     order49.setCreatedAt(testDate12);
     order49.setShopId(shop3.getId());
+    order49.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order49);
     Order order50 = new Order();
     order50.setCardId(testOtherCardId);
@@ -1000,6 +1052,7 @@ public class AggregationRepositoryTest {
     order50.setUsed(true);
     order50.setCreatedAt(testDate12);
     order50.setShopId(shop3.getId());
+    order50.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order50);
     Order order51 = new Order();
     order51.setCardId(testOtherCardId);
@@ -1008,6 +1061,7 @@ public class AggregationRepositoryTest {
     order51.setUsed(true);
     order51.setCreatedAt(testDate12);
     order51.setShopId(shop3.getId());
+    order51.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order51);
     Order order52 = new Order();
     order52.setCardId(testOtherCardId);
@@ -1016,6 +1070,7 @@ public class AggregationRepositoryTest {
     order52.setUsed(true);
     order52.setCreatedAt(testDate12);
     order52.setShopId(shop3.getId());
+    order52.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order52);
     Order order53 = new Order();
     order53.setCardId(testOtherCardId);
@@ -1024,6 +1079,7 @@ public class AggregationRepositoryTest {
     order53.setUsed(true);
     order53.setCreatedAt(testDate12);
     order53.setShopId(shop3.getId());
+    order53.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order53);
     Order order54 = new Order();
     order54.setCardId(testOtherCardId);
@@ -1032,6 +1088,7 @@ public class AggregationRepositoryTest {
     order54.setUsed(true);
     order54.setCreatedAt(testDate12);
     order54.setShopId(shop3.getId());
+    order54.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order54);
     Order order55 = new Order();
     order55.setCardId(testOtherCardId);
@@ -1040,6 +1097,7 @@ public class AggregationRepositoryTest {
     order55.setUsed(true);
     order55.setCreatedAt(testDate12);
     order55.setShopId(shop3.getId());
+    order55.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order55);
     Order order56 = new Order();
     order56.setCardId(testOtherCardId);
@@ -1048,6 +1106,7 @@ public class AggregationRepositoryTest {
     order56.setUsed(true);
     order56.setCreatedAt(testDate12);
     order56.setShopId(shop3.getId());
+    order56.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order56);
     Order order57 = new Order();
     order57.setCardId(testOtherCardId);
@@ -1056,6 +1115,7 @@ public class AggregationRepositoryTest {
     order57.setUsed(true);
     order57.setCreatedAt(testDate12);
     order57.setShopId(shop3.getId());
+    order57.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order57);
     Order order58 = new Order();
     order58.setCardId(testOtherCardId);
@@ -1064,6 +1124,7 @@ public class AggregationRepositoryTest {
     order58.setUsed(true);
     order58.setCreatedAt(testDate13);
     order58.setShopId(shop3.getId());
+    order58.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order58);
     Order order59 = new Order();
     order59.setCardId(testOtherCardId);
@@ -1072,6 +1133,7 @@ public class AggregationRepositoryTest {
     order59.setUsed(true);
     order59.setCreatedAt(testDate13);
     order59.setShopId(shop3.getId());
+    order59.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order59);
     Order order60 = new Order();
     order60.setCardId(testOtherCardId);
@@ -1080,6 +1142,7 @@ public class AggregationRepositoryTest {
     order60.setUsed(true);
     order60.setCreatedAt(testDate13);
     order60.setShopId(shop3.getId());
+    order60.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order60);
     Order order61 = new Order();
     order61.setCardId(testOtherCardId);
@@ -1088,6 +1151,7 @@ public class AggregationRepositoryTest {
     order61.setUsed(true);
     order61.setCreatedAt(testDate13);
     order61.setShopId(shop3.getId());
+    order61.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order61);
     Order order62 = new Order();
     order62.setCardId(testOtherCardId);
@@ -1096,6 +1160,7 @@ public class AggregationRepositoryTest {
     order62.setUsed(true);
     order62.setCreatedAt(testDate13);
     order62.setShopId(shop3.getId());
+    order62.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order62);
     Order order63 = new Order();
     order63.setCardId(testOtherCardId);
@@ -1104,6 +1169,7 @@ public class AggregationRepositoryTest {
     order63.setUsed(true);
     order63.setCreatedAt(testDate13);
     order63.setShopId(shop3.getId());
+    order63.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order63);
     Order order64 = new Order();
     order64.setCardId(testOtherCardId);
@@ -1112,6 +1178,7 @@ public class AggregationRepositoryTest {
     order64.setUsed(true);
     order64.setCreatedAt(testDate13);
     order64.setShopId(shop3.getId());
+    order64.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order64);
     Order order65 = new Order();
     order65.setCardId(testOtherCardId);
@@ -1120,6 +1187,7 @@ public class AggregationRepositoryTest {
     order65.setUsed(true);
     order65.setCreatedAt(testDate13);
     order65.setShopId(shop3.getId());
+    order65.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order65);
     Order order66 = new Order();
     order66.setCardId(testOtherCardId);
@@ -1128,6 +1196,7 @@ public class AggregationRepositoryTest {
     order66.setUsed(true);
     order66.setCreatedAt(testDate13);
     order66.setShopId(shop3.getId());
+    order66.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order66);
     Order order67 = new Order();
     order67.setCardId(testOtherCardId);
@@ -1136,6 +1205,7 @@ public class AggregationRepositoryTest {
     order67.setUsed(true);
     order67.setCreatedAt(testDate13);
     order67.setShopId(shop3.getId());
+    order67.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order67);
     Order order68 = new Order();
     order68.setCardId(testOtherCardId);
@@ -1144,6 +1214,7 @@ public class AggregationRepositoryTest {
     order68.setUsed(true);
     order68.setCreatedAt(testDate13);
     order68.setShopId(shop3.getId());
+    order68.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order68);
     Order order69 = new Order();
     order69.setCardId(testOtherCardId);
@@ -1152,6 +1223,7 @@ public class AggregationRepositoryTest {
     order69.setUsed(true);
     order69.setCreatedAt(testDate14);
     order69.setShopId(shop3.getId());
+    order69.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order69);
     Order order70 = new Order();
     order70.setCardId(testOtherCardId);
@@ -1160,6 +1232,7 @@ public class AggregationRepositoryTest {
     order70.setUsed(true);
     order70.setCreatedAt(testDate14);
     order70.setShopId(shop3.getId());
+    order70.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order70);
     Order order71 = new Order();
     order71.setCardId(testOtherCardId);
@@ -1168,6 +1241,7 @@ public class AggregationRepositoryTest {
     order71.setUsed(true);
     order71.setCreatedAt(testDate14);
     order71.setShopId(shop3.getId());
+    order71.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order71);
     Order order72 = new Order();
     order72.setCardId(testOtherCardId);
@@ -1176,6 +1250,7 @@ public class AggregationRepositoryTest {
     order72.setUsed(true);
     order72.setCreatedAt(testDate14);
     order72.setShopId(shop3.getId());
+    order72.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order72);
     Order order73 = new Order();
     order73.setCardId(testOtherCardId);
@@ -1184,6 +1259,7 @@ public class AggregationRepositoryTest {
     order73.setUsed(true);
     order73.setCreatedAt(testDate14);
     order73.setShopId(shop3.getId());
+    order73.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order73);
     Order order74 = new Order();
     order74.setCardId(testOtherCardId);
@@ -1192,6 +1268,7 @@ public class AggregationRepositoryTest {
     order74.setUsed(true);
     order74.setCreatedAt(testDate14);
     order74.setShopId(shop3.getId());
+    order74.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order74);
     Order order75 = new Order();
     order75.setCardId(testOtherCardId);
@@ -1200,6 +1277,7 @@ public class AggregationRepositoryTest {
     order75.setUsed(true);
     order75.setCreatedAt(testDate14);
     order75.setShopId(shop3.getId());
+    order75.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order75);
     Order order76 = new Order();
     order76.setCardId(testOtherCardId);
@@ -1208,6 +1286,7 @@ public class AggregationRepositoryTest {
     order76.setUsed(true);
     order76.setCreatedAt(testDate14);
     order76.setShopId(shop3.getId());
+    order76.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order76);
     Order order77 = new Order();
     order77.setCardId(testOtherCardId);
@@ -1216,6 +1295,7 @@ public class AggregationRepositoryTest {
     order77.setUsed(true);
     order77.setCreatedAt(testDate14);
     order77.setShopId(shop3.getId());
+    order77.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order77);
     Order order78 = new Order();
     order78.setCardId(testOtherCardId);
@@ -1224,6 +1304,7 @@ public class AggregationRepositoryTest {
     order78.setUsed(true);
     order78.setCreatedAt(testDate14);
     order78.setShopId(shop3.getId());
+    order78.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order78);
     Order order79 = new Order();
     order79.setCardId(testOtherCardId);
@@ -1232,6 +1313,7 @@ public class AggregationRepositoryTest {
     order79.setUsed(true);
     order79.setCreatedAt(testDate14);
     order79.setShopId(shop3.getId());
+    order79.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order79);
     Order order80 = new Order();
     order80.setCardId(testOtherCardId);
@@ -1240,6 +1322,7 @@ public class AggregationRepositoryTest {
     order80.setUsed(true);
     order80.setCreatedAt(testDate14);
     order80.setShopId(shop3.getId());
+    order80.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order80);
     Order order81 = new Order();
     order81.setCardId(testOtherCardId);
@@ -1248,6 +1331,7 @@ public class AggregationRepositoryTest {
     order81.setUsed(true);
     order81.setCreatedAt(testDate15);
     order81.setShopId(shop1.getId());
+    order81.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order81);
     Order order82 = new Order();
     order82.setCardId(testOtherCardId);
@@ -1256,6 +1340,7 @@ public class AggregationRepositoryTest {
     order82.setUsed(true);
     order82.setCreatedAt(testDate15);
     order82.setShopId(shop1.getId());
+    order82.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order82);
     Order order83 = new Order();
     order83.setCardId(testOtherCardId);
@@ -1264,6 +1349,7 @@ public class AggregationRepositoryTest {
     order83.setUsed(true);
     order83.setCreatedAt(testDate15);
     order83.setShopId(shop1.getId());
+    order83.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order83);
     Order order84 = new Order();
     order84.setCardId(testOtherCardId);
@@ -1272,6 +1358,7 @@ public class AggregationRepositoryTest {
     order84.setUsed(true);
     order84.setCreatedAt(testDate15);
     order84.setShopId(shop1.getId());
+    order84.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order84);
     Order order85 = new Order();
     order85.setCardId(testOtherCardId);
@@ -1280,6 +1367,7 @@ public class AggregationRepositoryTest {
     order85.setUsed(true);
     order85.setCreatedAt(testDate15);
     order85.setShopId(shop1.getId());
+    order85.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order85);
     Order order86 = new Order();
     order86.setCardId(testOtherCardId);
@@ -1288,6 +1376,7 @@ public class AggregationRepositoryTest {
     order86.setUsed(true);
     order86.setCreatedAt(testDate15);
     order86.setShopId(shop1.getId());
+    order86.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order86);
     Order order87 = new Order();
     order87.setCardId(testOtherCardId);
@@ -1296,6 +1385,7 @@ public class AggregationRepositoryTest {
     order87.setUsed(true);
     order87.setCreatedAt(testDate15);
     order87.setShopId(shop1.getId());
+    order87.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order87);
     Order order88 = new Order();
     order88.setCardId(testOtherCardId);
@@ -1304,6 +1394,7 @@ public class AggregationRepositoryTest {
     order88.setUsed(true);
     order88.setCreatedAt(testDate15);
     order88.setShopId(shop1.getId());
+    order88.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order88);
     Order order89 = new Order();
     order89.setCardId(testOtherCardId);
@@ -1312,6 +1403,7 @@ public class AggregationRepositoryTest {
     order89.setUsed(true);
     order89.setCreatedAt(testDate15);
     order89.setShopId(shop1.getId());
+    order89.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order89);
     Order order90 = new Order();
     order90.setCardId(testOtherCardId);
@@ -1320,6 +1412,7 @@ public class AggregationRepositoryTest {
     order90.setUsed(true);
     order90.setCreatedAt(testDate15);
     order90.setShopId(shop1.getId());
+    order90.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order90);
     Order order91 = new Order();
     order91.setCardId(testOtherCardId);
@@ -1328,6 +1421,7 @@ public class AggregationRepositoryTest {
     order91.setUsed(true);
     order91.setCreatedAt(testDate15);
     order91.setShopId(shop1.getId());
+    order91.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order91);
     Order order92 = new Order();
     order92.setCardId(testOtherCardId);
@@ -1336,6 +1430,7 @@ public class AggregationRepositoryTest {
     order92.setUsed(true);
     order92.setCreatedAt(testDate15);
     order92.setShopId(shop1.getId());
+    order92.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order92);
     Order order93 = new Order();
     order93.setCardId(testOtherCardId);
@@ -1344,6 +1439,7 @@ public class AggregationRepositoryTest {
     order93.setUsed(true);
     order93.setCreatedAt(testDate15);
     order93.setShopId(shop1.getId());
+    order93.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order93);
     Order order94 = new Order();
     order94.setCardId(testOtherCardId);
@@ -1352,6 +1448,7 @@ public class AggregationRepositoryTest {
     order94.setUsed(true);
     order94.setCreatedAt(testDate16);
     order94.setShopId(shop1.getId());
+    order94.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order94);
     Order order95 = new Order();
     order95.setCardId(testOtherCardId);
@@ -1360,6 +1457,7 @@ public class AggregationRepositoryTest {
     order95.setUsed(true);
     order95.setCreatedAt(testDate16);
     order95.setShopId(shop1.getId());
+    order95.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order95);
     Order order96 = new Order();
     order96.setCardId(testOtherCardId);
@@ -1368,6 +1466,7 @@ public class AggregationRepositoryTest {
     order96.setUsed(true);
     order96.setCreatedAt(testDate16);
     order96.setShopId(shop1.getId());
+    order96.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order96);
     Order order97 = new Order();
     order97.setCardId(testOtherCardId);
@@ -1376,6 +1475,7 @@ public class AggregationRepositoryTest {
     order97.setUsed(true);
     order97.setCreatedAt(testDate16);
     order97.setShopId(shop1.getId());
+    order97.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order97);
     Order order98 = new Order();
     order98.setCardId(testOtherCardId);
@@ -1384,6 +1484,7 @@ public class AggregationRepositoryTest {
     order98.setUsed(true);
     order98.setCreatedAt(testDate16);
     order98.setShopId(shop1.getId());
+    order98.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order98);
     Order order99 = new Order();
     order99.setCardId(testOtherCardId);
@@ -1392,6 +1493,7 @@ public class AggregationRepositoryTest {
     order99.setUsed(true);
     order99.setCreatedAt(testDate16);
     order99.setShopId(shop1.getId());
+    order99.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order99);
     Order order100 = new Order();
     order100.setCardId(testOtherCardId);
@@ -1400,6 +1502,7 @@ public class AggregationRepositoryTest {
     order100.setUsed(true);
     order100.setCreatedAt(testDate16);
     order100.setShopId(shop1.getId());
+    order100.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order100);
     Order order101 = new Order();
     order101.setCardId(testOtherCardId);
@@ -1408,6 +1511,7 @@ public class AggregationRepositoryTest {
     order101.setUsed(true);
     order101.setCreatedAt(testDate16);
     order101.setShopId(shop1.getId());
+    order101.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order101);
     Order order102 = new Order();
     order102.setCardId(testOtherCardId);
@@ -1416,6 +1520,7 @@ public class AggregationRepositoryTest {
     order102.setUsed(true);
     order102.setCreatedAt(testDate16);
     order102.setShopId(shop1.getId());
+    order102.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order102);
     Order order103 = new Order();
     order103.setCardId(testOtherCardId);
@@ -1424,6 +1529,7 @@ public class AggregationRepositoryTest {
     order103.setUsed(true);
     order103.setCreatedAt(testDate16);
     order103.setShopId(shop1.getId());
+    order103.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order103);
     Order order104 = new Order();
     order104.setCardId(testOtherCardId);
@@ -1432,6 +1538,7 @@ public class AggregationRepositoryTest {
     order104.setUsed(true);
     order104.setCreatedAt(testDate16);
     order104.setShopId(shop1.getId());
+    order104.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order104);
     Order order105 = new Order();
     order105.setCardId(testOtherCardId);
@@ -1440,6 +1547,7 @@ public class AggregationRepositoryTest {
     order105.setUsed(true);
     order105.setCreatedAt(testDate16);
     order105.setShopId(shop1.getId());
+    order105.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order105);
     Order order106 = new Order();
     order106.setCardId(testOtherCardId);
@@ -1448,6 +1556,7 @@ public class AggregationRepositoryTest {
     order106.setUsed(true);
     order106.setCreatedAt(testDate16);
     order106.setShopId(shop1.getId());
+    order106.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order106);
     Order order107 = new Order();
     order107.setCardId(testOtherCardId);
@@ -1456,6 +1565,7 @@ public class AggregationRepositoryTest {
     order107.setUsed(true);
     order107.setCreatedAt(testDate16);
     order107.setShopId(shop1.getId());
+    order107.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order107);
     Order order108 = new Order();
     order108.setCardId(testOtherCardId);
@@ -1464,6 +1574,7 @@ public class AggregationRepositoryTest {
     order108.setUsed(true);
     order108.setCreatedAt(testDate17);
     order108.setShopId(shop3.getId());
+    order108.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order108);
     Order order109 = new Order();
     order109.setCardId(testOtherCardId);
@@ -1472,6 +1583,7 @@ public class AggregationRepositoryTest {
     order109.setUsed(true);
     order109.setCreatedAt(testDate17);
     order109.setShopId(shop3.getId());
+    order109.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order109);
     Order order110 = new Order();
     order110.setCardId(testOtherCardId);
@@ -1480,6 +1592,7 @@ public class AggregationRepositoryTest {
     order110.setUsed(true);
     order110.setCreatedAt(testDate17);
     order110.setShopId(shop3.getId());
+    order110.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order110);
     Order order111 = new Order();
     order111.setCardId(testOtherCardId);
@@ -1488,6 +1601,7 @@ public class AggregationRepositoryTest {
     order111.setUsed(true);
     order111.setCreatedAt(testDate17);
     order111.setShopId(shop3.getId());
+    order111.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order111);
     Order order112 = new Order();
     order112.setCardId(testOtherCardId);
@@ -1496,6 +1610,7 @@ public class AggregationRepositoryTest {
     order112.setUsed(true);
     order112.setCreatedAt(testDate17);
     order112.setShopId(shop3.getId());
+    order112.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order112);
     Order order113 = new Order();
     order113.setCardId(testOtherCardId);
@@ -1504,6 +1619,7 @@ public class AggregationRepositoryTest {
     order113.setUsed(true);
     order113.setCreatedAt(testDate17);
     order113.setShopId(shop3.getId());
+    order113.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order113);
     Order order114 = new Order();
     order114.setCardId(testOtherCardId);
@@ -1512,6 +1628,7 @@ public class AggregationRepositoryTest {
     order114.setUsed(true);
     order114.setCreatedAt(testDate17);
     order114.setShopId(shop3.getId());
+    order114.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order114);
     Order order115 = new Order();
     order115.setCardId(testOtherCardId);
@@ -1520,6 +1637,7 @@ public class AggregationRepositoryTest {
     order115.setUsed(true);
     order115.setCreatedAt(testDate17);
     order115.setShopId(shop3.getId());
+    order115.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order115);
     Order order116 = new Order();
     order116.setCardId(testOtherCardId);
@@ -1528,6 +1646,7 @@ public class AggregationRepositoryTest {
     order116.setUsed(true);
     order116.setCreatedAt(testDate17);
     order116.setShopId(shop3.getId());
+    order116.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order116);
     Order order117 = new Order();
     order117.setCardId(testOtherCardId);
@@ -1536,6 +1655,7 @@ public class AggregationRepositoryTest {
     order117.setUsed(true);
     order117.setCreatedAt(testDate17);
     order117.setShopId(shop3.getId());
+    order117.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order117);
     Order order118 = new Order();
     order118.setCardId(testOtherCardId);
@@ -1544,6 +1664,7 @@ public class AggregationRepositoryTest {
     order118.setUsed(true);
     order118.setCreatedAt(testDate17);
     order118.setShopId(shop3.getId());
+    order118.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order118);
     Order order119 = new Order();
     order119.setCardId(testOtherCardId);
@@ -1552,6 +1673,7 @@ public class AggregationRepositoryTest {
     order119.setUsed(true);
     order119.setCreatedAt(testDate17);
     order119.setShopId(shop3.getId());
+    order119.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order119);
     Order order120 = new Order();
     order120.setCardId(testOtherCardId);
@@ -1560,6 +1682,7 @@ public class AggregationRepositoryTest {
     order120.setUsed(true);
     order120.setCreatedAt(testDate17);
     order120.setShopId(shop3.getId());
+    order120.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order120);
     Order order121 = new Order();
     order121.setCardId(testOtherCardId);
@@ -1568,6 +1691,7 @@ public class AggregationRepositoryTest {
     order121.setUsed(true);
     order121.setCreatedAt(testDate17);
     order121.setShopId(shop3.getId());
+    order121.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order121);
     Order order122 = new Order();
     order122.setCardId(testOtherCardId);
@@ -1576,6 +1700,7 @@ public class AggregationRepositoryTest {
     order122.setUsed(true);
     order122.setCreatedAt(testDate17);
     order122.setShopId(shop3.getId());
+    order122.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order122);
     Order order123 = new Order();
     order123.setCardId(testOtherCardId);
@@ -1584,6 +1709,7 @@ public class AggregationRepositoryTest {
     order123.setUsed(true);
     order123.setCreatedAt(testDate18);
     order123.setShopId(shop3.getId());
+    order123.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order123);
     Order order124 = new Order();
     order124.setCardId(testOtherCardId);
@@ -1592,6 +1718,7 @@ public class AggregationRepositoryTest {
     order124.setUsed(true);
     order124.setCreatedAt(testDate18);
     order124.setShopId(shop3.getId());
+    order124.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order124);
     Order order125 = new Order();
     order125.setCardId(testOtherCardId);
@@ -1600,6 +1727,7 @@ public class AggregationRepositoryTest {
     order125.setUsed(true);
     order125.setCreatedAt(testDate18);
     order125.setShopId(shop3.getId());
+    order125.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order125);
     Order order126 = new Order();
     order126.setCardId(testOtherCardId);
@@ -1608,6 +1736,7 @@ public class AggregationRepositoryTest {
     order126.setUsed(true);
     order126.setCreatedAt(testDate18);
     order126.setShopId(shop3.getId());
+    order126.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order126);
     Order order127 = new Order();
     order127.setCardId(testOtherCardId);
@@ -1616,6 +1745,7 @@ public class AggregationRepositoryTest {
     order127.setUsed(true);
     order127.setCreatedAt(testDate18);
     order127.setShopId(shop3.getId());
+    order127.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order127);
     Order order128 = new Order();
     order128.setCardId(testOtherCardId);
@@ -1624,6 +1754,7 @@ public class AggregationRepositoryTest {
     order128.setUsed(true);
     order128.setCreatedAt(testDate18);
     order128.setShopId(shop3.getId());
+    order128.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order128);
     Order order129 = new Order();
     order129.setCardId(testOtherCardId);
@@ -1632,6 +1763,7 @@ public class AggregationRepositoryTest {
     order129.setUsed(true);
     order129.setCreatedAt(testDate18);
     order129.setShopId(shop3.getId());
+    order129.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order129);
     Order order130 = new Order();
     order130.setCardId(testOtherCardId);
@@ -1640,6 +1772,7 @@ public class AggregationRepositoryTest {
     order130.setUsed(true);
     order130.setCreatedAt(testDate18);
     order130.setShopId(shop3.getId());
+    order130.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order130);
     Order order131 = new Order();
     order131.setCardId(testOtherCardId);
@@ -1648,6 +1781,7 @@ public class AggregationRepositoryTest {
     order131.setUsed(true);
     order131.setCreatedAt(testDate18);
     order131.setShopId(shop3.getId());
+    order131.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order131);
     Order order132 = new Order();
     order132.setCardId(testOtherCardId);
@@ -1656,6 +1790,7 @@ public class AggregationRepositoryTest {
     order132.setUsed(true);
     order132.setCreatedAt(testDate18);
     order132.setShopId(shop3.getId());
+    order132.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order132);
     Order order133 = new Order();
     order133.setCardId(testOtherCardId);
@@ -1664,6 +1799,7 @@ public class AggregationRepositoryTest {
     order133.setUsed(true);
     order133.setCreatedAt(testDate18);
     order133.setShopId(shop3.getId());
+    order133.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order133);
     Order order134 = new Order();
     order134.setCardId(testOtherCardId);
@@ -1672,6 +1808,7 @@ public class AggregationRepositoryTest {
     order134.setUsed(true);
     order134.setCreatedAt(testDate18);
     order134.setShopId(shop3.getId());
+    order134.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order134);
     Order order135 = new Order();
     order135.setCardId(testOtherCardId);
@@ -1680,6 +1817,7 @@ public class AggregationRepositoryTest {
     order135.setUsed(true);
     order135.setCreatedAt(testDate18);
     order135.setShopId(shop3.getId());
+    order135.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order135);
     Order order136 = new Order();
     order136.setCardId(testOtherCardId);
@@ -1688,6 +1826,7 @@ public class AggregationRepositoryTest {
     order136.setUsed(true);
     order136.setCreatedAt(testDate18);
     order136.setShopId(shop3.getId());
+    order136.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order136);
     Order order137 = new Order();
     order137.setCardId(testOtherCardId);
@@ -1696,6 +1835,7 @@ public class AggregationRepositoryTest {
     order137.setUsed(true);
     order137.setCreatedAt(testDate18);
     order137.setShopId(shop3.getId());
+    order137.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order137);
     Order order138 = new Order();
     order138.setCardId(testOtherCardId);
@@ -1704,6 +1844,7 @@ public class AggregationRepositoryTest {
     order138.setUsed(true);
     order138.setCreatedAt(testDate18);
     order138.setShopId(shop3.getId());
+    order138.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order138);
     BlockedProduct blockedProduct1 = new BlockedProduct();
     blockedProduct1.setExpiredAt(LocalDate.now().plusYears(1));
@@ -2304,7 +2445,10 @@ public class AggregationRepositoryTest {
 
     assertTrue(
         aggregationRepository.reservedProducts(
-            reducedProducts, "sadfasbsd234", new ObjectId("123356789012345678903333")));
+            reducedProducts,
+            "sadfasbsd234",
+            new ObjectId("123356789012345678903333"),
+            new ObjectId()));
     assertEquals(
         countBeforeUpdate + countOfNewReservedProducts, reservedProductsRepository.count());
   }
@@ -2320,7 +2464,10 @@ public class AggregationRepositoryTest {
 
     assertFalse(
         aggregationRepository.reservedProducts(
-            reducedProducts, "sadfasbsd234", new ObjectId("123356789012345678903333")));
+            reducedProducts,
+            "sadfasbsd234",
+            new ObjectId("123356789012345678903333"),
+            new ObjectId()));
     assertEquals(countBeforeUpdate, reservedProductsRepository.count());
   }
 }

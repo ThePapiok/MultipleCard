@@ -190,7 +190,7 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "shopId", "_class"],
+            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId", "shopId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -221,6 +221,10 @@ db.createCollection("orders", {
                     "bsonType": "int",
                     "minimum": 0,
                     "description": "price is required and must be greater or equal 0"
+                },
+                "orderId": {
+                    "bsonType": "objectId",
+                    "description": "orderId is required and must be objectId"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -494,7 +498,7 @@ db.createCollection("reservedProducts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "encryptedIp", "promotionId", "expiredAt", "cardId", "_class"],
+            "required": ["_id", "encryptedIp", "promotionId", "orderId", "cardId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -505,6 +509,10 @@ db.createCollection("reservedProducts", {
                     "bsonType": "objectId",
                     "description": "promotionId is required and must be objectId"
                 },
+                "orderId": {
+                    "bsonType": "objectId",
+                    "description": "orderId is required and must be objectId"
+                },
                 "cardId": {
                     "bsonType": "objectId",
                     "description": "cardId is required and must be objectId"
@@ -512,10 +520,6 @@ db.createCollection("reservedProducts", {
                 "encryptedIp": {
                     "bsonType": "string",
                     "description": "encryptedIp is required and must be string"
-                },
-                "expiredAt": {
-                    "bsonType": "date",
-                    "description": "expiredAt is required and must be date"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -538,6 +542,5 @@ db.products.createIndex({"description": "text", "name": "text"}, {"default_langu
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
-db.reservedProducts.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 
 

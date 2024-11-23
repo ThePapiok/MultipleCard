@@ -13,6 +13,7 @@ public class Order {
   private ObjectId cardId;
   private ObjectId productId;
   private ObjectId shopId;
+  private ObjectId orderId;
   private LocalDateTime createdAt;
   private boolean isUsed;
   private int price;

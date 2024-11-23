@@ -26,6 +26,7 @@ public class ReservedProductsServiceTest {
   private static final String TEST_IP = "127.0.0.1";
   private static final String TEST_ENCRYPTED_IP = "safd234234dsdfasdfasdf";
   private static final ObjectId TEST_CARD_OBJECT_ID = new ObjectId(TEST_CARD_ID);
+  private static final ObjectId TEST_ORDER_ID = new ObjectId("123496789012945698901231");
   private ReservedProductService reservedProductService;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private ReservedProductsRepository reservedProductsRepository;
@@ -51,10 +52,12 @@ public class ReservedProductsServiceTest {
 
     when(passwordEncoder.encode(TEST_IP)).thenReturn(TEST_ENCRYPTED_IP);
     when(aggregationRepository.reservedProducts(
-            reducedProducts, TEST_ENCRYPTED_IP, TEST_CARD_OBJECT_ID))
+            reducedProducts, TEST_ENCRYPTED_IP, TEST_ORDER_ID, TEST_CARD_OBJECT_ID))
         .thenReturn(true);
 
-    assertTrue(reservedProductService.reservedProducts(productsInfo, TEST_IP, TEST_CARD_ID));
+    assertTrue(
+        reservedProductService.reservedProducts(
+            productsInfo, TEST_IP, TEST_ORDER_ID, TEST_CARD_ID));
   }
 
   @Test
@@ -69,10 +72,12 @@ public class ReservedProductsServiceTest {
 
     when(passwordEncoder.encode(TEST_IP)).thenReturn(TEST_ENCRYPTED_IP);
     when(aggregationRepository.reservedProducts(
-            reducedProducts, TEST_ENCRYPTED_IP, TEST_CARD_OBJECT_ID))
+            reducedProducts, TEST_ENCRYPTED_IP, TEST_ORDER_ID, TEST_CARD_OBJECT_ID))
         .thenReturn(false);
 
-    assertFalse(reservedProductService.reservedProducts(productsInfo, TEST_IP, TEST_CARD_ID));
+    assertFalse(
+        reservedProductService.reservedProducts(
+            productsInfo, TEST_IP, TEST_ORDER_ID, TEST_CARD_ID));
   }
 
   @Test

@@ -1,6 +1,5 @@
 package com.thepapiok.multiplecard.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
@@ -10,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.util.Pair;
@@ -61,17 +61,15 @@ public class ShopController {
       @RequestBody Map<String, Integer> productsId,
       @RequestParam String cardId,
       Locale locale,
-      HttpServletRequest httpServletRequest)
-      throws JsonProcessingException {
+      HttpServletRequest httpServletRequest) {
+    final ObjectId orderId = new ObjectId();
     final String ip = httpServletRequest.getRemoteAddr();
     Map<ProductInfo, Integer> productsInfo = productService.getProductsInfo(productsId);
     if (productsInfo.size() == 0) {
       return new ResponseEntity<>(
           messageSource.getMessage("makeOrder.error.bad_products", null, locale),
           HttpStatus.BAD_REQUEST);
-    }
-    String redirectUrl;
-    if (!productService.checkProductsQuantity(productsInfo)) {
+    } else if (!productService.checkProductsQuantity(productsInfo)) {
       return new ResponseEntity<>(
           messageSource.getMessage("makeOrder.error.bad_products", null, locale),
           HttpStatus.BAD_REQUEST);
@@ -83,17 +81,17 @@ public class ShopController {
       return new ResponseEntity<>(
           messageSource.getMessage("makeOrder.error.reserved_products_too_many", null, locale),
           HttpStatus.BAD_REQUEST);
-    } else if (!reservedProductService.reservedProducts(productsInfo, ip, cardId)) {
+    }
+    Pair<Boolean, String> response =
+        payUService.productsOrder(productsInfo, cardId, ip, orderId.toHexString());
+    if (!response.getFirst()) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);
+    } else if (!reservedProductService.reservedProducts(productsInfo, ip, orderId, cardId)) {
       return new ResponseEntity<>(
           messageSource.getMessage("makeOrder.error.reserved_products_already", null, locale),
           HttpStatus.BAD_REQUEST);
     }
-    Pair<Boolean, String> response = payUService.productsOrder(productsInfo, cardId, ip);
-    redirectUrl = response.getSecond();
-    if (response.getFirst()) {
-      return new ResponseEntity<>(redirectUrl, HttpStatus.OK);
-    }
-    return new ResponseEntity<>(
-        messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(response.getSecond(), HttpStatus.OK);
   }
 }

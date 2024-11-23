@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import com.thepapiok.multiplecard.services.ReservedProductService;
 import com.thepapiok.multiplecard.services.ShopService;
 import java.util.List;
 import java.util.Map;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -141,22 +143,6 @@ public class ShopControllerTest {
   }
 
   @Test
-  public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorAtReservedProducts()
-      throws Exception {
-    setProductsInfoForMakeOrder();
-
-    when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
-    when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
-        .thenReturn(true);
-    when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
-        .thenReturn(true);
-    when(reservedProductService.reservedProducts(eq(productsInfo), anyString(), eq(TEST_CARD_ID)))
-        .thenReturn(false);
-
-    performPostAtMakeOrder("Błąd podczas rezerwacji produktów", STATUS_BAD_REQUEST);
-  }
-
-  @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorMakeOrderOfProducts()
       throws Exception {
     setProductsInfoForMakeOrder();
@@ -166,12 +152,29 @@ public class ShopControllerTest {
         .thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
-    when(reservedProductService.reservedProducts(eq(productsInfo), anyString(), eq(TEST_CARD_ID)))
-        .thenReturn(true);
-    when(payUService.productsOrder(eq(productsInfo), eq(TEST_CARD_ID), anyString()))
+    when(payUService.productsOrder(eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString()))
         .thenReturn(Pair.of(false, "error"));
 
     performPostAtMakeOrder("Nieoczekiwany błąd", STATUS_BAD_REQUEST);
+  }
+
+  @Test
+  public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorAtReservedProducts()
+      throws Exception {
+    setProductsInfoForMakeOrder();
+
+    when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
+        .thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
+        .thenReturn(true);
+    when(payUService.productsOrder(eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString()))
+        .thenReturn(Pair.of(true, "pay.com"));
+    when(reservedProductService.reservedProducts(
+            eq(productsInfo), anyString(), any(ObjectId.class), eq(TEST_CARD_ID)))
+        .thenReturn(false);
+
+    performPostAtMakeOrder("Błąd podczas rezerwacji produktów", STATUS_BAD_REQUEST);
   }
 
   @Test
@@ -184,10 +187,11 @@ public class ShopControllerTest {
         .thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
-    when(reservedProductService.reservedProducts(eq(productsInfo), anyString(), eq(TEST_CARD_ID)))
-        .thenReturn(true);
-    when(payUService.productsOrder(eq(productsInfo), eq(TEST_CARD_ID), anyString()))
+    when(payUService.productsOrder(eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString()))
         .thenReturn(Pair.of(true, "payu.com"));
+    when(reservedProductService.reservedProducts(
+            eq(productsInfo), anyString(), any(ObjectId.class), eq(TEST_CARD_ID)))
+        .thenReturn(true);
 
     performPostAtMakeOrder("payu.com", statusOk);
   }

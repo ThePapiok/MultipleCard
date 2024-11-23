@@ -35,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 public class PayUServiceTest {
   private static final String TEST_IP = "127.0.0.1";
   private static final String TEST_CARD_ID = "123456789012345678901234";
+  private static final String TEST_ORDER_ID = "593456189012345678901231";
   private static final String NAME_PARAM = "name";
   private static final String UNIT_PRICE_PARAM = "unitPrice";
   private static final String QUANTITY_PARAM = "quantity";
@@ -102,6 +103,7 @@ public class PayUServiceTest {
     headersOrder.setBearerAuth(testBearerToken);
     headersOrder.setContentType(MediaType.APPLICATION_JSON);
     Map<String, Object> dataOrder = new HashMap<>();
+    dataOrder.put("extOrderId", TEST_ORDER_ID);
     dataOrder.put("notifyUrl", "nullbuy_products");
     dataOrder.put("continueUrl", null);
     dataOrder.put("customerIp", TEST_IP);
@@ -125,7 +127,9 @@ public class PayUServiceTest {
             String.class))
         .thenReturn(expectedResponseForOrder);
 
-    assertEquals(expectedPair, payUService.productsOrder(productsInfo, TEST_CARD_ID, TEST_IP));
+    assertEquals(
+        expectedPair,
+        payUService.productsOrder(productsInfo, TEST_CARD_ID, TEST_IP, TEST_ORDER_ID));
   }
 
   @Test
@@ -170,6 +174,7 @@ public class PayUServiceTest {
     headersOrder.setBearerAuth(testBearerToken);
     headersOrder.setContentType(MediaType.APPLICATION_JSON);
     Map<String, Object> dataOrder = new HashMap<>();
+    dataOrder.put("extOrderId", TEST_ORDER_ID);
     dataOrder.put("notifyUrl", "nullbuy_products");
     dataOrder.put("continueUrl", null);
     dataOrder.put("customerIp", TEST_IP);
@@ -191,7 +196,9 @@ public class PayUServiceTest {
             String.class))
         .thenThrow(RuntimeException.class);
 
-    assertEquals(expectedPair, payUService.productsOrder(productsInfo, TEST_CARD_ID, TEST_IP));
+    assertEquals(
+        expectedPair,
+        payUService.productsOrder(productsInfo, TEST_CARD_ID, TEST_IP, TEST_ORDER_ID));
   }
 
   @Test

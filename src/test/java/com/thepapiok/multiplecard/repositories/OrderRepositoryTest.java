@@ -25,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 public class OrderRepositoryTest {
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId("123456789012345678901234");
   private static final ObjectId TEST_SHOP_ID = new ObjectId("123456789012345178901231");
+  private static final ObjectId TEST_ORDER_ID = new ObjectId("563456789012345178901231");
   private Order order1;
   private Order order2;
 
@@ -59,6 +60,7 @@ public class OrderRepositoryTest {
     order1.setProductId(TEST_PRODUCT_ID);
     order1.setCardId(testCardId);
     order1.setShopId(TEST_SHOP_ID);
+    order1.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order1);
     order2 = new Order();
     order2.setUsed(false);
@@ -67,6 +69,7 @@ public class OrderRepositoryTest {
     order2.setProductId(TEST_PRODUCT_ID);
     order2.setCardId(testCardId);
     order2.setShopId(TEST_SHOP_ID);
+    order2.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order2);
     Order order3 = new Order();
     order3.setUsed(true);
@@ -75,6 +78,7 @@ public class OrderRepositoryTest {
     order3.setProductId(TEST_PRODUCT_ID);
     order3.setCardId(testCardId);
     order3.setShopId(TEST_SHOP_ID);
+    order3.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order3);
     Order order4 = new Order();
     order4.setUsed(true);
@@ -83,6 +87,7 @@ public class OrderRepositoryTest {
     order4.setProductId(testProduct2Id);
     order4.setCardId(testCardId);
     order4.setShopId(TEST_SHOP_ID);
+    order4.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order4);
   }
 

@@ -27,13 +27,14 @@ public class ReservedProductService {
     this.aggregationRepository = aggregationRepository;
   }
 
-  public boolean reservedProducts(Map<ProductInfo, Integer> products, String ip, String cardId) {
+  public boolean reservedProducts(
+      Map<ProductInfo, Integer> products, String ip, ObjectId orderId, String cardId) {
     final Map<ObjectId, Integer> reducedProducts =
         products.entrySet().stream()
             .filter(e -> e.getKey().isHasPromotion())
             .collect(Collectors.toMap(e -> e.getKey().getProductId(), Map.Entry::getValue));
     return aggregationRepository.reservedProducts(
-        reducedProducts, passwordEncoder.encode(ip), new ObjectId(cardId));
+        reducedProducts, passwordEncoder.encode(ip), orderId, new ObjectId(cardId));
   }
 
   public boolean checkReservedProductsIsLessThan100ByCardId(String cardId) {

@@ -57,7 +57,7 @@ public class PayUService {
   }
 
   public Pair<Boolean, String> productsOrder(
-      Map<ProductInfo, Integer> productsId, String cardId, String ip) {
+      Map<ProductInfo, Integer> productsId, String cardId, String ip, String orderId) {
     try {
       final int maxTimeForOrderInSeconds = 900;
       ObjectId productId;
@@ -69,6 +69,7 @@ public class PayUService {
       headers.setBearerAuth(getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
       Map<String, Object> data = new HashMap<>();
+      data.put("extOrderId", orderId);
       data.put("notifyUrl", appUrl + "buy_products");
       data.put("continueUrl", appUrl);
       data.put("customerIp", ip);

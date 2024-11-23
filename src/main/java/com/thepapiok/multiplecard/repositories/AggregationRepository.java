@@ -16,7 +16,6 @@ import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.CustomProjectAggregationOperation;
 import com.thepapiok.multiplecard.misc.ProductInfo;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -696,30 +695,30 @@ public class AggregationRepository {
   }
 
   public boolean reservedProducts(
-      Map<ObjectId, Integer> reducedProducts, String encryptedIp, ObjectId cardId) {
+      Map<ObjectId, Integer> reducedProducts,
+      String encryptedIp,
+      ObjectId orderId,
+      ObjectId cardId) {
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
       transactionTemplate.execute(
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-              final int maxTimeForReservedProductInMinutes = 20;
               ObjectId productId;
-              LocalDateTime localDateTime;
               ObjectId promotionId;
               for (Map.Entry<ObjectId, Integer> entry : reducedProducts.entrySet()) {
                 productId = entry.getKey();
                 if (!promotionRepository.existsByProductIdAndQuantityIsNotNull(productId)) {
                   continue;
                 }
-                localDateTime = LocalDateTime.now().plusMinutes(maxTimeForReservedProductInMinutes);
                 promotionId = promotionRepository.findIdByProductId(productId).getId();
                 for (int i = 1; i <= entry.getValue(); i++) {
                   ReservedProduct reservedProduct = new ReservedProduct();
-                  reservedProduct.setCardId(cardId);
                   reservedProduct.setEncryptedIp(encryptedIp);
                   reservedProduct.setPromotionId(promotionId);
-                  reservedProduct.setExpiredAt(localDateTime);
+                  reservedProduct.setOrderId(orderId);
+                  reservedProduct.setCardId(cardId);
                   mongoTemplate.save(reservedProduct);
                 }
                 if (promotionRepository.findQuantityById(promotionId).getQuantity()
