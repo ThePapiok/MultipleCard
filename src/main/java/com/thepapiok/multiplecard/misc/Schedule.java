@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.misc;
 
 import com.thepapiok.multiplecard.collections.BlockedProduct;
+import com.thepapiok.multiplecard.repositories.BlockedIpRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.services.ProductService;
 import java.time.LocalDate;
@@ -14,12 +15,16 @@ import org.springframework.web.client.RestTemplate;
 @Profile("prod")
 public class Schedule {
   private final BlockedProductRepository blockedProductRepository;
+  private final BlockedIpRepository blockedIpRepository;
   private final ProductService productService;
 
   @Autowired
   public Schedule(
-      BlockedProductRepository blockedProductRepository, ProductService productService) {
+      BlockedProductRepository blockedProductRepository,
+      BlockedIpRepository blockedIpRepository,
+      ProductService productService) {
     this.blockedProductRepository = blockedProductRepository;
+    this.blockedIpRepository = blockedIpRepository;
     this.productService = productService;
   }
 
@@ -37,5 +42,6 @@ public class Schedule {
         blockedProductRepository.findAllByExpiredAtIsBefore(LocalDate.now())) {
       productService.deleteProduct(blockedProduct.getProductId().toString());
     }
+    blockedIpRepository.deleteAll();
   }
 }

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.services.BlockedIpService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReservedProductService;
@@ -45,6 +46,7 @@ public class ShopControllerTest {
   @MockBean private ProductService productService;
   @MockBean private ReservedProductService reservedProductService;
   @MockBean private PayUService payUService;
+  @MockBean private BlockedIpService blockedIpService;
 
   @Test
   public void shouldReturnListOfShopNamesAtGetShopNamesWhenEverythingOk() throws Exception {
@@ -83,6 +85,15 @@ public class ShopControllerTest {
   }
 
   @Test
+  public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenBlockedIp() throws Exception {
+    setProductsInfoForMakeOrder();
+
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(false);
+
+    performPostAtMakeOrder("Zbyt dużo anulowanych transakcji, spróbuj jutro", STATUS_BAD_REQUEST);
+  }
+
+  @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenBadSizeOfProducts()
       throws Exception {
     final String productInfoJSON =
@@ -101,6 +112,7 @@ public class ShopControllerTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
     when(productService.getProductsInfo(productsJSON)).thenReturn(products);
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(products)).thenReturn(false);
 
     MvcResult result =
@@ -120,6 +132,7 @@ public class ShopControllerTest {
       throws Exception {
     setProductsInfoForMakeOrder();
 
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(false);
@@ -133,6 +146,7 @@ public class ShopControllerTest {
           throws Exception {
     setProductsInfoForMakeOrder();
 
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(true);
@@ -147,6 +161,7 @@ public class ShopControllerTest {
       throws Exception {
     setProductsInfoForMakeOrder();
 
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(true);
@@ -163,6 +178,7 @@ public class ShopControllerTest {
       throws Exception {
     setProductsInfoForMakeOrder();
 
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(true);
@@ -182,6 +198,7 @@ public class ShopControllerTest {
     final int statusOk = 200;
     setProductsInfoForMakeOrder();
 
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
     when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(true);

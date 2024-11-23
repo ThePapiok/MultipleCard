@@ -530,6 +530,42 @@ db.createCollection("reservedProducts", {
         }
     }
 });
+db.createCollection("blockedIps", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "encryptedIp", "amount", "attempts", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "encryptedIp": {
+                    "bsonType": "string",
+                    "description": "encryptedIp is required and must be string"
+                },
+                "amount": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "description": "amount is required and must be between 0 and 200"
+                },
+                "attempts": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "description": "attempts is required and must be between 0 and 3"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});

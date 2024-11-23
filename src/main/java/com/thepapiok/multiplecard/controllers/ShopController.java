@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.services.BlockedIpService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReservedProductService;
@@ -27,6 +28,7 @@ public class ShopController {
   private final ShopService shopService;
   private final ProductService productService;
   private final ReservedProductService reservedProductService;
+  private final BlockedIpService blockedIpService;
   private final PayUService payUService;
   private final MessageSource messageSource;
 
@@ -35,11 +37,13 @@ public class ShopController {
       ShopService shopService,
       ProductService productService,
       ReservedProductService reservedProductService,
+      BlockedIpService blockedIpService,
       PayUService payUService,
       MessageSource messageSource) {
     this.shopService = shopService;
     this.productService = productService;
     this.reservedProductService = reservedProductService;
+    this.blockedIpService = blockedIpService;
     this.payUService = payUService;
     this.messageSource = messageSource;
   }
@@ -68,6 +72,10 @@ public class ShopController {
     if (productsInfo.size() == 0) {
       return new ResponseEntity<>(
           messageSource.getMessage("makeOrder.error.bad_products", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!blockedIpService.checkIpIsNotBlocked(ip)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("makeOrder.error.ip_blocked", null, locale),
           HttpStatus.BAD_REQUEST);
     } else if (!productService.checkProductsQuantity(productsInfo)) {
       return new ResponseEntity<>(
