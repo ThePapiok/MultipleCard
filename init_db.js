@@ -566,6 +566,34 @@ db.createCollection("blockedIps", {
         }
     }
 });
+db.createCollection("refunds", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "orderId", "isRefunded", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "orderId": {
+                    "bsonType": "string",
+                    "description": "orderId is required and must be string"
+                },
+                "isRefunded": {
+                    "bsonType": "bool",
+                    "description": "isRefunded is required and must be bool"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
@@ -578,5 +606,6 @@ db.products.createIndex({"description": "text", "name": "text"}, {"default_langu
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
+db.refunds.createIndex({"orderId": 1}, {"unique": true});
 
 
