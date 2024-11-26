@@ -45,6 +45,7 @@ public class AggregationRepository {
   private static final String PROMOTION_FIELD = "promotion";
   private static final String SHOP_ID_FIELD = "shopId";
   private static final String SHOP_FIELD = "shop";
+  private static final String PROMOTIONS_FIELD = "promotions";
   private final AccountRepository accountRepository;
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
@@ -76,7 +77,7 @@ public class AggregationRepository {
     final int countReviewsAtPage = 12;
     final String createdAtField = "order.createdAt";
     final String dateField = "date";
-    final String priceField = "price";
+    final String realPriceField = "realPrice";
     final String updatedAtField = "updatedAt";
     final String isNullField = "isNull";
     final String productField = "product";
@@ -116,9 +117,9 @@ public class AggregationRepository {
         break;
       case "price":
         if (isDescending) {
-          sortOperation = Aggregation.sort(Sort.by(priceField).descending());
+          sortOperation = Aggregation.sort(Sort.by(realPriceField).descending());
         } else {
-          sortOperation = Aggregation.sort(Sort.by(priceField).ascending());
+          sortOperation = Aggregation.sort(Sort.by(realPriceField).ascending());
         }
         break;
       case "added":
@@ -179,7 +180,22 @@ public class AggregationRepository {
       stages.add(sortOperation);
       stages.add(lookup(PRODUCTS_COLLECTION, ID_FIELD, ID_FIELD, productField));
       stages.add(unwind(productField, true));
+      stages.add(lookup(PROMOTIONS_FIELD, ID_FIELD, PRODUCT_ID_FIELD, PROMOTION_FIELD));
+      stages.add(unwind(PROMOTION_FIELD, true));
     } else {
+      stages.add(lookup(PROMOTIONS_FIELD, ID_FIELD, PRODUCT_ID_FIELD, PROMOTION_FIELD));
+      stages.add(unwind(PROMOTION_FIELD, true));
+      stages.add(
+          new CustomProjectAggregationOperation(
+              """
+            {
+              $addFields: {
+                "realPrice": {
+                  $ifNull: ["$promotion.newPrice", "$price"]
+                }
+              }
+            }
+            """));
       stages.add(sortOperation);
       stages.add(
           new CustomProjectAggregationOperation(
@@ -209,13 +225,12 @@ public class AggregationRepository {
                                         "product.price": 1,
                                         "product.shopId": 1,
                                         "product.updatedAt": 1,
-                                        "product._class": 1
+                                        "product._class": 1,
+                                        "promotion": 1
                                       }
                                     }
                                     """));
     }
-    stages.add(lookup("promotions", ID_FIELD, PRODUCT_ID_FIELD, PROMOTION_FIELD));
-    stages.add(unwind(PROMOTION_FIELD, true));
     if (phone != null) {
       stages.add(lookup(BLOCKED_FIELD, ID_FIELD, PRODUCT_ID_FIELD, BLOCKED_FIELD));
       stages.add(unwind(BLOCKED_FIELD, true));
@@ -437,7 +452,7 @@ public class AggregationRepository {
                                               }
                                             """));
         } else {
-          stages.add(lookup("promotions", ID_FIELD, PRODUCT_ID_FIELD, PROMOTION_FIELD));
+          stages.add(lookup(PROMOTIONS_FIELD, ID_FIELD, PRODUCT_ID_FIELD, PROMOTION_FIELD));
           stages.add(unwind(PROMOTION_FIELD, true));
           stages.add(
               new CustomProjectAggregationOperation(
@@ -734,6 +749,3 @@ public class AggregationRepository {
     return true;
   }
 }
-
-// TODO - don't reset basket
-// TODO - apply promotion for the lowest..

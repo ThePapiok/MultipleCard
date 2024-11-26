@@ -104,6 +104,7 @@ public class AggregationRepositoryTest {
     final int testPromotion1NewPrice = 100;
     final int testPromotion2NewPrice = 1200;
     final int testPromotion3NewPrice = 5;
+    final int testPromotion4NewPrice = 2;
     final int testYearStartAtPromotion1 = 2024;
     final int testMonthStartAtPromotion1 = 5;
     final int testDayStartAtPromotion1 = 3;
@@ -529,7 +530,7 @@ public class AggregationRepositoryTest {
     promotion3 = mongoTemplate.save(promotion3);
     Promotion promotion4 = new Promotion();
     promotion4.setProductId(product7.getId());
-    promotion4.setNewPrice(testPromotion3NewPrice);
+    promotion4.setNewPrice(testPromotion4NewPrice);
     promotion4.setQuantity(1);
     promotion4.setStartAt(
         LocalDate.of(
@@ -2085,7 +2086,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsDescendingWithoutText() {
     assertEquals(
-        List.of(productDTO1, productDTO3, productDTO14, productDTO15),
+        List.of(productDTO3, productDTO1, productDTO14, productDTO15),
         aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, true, "", "", ""));
   }
 
@@ -2093,7 +2094,7 @@ public class AggregationRepositoryTest {
   public void
       shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsAscendingWithoutText() {
     assertEquals(
-        List.of(productDTO15, productDTO14, productDTO3, productDTO1),
+        List.of(productDTO15, productDTO14, productDTO1, productDTO3),
         aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, false, "", "", ""));
   }
 
@@ -2206,8 +2207,8 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsDescendingWithoutText() {
     assertEquals(
         List.of(
-            productDTO1,
             productDTO2,
+            productDTO1,
             productDTO14,
             productDTO10,
             productDTO17,
@@ -2216,8 +2217,8 @@ public class AggregationRepositoryTest {
             productDTO11,
             productDTO9,
             productDTO8,
-            productDTO7,
-            productDTO5),
+            productDTO5,
+            productDTO4),
         aggregationRepository.getProducts(null, 0, PRICE_FIELD, true, "", "", ""));
   }
 
@@ -2226,9 +2227,9 @@ public class AggregationRepositoryTest {
       shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsAscendingWithoutText() {
     assertEquals(
         List.of(
+            productDTO7,
             productDTO4,
             productDTO5,
-            productDTO7,
             productDTO8,
             productDTO9,
             productDTO11,
@@ -2237,7 +2238,7 @@ public class AggregationRepositoryTest {
             productDTO17,
             productDTO10,
             productDTO14,
-            productDTO2),
+            productDTO1),
         aggregationRepository.getProducts(null, 0, PRICE_FIELD, false, "", "", ""));
   }
 
