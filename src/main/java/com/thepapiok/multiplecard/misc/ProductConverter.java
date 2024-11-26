@@ -24,7 +24,7 @@ public class ProductConverter {
     product.setBarcode(addProductDTO.getBarcode());
     product.setName(addProductDTO.getName());
     product.setDescription(addProductDTO.getDescription());
-    product.setAmount((int) (Double.parseDouble(addProductDTO.getAmount()) * centsPerZl));
+    product.setPrice((int) (Double.parseDouble(addProductDTO.getPrice()) * centsPerZl));
     return product;
   }
 
@@ -39,13 +39,13 @@ public class ProductConverter {
     product.setBarcode(editProductDTO.getBarcode());
     product.setName(editProductDTO.getName());
     product.setDescription(editProductDTO.getDescription());
-    product.setAmount((int) (Double.parseDouble(editProductDTO.getAmount()) * centsPerZl));
+    product.setPrice((int) (Double.parseDouble(editProductDTO.getPrice()) * centsPerZl));
     return product;
   }
 
   public EditProductDTO getDTO(Product product) {
     EditProductDTO editProductDTO = new EditProductDTO();
-    editProductDTO.setAmount(String.valueOf(product.getAmount()));
+    editProductDTO.setPrice(String.valueOf(product.getPrice()));
     editProductDTO.setName(product.getName());
     editProductDTO.setDescription(product.getDescription());
     editProductDTO.setImageUrl(product.getImageUrl());

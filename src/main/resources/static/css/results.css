@@ -116,7 +116,7 @@
     display: none;
 }
 
-#noResults[data-results-size="0"] {
+#noResults[data-results-empty="true"] {
     display: block;
 }
 

@@ -40,19 +40,8 @@ public class ReviewControllerTest {
   private static final String REVIEWS_URL = "/reviews";
   private static final String DESCRIPTION_PARAM = "description";
   private static final String RATING_PARAM = "rating";
-  private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-  private static final String LANDING_PAGE_ERROR_URL = "/?error";
-  private static final String TEST_DESCRIPTION2 = "123sdfasdfasdfsaf1 test";
-  private static final String REVIEWS_PAGE = "reviewPage";
-  private static final String REVIEWS_PARAM = "reviews";
-  private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
-  private static final String PRINCIPAL_PARAM = "principal";
-  private static final String PAGE_PARAM = "page";
   private static final String FIELD_PARAM = "field";
-  private static final String TEXT_PARAM = "text";
   private static final String IS_DESCENDING_PARAM = "isDescending";
-  private static final String PAGES_PARAM = "pages";
-  private static final String PAGE_SELECTED_PARAM = "pageSelected";
   private static final String TEST_PAGE = "1";
   private static final String TEST_FIELD = "count";
   private static final String TEST_TEXT = "test";
@@ -98,8 +87,8 @@ public class ReviewControllerTest {
                 .param(DESCRIPTION_PARAM, reviewDTO.getDescription())
                 .param(RATING_PARAM, String.valueOf(rating))
                 .session(httpSession))
-        .andExpect(redirectedUrl(LANDING_PAGE_ERROR_URL));
-    assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+        .andExpect(redirectedUrl("/?error"));
+    assertEquals(message, httpSession.getAttribute("errorMessage"));
   }
 
   @Test
@@ -121,8 +110,8 @@ public class ReviewControllerTest {
                 .param(DESCRIPTION_PARAM, reviewDTO.getDescription())
                 .param(RATING_PARAM, String.valueOf(rating))
                 .session(httpSession))
-        .andExpect(redirectedUrl(LANDING_PAGE_ERROR_URL));
-    assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+        .andExpect(redirectedUrl("/?error"));
+    assertEquals(message, httpSession.getAttribute("errorMessage"));
   }
 
   @Test
@@ -171,10 +160,10 @@ public class ReviewControllerTest {
     mockMvc
         .perform(
             get(REVIEWS_URL)
-                .param(PAGE_PARAM, TEST_PAGE)
+                .param("page", TEST_PAGE)
                 .param(FIELD_PARAM, TEST_FIELD)
                 .param(IS_DESCENDING_PARAM, TRUE_TEXT)
-                .param(TEXT_PARAM, TEST_TEXT))
+                .param("text", TEST_TEXT))
         .andExpect(model().attribute("yourReview", reviewGetDTO1));
   }
 
@@ -190,7 +179,7 @@ public class ReviewControllerTest {
     Review review1 = new Review();
     review1.setDescription(TEST_DESCRIPTION1);
     Review review2 = new Review();
-    review2.setDescription(TEST_DESCRIPTION2);
+    review2.setDescription("123sdfasdfasdfsaf1 test");
     ReviewGetDTO reviewGetDTO1 = new ReviewGetDTO();
     reviewGetDTO1.setReview(review1);
     reviewGetDTO1.setCount(count1);
@@ -208,18 +197,18 @@ public class ReviewControllerTest {
     mockMvc
         .perform(
             get(REVIEWS_URL)
-                .param(PAGE_PARAM, TEST_PAGE)
+                .param("page", TEST_PAGE)
                 .param(FIELD_PARAM, TEST_FIELD)
                 .param(IS_DESCENDING_PARAM, TRUE_TEXT)
-                .param(TEXT_PARAM, TEST_TEXT))
+                .param("text", TEST_TEXT))
         .andExpect(model().attribute(FIELD_PARAM, TEST_FIELD))
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
-        .andExpect(model().attribute(PAGES_PARAM, pages))
-        .andExpect(model().attribute(PAGE_SELECTED_PARAM, testPageInt + 1))
-        .andExpect(model().attribute(REVIEWS_PARAM, expectedReviews))
-        .andExpect(model().attribute(REVIEWS_SIZE_PARAM, expectedReviews.size()))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
+        .andExpect(model().attribute("pages", pages))
+        .andExpect(model().attribute("pageSelected", testPageInt + 1))
+        .andExpect(model().attribute("reviews", expectedReviews))
+        .andExpect(model().attribute("reviewsEmpty", expectedReviews.size() == 0))
+        .andExpect(model().attribute("principal", principal))
         .andExpect(model().attribute("maxPage", 1))
-        .andExpect(view().name(REVIEWS_PAGE));
+        .andExpect(view().name("reviewPage"));
   }
 }

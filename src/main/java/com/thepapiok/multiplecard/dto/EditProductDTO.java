@@ -38,5 +38,5 @@ public class EditProductDTO {
   @NotNull
   @Size(min = 5, max = 9)
   @Pattern(regexp = "^[0-9]*\\.[0-9]{2}zł$")
-  private String amount;
+  private String price;
 }

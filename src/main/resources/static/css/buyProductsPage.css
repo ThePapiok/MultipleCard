@@ -1,0 +1,129 @@
+.resultIcons {
+    position: relative;
+    top: 5px;
+}
+
+.basketImage {
+    height: 100%;
+}
+
+.basketUrl {
+    height: 100%;
+    width: 40px;
+}
+
+#notEmptyBasket {
+    cursor: pointer;
+    display: block;
+}
+
+#emptyBasket {
+    display: none;
+}
+
+#basket {
+    padding-left: 5px;
+    position: relative;
+    width: 40px;
+}
+
+#basketQuantity[data-empty="true"] ~ #emptyBasket {
+    display: block;
+}
+
+#basketQuantity[data-empty="true"] ~ #notEmptyBasket {
+    display: none;
+}
+
+#basketQuantity {
+    position: absolute;
+    left: 30px;
+    top: 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.imageContainer {
+    cursor: auto;
+}
+
+.result-vertical {
+    justify-content: normal;
+}
+
+#searchBar {
+    width: 95%;
+}
+
+#searchInput {
+    width: 25%;
+}
+
+.select {
+    width: 25%;
+}
+
+#categoryInput, #shopNameInput {
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    font-family: "Inter", cursive;
+    font-size: 20px;
+    padding-left: 10px;
+    font-weight: 700;
+    border: 1px solid #B3B6B7;
+}
+
+.options {
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    background-color: white;
+    border: 1px solid gray;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.option {
+    cursor: pointer;
+    list-style-type: none;
+    font-size: 20px;
+    font-family: "Inter", sans-serif;
+    padding-left: 5px;
+}
+
+.option:hover {
+    background-color: gray;
+}
+
+#errorCardNotFound {
+    margin-left: 5%;
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+    #basketQuantity {
+        font-size: 13px;
+        top: 23px;
+        left: 33px;
+    }
+
+    #searchInput {
+        font-size: 10px;
+    }
+
+    #categoryInput {
+        padding: 1px;
+        font-size: 10px;
+    }
+
+    #shopNameInput {
+        padding: 1px;
+        font-size: 7px;
+    }
+
+}

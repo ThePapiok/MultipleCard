@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class OrderCardDTOTest {
-  private static final String NAME_PARAM = "name";
   private static final String PIN_PARAM = "pin";
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
@@ -36,7 +35,7 @@ public class OrderCardDTOTest {
     orderCardDTO.setName("daZż0dz1Ń");
 
     Set<ConstraintViolation<OrderCardDTO>> violations =
-        validator.validateProperty(orderCardDTO, NAME_PARAM);
+        validator.validateProperty(orderCardDTO, "name");
     assertTrue(violations.isEmpty());
   }
 
@@ -46,7 +45,7 @@ public class OrderCardDTOTest {
     orderCardDTO.setName("daZż0dz!Ń");
 
     Set<ConstraintViolation<OrderCardDTO>> violations =
-        validator.validateProperty(orderCardDTO, NAME_PARAM);
+        validator.validateProperty(orderCardDTO, "name");
     assertFalse(violations.isEmpty());
   }
 

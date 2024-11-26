@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class AuthenticationAspect {
-
   @Before(
       "execution(* com.thepapiok.multiplecard.controllers.AuthenticationController.createUser(..))")
   public void removeWhiteSpaceRegister(JoinPoint joinPoint) {

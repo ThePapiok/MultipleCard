@@ -23,35 +23,35 @@ import org.mockito.MockitoAnnotations;
 public class PromotionServiceTest {
   private static final String TEST_ID = "123456789012345678901234";
   private static final ObjectId TEST_PRODUCT_ID = new ObjectId(TEST_ID);
+  private Promotion expectedPromotion;
   @Mock private PromotionRepository promotionRepository;
   @Mock private PromotionConverter promotionConverter;
   private PromotionService promotionService;
-  private Promotion expectedPromotion;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     promotionService = new PromotionService(promotionRepository, promotionConverter);
-    final int amount = 500;
+    final int testNewPrice = 500;
     final int testYearOfExpiredAt = 2025;
     final int testMonthOfExpiredAt = 2;
     final int testDayOfExpiredAt = 2;
     expectedPromotion = new Promotion();
     expectedPromotion.setId(new ObjectId("029956781012345678403259"));
     expectedPromotion.setProductId(TEST_PRODUCT_ID);
-    expectedPromotion.setAmount(amount);
+    expectedPromotion.setNewPrice(testNewPrice);
     expectedPromotion.setStartAt(LocalDate.now());
     expectedPromotion.setExpiredAt(
         LocalDate.of(testYearOfExpiredAt, testMonthOfExpiredAt, testDayOfExpiredAt));
-    expectedPromotion.setCount(0);
+    expectedPromotion.setQuantity(0);
   }
 
   @Test
   public void shouldReturnPromotionDTOAtGetPromotionDTOWhenEverythingOk() {
     PromotionDTO expectedPromotionDTO = new PromotionDTO();
     expectedPromotionDTO.setProductId(expectedPromotion.getProductId().toString());
-    expectedPromotionDTO.setAmount(String.valueOf(expectedPromotion.getAmount()));
-    expectedPromotionDTO.setCount(String.valueOf(expectedPromotion.getCount()));
+    expectedPromotionDTO.setNewPrice(String.valueOf(expectedPromotion.getNewPrice()));
+    expectedPromotionDTO.setQuantity(String.valueOf(expectedPromotion.getQuantity()));
     expectedPromotionDTO.setStartAt(expectedPromotion.getStartAt());
     expectedPromotionDTO.setExpiredAt(expectedPromotion.getExpiredAt());
 
@@ -118,8 +118,8 @@ public class PromotionServiceTest {
   public void shouldReturnTrueAtUpsertPromotionWhenEverythingOk() {
     PromotionDTO promotionDTO = new PromotionDTO();
     promotionDTO.setProductId(expectedPromotion.getProductId().toString());
-    promotionDTO.setAmount(String.valueOf(expectedPromotion.getAmount()));
-    promotionDTO.setCount(String.valueOf(expectedPromotion.getCount()));
+    promotionDTO.setNewPrice(String.valueOf(expectedPromotion.getNewPrice()));
+    promotionDTO.setQuantity(String.valueOf(expectedPromotion.getQuantity()));
     promotionDTO.setStartAt(expectedPromotion.getStartAt());
     promotionDTO.setExpiredAt(expectedPromotion.getExpiredAt());
 
@@ -133,8 +133,8 @@ public class PromotionServiceTest {
   public void shouldReturnTrueAtUpsertPromotionWhenGetException() {
     PromotionDTO promotionDTO = new PromotionDTO();
     promotionDTO.setProductId(expectedPromotion.getProductId().toString());
-    promotionDTO.setAmount(String.valueOf(expectedPromotion.getAmount()));
-    promotionDTO.setCount(String.valueOf(expectedPromotion.getCount()));
+    promotionDTO.setNewPrice(String.valueOf(expectedPromotion.getNewPrice()));
+    promotionDTO.setQuantity(String.valueOf(expectedPromotion.getQuantity()));
     promotionDTO.setStartAt(expectedPromotion.getStartAt());
     promotionDTO.setExpiredAt(expectedPromotion.getExpiredAt());
 

@@ -57,31 +57,19 @@ public class ProfileControllerTest {
   private static final String POSTAL_CODE_PARAM = "postalCode";
   private static final String CITY_PARAM = "city";
   private static final String COUNTRY_PARAM = "country";
-  private static final String PROFILE_PARAM = "profile";
-  private static final String CODE_PARAM = "code";
-  private static final String FILE_PATH_PARAM = "filePath";
-  private static final String RETYPED_PASSWORD_PARAM = "retypedPassword";
-  private static final String PASSWORD_PARAM = "password";
-  private static final String OLD_PASSWORD_PARAM = "oldPassword";
   private static final String COUNTRIES_PARAM = "countries";
-  private static final String USER_URL = "/user";
   private static final String SHOP_URL = "/shop";
   private static final String PROFILE_URL = "/profile";
-  private static final String LOGIN_SUCCESS_URL = "/login?success";
   private static final String PASSWORD_CHANGE_URL = "/password_change";
   private static final String EDIT_PROFILE_URL = "/edit_profile";
   private static final String EDIT_PROFILE_ERROR_URL = "/edit_profile?error";
   private static final String PROFILE_ERROR_URL = "/profile?error";
-  private static final String PROFILE_SUCCESS_URL = "/profile?success";
   private static final String DELETE_ACCOUNT_URL = "/delete_account";
-  private static final String DELETE_ACCOUNT_ERROR_URL = "/delete_account?error";
   private static final String DELETE_ACCOUNT_PAGE = "deleteAccountPage";
-  private static final String PROFILE_PAGE = "profilePage";
   private static final String EDIT_PROFILE_PAGE = "editProfilePage";
   private static final String EDIT_PROFILE_SHOP_PAGE = "editProfileShopPage";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
-  private static final String CARD_PARAM = "card";
   private static final String EDIT_PARAM = "edit";
   private static final String ERROR_MESSAGE = "error!";
   private static final String SUCCESS_UPDATE_MESSAGE = "Pomyślnie zaktualizowano dane";
@@ -113,14 +101,12 @@ public class ProfileControllerTest {
   private static final String TEST_NEW_PASSWORD = "Test123!!";
   private static final String TEST_ENCODE_CODE = "312fdasfdsaffsd";
   private static final String PARAM_ADDRESS_PREFIX = "address.";
-
   private static ProfileDTO profileDTO;
   private static ProfileShopDTO profileShopDTO;
   private static MockMultipartFile file1;
   private static MockMultipartFile file2;
   private static List<CountryDTO> countryDTOS;
   private static List<CountryNamesDTO> countryNamesDTOS;
-
   @Autowired private MockMvc mockMvc;
   @MockBean private ProfileService profileService;
   @MockBean private CountryService countryService;
@@ -185,10 +171,10 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(get(PROFILE_URL))
-        .andExpect(model().attribute(CARD_PARAM, card))
-        .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
+        .andExpect(model().attribute("card", card))
+        .andExpect(model().attribute("profile", profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
-        .andExpect(view().name(PROFILE_PAGE));
+        .andExpect(view().name("profilePage"));
   }
 
   @Test
@@ -238,11 +224,11 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(get(PROFILE_URL).param(param, "").session(httpSession))
-        .andExpect(model().attribute(CARD_PARAM, card))
-        .andExpect(model().attribute(PROFILE_PARAM, profileDTO))
+        .andExpect(model().attribute("card", card))
+        .andExpect(model().attribute("profile", profileDTO))
         .andExpect(model().attribute(COUNTRIES_PARAM, countryNamesDTOS))
         .andExpect(model().attribute(messageParam, message))
-        .andExpect(view().name(PROFILE_PAGE));
+        .andExpect(view().name("profilePage"));
     assertNull(httpSession.getAttribute(messageParam));
   }
 
@@ -253,7 +239,7 @@ public class ProfileControllerTest {
 
     mockMvc
         .perform(
-            post(USER_URL)
+            post("/user")
                 .param(FIRST_NAME_PARAM, profileDTO.getFirstName())
                 .param(LAST_NAME_PARAM, profileDTO.getLastName())
                 .param(PARAM_ADDRESS_PREFIX + PROVINCE_PARAM, profileDTO.getAddress().getProvince())
@@ -279,9 +265,7 @@ public class ProfileControllerTest {
   public void shouldRedirectToUserErrorAtEditProfileWhenValidationProblems() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
 
-    mockMvc
-        .perform(post(USER_URL).session(httpSession))
-        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
+    mockMvc.perform(post("/user").session(httpSession)).andExpect(redirectedUrl(PROFILE_ERROR_URL));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -593,7 +577,6 @@ public class ProfileControllerTest {
     profileShopDTO1.setLastName(profileShopDTO.getLastName());
     MockMultipartFile multipartFile = new MockMultipartFile(FILE_NAME, new byte[0]);
     profileShopDTO1.setFile(multipartFile);
-    System.out.println(profileShopDTO1);
 
     when(shopService.checkShopNameExists(profileShopDTO.getName(), TEST_PHONE)).thenReturn(false);
     when(shopService.checkAccountNumberExists(profileShopDTO.getAccountNumber(), TEST_PHONE))
@@ -879,7 +862,7 @@ public class ProfileControllerTest {
             post(EDIT_PROFILE_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(PROFILE_SUCCESS_URL));
+        .andExpect(redirectedUrl("/profile?success"));
     assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(EDIT_PARAM));
@@ -1093,7 +1076,7 @@ public class ProfileControllerTest {
     httpSession.setAttribute(EDIT_SHOP_PARAM, profileShopDTO);
     httpSession.setAttribute(CODE_SMS_EDIT_SHOP_PARAM, TEST_ENCODE_CODE);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 1);
-    httpSession.setAttribute(FILE_PATH_PARAM, TEST_URL);
+    httpSession.setAttribute("filePath", TEST_URL);
 
     when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
@@ -1126,7 +1109,7 @@ public class ProfileControllerTest {
     httpSession.setAttribute(CODE_SMS_EDIT_SHOP_PARAM, TEST_ENCODE_CODE);
     httpSession.setAttribute(EDIT_SHOP_PARAM, profileShopDTO);
     httpSession.setAttribute(CODE_AMOUNT_SMS_PARAM, 0);
-    httpSession.setAttribute(FILE_PATH_PARAM, TEST_URL);
+    httpSession.setAttribute("filePath", TEST_URL);
 
     when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
@@ -1142,7 +1125,7 @@ public class ProfileControllerTest {
                 .file(file2)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(PROFILE_SUCCESS_URL));
+        .andExpect(redirectedUrl("/profile?success"));
     assertEquals(SUCCESS_UPDATE_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
     assertNull(httpSession.getAttribute(ATTEMPTS_PARAM));
     assertNull(httpSession.getAttribute(EDIT_SHOP_PARAM));
@@ -1222,7 +1205,7 @@ public class ProfileControllerTest {
     when(authenticationService.checkPassword(TEST_OLD_PASSWORD, TEST_PHONE)).thenReturn(true);
     when(authenticationService.changePassword(TEST_PHONE, TEST_NEW_PASSWORD)).thenReturn(true);
 
-    redirectUserErrorAndLoginSuccess(httpSession, LOGIN_SUCCESS_URL);
+    redirectUserErrorAndLoginSuccess(httpSession, "/login?success");
   }
 
   @Test
@@ -1244,10 +1227,10 @@ public class ProfileControllerTest {
     mockMvc
         .perform(
             post(PASSWORD_CHANGE_URL)
-                .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
-                .param(PASSWORD_PARAM, TEST_NEW_PASSWORD)
-                .param(RETYPED_PASSWORD_PARAM, TEST_NEW_PASSWORD)
-                .param(CODE_PARAM, TEST_CODE)
+                .param("oldPassword", TEST_OLD_PASSWORD)
+                .param("password", TEST_NEW_PASSWORD)
+                .param("retypedPassword", TEST_NEW_PASSWORD)
+                .param("code", TEST_CODE)
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
   }
@@ -1325,10 +1308,10 @@ public class ProfileControllerTest {
     mockMvc
         .perform(
             post(PASSWORD_CHANGE_URL)
-                .param(OLD_PASSWORD_PARAM, TEST_OLD_PASSWORD)
-                .param(PASSWORD_PARAM, newPassword)
-                .param(RETYPED_PASSWORD_PARAM, retypedPassword)
-                .param(CODE_PARAM, TEST_CODE)
+                .param("oldPassword", TEST_OLD_PASSWORD)
+                .param("password", newPassword)
+                .param("retypedPassword", retypedPassword)
+                .param("code", TEST_CODE)
                 .session(httpSession))
         .andExpect(redirectedUrl("/password_change?error"));
     assertEquals(message, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -1432,7 +1415,7 @@ public class ProfileControllerTest {
             post(DELETE_ACCOUNT_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(LOGIN_SUCCESS_URL));
+        .andExpect(redirectedUrl("/login?success"));
   }
 
   @Test
@@ -1466,7 +1449,7 @@ public class ProfileControllerTest {
     mockMvc
         .perform(
             post(DELETE_ACCOUNT_URL).param(VERIFICATION_NUMBER_SMS_PARAM, "").session(httpSession))
-        .andExpect(redirectedUrl(DELETE_ACCOUNT_ERROR_URL));
+        .andExpect(redirectedUrl("/delete_account?error"));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
@@ -1485,7 +1468,7 @@ public class ProfileControllerTest {
             post(DELETE_ACCOUNT_URL)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE)
                 .session(httpSession))
-        .andExpect(redirectedUrl(DELETE_ACCOUNT_ERROR_URL));
+        .andExpect(redirectedUrl("/delete_account?error"));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(ERROR_BAD_SMS_CODE_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }

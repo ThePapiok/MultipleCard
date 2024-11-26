@@ -1,6 +1,6 @@
 let ok = [null, null, null, null, null, null];
 let previous = [null, null, null, null, null, null];
-let amount;
+let price;
 let name;
 let barcode;
 let description;
@@ -18,11 +18,11 @@ function atStart() {
         document.getElementById("inputCategory" + realIndex).value = category;
         document.getElementById("delete" + realIndex).style.display = "block";
     }
-    document.getElementById("amount").value /= 100.0;
+    document.getElementById("price").value /= 100.0;
     name = document.getElementById("name").value;
-    unfocusedAmount(document.getElementById("amount"));
-    amount = document.getElementById("amount").value;
-    checkAmount(document.getElementById("amount"));
+    unfocusedPrice(document.getElementById("price"));
+    price = document.getElementById("price").value;
+    checkPrice(document.getElementById("price"));
     barcode = document.getElementById("barcode").value;
     description = document.getElementById("inputEdit").value;
 }
@@ -33,10 +33,10 @@ function checkName(e) {
     checkOnlyIfOther(input, (length >= 2 && length <= 30 && regProductName.test(input)), 1, name, true, e);
 }
 
-function checkAmount(e) {
+function checkPrice(e) {
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 2 && length <= 7 && regAmount.test(input)), 3, amount, true, e);
+    checkOnlyIfOther(input, (length >= 2 && length <= 7 && regPrice.test(input)), 3, price, true, e);
 }
 
 function checkBarcode(e) {

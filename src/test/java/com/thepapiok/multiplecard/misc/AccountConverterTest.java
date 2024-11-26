@@ -16,12 +16,8 @@ public class AccountConverterTest {
   private static final String TEST_PASSWORD = "Test123!";
   private static final String TEST_ENCODE_PASSWORD = "123dsfavdva3312";
   private static final String TEST_EMAIL = "test@test";
-  private static final String TEST_CALLING_CODE = "+48";
-  private static final String TEST_PHONE = "21441322432314432";
-  private static final String TEST_FULL_PHONE = "+4821441322432314432";
-
-  private AccountConverter accountConverter;
   @Mock private PasswordEncoder passwordEncoder;
+  private AccountConverter accountConverter;
 
   @BeforeEach
   public void setUp() {
@@ -33,12 +29,12 @@ public class AccountConverterTest {
   public void shouldReturnAccountEntityAtGetEntityRegisterDTOWhenEverythingOk() {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setPassword(TEST_PASSWORD);
-    registerDTO.setCallingCode(TEST_CALLING_CODE);
-    registerDTO.setPhone(TEST_PHONE);
+    registerDTO.setCallingCode("+48");
+    registerDTO.setPhone("21441322432314432");
     registerDTO.setEmail(TEST_EMAIL);
     Account expectedAccount = new Account();
     expectedAccount.setPassword(TEST_ENCODE_PASSWORD);
-    expectedAccount.setPhone(TEST_FULL_PHONE);
+    expectedAccount.setPhone("+4821441322432314432");
     expectedAccount.setEmail(TEST_EMAIL);
 
     when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(TEST_ENCODE_PASSWORD);
@@ -50,12 +46,12 @@ public class AccountConverterTest {
   public void shouldReturnAccountEntityAtGetEntityRegisterShopDTOWhenEverythingOk() {
     RegisterShopDTO registerShopDTO = new RegisterShopDTO();
     registerShopDTO.setPassword(TEST_PASSWORD);
-    registerShopDTO.setCallingCode(TEST_CALLING_CODE);
-    registerShopDTO.setPhone(TEST_PHONE);
+    registerShopDTO.setCallingCode("+48");
+    registerShopDTO.setPhone("21441322432314432");
     registerShopDTO.setEmail(TEST_EMAIL);
     Account expectedAccount = new Account();
     expectedAccount.setPassword(TEST_ENCODE_PASSWORD);
-    expectedAccount.setPhone(TEST_FULL_PHONE);
+    expectedAccount.setPhone("+4821441322432314432");
     expectedAccount.setEmail(TEST_EMAIL);
 
     when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(TEST_ENCODE_PASSWORD);

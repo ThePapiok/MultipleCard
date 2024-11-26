@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class AddressConverterTest {
-
   private static AddressDTO TEST_ADDRESS_DTO;
   private static AddressDTO TEST_OTHER_ADDRESS_DTO;
   private static Address TEST_ADDRESS;

@@ -4,7 +4,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
-
   private final AccountRepository accountRepository;
   private final UserRepository userRepository;
   private final ProfileConverter profileConverter;
@@ -128,15 +127,16 @@ public class ProfileService {
                 for (Product product : products) {
                   productId = product.getId();
                   mongoTemplate.remove(query(where(productIdParam).is(productId)), Promotion.class);
-                  mongoTemplate.remove(query(where(productIdParam).is(productId)), Blocked.class);
-                  List<Order> orders = orderRepository.findAllByProductIdAndUsed(productId, false);
+                  mongoTemplate.remove(
+                      query(where(productIdParam).is(productId)), BlockedProduct.class);
+                  List<Order> orders =
+                      orderRepository.findAllByProductIdAndIsUsed(productId, false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
                         query(where(cardIdParam).is(order.getCardId())),
-                        new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
+                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
                         User.class);
-                    order.setUsed(true);
-                    mongoTemplate.save(order);
+                    mongoTemplate.remove(order);
                   }
                   try {
                     cloudinaryService.deleteImage(product.getId().toString());

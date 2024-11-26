@@ -22,6 +22,9 @@ jakiś produkt, a następnie w sklepie można ten produkt dostać.
 - Cloudinary
 - Zxing
 - IbanApi
+- PayU
+- Checkstyle
+- Spotless
 
 ## Zmienne Środowiskowe
 
@@ -50,6 +53,12 @@ Aby projekt działał, potrzebuje on dodania zmiennych środowiskowych oraz usta
 `CLOUDINARY_API_SECRET` - api secret dla cloudinary
 
 `IBANAPI_API_KEY` - api key dla ibanapi
+
+`PAYU_CLIENT_SECRET` - client secret dla PayU
+
+`PAYU_CLIENT_ID` - client id dla PayU
+
+`PAYU_KEY_MD5` - klucz md5 dla PayU
 
 ## Uruchomienie z dockerem
 

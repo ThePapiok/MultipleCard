@@ -54,41 +54,19 @@ import org.springframework.web.multipart.MultipartFile;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AuthenticationControllerTest {
-  private static List<CountryDTO> expectedCountries;
-  private static List<CallingCodeDTO> expectedCallingCodes;
-  private static List<CountryNamesDTO> expectedCountryNames;
-  private static RegisterDTO expectedRegisterDTO;
-  private static final Locale LOCALE = new Locale.Builder().setLanguage("pl").build();
 
+  private static final Locale LOCALE = new Locale.Builder().setLanguage("pl").build();
   private static final String ERROR_AT_SMS_SENDING_MESSAGE = "Błąd podczas wysyłania sms";
   private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
   private static final String ERROR_UNEXPECTED_MESSAGE = "Nieoczekiwany błąd";
   private static final String ERROR_BAD_SMS_CODE_MESSAGE = "Nieprawidłowy kod sms";
-  private static final String ERROR_BAD_EMAIL_CODE_MESSAGE = "Nieprawidłowy kod email";
-  private static final String ERROR_PHONE_THE_SAME_MESSAGE =
-      "Użytkownik o takim numerze telefonu już istnieje";
-  private static final String ERROR_EMAIL_THE_SAME_MESSAGE =
-      "Użytkownik o takim emailu już istnieje";
   private static final String ERROR_TOO_MANY_ATTEMPTS_MESSAGE =
       "Za dużo razy podałeś niepoprawne dane";
-  private static final String ERROR_TOO_MANY_SMS_MESSAGE = "Za dużo razy poprosiłeś o nowy kod sms";
-  private static final String ERROR_TOO_MANY_EMAIL_MESSAGE =
-      "Za dużo razy poprosiłeś o nowy kod email";
-  private static final String ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE = "Podane hasła różnią się";
   private static final String ERROR_INCORRECT_DATA_MESSAGE = "Podane dane są niepoprawne";
-  private static final String ERROR_USER_NOT_FOUND_MESSAGE = "Nie ma takiego użytkownika";
-  private static final String SUCCESS_OK_MESSAGE = "ok";
   private static final String ERROR_MESSAGE = "Error!";
   private static final String PL_NAME = "Polska";
   private static final String PL_CALLING_CODE = "+48";
   private static final String TEST_TEXT = "Test";
-  private static final String TEST_SUFFIX_FILE = ".tmp";
-  private static final String TEST_FILE_NAME = "file";
-  private static final String TEST_FILE1_NAME = "file1";
-  private static final String TEST_FILE2_NAME = "file2";
-  private static final String TEST_FILE3_NAME = "file3";
-  private static final String FILE0_PARAM = "file[0]";
-  private static final String FILE1_PARAM = "file[1]";
   private static final String TEST_MAIL = "Test@Test.pl";
   private static final String TEST_HOUSE_NUMBER = "1";
   private static final String TEST_POSTAL_CODE = "00-000";
@@ -97,7 +75,6 @@ public class AuthenticationControllerTest {
   private static final String SHOP_VERIFICATIONS_URL = "/shop_verifications";
   private static final String CALLING_CODES_PARAM = "callingCodes";
   private static final String LOGIN_PAGE = "loginPage";
-  private static final String SUCCESS_PARAM = "success";
   private static final String PARAM_PARAM = "param";
   private static final String NEW_USER_PARAM = "newUser";
   private static final String TEST_NEW_USER = "false";
@@ -122,26 +99,20 @@ public class AuthenticationControllerTest {
   private static final String PASSWORD_RESET_URL = "/password_reset";
   private static final String COUNTRIES_PARAM = "countries";
   private static final String REGISTER_PARAM = "register";
-  private static final String REGISTER_PAGE = "registerPage";
   private static final String RESET_PASSWORD_PAGE = "resetPasswordPage";
   private static final String TEST_CODE = "123 456";
   private static final String TEST_ENCODE_CODE = "sad8h121231z#$2";
-  private static final String TEST_PHONE_NUMBER = "+1212345673123";
   private static final String TEST_APARTMENT_NUMBER = "2";
   private static final String VERIFICATION_MESSAGE = "Twój kod weryfikacyjny MultipleCard: ";
   private static final String REDIRECT_VERIFICATION_ERROR = "/account_verifications?error";
   private static final String VERIFICATION_PAGE = "verificationPage";
-  private static final String NEW_CODE_SMS_PARAM = "newCodeSms";
   private static final String FILE_PATH_PARAM = "filePath";
-  private static final String NEW_CODE_EMAIL_PARAM = "newCodeEmail";
   private static final String VERIFICATION_NUMBER_EMAIL_PARAM = "verificationNumberEmail";
   private static final String VERIFICATION_NUMBER_SMS_PARAM = "verificationNumberSms";
   private static final String REDIRECT_LOGIN_ERROR = "/login?error";
   private static final String REDIRECT_LOGIN_SUCCESS = "/login?success";
   private static final String TEST_OTHER_CODE = "443 411";
   private static final String TEST_OTHER_ENCODE_CODE = "ssadfsadfsadf123";
-  private static final String TEST_OTHER_MAIL = "test@Test";
-  private static final String TEST_OTHER_PHONE_NUMBER = "+34234234234";
   private static final String TEST_PHONE = "1231231231234";
   private static final String VERIFICATION_URL = "/account_verifications";
   private static final String VERIFICATION_SHOP_ERROR_URL = "/shop_verifications?error";
@@ -155,11 +126,9 @@ public class AuthenticationControllerTest {
   private static final String CODE_SMS_PARAM_REGISTER = "codeSmsRegister";
   private static final String CODE_AMOUNT_EMAIL_PARAM = "codeAmountEmail";
   private static final String CODE_EMAIL_PARAM = "codeEmail";
-  private static final String CODE_PARAM = "code";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String PASSWORD_PARAM = "password";
   private static final String RETYPED_PASSWORD_PARAM = "retypedPassword";
-  private static final String REDIRECT_REGISTER_ERROR = "/register?error";
   private static final String CODE_SMS_PARAM_RESET = "codeSmsReset";
   private static final String RESET_PARAM = "reset";
   private static final String IS_SENT_PARAM = "isSent";
@@ -167,7 +136,10 @@ public class AuthenticationControllerTest {
   private static final String PARAM_ADDRESS_PREFIX1 = "address[1].";
   private static final String PARAM_ADDRESS_PREFIX = "address.";
   private static final String CODE_SMS_PARAM_REGISTER_SHOP = "codeSmsRegisterShop";
-
+  private static List<CountryDTO> expectedCountries;
+  private static List<CallingCodeDTO> expectedCallingCodes;
+  private static List<CountryNamesDTO> expectedCountryNames;
+  private static RegisterDTO expectedRegisterDTO;
   @Autowired private MockMvc mockMvc;
   @MockBean private CountryService countryService;
   @MockBean private AuthenticationService authenticationService;
@@ -235,7 +207,7 @@ public class AuthenticationControllerTest {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
-        .perform(get(LOGIN_URL).param(SUCCESS_PARAM, ""))
+        .perform(get(LOGIN_URL).param("success", ""))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(view().name(LOGIN_PAGE));
   }
@@ -252,7 +224,7 @@ public class AuthenticationControllerTest {
     when(countryService.getAll()).thenReturn(expectedCountries);
 
     mockMvc
-        .perform(get(LOGIN_URL).param(SUCCESS_PARAM, "").session(httpSession))
+        .perform(get(LOGIN_URL).param("success", "").session(httpSession))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(model().attribute(SUCCESS_MESSAGE_PARAM, successMessage))
         .andExpect(model().attribute(PHONE_PARAM, phone))
@@ -293,7 +265,7 @@ public class AuthenticationControllerTest {
         .andExpect(model().attribute(COUNTRIES_PARAM, expectedCountryNames))
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(model().attribute(REGISTER_PARAM, new RegisterDTO()))
-        .andExpect(view().name(REGISTER_PAGE));
+        .andExpect(view().name("registerPage"));
   }
 
   @Test
@@ -314,7 +286,7 @@ public class AuthenticationControllerTest {
         .andExpect(model().attribute(CALLING_CODES_PARAM, expectedCallingCodes))
         .andExpect(model().attribute(REGISTER_PARAM, registerDTO))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
-        .andExpect(view().name(REGISTER_PAGE));
+        .andExpect(view().name("registerPage"));
   }
 
   @Test
@@ -359,7 +331,7 @@ public class AuthenticationControllerTest {
         .thenReturn(true);
 
     performPostRegisterAndRedirectRegister(
-        expectedRegisterDTO, httpSession, ERROR_PHONE_THE_SAME_MESSAGE);
+        expectedRegisterDTO, httpSession, "Użytkownik o takim numerze telefonu już istnieje");
   }
 
   @Test
@@ -372,7 +344,7 @@ public class AuthenticationControllerTest {
     when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(true);
 
     performPostRegisterAndRedirectRegister(
-        expectedRegisterDTO, httpSession, ERROR_EMAIL_THE_SAME_MESSAGE);
+        expectedRegisterDTO, httpSession, "Użytkownik o takim emailu już istnieje");
   }
 
   @Test
@@ -410,7 +382,8 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
+        .sendEmail(
+            VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), "Weryfikacja konta");
 
     performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_VERIFICATION_ERROR);
     assertEquals(
@@ -445,13 +418,13 @@ public class AuthenticationControllerTest {
     when(authenticationService.emailExists(expectedRegisterDTO.getEmail())).thenReturn(false);
 
     performPostRegisterAndRedirectRegister(
-        expectedRegisterDTO, httpSession, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE);
+        expectedRegisterDTO, httpSession, "Podane hasła różnią się");
   }
 
   private void performPostRegisterAndRedirectRegister(
       RegisterDTO expectedRegisterDTO, MockHttpSession httpSession, String errorMessage)
       throws Exception {
-    performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_REGISTER_ERROR);
+    performPostRegister(expectedRegisterDTO, httpSession, "/register?error");
     assertEquals(
         expectedRegisterDTO, Objects.requireNonNull(httpSession.getAttribute(REGISTER_PARAM)));
     assertEquals(errorMessage, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -627,7 +600,7 @@ public class AuthenticationControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
 
-    redirectVerificationErrorWhenVerificationNumberIsBad(httpSession, ERROR_BAD_EMAIL_CODE_MESSAGE);
+    redirectVerificationErrorWhenVerificationNumberIsBad(httpSession, "Nieprawidłowy kod email");
   }
 
   @Test
@@ -830,7 +803,7 @@ public class AuthenticationControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
 
-    redirectPasswordResetError(resetPasswordDTO, httpSession, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE);
+    redirectPasswordResetError(resetPasswordDTO, httpSession, "Podane hasła różnią się");
   }
 
   @Test
@@ -842,7 +815,7 @@ public class AuthenticationControllerTest {
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(authenticationService.getAccountByPhone(PL_CALLING_CODE + TEST_PHONE)).thenReturn(false);
 
-    redirectPasswordResetError(resetPasswordDTO, httpSession, ERROR_USER_NOT_FOUND_MESSAGE);
+    redirectPasswordResetError(resetPasswordDTO, httpSession, "Nie ma takiego użytkownika");
   }
 
   private void redirectPasswordResetError(
@@ -856,7 +829,7 @@ public class AuthenticationControllerTest {
                 .param(CALLING_CODE_PARAM, resetPasswordDTO.getCallingCode())
                 .param(PASSWORD_PARAM, resetPasswordDTO.getPassword())
                 .param(RETYPED_PASSWORD_PARAM, resetPasswordDTO.getRetypedPassword())
-                .param(CODE_PARAM, resetPasswordDTO.getCode())
+                .param("code", resetPasswordDTO.getCode())
                 .session(httpSession))
         .andExpect(redirectedUrl("/password_reset?error"));
     assertEquals(amount, httpSession.getAttribute(ATTEMPTS_PARAM));
@@ -898,7 +871,7 @@ public class AuthenticationControllerTest {
                 .param(CALLING_CODE_PARAM, resetPasswordDTO.getCallingCode())
                 .param(PASSWORD_PARAM, resetPasswordDTO.getPassword())
                 .param(RETYPED_PASSWORD_PARAM, resetPasswordDTO.getRetypedPassword())
-                .param(CODE_PARAM, resetPasswordDTO.getCode())
+                .param("code", resetPasswordDTO.getCode())
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
     assertNull(httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
@@ -935,7 +908,7 @@ public class AuthenticationControllerTest {
                 .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
                 .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
                 .param(NEW_USER_PARAM, TEST_NEW_USER))
-        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+        .andExpect(content().string("ok"));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_SMS_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_SMS_PARAM_RESET));
   }
@@ -954,7 +927,7 @@ public class AuthenticationControllerTest {
                 .param(PHONE_PARAM, PL_CALLING_CODE + TEST_PHONE)
                 .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
                 .param(NEW_USER_PARAM, TEST_NEW_USER))
-        .andExpect(content().string(ERROR_TOO_MANY_SMS_MESSAGE));
+        .andExpect(content().string("Za dużo razy poprosiłeś o nowy kod sms"));
   }
 
   @Test
@@ -988,7 +961,7 @@ public class AuthenticationControllerTest {
                 .param(PARAM_PARAM, CODE_SMS_PARAM_RESET)
                 .param(NEW_USER_PARAM, TEST_NEW_USER)
                 .session(httpSession))
-        .andExpect(content().string(ERROR_USER_NOT_FOUND_MESSAGE));
+        .andExpect(content().string("Nie ma takiego użytkownika"));
   }
 
   @Test
@@ -1023,7 +996,7 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(
             post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
-        .andExpect(content().string(ERROR_TOO_MANY_EMAIL_MESSAGE));
+        .andExpect(content().string("Za dużo razy poprosiłeś o nowy kod email"));
   }
 
   @Test
@@ -1065,7 +1038,7 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(
             post(GET_VERIFICATION_EMAIL_URL).session(httpSession).param(EMAIL_PARAM, TEST_MAIL))
-        .andExpect(content().string(SUCCESS_OK_MESSAGE));
+        .andExpect(content().string("ok"));
     assertEquals(1, httpSession.getAttribute(CODE_AMOUNT_EMAIL_PARAM));
     assertEquals(TEST_ENCODE_CODE, httpSession.getAttribute(CODE_EMAIL_PARAM));
   }
@@ -1170,7 +1143,9 @@ public class AuthenticationControllerTest {
         .thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
-    assertEquals(ERROR_PHONE_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(
+        "Użytkownik o takim numerze telefonu już istnieje",
+        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -1185,7 +1160,8 @@ public class AuthenticationControllerTest {
     when(authenticationService.emailExists(registerShopDTO.getEmail())).thenReturn(true);
 
     performPostRegisterShop(registerShopDTO, addressDTO, httpSession, REGISTER_SHOP_ERROR_URL);
-    assertEquals(ERROR_EMAIL_THE_SAME_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(
+        "Użytkownik o takim emailu już istnieje", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
   @Test
@@ -1598,7 +1574,7 @@ public class AuthenticationControllerTest {
     addressDTO.setProvince(TEST_TEXT);
     addressDTO.setHouseNumber(TEST_HOUSE_NUMBER);
     addressDTO.setPostalCode(TEST_POSTAL_CODE);
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockMultipartFile multipartFile = new MockMultipartFile("file", new byte[0]);
     List<AddressDTO> addressDTOList = List.of(addressDTO);
     RegisterShopDTO registerShopDTO = new RegisterShopDTO();
     registerShopDTO.setPassword(TEST_PASSWORD);
@@ -1665,8 +1641,8 @@ public class AuthenticationControllerTest {
 
   @Test
   public void shouldRedirectToLoginAtVerificationShopPageWhenParamReset() throws Exception {
-    MultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    Path path = Files.createTempFile("_upload", TEST_SUFFIX_FILE);
+    MultipartFile multipartFile = new MockMultipartFile("file", new byte[0]);
+    Path path = Files.createTempFile("_upload", ".tmp");
     Files.copy(multipartFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(FILE_PATH_PARAM, path.toString());
@@ -1755,7 +1731,7 @@ public class AuthenticationControllerTest {
 
     performPostAtVerificationShop(
         httpSession,
-        ERROR_BAD_EMAIL_CODE_MESSAGE,
+        "Nieprawidłowy kod email",
         VERIFICATION_SHOP_ERROR_URL,
         TEST_CODE,
         ERROR_MESSAGE_PARAM);
@@ -1787,9 +1763,9 @@ public class AuthenticationControllerTest {
     when(passwordEncoder.matches(TEST_OTHER_CODE, TEST_OTHER_ENCODE_CODE)).thenReturn(true);
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
 
-    MockMultipartFile multipartFile1 = new MockMultipartFile(TEST_FILE1_NAME, new byte[0]);
-    MockMultipartFile multipartFile2 = new MockMultipartFile(TEST_FILE2_NAME, new byte[0]);
-    MockMultipartFile multipartFile3 = new MockMultipartFile(TEST_FILE3_NAME, new byte[0]);
+    MockMultipartFile multipartFile1 = new MockMultipartFile("file1", new byte[0]);
+    MockMultipartFile multipartFile2 = new MockMultipartFile("file2", new byte[0]);
+    MockMultipartFile multipartFile3 = new MockMultipartFile("file3", new byte[0]);
     MockMultipartFile multipartFile4 = new MockMultipartFile("file4", new byte[0]);
     MockMultipartFile multipartFile5 = new MockMultipartFile("file5", new byte[0]);
     MockMultipartFile multipartFile6 = new MockMultipartFile("file6", new byte[0]);
@@ -1801,8 +1777,8 @@ public class AuthenticationControllerTest {
     mockMvc
         .perform(
             multipart(SHOP_VERIFICATIONS_URL)
-                .file(FILE0_PARAM, multipartFile1.getBytes())
-                .file(FILE1_PARAM, multipartFile2.getBytes())
+                .file("file[0]", multipartFile1.getBytes())
+                .file("file[1]", multipartFile2.getBytes())
                 .file("file[2]", multipartFile3.getBytes())
                 .file("file[3]", multipartFile4.getBytes())
                 .file("file[4]", multipartFile5.getBytes())
@@ -1897,8 +1873,8 @@ public class AuthenticationControllerTest {
   }
 
   private MockHttpSession setSessionAtVerificationShop(int attempts) throws IOException {
-    MockMultipartFile multipartFile3 = new MockMultipartFile(TEST_FILE3_NAME, new byte[0]);
-    Path path = Files.createTempFile("upload_", TEST_SUFFIX_FILE);
+    MockMultipartFile multipartFile3 = new MockMultipartFile("file3", new byte[0]);
+    Path path = Files.createTempFile("upload_", ".tmp");
     Files.copy(multipartFile3.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(REGISTER_PARAM, new RegisterShopDTO());
@@ -1918,14 +1894,14 @@ public class AuthenticationControllerTest {
       String codeSms,
       String messageParam)
       throws Exception {
-    MockMultipartFile multipartFile1 = new MockMultipartFile(TEST_FILE1_NAME, new byte[0]);
-    MockMultipartFile multipartFile2 = new MockMultipartFile(TEST_FILE2_NAME, new byte[0]);
+    MockMultipartFile multipartFile1 = new MockMultipartFile("file1", new byte[0]);
+    MockMultipartFile multipartFile2 = new MockMultipartFile("file2", new byte[0]);
 
     mockMvc
         .perform(
             multipart(SHOP_VERIFICATIONS_URL)
-                .file(FILE0_PARAM, multipartFile1.getBytes())
-                .file(FILE1_PARAM, multipartFile2.getBytes())
+                .file("file[0]", multipartFile1.getBytes())
+                .file("file[1]", multipartFile2.getBytes())
                 .param(VERIFICATION_NUMBER_SMS_PARAM, codeSms)
                 .param(VERIFICATION_NUMBER_EMAIL_PARAM, TEST_OTHER_CODE)
                 .session(httpSession))

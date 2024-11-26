@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface UserRepository extends MongoRepository<User, ObjectId> {
-
   @Aggregation(
       pipeline = {
         """
@@ -31,8 +30,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                     "foreignField": "reviewUserId",
                                     "as": "like",
                                     "pipeline": [{
-                                        $project: {
-                                            "reviewUserId": 1,
+                                        $addFields: {
                                             "isAdded": {
                                                 $cond: {
                                                     if: {
@@ -42,6 +40,11 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                                     else: 0
                                                 }
                                             }
+                                        }
+                                    },{
+                                        $project: {
+                                            "reviewUserId": 1,
+                                            "isAdded": 1
                                         }
                                     }, {
                                                  $group: {
@@ -67,9 +70,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             """,
         """
                             {
-                                $project: {
-                                    "firstName": 1,
-                                    "review": 1,
+                                $addFields: {
                                     "count": {$ifNull: ["$like.count", 0]},
                                     "isAdded": {$ifNull: ["$like.isAdded", 0]},
                                     "owner": {
@@ -81,6 +82,18 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                             else: false
                                                 }
                                             }
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "firstName": 1,
+                                    "review": 1,
+                                    "count": 1,
+                                    "isAdded": 1,
+                                    "owner": 1
+
                                 }
                             }
                             """,
@@ -123,9 +136,8 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                     "foreignField": "reviewUserId",
                                     "as": "like",
                                     "pipeline": [{
-                                        $project: {
-                                            "reviewUserId": 1,
-                                            "isAdded": {
+                                        $addFields: {
+                                        "isAdded": {
                                                 $cond: {
                                                     if: {
                                                         $eq: ["$userId", ?0]
@@ -134,8 +146,14 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                                     else: 0
                                                 }
                                             }
+
                                         }
-                                    }, {
+                                    },{
+                                        $project: {
+                                            "reviewUserId": 1,
+                                            "isAdded": 1
+                                        }},
+                                         {
                                                  $group: {
                                                      "_id": "$reviewUserId",
                                                      "count": {
@@ -159,9 +177,7 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             """,
         """
                             {
-                                $project: {
-                                    "firstName": 1,
-                                    "review": 1,
+                                $addFields: {
                                     "count": {$ifNull: ["$like.count", 0]},
                                     "isAdded": {$ifNull: ["$like.isAdded", 0]},
                                     "owner": {
@@ -173,6 +189,17 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                             else: false
                                                 }
                                             }
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "firstName": 1,
+                                    "review": 1,
+                                    "count": 1,
+                                    "isAdded": 1,
+                                    "owner": 1
                                 }
                             }
                             """,
@@ -219,7 +246,10 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                     "as": "like",
                                     "pipeline": [{
                                         $project: {
-                                            "reviewUserId": 1,
+                                            "reviewUserId": 1
+                                        }
+                                    }, {
+                                        $addFields: {
                                             "isAdded": {
                                                 $cond: {
                                                     if: {
@@ -254,11 +284,19 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             """,
         """
                             {
+                                $addFields: {
+                                     "count": {$ifNull: ["$like.count", 0]},
+                                     "isAdded": {$ifNull: ["$like.isAdded", 0]}
+                                }
+                            }
+                            """,
+        """
+                            {
                                 $project: {
                                     "firstName": 1,
                                     "review": 1,
-                                    "count": {$ifNull: ["$like.count", 0]},
-                                    "isAdded": {$ifNull: ["$like.isAdded", 0]}
+                                    "count": 1,
+                                    "isAdded": 1
                                 }
                             }
                             """

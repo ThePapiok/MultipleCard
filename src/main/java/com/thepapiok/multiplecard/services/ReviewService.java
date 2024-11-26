@@ -16,7 +16,6 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoTransactionManager;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -29,7 +28,6 @@ public class ReviewService {
   private final UserRepository userRepository;
   private final LikeRepository likeRepository;
   private final MongoTransactionManager mongoTransactionManager;
-  private final MongoTemplate mongoTemplate;
 
   @Autowired
   public ReviewService(
@@ -37,14 +35,12 @@ public class ReviewService {
       AccountRepository accountRepository,
       UserRepository userRepository,
       LikeRepository likeRepository,
-      MongoTransactionManager mongoTransactionManager,
-      MongoTemplate mongoTemplate) {
+      MongoTransactionManager mongoTransactionManager) {
     this.reviewConverter = reviewConverter;
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.likeRepository = likeRepository;
     this.mongoTransactionManager = mongoTransactionManager;
-    this.mongoTemplate = mongoTemplate;
   }
 
   public boolean addReview(ReviewDTO reviewDTO, String phone) {

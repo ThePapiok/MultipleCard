@@ -3,25 +3,38 @@ package com.thepapiok.multiplecard.services;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
+import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
-import com.thepapiok.multiplecard.dto.ProductGetDTO;
+import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
+import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
-import com.thepapiok.multiplecard.repositories.BlockedRepository;
+import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +49,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
-  private static final String COUNT_FIELD = "count";
-  private static final String ID_FIELD = "_id";
-  private static final String SHOP_ID_FIELD = "shopId";
-  private static final String PRODUCTS_COLLECTION = "products";
-  private static final String TEXT_OPERATOR = "$text";
-  private static final String SEARCH_OPERATOR = "$search";
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
   private final ProductRepository productRepository;
@@ -52,8 +59,11 @@ public class ProductService {
   private final AggregationRepository aggregationRepository;
   private final PromotionService promotionService;
   private final OrderRepository orderRepository;
-  private final BlockedRepository blockedRepository;
+  private final BlockedProductRepository blockedProductRepository;
   private final CategoryRepository categoryRepository;
+  private final ShopRepository shopRepository;
+  private final PromotionRepository promotionRepository;
+  private final ReservedProductService reservedProductService;
 
   @Autowired
   public ProductService(
@@ -67,8 +77,11 @@ public class ProductService {
       AggregationRepository aggregationRepository,
       PromotionService promotionService,
       OrderRepository orderRepository,
-      BlockedRepository blockedRepository,
-      CategoryRepository categoryRepository) {
+      BlockedProductRepository blockedProductRepository,
+      CategoryRepository categoryRepository,
+      ShopRepository shopRepository,
+      PromotionRepository promotionRepository,
+      ReservedProductService reservedProductService) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -79,8 +92,11 @@ public class ProductService {
     this.aggregationRepository = aggregationRepository;
     this.promotionService = promotionService;
     this.orderRepository = orderRepository;
-    this.blockedRepository = blockedRepository;
+    this.blockedProductRepository = blockedProductRepository;
     this.categoryRepository = categoryRepository;
+    this.shopRepository = shopRepository;
+    this.promotionRepository = promotionRepository;
+    this.reservedProductService = reservedProductService;
   }
 
   public boolean addProduct(
@@ -94,6 +110,7 @@ public class ProductService {
               Product product = productConverter.getEntity(addProductDTO);
               product.setShopId(ownerId);
               product.setImageUrl("");
+              product.setUpdatedAt(LocalDateTime.now());
               product.setCategories(setCategories(nameOfCategories, ownerId));
               product = mongoTemplate.save(product);
               try {
@@ -120,13 +137,8 @@ public class ProductService {
     return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
   }
 
-  public List<ProductGetDTO> getProductsOwner(
-      String phone, int page, String field, boolean isDescending, String text) {
-    return aggregationRepository.getProductsOwner(phone, page, field, isDescending, text);
-  }
-
-  public int getMaxPage(String text, String phone) {
-    return aggregationRepository.getMaxPage(text, phone);
+  public int getMaxPage(String text, String phone, String category, String shopName) {
+    return aggregationRepository.getMaxPage(text, phone, category, shopName);
   }
 
   public boolean isProductOwner(String phone, String id) {
@@ -137,24 +149,24 @@ public class ProductService {
     return accountRepository.findIdByPhone(phone).getId().equals(product.getShopId());
   }
 
-  public boolean isLessThanOriginalPrice(String amount, String productId) {
+  public boolean isLessThanOriginalPrice(String price, String productId) {
     final int centsPerZl = 100;
-    final int amountCents = (int) (Double.parseDouble(amount) * centsPerZl);
+    final int amountCents = (int) (Double.parseDouble(price) * centsPerZl);
     Optional<Product> product = productRepository.findById(new ObjectId(productId));
     if (product.isEmpty()) {
       return false;
     }
-    return product.get().getAmount() > amountCents;
+    return product.get().getPrice() > amountCents;
   }
 
-  public Double getAmount(String productId) {
+  public Double getPrice(String productId) {
     final double centsPerZl = 100.0;
     Optional<Product> product = productRepository.findById(new ObjectId(productId));
     if (product.isEmpty()) {
       return null;
     }
 
-    return (product.get().getAmount() / centsPerZl);
+    return (product.get().getPrice() / centsPerZl);
   }
 
   public boolean deleteProduct(String productId) {
@@ -167,19 +179,18 @@ public class ProductService {
               try {
                 final ObjectId objectId = new ObjectId(productId);
                 final float centsPerZloty = 100;
-                cloudinaryService.deleteImage(productId);
                 promotionService.deletePromotion(productId);
                 productRepository.deleteById(objectId);
-                blockedRepository.deleteByProductId(objectId);
-                List<Order> orders = orderRepository.findAllByProductIdAndUsed(objectId, false);
+                blockedProductRepository.deleteByProductId(objectId);
+                List<Order> orders = orderRepository.findAllByProductIdAndIsUsed(objectId, false);
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
                       query(where("cardId").is(order.getCardId())),
-                      new Update().inc("points", (Math.round(order.getAmount() / centsPerZloty))),
+                      new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
                       User.class);
-                  order.setUsed(true);
-                  mongoTemplate.save(order);
+                  mongoTemplate.remove(order);
                 }
+                cloudinaryService.deleteImage(productId);
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
@@ -192,16 +203,16 @@ public class ProductService {
   }
 
   public boolean hasBlock(String id) {
-    return blockedRepository.existsByProductId(new ObjectId(id));
+    return blockedProductRepository.existsByProductId(new ObjectId(id));
   }
 
   public boolean blockProduct(String id) {
     try {
       final int month = 30;
-      Blocked blocked = new Blocked();
-      blocked.setProductId(new ObjectId(id));
-      blocked.setExpiredAt(LocalDate.now().plusDays(month));
-      blockedRepository.save(blocked);
+      BlockedProduct blockedProduct = new BlockedProduct();
+      blockedProduct.setProductId(new ObjectId(id));
+      blockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+      blockedProductRepository.save(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
@@ -210,8 +221,8 @@ public class ProductService {
 
   public boolean unblockProduct(String id) {
     try {
-      Blocked blocked = blockedRepository.findByProductId(new ObjectId(id));
-      blockedRepository.delete(blocked);
+      BlockedProduct blockedProduct = blockedProductRepository.findByProductId(new ObjectId(id));
+      blockedProductRepository.delete(blockedProduct);
       return true;
     } catch (Exception e) {
       return false;
@@ -253,6 +264,7 @@ public class ProductService {
               final MultipartFile file = editProduct.getFile();
               Product product = productConverter.getEntity(editProduct);
               product.setCategories(setCategories(nameOfCategories, ownerId));
+              product.setUpdatedAt(LocalDateTime.now());
               if (file != null) {
                 try {
                   product.setImageUrl(
@@ -284,5 +296,133 @@ public class ProductService {
       }
     }
     return categories;
+  }
+
+  public List<ProductDTO> getProducts(
+      String phone,
+      int page,
+      String field,
+      boolean isDescending,
+      String text,
+      String category,
+      String shopName) {
+    return aggregationRepository.getProducts(
+        phone, page, field, isDescending, text, category, shopName);
+  }
+
+  public List<ProductWithShopDTO> getProductsByIds(List<String> productsInfo)
+      throws JsonProcessingException {
+    if (productsInfo.size() == 0) {
+      return List.of();
+    }
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<ProductInfo> products = new ArrayList<>();
+    for (String json : productsInfo) {
+      products.add(objectMapper.readValue(json, ProductInfo.class));
+    }
+    return aggregationRepository.findProductsByIdsAndType(products);
+  }
+
+  public List<ProductWithShopDTO> getProductsWithShops(
+      int page, String field, boolean isDescending, String text, String category, String shopName) {
+    List<ProductDTO> productDTOS =
+        getProducts(null, page, field, isDescending, text, category, shopName);
+    List<ProductWithShopDTO> products = new ArrayList<>();
+    for (ProductDTO productDTO : productDTOS) {
+      Shop shop = shopRepository.findImageUrlAndNameById(productDTO.getShopId());
+      products.add(new ProductWithShopDTO(productDTO, shop.getName(), shop.getImageUrl()));
+    }
+    return products;
+  }
+
+  public boolean checkProductsQuantity(Map<ProductInfo, Integer> products) {
+    final int maxQuantityPerProduct = 10;
+    final int maxQuantityPerAllProducts = 100;
+    int totalQuantity = 0;
+    int quantity;
+    for (Map.Entry<ProductInfo, Integer> entry : products.entrySet()) {
+      quantity = entry.getValue();
+      if (quantity > maxQuantityPerProduct || quantity <= 0) {
+        return false;
+      } else if (!productRepository.existsById(entry.getKey().getProductId())) {
+        return false;
+      } else {
+        totalQuantity += quantity;
+      }
+    }
+    return totalQuantity <= maxQuantityPerAllProducts;
+  }
+
+  public Map<ProductInfo, Integer> getProductsInfo(Map<String, Integer> productsId) {
+    try {
+      if (productsId.size() == 0) {
+        return Map.of();
+      }
+      ObjectMapper objectMapper = new ObjectMapper();
+      Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+      for (Map.Entry<String, Integer> entry : productsId.entrySet()) {
+        productsInfo.put(
+            objectMapper.readValue(entry.getKey(), ProductInfo.class), entry.getValue());
+      }
+      return productsInfo;
+    } catch (Exception e) {
+      return Map.of();
+    }
+  }
+
+  public boolean buyProducts(List<ProductPayU> products, String cardId, String orderId) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      LocalDateTime localDateTime = LocalDateTime.now();
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              int newQuantity;
+              Map<String, Object> productInfo;
+              ObjectId productId;
+              ObjectId shopId;
+              for (ProductPayU product : products) {
+                try {
+                  productInfo =
+                      objectMapper.readValue(
+                          product.getName(), new TypeReference<Map<String, Object>>() {});
+                  productId = new ObjectId((String) productInfo.get("productId"));
+                  shopId = productRepository.findShopIdById(productId).getShopId();
+                  for (int i = 1; i <= product.getQuantity(); i++) {
+                    Order order = new Order();
+                    order.setProductId(productId);
+                    order.setOrderId(new ObjectId(orderId));
+                    order.setUsed(false);
+                    order.setCardId(new ObjectId(cardId));
+                    order.setCreatedAt(localDateTime);
+                    order.setShopId(shopId);
+                    if ((Boolean) productInfo.get("hasPromotion")) {
+                      Promotion promotion = promotionRepository.findByProductId(productId);
+                      if (promotion.getQuantity() != null) {
+                        newQuantity = promotion.getQuantity() - 1;
+                        if (newQuantity == 0) {
+                          mongoTemplate.remove(promotion);
+                        } else {
+                          promotion.setQuantity(newQuantity);
+                          mongoTemplate.save(promotion);
+                        }
+                      }
+                    }
+                    order.setPrice(product.getUnitPrice());
+                    mongoTemplate.save(order);
+                  }
+                } catch (JsonProcessingException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+              reservedProductService.deleteAllByOrderId(orderId);
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

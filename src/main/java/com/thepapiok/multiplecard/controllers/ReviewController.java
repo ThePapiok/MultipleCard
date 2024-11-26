@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/reviews")
 public class ReviewController {
-
   private final MessageSource messageSource;
   private final ReviewService reviewService;
   private final ResultService resultService;
@@ -99,7 +98,7 @@ public class ReviewController {
     model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
     model.addAttribute("pageSelected", page + 1);
     model.addAttribute("reviews", reviews);
-    model.addAttribute("reviewsSize", reviews.size());
+    model.addAttribute("reviewsEmpty", reviews.size() == 0);
     model.addAttribute("principal", principal != null);
     model.addAttribute("maxPage", maxPage);
     return "reviewPage";

@@ -17,14 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 public class CloudinaryServiceTest {
-  private static final String PUBLIC_ID_PARAM = "public_id";
-  private static final String UNIQUE_FILENAME_PARAM = "unique_filename";
-  private static final String OVERWRITE_PARAM = "overwrite";
   private static final String TEST_FILE_NAME = "name";
-
   @Mock private Cloudinary cloudinary;
   @Mock private Uploader uploader;
-
   private final CloudinaryService cloudinaryService = new CloudinaryService();
 
   @BeforeEach
@@ -43,9 +38,9 @@ public class CloudinaryServiceTest {
     when(uploader.upload(
             file,
             ObjectUtils.asMap(
-                PUBLIC_ID_PARAM, TEST_FILE_NAME,
-                UNIQUE_FILENAME_PARAM, false,
-                OVERWRITE_PARAM, true)))
+                "public_id", TEST_FILE_NAME,
+                "unique_filename", false,
+                "overwrite", true)))
         .thenReturn(upload);
 
     assertEquals(url, cloudinaryService.addImage(file, TEST_FILE_NAME));
@@ -59,9 +54,9 @@ public class CloudinaryServiceTest {
     when(uploader.upload(
             file,
             ObjectUtils.asMap(
-                PUBLIC_ID_PARAM, TEST_FILE_NAME,
-                UNIQUE_FILENAME_PARAM, false,
-                OVERWRITE_PARAM, true)))
+                "public_id", TEST_FILE_NAME,
+                "unique_filename", false,
+                "overwrite", true)))
         .thenThrow(RuntimeException.class);
 
     assertNull(cloudinaryService.addImage(file, TEST_FILE_NAME));

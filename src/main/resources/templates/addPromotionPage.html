@@ -13,7 +13,7 @@
 <body onload="atStart()">
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
-<script src="/js/amount.js"></script>
+<script src="/js/price.js"></script>
 <script src="/js/edit.js"></script>
 <script src="/js/addPromotionPage.js"></script>
 <div id="header">
@@ -28,7 +28,7 @@
     <span hidden th:text="${promotion.startAt}" id="dateStartAt"></span>
     <span hidden th:text="${promotion.expiredAt}" id="dateExpiredAt"></span>
     <span hidden th:text="${promotion.expiredAt} != null" id="hasPromotion"></span>
-    <span hidden th:text="${originalAmount}" id="originalAmount"></span>
+    <span hidden th:text="${originalPrice}" id="originalPrice"></span>
     <span hidden th:text="#{addPromotionPage.button.add_promotion}" id="textButtonAddPromotion"></span>
     <span hidden th:text="#{addPromotionPage.button.edit_promotion}" id="textButtonEditPromotion"></span>
     <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
@@ -70,41 +70,42 @@
             </div>
         </div>
         <div class="block-horizontally">
-            <label id="Amount">
+            <label id="NewPrice">
                 <label class="inputs">
-                    <input th:field="*{amount}" type="text" th:placeholder="#{addPromotionPage.amount.text}" required
-                           oninput="checkAmount(this)"
-                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
-                           onmouseleave="hideValidation('Amount')" onfocusout="unfocused(this)"
+                    <input th:field="*{newPrice}" type="text" th:placeholder="#{addPromotionPage.new_price.text}"
+                           required
+                           oninput="checkPrice(this)"
+                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'NewPrice')"
+                           onmouseleave="hideValidation('NewPrice')" onfocusout="unfocused(this)"
                            onfocus="focused(this)">
                     <img id="close3" src="/images/close.png" alt="close">
                     <img id="check3" hidden src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
-                <span th:text="#{addPromotionPage.amount.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{addPromotionPage.new_price.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
                     <li th:text="#{validation.not_negative}"></li>
                     <li th:text="#{validation.only_digits}"></li>
-                    <li th:text="#{addPromotionPage.amount.validation1}"></li>
-                    <li th:text="#{addPromotionPage.amount.validation2}"></li>
+                    <li th:text="#{addPromotionPage.new_price.validation1}"></li>
+                    <li th:text="#{addPromotionPage.new_price.validation2}"></li>
                 </ul>
             </div>
         </div>
         <div class="block-horizontally">
-            <label id="Count">
+            <label id="Quantity">
                 <label class="inputs">
-                    <input th:field="*{count}" type="text" th:placeholder="#{addPromotionPage.count.empty}"
-                           oninput="checkCount(this)"
-                           maxlength="5" onmouseenter="showValidation(this, 'Count')"
-                           onmouseleave="hideValidation('Count')">
+                    <input th:field="*{quantity}" type="text" th:placeholder="#{addPromotionPage.quantity.empty}"
+                           oninput="checkQuantity(this)"
+                           maxlength="5" onmouseenter="showValidation(this, 'Quantity')"
+                           onmouseleave="hideValidation('Quantity')">
                     <img id="close4" hidden src="/images/close.png" alt="close">
                     <img id="check4" src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
-                <span th:text="#{addPromotionPage.count.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{addPromotionPage.quantity.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.empty_or}"></li>
                     <li th:text="#{validation.only_digits}"></li>
@@ -142,10 +143,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

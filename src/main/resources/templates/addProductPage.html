@@ -16,7 +16,7 @@
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/image.js"></script>
-<script src="/js/amount.js"></script>
+<script src="/js/price.js"></script>
 <script src="/js/categories.js"></script>
 <script src="/js/addProductPage.js"></script>
 <div id="header">
@@ -114,19 +114,19 @@
             </div>
         </div>
         <div class="block-horizontally">
-            <label id="Amount">
+            <label id="Price">
                 <label class="inputs">
-                    <input th:field="*{amount}" type="text" th:placeholder="#{product_amount.text}" required
-                           oninput="checkAmount(this)"
-                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Amount')"
-                           onmouseleave="hideValidation('Amount')" onfocusout="unfocusedAmount(this)"
-                           onfocus="focusedAmount(this)">
+                    <input th:field="*{price}" type="text" th:placeholder="#{product_price.text}" required
+                           oninput="checkPrice(this)"
+                           minlength="2" maxlength="7" onmouseenter="showValidation(this, 'Price')"
+                           onmouseleave="hideValidation('Price')" onfocusout="unfocusedPrice(this)"
+                           onfocus="focusedPrice(this)">
                     <img id="close3" src="/images/close.png" alt="close">
                     <img id="check3" hidden src="/images/check.png" alt="check">
                 </label>
             </label>
             <div class="validation">
-                <span th:text="#{product_amount.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{product_price.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 7'"></li>
                     <li th:text="#{validation.not_negative}"></li>
@@ -188,7 +188,7 @@
             </ul>
         </div>
         <p id="errorFile"></p>
-        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <p id="error" th:text="${errorMessage}"></p>
         <a>
             <button type="button" class="grayButton" id="addButton" th:text="#{add_product.text}"
                     onclick="changeCursor(this)"></button>
@@ -200,10 +200,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

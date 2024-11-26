@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PromotionService {
-
   private final PromotionRepository promotionRepository;
   private final PromotionConverter promotionConverter;
 

@@ -20,16 +20,10 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class CustomAuthenticationFailureHandlerTest {
-  private static final String ERROR_USER_NOT_ACTIVE_MESSAGE = "Konto nie jest aktywowane";
-  private static final String ERROR_BAD_CREDENTIALS_MESSAGE = "Błędny login lub hasło";
-  private static final String LOGIN_ERROR_URL = "/login?error";
-
-  private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-
-  @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
   private MockHttpServletRequest httpServletRequest;
   private MockHttpServletResponse httpServletResponse;
   @Autowired private MessageSource messageSource;
+  @Autowired private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
   @BeforeEach
   public void setUp() {
@@ -47,12 +41,11 @@ public class CustomAuthenticationFailureHandlerTest {
     customAuthenticationFailureHandler.onAuthenticationFailure(
         httpServletRequest,
         httpServletResponse,
-        new NotActiveException(ERROR_USER_NOT_ACTIVE_MESSAGE));
+        new NotActiveException("Konto nie jest aktywowane"));
 
-    assertEquals(LOGIN_ERROR_URL, httpServletResponse.getRedirectedUrl());
+    assertEquals("/login?error", httpServletResponse.getRedirectedUrl());
     assertEquals(
-        ERROR_USER_NOT_ACTIVE_MESSAGE,
-        httpServletRequest.getSession().getAttribute(ERROR_MESSAGE_PARAM));
+        "Konto nie jest aktywowane", httpServletRequest.getSession().getAttribute("errorMessage"));
   }
 
   @Test
@@ -61,11 +54,10 @@ public class CustomAuthenticationFailureHandlerTest {
     customAuthenticationFailureHandler.onAuthenticationFailure(
         httpServletRequest,
         httpServletResponse,
-        new BadCredentialsException(ERROR_BAD_CREDENTIALS_MESSAGE));
+        new BadCredentialsException("Błędny login lub hasło"));
 
-    assertEquals(LOGIN_ERROR_URL, httpServletResponse.getRedirectedUrl());
+    assertEquals("/login?error", httpServletResponse.getRedirectedUrl());
     assertEquals(
-        ERROR_BAD_CREDENTIALS_MESSAGE,
-        httpServletRequest.getSession().getAttribute(ERROR_MESSAGE_PARAM));
+        "Błędny login lub hasło", httpServletRequest.getSession().getAttribute("errorMessage"));
   }
 }

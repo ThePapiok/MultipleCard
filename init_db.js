@@ -48,7 +48,7 @@ db.createCollection("shops", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "accountNumber", "name", "totalAmount", "imageUrl", "points", "_class"],
+            "required": ["_id", "firstName", "lastName", "accountNumber", "name", "imageUrl", "points", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -66,11 +66,6 @@ db.createCollection("shops", {
                 "name": {
                     "bsonType": "string",
                     "description": "name is required and must be string"
-                },
-                "totalAmount": {
-                    "bsonType": "long",
-                    "minimum": 0,
-                    "description": "totalAmount is required and must be greater or equal 0"
                 },
                 "imageUrl": {
                     "bsonType": "string",
@@ -136,7 +131,7 @@ db.createCollection("products", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "amount", "shopId", "_class"],
+            "required": ["_id", "name", "description", "imageUrl", "barcode", "price", "shopId", "updatedAt", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -169,10 +164,14 @@ db.createCollection("products", {
                         "description": "categories must be objectId"
                     }
                 },
-                "amount": {
+                "price": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "price is required and must be greater or equal 0"
+                },
+                "updatedAt": {
+                    "bsonType": "date",
+                    "description": "updatedAt is required and must be date"
                 },
                 "shopId": {
                     "bsonType": "objectId",
@@ -191,7 +190,7 @@ db.createCollection("orders", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "amount", "_class"],
+            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId", "shopId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -201,6 +200,10 @@ db.createCollection("orders", {
                 "cardId": {
                     "bsonType": "objectId",
                     "description": "cardId is required and must be objectId"
+                },
+                "shopId": {
+                    "bsonType": "objectId",
+                    "description": "shopId is required and must be objectId"
                 },
                 "productId": {
                     "bsonType": "objectId",
@@ -214,10 +217,14 @@ db.createCollection("orders", {
                     "bsonType": "bool",
                     "description": "isUsed is required and must be bool"
                 }, 
-                "amount": {
+                "price": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "price is required and must be greater or equal 0"
+                },
+                "orderId": {
+                    "bsonType": "objectId",
+                    "description": "orderId is required and must be objectId"
                 },
                 "_class": {
                     "bsonType": "string",
@@ -421,7 +428,7 @@ db.createCollection("promotions", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "startAt", "expiredAt", "amount", "productId", "count", "_class"],
+            "required": ["_id", "startAt", "expiredAt", "newPrice", "productId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -436,16 +443,16 @@ db.createCollection("promotions", {
                     "bsonType": "date",
                     "description": "expiredAt is required and must be date"
                 },
-                "amount": {
+                "newPrice": {
                     "bsonType": "int",
                     "minimum": 0,
-                    "description": "amount is required and must be greater or equal 0"
+                    "description": "newPrice is required and must be greater or equal 0"
                 },
-                "count": {
-                    "bsonType": "int",
+                "quantity": {
+                    "bsonType": ["null", "int"],
                     "minimum": 0,
                     "maximum": 99999,
-                    "description": "count is required and must be greater or equal 0"
+                    "description": "quantity must be greater or equal 0"
                 },
                 "productId": {
                     "bsonType": "objectId",
@@ -459,7 +466,7 @@ db.createCollection("promotions", {
         }
     }
 });
-db.createCollection("blocked", {
+db.createCollection("blockedProducts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
@@ -486,7 +493,107 @@ db.createCollection("blocked", {
 
         }
     }
-})
+});
+db.createCollection("reservedProducts", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "encryptedIp", "promotionId", "orderId", "cardId", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "promotionId": {
+                    "bsonType": "objectId",
+                    "description": "promotionId is required and must be objectId"
+                },
+                "orderId": {
+                    "bsonType": "objectId",
+                    "description": "orderId is required and must be objectId"
+                },
+                "cardId": {
+                    "bsonType": "objectId",
+                    "description": "cardId is required and must be objectId"
+                },
+                "encryptedIp": {
+                    "bsonType": "string",
+                    "description": "encryptedIp is required and must be string"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
+db.createCollection("blockedIps", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "encryptedIp", "amount", "attempts", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "encryptedIp": {
+                    "bsonType": "string",
+                    "description": "encryptedIp is required and must be string"
+                },
+                "amount": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "description": "amount is required and must be between 0 and 200"
+                },
+                "attempts": {
+                    "bsonType": "int",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "description": "attempts is required and must be between 0 and 3"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
+db.createCollection("refunds", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "orderId", "isRefunded", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "orderId": {
+                    "bsonType": "string",
+                    "description": "orderId is required and must be string"
+                },
+                "isRefunded": {
+                    "bsonType": "bool",
+                    "description": "isRefunded is required and must be bool"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
@@ -498,4 +605,7 @@ db.shops.createIndex({"accountNumber": 1}, {"unique": true});
 db.products.createIndex({"description": "text", "name": "text"}, {"default_language": "none"});
 db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
-db.blocked.createIndex({"productId": 1}, {"unique": true});
+db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
+db.refunds.createIndex({"orderId": 1}, {"unique": true});
+
+

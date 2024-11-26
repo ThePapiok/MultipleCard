@@ -11,86 +11,128 @@ public interface CategoryRepository extends MongoRepository<Category, ObjectId> 
   @Aggregation(
       pipeline = {
         """
-            {
-                $match: {
-                    "ownerId": ?0,
-                        }
-            }
-            """,
-        """
-                {
-                    $group: {
-                        "_id": "_id",
-                        "count": {
-                            $count: {}
-                        }
-                    }
-                }
-            """,
-        """
-                {
-                    $project: {
-                        "_id": 0,
-                        "count": { $add: ["$count", ?1]}
-                    }
-                }
-            """,
-        """
-                {
-                    $project: {
-                        "find": {
-                            $cond: {
-                                if: { $gte: ["$count", 20] },
-                                then: true,
-                                else: false
+                            {
+                                $match: {
+                                    "ownerId": ?0,
+                                        }
                             }
-                        }
-                    }
-                }
-            """
+                            """,
+        """
+                                {
+                                    $group: {
+                                        "_id": "_id",
+                                        "count": {
+                                            $count: {}
+                                        }
+                                    }
+                                }
+                            """,
+        """
+                            {
+                                $addFields: {
+                                    "allCount": { $add: ["$count", ?1]}
+                                }
+                            }
+                            """,
+        """
+                                {
+                                    $project: {
+                                        "_id": 0,
+                                        "allCount": 1
+                                    }
+                                }
+                            """,
+        """
+                                {
+                                    $addFields: {
+                                        "find": {
+                                            $cond: {
+                                                if: { $gte: ["$allCount", 20] },
+                                                then: true,
+                                                else: false
+                                            }
+                                        }
+                                    }
+                                }
+                            """,
+        """
+                            {
+                                $project: {
+                                    "find": 1,
+                                }
+                            }
+                            """
       })
   Boolean countByOwnerIsGTE20(ObjectId ownerId, int count);
 
   @Aggregation(
       pipeline = {
         """
-                {
-                    $project: {
-                        "isSubset": {
-                            $setIsSubset: [["$name"], ?0]
-                        }
+                                {
+                                    $addFields: {
+                                        "isSubset": {
+                                            $setIsSubset: [["$name"], ?0]
+                                        }
 
-                    }
-                }
-            """,
+                                    }
+                                }
+                            """,
         """
-                {
-                    $match: {
-                        "isSubset": true
-                    }
-                }
-            """,
+                            {
+                                $project: {
+                                    "_id": 0,
+                                    "isSubset": 1
+                                }
+                            }
+                            """,
         """
-                {
-                    $group: {
-                        "_id": "_id",
-                        "count": {
-                            $count: {}
-                        }
-                    }
-                }
-            """,
+                                {
+                                    $match: {
+                                        "isSubset": true
+                                    }
+                                }
+                            """,
         """
-                {
-                    $project: {
-                        "_id": 0,
-                        "count": 1
-                    }
-                }
-            """
+                                {
+                                    $group: {
+                                        "_id": "_id",
+                                        "count": {
+                                            $count: {}
+                                        }
+                                    }
+                                }
+                            """,
+        """
+                                {
+                                    $project: {
+                                        "_id": 0,
+                                        "count": 1
+                                    }
+                                }
+                            """
       })
   Integer countExistingCategories(List<String> categories);
 
   @Query(value = "{'name': ?0}", fields = "{'_id': 1}")
   Category findIdByName(String name);
+
+  @Aggregation(
+      pipeline = {
+        """
+    {
+        $match: {
+            "name": {$regex: ?0, $options:  "i"}
+        }
+    }
+""",
+        """
+    {
+        $project: {
+            "name": 1,
+            "_id": 0
+        }
+    }
+"""
+      })
+  List<String> getCategoryNamesByPrefix(String pattern);
 }

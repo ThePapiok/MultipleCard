@@ -73,7 +73,7 @@
     </div>
     <div id="allResults">
         <div id="results">
-            <div class="result" th:if="${reviewsSize} > 0" th:each="review : ${reviews}">
+            <div class="result" th:if="${reviewsEmpty} != true" th:each="review : ${reviews}">
                 <div class="result-vertical">
                     <div class="result-horizontal">
                         <span class="name yourReview" th:text="#{yourReview.name}" th:if="${review.owner}"></span>
@@ -103,7 +103,7 @@
                     </div>
                 </div>
             </div>
-            <span th:data-results-size="${reviewsSize}" th:text="#{select.no_results}" id="noResults"></span>
+            <span th:data-results-empty="${reviewsEmpty}" th:text="#{select.no_results}" id="noResults"></span>
         </div>
     </div>
     <div id="pages">
@@ -113,7 +113,7 @@
         </a>
         <div id="pagesSelect">
             <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
-                  th:if="${reviewsSize} != 0" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+                  th:if="${reviewsEmpty} != true" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
         </div>
         <a>
             <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
@@ -123,10 +123,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

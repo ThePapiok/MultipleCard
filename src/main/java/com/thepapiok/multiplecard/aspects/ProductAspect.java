@@ -11,20 +11,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductAspect {
 
-  private static final String REGEX_ZL = "zł";
-
   @Before("execution(* com.thepapiok.multiplecard.controllers.ProductController.addProduct(..))")
-  public void removeZlFromAmountAndRemoveNullCategoriesAtAddProduct(JoinPoint joinPoint) {
+  public void removeZlFromPriceAndRemoveNullCategoriesAtAddProduct(JoinPoint joinPoint) {
     AddProductDTO addProductDTO = (AddProductDTO) joinPoint.getArgs()[0];
-    addProductDTO.setAmount(addProductDTO.getAmount().replaceAll(REGEX_ZL, ""));
+    addProductDTO.setPrice(addProductDTO.getPrice().replaceAll("zł", ""));
     addProductDTO.setCategory(
         (addProductDTO.getCategory().stream().filter(e -> !e.equals("")).toList()));
   }
 
   @Before("execution(* com.thepapiok.multiplecard.controllers.ProductController.editProduct(..))")
-  public void removeZlFromAmountAndRemoveNullCategoriesAtEditProduct(JoinPoint joinPoint) {
+  public void removeZlFromPriceAndRemoveNullCategoriesAtEditProduct(JoinPoint joinPoint) {
     EditProductDTO editProductDTO = (EditProductDTO) joinPoint.getArgs()[0];
-    editProductDTO.setAmount(editProductDTO.getAmount().replaceAll(REGEX_ZL, ""));
+    editProductDTO.setPrice(editProductDTO.getPrice().replaceAll("zł", ""));
     editProductDTO.setCategory(
         (editProductDTO.getCategory().stream().filter(e -> !e.equals("")).toList()));
   }

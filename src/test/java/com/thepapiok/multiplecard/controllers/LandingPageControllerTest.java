@@ -26,15 +26,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class LandingPageControllerTest {
-  private static final String TEST_PHONE = "123123123";
   private static final String LANDING_PAGE_URL = "/";
   private static final String REVIEW_PARAM = "newReview";
   private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
   private static final String LANDING_PAGE_VIEW = "landingPage";
-  private static final String ERROR_PARAM = "error";
   private static final String SUCCESS_PARAM = "success";
   private static final String REVIEWS_PARAM = "reviews";
-  private static final String PRINCIPAL_PARAM = "principal";
   private static List<ReviewGetDTO> list;
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
@@ -60,9 +57,9 @@ public class LandingPageControllerTest {
   }
 
   @Test
-  @WithMockUser(username = TEST_PHONE)
+  @WithMockUser(username = "123123123")
   public void shouldReturnLandingPageAtGetLandingPageWithPrincipal() throws Exception {
-    returnLandingPage(TEST_PHONE, true);
+    returnLandingPage("123123123", true);
   }
 
   private void returnLandingPage(String phone, boolean principal) throws Exception {
@@ -73,13 +70,13 @@ public class LandingPageControllerTest {
         .andExpect(model().attribute(REVIEW_PARAM, new ReviewDTO()))
         .andExpect(model().attribute(REVIEWS_SIZE_PARAM, list.size()))
         .andExpect(model().attribute(REVIEWS_PARAM, list))
-        .andExpect(model().attribute(PRINCIPAL_PARAM, principal))
+        .andExpect(model().attribute("principal", principal))
         .andExpect(view().name(LANDING_PAGE_VIEW));
   }
 
   @Test
   public void shouldReturnLandingPageAtGetLandingPageWithParamErrorButNoMessage() throws Exception {
-    paramWithoutMessage(ERROR_PARAM);
+    paramWithoutMessage("error");
   }
 
   @Test
@@ -105,7 +102,7 @@ public class LandingPageControllerTest {
     final String errorMessageParam = "errorMessage";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(errorMessageParam, message);
-    paramWithMessage(ERROR_PARAM, httpSession, message, errorMessageParam);
+    paramWithMessage("error", httpSession, message, errorMessageParam);
   }
 
   @Test

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 public class AddProductDTOTest {
   private static final String NAME_PARAM = "name";
   private static final String BARCODE_PARAM = "barcode";
-  private static final String AMOUNT_PARAM = "amount";
+  private static final String PRICE_PARAM = "price";
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
 
@@ -122,72 +122,72 @@ public class AddProductDTOTest {
   }
 
   @Test
-  public void shouldSuccessAtValidationAmount() {
+  public void shouldSuccessAtValidationPrice() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1231.12zł");
+    addProductDTO.setPrice("1231.12zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenContainsAnotherSpecialSymbols() {
+  public void shouldFailAtValidationPriceWhenContainsAnotherSpecialSymbols() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1!31.12zł");
+    addProductDTO.setPrice("1!31.12zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenDontContainsCurrency() {
+  public void shouldFailAtValidationPriceWhenDontContainsCurrency() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("131.12");
+    addProductDTO.setPrice("131.12");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenContainsLetters() {
+  public void shouldFailAtValidationPriceWhenContainsLetters() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1A31.12zł");
+    addProductDTO.setPrice("1A31.12zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenNoContainsDot() {
+  public void shouldFailAtValidationPriceWhenNoContainsDot() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("113112zł");
+    addProductDTO.setPrice("113112zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenFractionalPartIsTooLong() {
+  public void shouldFailAtValidationPriceWhenFractionalPartIsTooLong() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1131.122zł");
+    addProductDTO.setPrice("1131.122zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 
   @Test
-  public void shouldFailAtValidationAmountWhenFractionalPartIsTooShort() {
+  public void shouldFailAtValidationPriceWhenFractionalPartIsTooShort() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setAmount("1131.2zł");
+    addProductDTO.setPrice("1131.2zł");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
-        validator.validateProperty(addProductDTO, AMOUNT_PARAM);
+        validator.validateProperty(addProductDTO, PRICE_PARAM);
     assertFalse(violations.isEmpty());
   }
 }

@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AuthenticationService {
-
   private final AccountRepository accountRepository;
   private final UserConverter userConverter;
   private final AccountConverter accountConverter;
@@ -151,7 +150,6 @@ public class AuthenticationService {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
               Shop shop = shopConverter.getEntity(registerShopDTO);
-              shop.setTotalAmount(0L);
               shop = mongoTemplate.save(shop);
               try {
                 Path path = Path.of(filePath);

@@ -24,11 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/promotions")
 public class PromotionController {
-  private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
-  private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
-  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
-  private static final String PROMOTION_PARAM = "promotion";
   private final ProductService productService;
   private final PromotionService promotionService;
   private final MessageSource messageSource;
@@ -60,9 +56,9 @@ public class PromotionController {
       }
     }
     if (productService.isProductOwner(principal.getName(), id)) {
-      Double amount = productService.getAmount(id);
-      if (amount != null) {
-        model.addAttribute("originalAmount", amount);
+      Double price = productService.getPrice(id);
+      if (price != null) {
+        model.addAttribute("originalPrice", price);
       }
       model.addAttribute(isOwnerParam, true);
       promotionDTO = promotionService.getPromotionDTO(id);
@@ -73,7 +69,7 @@ public class PromotionController {
       promotionDTO = new PromotionDTO();
       promotionDTO.setProductId(id);
     }
-    model.addAttribute(PROMOTION_PARAM, promotionDTO);
+    model.addAttribute("promotion", promotionDTO);
     model.addAttribute("productId", id);
     return "addPromotionPage";
   }
@@ -105,26 +101,25 @@ public class PromotionController {
       message = messageSource.getMessage("addPromotion.error.expiredAt_too_far", null, locale);
     } else if (!productService.isProductOwner(principal.getName(), id)) {
       error = true;
-      message = messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
+      message = messageSource.getMessage("error.not_owner", null, locale);
     } else if (!promotionService.checkNewStartAtIsPresent(startAt, id)) {
       error = true;
       message = messageSource.getMessage("addPromotion.error.startAt_not_present", null, locale);
-    } else if (!productService.isLessThanOriginalPrice(promotion.getAmount(), id)) {
+    } else if (!productService.isLessThanOriginalPrice(promotion.getNewPrice(), id)) {
       error = true;
-      message = messageSource.getMessage("addPromotion.error.amount_too_less", null, locale);
+      message = messageSource.getMessage("addPromotion.error.new_price_too_less", null, locale);
     }
     if (error) {
       httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
       return "redirect:/promotions?id=" + id + "&error";
     }
     if (!promotionService.upsertPromotion(promotion)) {
-      System.out.println(promotion);
       httpSession.setAttribute(
-          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale));
+          ERROR_MESSAGE_PARAM, messageSource.getMessage("error.unexpected", null, locale));
       return "redirect:/products?error";
     }
     httpSession.setAttribute(
-        SUCCESS_MESSAGE_PARAM,
+        "successMessage",
         messageSource.getMessage("addPromotion.success.upsert_promotion", null, locale));
     return "redirect:/products?success";
   }
@@ -133,9 +128,9 @@ public class PromotionController {
   @ResponseBody
   public String deletePromotion(@RequestParam String id, Principal principal, Locale locale) {
     if (!productService.isProductOwner(principal.getName(), id)) {
-      return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
+      return messageSource.getMessage("error.not_owner", null, locale);
     } else if (!promotionService.deletePromotion(id)) {
-      return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
+      return messageSource.getMessage("error.unexpected", null, locale);
     }
     return "ok";
   }

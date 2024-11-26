@@ -81,7 +81,7 @@
                 <li th:text="#{validation.prefix_length_is} + ' 6'"></li>
             </ul>
         </div>
-        <p th:if="${param.error}" id="error" th:text="${errorMessage}"></p>
+        <p id="error" th:text="${errorMessage}"></p>
         <a>
             <button type="button" class="grayButton" id="registerButton"
                     th:text="#{verificationShopPage.button.create_shop}" onclick="changeCursor(this)"
@@ -104,10 +104,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

@@ -12,6 +12,7 @@ import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.List;
@@ -28,7 +29,6 @@ public class ProfileConverterTest {
   private static final String TEST_FIRST_NAME = "firstName";
   private static final String TEST_LAST_NAME = "lastName";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
-
   private static Address address;
   private static AddressDTO addressDTO;
   private static User user;
@@ -37,6 +37,7 @@ public class ProfileConverterTest {
   @Mock private AccountRepository accountRepository;
   @Mock private AddressConverter addressConverter;
   @Mock private ShopRepository shopRepository;
+  @Mock private OrderRepository orderRepository;
   private ProfileConverter profileConverter;
 
   @BeforeAll
@@ -76,7 +77,8 @@ public class ProfileConverterTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     profileConverter =
-        new ProfileConverter(userRepository, accountRepository, addressConverter, shopRepository);
+        new ProfileConverter(
+            userRepository, accountRepository, addressConverter, shopRepository, orderRepository);
   }
 
   @Test
@@ -112,17 +114,17 @@ public class ProfileConverterTest {
   @Test
   public void shouldReturnProfilesShopDTOAtGetDTOShopWhenEverythingOk() {
     final long totalAmount = 3000;
-    final float centsPerZloty = 100.0F;
+    final double centsPerZloty = 100;
     final String shopNameTest = "name";
     final String accountNumberTest = "accountNumber";
     final String imageUrlTest = "imageUrl";
     Shop shop = new Shop();
+    shop.setId(new ObjectId("123456789012345678901234"));
     shop.setFirstName(TEST_FIRST_NAME);
     shop.setLastName(TEST_LAST_NAME);
     shop.setName(shopNameTest);
     shop.setAccountNumber(accountNumberTest);
     shop.setImageUrl(imageUrlTest);
-    shop.setTotalAmount(totalAmount);
     shop.setPoints(List.of(address));
     ProfileShopDTO expectedProfileShopDTO = new ProfileShopDTO();
     expectedProfileShopDTO.setFirstName(TEST_FIRST_NAME);
@@ -133,6 +135,7 @@ public class ProfileConverterTest {
     expectedProfileShopDTO.setTotalAmount(String.valueOf(totalAmount / centsPerZloty));
     expectedProfileShopDTO.setAddress(List.of(addressDTO));
 
+    when(orderRepository.sumTotalAmountForShop(shop.getId())).thenReturn(totalAmount);
     when(addressConverter.getDTOs(List.of(address))).thenReturn(List.of(addressDTO));
 
     assertEquals(expectedProfileShopDTO, profileConverter.getDTO(shop));
@@ -140,7 +143,6 @@ public class ProfileConverterTest {
 
   @Test
   public void shouldReturnShopEntityAtGetEntityForShopsWhenEverythingOk() {
-    final long totalAmountTest = 3L;
     final String newShopNameTest = "newName";
     final String newAccountNumberTest = "newAccountNumber";
     final String newFirstNameTest = "newFirstName";
@@ -156,7 +158,6 @@ public class ProfileConverterTest {
     shop.setPoints(List.of(new Address()));
     shop.setAccountNumber("123123123123123123");
     shop.setImageUrl(urlTest);
-    shop.setTotalAmount(totalAmountTest);
     List<AddressDTO> addressDTOList = List.of(addressDTO);
     List<Address> addresses = List.of(address);
     ProfileShopDTO profileShopDTO = new ProfileShopDTO();
@@ -166,7 +167,6 @@ public class ProfileConverterTest {
     profileShopDTO.setAccountNumber(newAccountNumberTest);
     profileShopDTO.setAddress(addressDTOList);
     Shop expectedShop = new Shop();
-    expectedShop.setTotalAmount(totalAmountTest);
     expectedShop.setName(newShopNameTest);
     expectedShop.setPoints(addresses);
     expectedShop.setId(TEST_ID);

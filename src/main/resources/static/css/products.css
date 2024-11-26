@@ -1,0 +1,91 @@
+
+#error, #success {
+    margin-left: 5%;
+}
+
+.productImage {
+    width: 50%;
+    height: 200px;
+}
+
+.quantity, .price {
+    margin-top: 10px;
+    font-family: "Inter", sans-serif;
+    color: #000000;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.promotion {
+    opacity: 50%;
+    text-decoration-line: line-through;
+    color: red;
+}
+
+.fullPrice, .promotion {
+    margin-left: 10px;
+}
+
+.notImageContainer {
+    height: 50px;
+    background-color: #eadcc2;
+}
+
+.description {
+    color: #6E6E6E;
+    max-width: 50%;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    overflow-wrap: break-word;
+    padding: 5px;
+}
+
+.imageContainer {
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    padding: 5px;
+    background-color: #f7f7f7;
+    cursor: pointer;
+}
+
+.date {
+    font-family: "Inter", sans-serif;
+}
+
+.promotionInfo {
+    width: 55%;
+}
+
+.productsLeft {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+}
+
+.promotionPrice {
+    width: 45%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.promotionContainer {
+    width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+    .result {
+        height: auto;
+    }
+
+    .quantity, .price {
+        font-size: 13px;
+    }
+
+    .date {
+        font-size: 12px;
+    }
+
+    .productsLeft {
+        font-size: 10px;
+    }
+}

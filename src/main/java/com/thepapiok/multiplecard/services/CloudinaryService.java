@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CloudinaryService {
-
   @Value("${CLOUDINARY_CLOUD_NAME}")
   private String cloudinaryCloudName;
 

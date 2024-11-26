@@ -15,7 +15,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
-import com.thepapiok.multiplecard.collections.Blocked;
+import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
@@ -57,20 +57,15 @@ public class ProfileServiceTest {
   private static final String TEST_PHONE = "+48755775676767";
   private static final String ID_PARAM = "_id";
   private static final String CARD_ID_PARAM = "cardId";
-  private static final String REVIEW_USER_ID_PARAM = "reviewUserId";
-  private static final String USER_ID_PARAM = "userId";
   private static final ObjectId TEST_PRODUCT_ID1 = new ObjectId("123132123312123312312577");
   private static final ObjectId TEST_PRODUCT_ID2 = new ObjectId("123132103312123310312577");
   private static final ObjectId TEST_PRODUCT_ID3 = new ObjectId("423132303311123310772591");
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static final String TEST_SHOP_NAME = "shopName";
-  private static final Long TEST_TOTAL_AMOUNT = 3300L;
-  private static final String TEST_IMAGE_URL = "url";
   private static final String TEST_FIRST_NAME = "firstNameShop";
   private static final String TEST_LAST_NAME = "lastNameShop";
   private static final String TEST_ACCOUNT_NUMBER = "accountNumberShop";
   private static final String PRODUCT_ID_PARAM = "productId";
-
   private static Address address;
   private static User user;
   private static Shop shop;
@@ -131,8 +126,7 @@ public class ProfileServiceTest {
     shop = new Shop();
     shop.setId(TEST_ID);
     shop.setName(TEST_SHOP_NAME);
-    shop.setTotalAmount(TEST_TOTAL_AMOUNT);
-    shop.setImageUrl(TEST_IMAGE_URL);
+    shop.setImageUrl("url");
     shop.setFirstName(TEST_FIRST_NAME);
     shop.setLastName(TEST_LAST_NAME);
     shop.setAccountNumber(TEST_ACCOUNT_NUMBER);
@@ -229,7 +223,7 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndUsed(any(), eq(false))).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(any(), eq(false))).thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -248,11 +242,11 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test
@@ -263,9 +257,9 @@ public class ProfileServiceTest {
     final ObjectId cardId1 = new ObjectId("123132123312123312312579");
     final ObjectId cardId2 = new ObjectId("123132103312123310312579");
     final ObjectId cardId3 = new ObjectId("423132303311123310772599");
-    final int amount1 = 10;
-    final int amount2 = 20;
-    final int amount3 = 30;
+    final int price1 = 10;
+    final int price2 = 20;
+    final int price3 = 30;
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -281,45 +275,35 @@ public class ProfileServiceTest {
     products.add(product3);
     List<Order> orders = new ArrayList<>();
     Order order1 = new Order();
-    order1.setAmount(amount1);
+    order1.setPrice(price1);
     order1.setCardId(cardId1);
     order1.setUsed(false);
     Order order2 = new Order();
-    order2.setAmount(amount2);
+    order2.setPrice(price2);
     order2.setCardId(cardId2);
     order2.setUsed(false);
     Order order3 = new Order();
-    order3.setAmount(amount3);
+    order3.setPrice(price3);
     order3.setCardId(cardId3);
     order3.setUsed(false);
-    Order order1AfterDelete = new Order();
-    order1AfterDelete.setAmount(amount1);
-    order1AfterDelete.setCardId(cardId1);
-    order1AfterDelete.setUsed(true);
-    Order order2AfterDelete = new Order();
-    order2AfterDelete.setAmount(amount2);
-    order2AfterDelete.setCardId(cardId2);
-    order2AfterDelete.setUsed(true);
-    Order order3AfterDelete = new Order();
-    order3AfterDelete.setAmount(amount3);
-    order3AfterDelete.setCardId(cardId3);
-    order3AfterDelete.setUsed(true);
     orders.add(order1);
     orders.add(order2);
     orders.add(order3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID2, false)).thenReturn(List.of());
-    when(orderRepository.findAllByProductIdAndUsed(TEST_PRODUCT_ID3, false)).thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID2, false))
+        .thenReturn(List.of());
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID3, false))
+        .thenReturn(List.of());
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
-    verify(mongoTemplate).save(order1AfterDelete);
-    verify(mongoTemplate).save(order2AfterDelete);
-    verify(mongoTemplate).save(order3AfterDelete);
+    verify(mongoTemplate).remove(order1);
+    verify(mongoTemplate).remove(order2);
+    verify(mongoTemplate).remove(order3);
     verify(mongoTemplate).remove(product1);
     verify(mongoTemplate).remove(product2);
     verify(mongoTemplate).remove(product3);
@@ -330,17 +314,17 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId1)),
-            new Update().inc(pointsParam, (amount1 / centsPerZloty)),
+            new Update().inc(pointsParam, (price1 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId2)),
-            new Update().inc(pointsParam, (amount2 / centsPerZloty)),
+            new Update().inc(pointsParam, (price2 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .updateFirst(
             query(where(CARD_ID_PARAM).is(cardId3)),
-            new Update().inc(pointsParam, (amount3 / centsPerZloty)),
+            new Update().inc(pointsParam, (price3 / centsPerZloty)),
             User.class);
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);
@@ -349,11 +333,11 @@ public class ProfileServiceTest {
     verify(mongoTemplate)
         .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
     verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Blocked.class);
+        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test
@@ -381,8 +365,8 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(account);
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), User.class);
-    verify(mongoTemplate).remove(query(where(REVIEW_USER_ID_PARAM).is(TEST_ID)), Like.class);
-    verify(mongoTemplate).remove(query(where(USER_ID_PARAM).is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("reviewUserId").is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("userId").is(TEST_ID)), Like.class);
   }
 
   @Test
@@ -400,8 +384,8 @@ public class ProfileServiceTest {
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(account);
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), User.class);
-    verify(mongoTemplate).remove(query(where(REVIEW_USER_ID_PARAM).is(TEST_ID)), Like.class);
-    verify(mongoTemplate).remove(query(where(USER_ID_PARAM).is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("reviewUserId").is(TEST_ID)), Like.class);
+    verify(mongoTemplate).remove(query(where("userId").is(TEST_ID)), Like.class);
     verify(mongoTemplate).remove(query(where(CARD_ID_PARAM).is(cardId)), Order.class);
     verify(mongoTemplate).remove(card);
     verify(cloudinaryService).deleteImage(card.getId().toString());
@@ -497,7 +481,6 @@ public class ProfileServiceTest {
     Shop expectedShopWithNewUrl = new Shop();
     expectedShopWithNewUrl.setId(TEST_ID);
     expectedShopWithNewUrl.setName(TEST_SHOP_NAME);
-    expectedShopWithNewUrl.setTotalAmount(TEST_TOTAL_AMOUNT);
     expectedShopWithNewUrl.setImageUrl(otherImageUrlTest);
     expectedShopWithNewUrl.setFirstName(TEST_FIRST_NAME);
     expectedShopWithNewUrl.setLastName(TEST_LAST_NAME);

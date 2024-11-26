@@ -1,13 +1,16 @@
 package com.thepapiok.multiplecard.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.misc.AddressConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -15,12 +18,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import javax.imageio.ImageIO;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -31,7 +38,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 public class ShopServiceTest {
-
   private static final String TEST_ACCOUNT_NUMBER = "12312312312312312312312";
   private static final String TEST_SHOP_NAME = "test";
   private static final String TEST_CONTENT_TYPE = "image/png";
@@ -40,19 +46,31 @@ public class ShopServiceTest {
   private static final String TEST_FILE2_NAME = "file2";
   private static final String TEST_FILE3_NAME = "file3";
   private static final String TEST_FILE4_NAME = "file4";
-  private static final String TEST_FORMAT_NAME = "png";
   private static final String TEST_OTHER_CONTENT_TYPE = "application/pdf";
-  private static final String IBAN_API_URL =
-      "https://api.ibanapi.com/v1/validate-basic/PL12312312312312312312312?api_key=null";
+  private static final LocalDateTime TEST_LOCALE_DATE_TIME = LocalDateTime.of(2024, 12, 2, 2, 2);
+  private static MockedStatic<LocalDateTime> localDateTimeMockedStatic;
   @Mock private AddressConverter addressConverter;
   @Mock private RestTemplate restTemplate;
   @Mock private AccountRepository accountRepository;
+  @Mock private ShopRepository shopRepository;
   private ShopService shopService;
+
+  @BeforeAll
+  public static void setStatic() {
+    localDateTimeMockedStatic = mockStatic(LocalDateTime.class);
+    localDateTimeMockedStatic.when(LocalDateTime::now).thenReturn(TEST_LOCALE_DATE_TIME);
+  }
+
+  @AfterAll
+  public static void cleanStatic() {
+    localDateTimeMockedStatic.close();
+  }
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    shopService = new ShopService(addressConverter, accountRepository, restTemplate);
+    shopService =
+        new ShopService(addressConverter, accountRepository, shopRepository, restTemplate);
   }
 
   @Test
@@ -99,7 +117,7 @@ public class ShopServiceTest {
   private MultipartFile setFile(String contentType, int width, int height) throws IOException {
     BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ImageIO.write(bufferedImage, TEST_FORMAT_NAME, byteArrayOutputStream);
+    ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
     return new MockMultipartFile(
         TEST_FILE_NAME, TEST_FILE_NAME, contentType, byteArrayOutputStream.toByteArray());
   }
@@ -123,7 +141,7 @@ public class ShopServiceTest {
     }
     graphics2D.dispose();
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ImageIO.write(bufferedImage, TEST_FORMAT_NAME, byteArrayOutputStream);
+    ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
     MockMultipartFile multipartFile =
         new MockMultipartFile(
             TEST_FILE_NAME, TEST_FILE_NAME, TEST_CONTENT_TYPE, byteArrayOutputStream.toByteArray());
@@ -166,7 +184,11 @@ public class ShopServiceTest {
     final int statusOk = 200;
     ResponseEntity<String> response = new ResponseEntity<>(HttpStatusCode.valueOf(statusOk));
 
-    when(restTemplate.exchange(IBAN_API_URL, HttpMethod.GET, null, String.class))
+    when(restTemplate.exchange(
+            "https://api.ibanapi.com/v1/validate-basic/PL12312312312312312312312?api_key=null",
+            HttpMethod.GET,
+            null,
+            String.class))
         .thenReturn(response);
 
     assertTrue(shopService.checkAccountNumber(TEST_ACCOUNT_NUMBER));
@@ -174,7 +196,11 @@ public class ShopServiceTest {
 
   @Test
   public void shouldReturnFalseAtCheckAccountNumberWhenInvalidAccountNumber() {
-    when(restTemplate.exchange(IBAN_API_URL, HttpMethod.GET, null, String.class))
+    when(restTemplate.exchange(
+            "https://api.ibanapi.com/v1/validate-basic/PL12312312312312312312312?api_key=null",
+            HttpMethod.GET,
+            null,
+            String.class))
         .thenThrow(HttpClientErrorException.class);
 
     assertFalse(shopService.checkAccountNumber(TEST_ACCOUNT_NUMBER));
@@ -214,7 +240,6 @@ public class ShopServiceTest {
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
 
     String filePath = shopService.saveTempFile(multipartFile);
-    System.out.println(filePath);
     assertTrue(filePath.contains("upload_"));
     assertTrue(filePath.contains(".tmp"));
 
@@ -271,5 +296,19 @@ public class ShopServiceTest {
         List.of(multipartFile1, multipartFile2, multipartFile3, multipartFile4);
 
     assertFalse(shopService.checkFiles(list));
+  }
+
+  @Test
+  public void shouldReturnListOfShopNamesAtGetShopNamesByPrefixWhenEverythingOk() {
+    List<String> shopNames = List.of("Zahir", "Zamek");
+
+    when(shopRepository.getShopNamesByPrefix("^Za")).thenReturn(shopNames);
+
+    assertEquals(shopNames, shopService.getShopNamesByPrefix("Za"));
+  }
+
+  @Test
+  public void shouldReturnEmptyListAtGetShopNamesByPrefixWhenPrefixIsBlank() {
+    assertEquals(List.of(), shopService.getShopNamesByPrefix(""));
   }
 }

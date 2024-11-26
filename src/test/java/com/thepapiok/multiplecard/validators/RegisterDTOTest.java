@@ -18,23 +18,7 @@ public class RegisterDTOTest {
   private static final String TEST_TEXT = "Test";
   private static final String TEST_TEXT_TWO_PARTS = "Test Test";
   private static final String TEST_TEXT_LOWER_CASE = "test";
-  private static final String TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER = "1B";
-  private static final String TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL = "1!";
-
-  private static final String PASSWORD_FIELD = "password";
-  private static final String RETYPED_PASSWORD_FIELD = "retypedPassword";
-  private static final String EMAIL_FIELD = "email";
-  private static final String PHONE_FIELD = "phone";
-  private static final String POSTAL_CODE_FIELD = "postalCode";
-  private static final String APARTMENT_NUMBER_FIELD = "apartmentNumber";
-  private static final String HOUSE_NUMBER_FIELD = "houseNumber";
-  private static final String PROVINCE_FIELD = "province";
-  private static final String STREET_FIELD = "street";
-  private static final String CITY_FIELD = "city";
-  private static final String LAST_NAME_FIELD = "lastName";
-  private static final String FIRST_NAME_FIELD = "firstName";
   private static final String CALLING_CODE_FIELD = "callingCode";
-
   private static ValidatorFactory validatorFactory;
   private static Validator validator;
 
@@ -54,7 +38,7 @@ public class RegisterDTOTest {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setFirstName(TEST_TEXT);
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, FIRST_NAME_FIELD);
+        validator.validateProperty(registerDTO, "firstName");
 
     assertTrue(violations.isEmpty());
   }
@@ -93,7 +77,7 @@ public class RegisterDTOTest {
 
   private void validationFalseFirstName(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, FIRST_NAME_FIELD);
+        validator.validateProperty(registerDTO, "firstName");
 
     assertFalse(violations.isEmpty());
   }
@@ -143,13 +127,13 @@ public class RegisterDTOTest {
     Set<ConstraintViolation<AddressDTO>> violationsAddress;
     AddressDTO addressDTO = registerDTO.getAddress();
 
-    violations = validator.validateProperty(registerDTO, LAST_NAME_FIELD);
+    violations = validator.validateProperty(registerDTO, "lastName");
     assertTrue(violations.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, CITY_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "city");
     assertTrue(violationsAddress.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, STREET_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "street");
     assertTrue(violationsAddress.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, PROVINCE_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "province");
     assertTrue(violationsAddress.isEmpty());
   }
 
@@ -287,13 +271,13 @@ public class RegisterDTOTest {
     Set<ConstraintViolation<AddressDTO>> violationsAddress;
     AddressDTO addressDTO = registerDTO.getAddress();
 
-    violations = validator.validateProperty(registerDTO, LAST_NAME_FIELD);
+    violations = validator.validateProperty(registerDTO, "lastName");
     assertFalse(violations.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, CITY_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "city");
     assertFalse(violationsAddress.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, STREET_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "street");
     assertFalse(violationsAddress.isEmpty());
-    violationsAddress = validator.validateProperty(addressDTO, PROVINCE_FIELD);
+    violationsAddress = validator.validateProperty(addressDTO, "province");
     assertFalse(violationsAddress.isEmpty());
   }
 
@@ -310,7 +294,7 @@ public class RegisterDTOTest {
   @Test
   public void shouldSuccessAtValidationHouseNumber2() {
     AddressDTO addressDTO = new AddressDTO();
-    addressDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
+    addressDTO.setHouseNumber("1B");
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setAddress(addressDTO);
 
@@ -329,7 +313,7 @@ public class RegisterDTOTest {
 
   public void validationTrueHouseNumber(RegisterDTO registerDTO) {
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), HOUSE_NUMBER_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "houseNumber");
     assertTrue(violations.isEmpty());
   }
 
@@ -346,7 +330,7 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationHouseNumberWhenContainsSpecialSymbols() {
     AddressDTO addressDTO = new AddressDTO();
-    addressDTO.setHouseNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
+    addressDTO.setHouseNumber("1!");
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setAddress(addressDTO);
 
@@ -415,7 +399,7 @@ public class RegisterDTOTest {
 
   public void validationFalseHouseNumber(RegisterDTO registerDTO) {
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), HOUSE_NUMBER_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "houseNumber");
     assertFalse(violations.isEmpty());
   }
 
@@ -441,7 +425,7 @@ public class RegisterDTOTest {
 
   public void validationTrueApartmentNumber(RegisterDTO registerDTO) {
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), APARTMENT_NUMBER_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "apartmentNumber");
     assertTrue(violations.isEmpty());
   }
 
@@ -458,7 +442,7 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationApartmentNumberWhenContainsLetters() {
     AddressDTO addressDTO = new AddressDTO();
-    addressDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_LETTER);
+    addressDTO.setApartmentNumber("1B");
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setAddress(addressDTO);
 
@@ -468,7 +452,7 @@ public class RegisterDTOTest {
   @Test
   public void shouldFailAtValidationApartmentNumberWhenContainsSpecialSymbols() {
     AddressDTO addressDTO = new AddressDTO();
-    addressDTO.setApartmentNumber(TEST_HOUSE_APARTMENT_NUMBER_WITH_SPECIAL_SYMBOL);
+    addressDTO.setApartmentNumber("1!");
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setAddress(addressDTO);
 
@@ -487,7 +471,7 @@ public class RegisterDTOTest {
 
   public void validationFalseApartmentNumber(RegisterDTO registerDTO) {
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), APARTMENT_NUMBER_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "apartmentNumber");
     assertFalse(violations.isEmpty());
   }
 
@@ -498,7 +482,7 @@ public class RegisterDTOTest {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setAddress(addressDTO);
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), POSTAL_CODE_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "postalCode");
 
     assertTrue(violations.isEmpty());
   }
@@ -565,7 +549,7 @@ public class RegisterDTOTest {
 
   public void validationFalsePostalCode(RegisterDTO registerDTO) {
     Set<ConstraintViolation<AddressDTO>> violations =
-        validator.validateProperty(registerDTO.getAddress(), POSTAL_CODE_FIELD);
+        validator.validateProperty(registerDTO.getAddress(), "postalCode");
     assertFalse(violations.isEmpty());
   }
 
@@ -587,7 +571,7 @@ public class RegisterDTOTest {
 
   public void validationTruePhone(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, PHONE_FIELD);
+        validator.validateProperty(registerDTO, "phone");
     assertTrue(violations.isEmpty());
   }
 
@@ -617,7 +601,7 @@ public class RegisterDTOTest {
 
   public void validationFalsePhone(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, PHONE_FIELD);
+        validator.validateProperty(registerDTO, "phone");
     assertFalse(violations.isEmpty());
   }
 
@@ -629,9 +613,9 @@ public class RegisterDTOTest {
     registerDTO.setRetypedPassword(testPassword);
     Set<ConstraintViolation<RegisterDTO>> violations;
 
-    violations = validator.validateProperty(registerDTO, PASSWORD_FIELD);
+    violations = validator.validateProperty(registerDTO, "password");
     assertTrue(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, RETYPED_PASSWORD_FIELD);
+    violations = validator.validateProperty(registerDTO, "retypedPassword");
     assertTrue(violations.isEmpty());
   }
 
@@ -677,9 +661,9 @@ public class RegisterDTOTest {
 
   public void validationFalsePasswordAndRetypedPassword(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations;
-    violations = validator.validateProperty(registerDTO, PASSWORD_FIELD);
+    violations = validator.validateProperty(registerDTO, "password");
     assertFalse(violations.isEmpty());
-    violations = validator.validateProperty(registerDTO, RETYPED_PASSWORD_FIELD);
+    violations = validator.validateProperty(registerDTO, "retypedPassword");
     assertFalse(violations.isEmpty());
   }
 
@@ -688,7 +672,7 @@ public class RegisterDTOTest {
     RegisterDTO registerDTO = new RegisterDTO();
     registerDTO.setEmail("Em.-1_ail@T1e.pL");
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, EMAIL_FIELD);
+        validator.validateProperty(registerDTO, "email");
 
     assertTrue(violations.isEmpty());
   }
@@ -743,7 +727,7 @@ public class RegisterDTOTest {
 
   public void validationFalseEmail(RegisterDTO registerDTO) {
     Set<ConstraintViolation<RegisterDTO>> violations =
-        validator.validateProperty(registerDTO, EMAIL_FIELD);
+        validator.validateProperty(registerDTO, "email");
     assertFalse(violations.isEmpty());
   }
 

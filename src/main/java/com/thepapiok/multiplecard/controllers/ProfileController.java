@@ -43,7 +43,6 @@ public class ProfileController {
   private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String PHONE_PARAM = "phone";
-  private static final String FILE_PATH_PARAM = "filePath";
   private static final String CODE_SMS_CHANGE_PARAM = "codeSmsChange";
   private static final String CODE_SMS_EDIT_PARAM = "codeSmsEdit";
   private static final String CODE_SMS_EDIT_SHOP_PARAM = "codeSmsEditShop";
@@ -53,10 +52,7 @@ public class ProfileController {
   private static final String ERROR_VALIDATION_MESSAGE = "validation.incorrect_data";
   private static final String REDIRECT_PROFILE_ERROR = "redirect:/profile?error";
   private static final String REDIRECT_PROFILE = "redirect:/profile";
-  private static final String REDIRECT_LOGIN_SUCCESS = "redirect:/login?success";
-  private static final String REDIRECT_EDIT_PROFILE = "redirect:/edit_profile";
   private static final Pattern PATTERN_CODE = Pattern.compile("^[0-9]{3} [0-9]{3}$");
-
   private final ProfileService profileService;
   private final CountryService countryService;
   private final MessageSource messageSource;
@@ -138,8 +134,6 @@ public class ProfileController {
     final List<AddressDTO> points = profileShop.getAddress();
     final int maxListSize = 5;
     final MultipartFile file = profileShop.getFile();
-    System.out.println(file);
-    System.out.println(profileShop);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
@@ -170,7 +164,7 @@ public class ProfileController {
         error = true;
         message = messageSource.getMessage(ERROR_UNEXPECTED_PARAM, null, locale);
       } else {
-        httpSession.setAttribute(FILE_PATH_PARAM, filePath);
+        httpSession.setAttribute("filePath", filePath);
       }
     }
     if (error) {
@@ -178,7 +172,7 @@ public class ProfileController {
       return REDIRECT_PROFILE_ERROR;
     }
     httpSession.setAttribute(EDIT_SHOP_PARAM, profileShop);
-    return REDIRECT_EDIT_PROFILE;
+    return "redirect:/edit_profile";
   }
 
   @PostMapping("/user")
@@ -193,7 +187,7 @@ public class ProfileController {
       return REDIRECT_PROFILE_ERROR;
     }
     httpSession.setAttribute(EDIT_PARAM, profile);
-    return REDIRECT_EDIT_PROFILE;
+    return "redirect:/edit_profile";
   }
 
   @GetMapping("/edit_profile")
@@ -274,11 +268,7 @@ public class ProfileController {
         return redirectErrorPage(
             httpSession, amount, "error.bad_files", locale, redirectEditProfileError);
       } else if (!profileService.editProfileShop(
-          profileShopDTO,
-          (String) httpSession.getAttribute(FILE_PATH_PARAM),
-          locale,
-          file,
-          phone)) {
+          profileShopDTO, (String) httpSession.getAttribute("filePath"), locale, file, phone)) {
         authenticationController.resetSession(
             httpSession, CODE_SMS_EDIT_SHOP_PARAM, EDIT_SHOP_PARAM);
         httpSession.setAttribute(
@@ -388,7 +378,7 @@ public class ProfileController {
     }
     authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
     new SecurityContextLogoutHandler().logout(request, response, authentication);
-    return REDIRECT_LOGIN_SUCCESS;
+    return "redirect:/login?success";
   }
 
   @GetMapping("/delete_account")
@@ -444,7 +434,7 @@ public class ProfileController {
     }
     authenticationController.resetSession(httpSession, CODE_SMS_CHANGE_PARAM, null);
     new SecurityContextLogoutHandler().logout(request, response, authentication);
-    return REDIRECT_LOGIN_SUCCESS;
+    return "redirect:/login?success";
   }
 
   private String resetAndErrorParams(

@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperationContext;
 
 public class CustomProjectAggregationOperation implements AggregationOperation {
-  private String jsonOperation;
+  private final String jsonOperation;
 
   public CustomProjectAggregationOperation(String jsonOperation) {
     this.jsonOperation = jsonOperation;

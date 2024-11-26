@@ -25,9 +25,8 @@ public class UserServiceTest {
   private static final String TEST_EMAIL = "email";
   private static final String TEST_PASSWORD = "123wefasdfasd123bsedf";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
-
-  private UserService userService;
   @Mock private AccountRepository accountRepository;
+  private UserService userService;
 
   @BeforeEach
   public void setUp() {

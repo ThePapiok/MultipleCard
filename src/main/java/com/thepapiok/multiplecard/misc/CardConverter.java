@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CardConverter {
-
   private final PasswordEncoder passwordEncoder;
 
   @Autowired
