@@ -3,8 +3,10 @@ package com.thepapiok.multiplecard.misc;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.repositories.BlockedIpRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
+import com.thepapiok.multiplecard.services.BlockedProductService;
 import com.thepapiok.multiplecard.services.ProductService;
 import java.time.LocalDate;
+import java.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,30 +19,45 @@ public class Schedule {
   private final BlockedProductRepository blockedProductRepository;
   private final BlockedIpRepository blockedIpRepository;
   private final ProductService productService;
+  private final BlockedProductService blockedProductService;
+  private final RestTemplate restTemplate;
 
   @Autowired
   public Schedule(
       BlockedProductRepository blockedProductRepository,
       BlockedIpRepository blockedIpRepository,
-      ProductService productService) {
+      ProductService productService,
+      BlockedProductService blockedProductService,
+      RestTemplate restTemplate) {
     this.blockedProductRepository = blockedProductRepository;
     this.blockedIpRepository = blockedIpRepository;
     this.productService = productService;
+    this.blockedProductService = blockedProductService;
+    this.restTemplate = restTemplate;
   }
 
   @Scheduled(fixedRate = 840000)
   public void checkHealth() {
-    RestTemplate restTemplate = new RestTemplate();
-    restTemplate
-        .getForEntity("https://multiplecard-neq8.onrender.com/health", String.class)
-        .getStatusCode();
+    restTemplate.getForEntity("https://multiplecard-neq8.onrender.com/health", String.class);
   }
 
   @Scheduled(fixedRate = 86400000)
   public void checkBlocked() {
-    for (BlockedProduct blockedProduct :
-        blockedProductRepository.findAllByExpiredAtIsBefore(LocalDate.now())) {
-      productService.deleteProduct(blockedProduct.getProductId().toString());
+    final int periodIs7 = 7;
+    final int periodIs1 = 1;
+    final int periodIs0 = 0;
+    int days;
+    for (BlockedProduct blockedProduct : blockedProductRepository.findAll()) {
+      days = Period.between(blockedProduct.getExpiredAt(), LocalDate.now()).getDays();
+      if (days == periodIs7) {
+        blockedProductService.sendWarning(
+            blockedProduct.getProductId(), "blockedProductService.warning.text_7days");
+      } else if (days == periodIs1) {
+        blockedProductService.sendWarning(
+            blockedProduct.getProductId(), "blockedProductService.warning.text_1day");
+      } else if (days == periodIs0) {
+        productService.deleteProduct(blockedProduct.getProductId().toString());
+      }
     }
     blockedIpRepository.deleteAll();
   }
