@@ -18,9 +18,6 @@
 <script src="/js/productsId.js"></script>
 <script src="/js/shopInfo.js"></script>
 <script src="/js/buyProductsPage.js"></script>
-<script th:inline="javascript">
-    resetBasket();
-</script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
@@ -151,10 +148,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

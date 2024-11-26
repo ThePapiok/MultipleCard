@@ -15,6 +15,9 @@
 <script src="/js/forms.js"></script>
 <script src="/js/reviews.js"></script>
 <script src="/js/landingPage.js"></script>
+<script th:inline="javascript">
+    resetBasket();
+</script>
 <div id="header">
     <a sec:authorize="isAnonymous()" th:href="@{/login}" class="h2 headerButton">
         <button class="blackButton" th:text="#{button.login}"></button>
@@ -121,10 +124,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

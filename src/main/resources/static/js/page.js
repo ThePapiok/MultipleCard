@@ -10,14 +10,19 @@ function checkLanguage() {
 }
 
 function setLanguage() {
+    const urlParams = new URLSearchParams(window.location.search);
     const is = sessionStorage.getItem("isEn");
     if (is != null) {
         if (is === 'true') {
             sessionStorage.setItem('isEn', 'false');
+            urlParams.set("lang", "pl");
         } else {
             sessionStorage.setItem('isEn', 'true');
+            urlParams.set("lang", "eng");
         }
     } else {
         sessionStorage.setItem('isEn', "true");
+        urlParams.set("lang", "eng");
     }
+    window.location.search = urlParams;
 }

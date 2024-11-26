@@ -24,11 +24,6 @@ function goToBasket(id) {
     window.location = "/cart";
 }
 
-function resetBasket() {
-    sessionStorage.removeItem("productsId");
-    sessionStorage.removeItem("cardId");
-}
-
 function showCategories(e) {
     e.hidden = true;
 }

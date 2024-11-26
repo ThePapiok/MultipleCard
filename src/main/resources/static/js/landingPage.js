@@ -8,6 +8,11 @@ function setStars(startIndex, endIndex) {
     }
 }
 
+function resetBasket() {
+    sessionStorage.removeItem("productsId");
+    sessionStorage.removeItem("cardId");
+}
+
 function unsetStars(startIndex, endIndex) {
     for (let i = startIndex; i <= endIndex; i++) {
         document.getElementById("checked-" + i).style.display = "none";

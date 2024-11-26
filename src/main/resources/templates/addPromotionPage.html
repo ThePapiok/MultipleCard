@@ -72,7 +72,8 @@
         <div class="block-horizontally">
             <label id="NewPrice">
                 <label class="inputs">
-                    <input th:field="*{newPrice}" type="text" th:placeholder="#{addPromotionPage.new_price.text}" required
+                    <input th:field="*{newPrice}" type="text" th:placeholder="#{addPromotionPage.new_price.text}"
+                           required
                            oninput="checkPrice(this)"
                            minlength="2" maxlength="7" onmouseenter="showValidation(this, 'NewPrice')"
                            onmouseleave="hideValidation('NewPrice')" onfocusout="unfocused(this)"
@@ -142,10 +143,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage" th:href="@{'?lang=eng'}">
+        <a id="enLanguage">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage" th:href="@{'?lang=pl'}">
+        <a id="plLanguage">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>
