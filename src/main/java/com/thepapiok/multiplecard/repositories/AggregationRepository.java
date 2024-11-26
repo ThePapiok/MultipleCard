@@ -736,6 +736,8 @@ public class AggregationRepository {
                   reservedProduct.setCardId(cardId);
                   mongoTemplate.save(reservedProduct);
                 }
+                System.out.println(promotionRepository.findQuantityById(promotionId).getQuantity());
+                System.out.println(reservedProductsRepository.countByPromotionId(promotionId));
                 if (promotionRepository.findQuantityById(promotionId).getQuantity()
                     < reservedProductsRepository.countByPromotionId(promotionId)) {
                   throw new RuntimeException();
@@ -744,6 +746,7 @@ public class AggregationRepository {
             }
           });
     } catch (Exception e) {
+      System.out.println(e);
       return false;
     }
     return true;

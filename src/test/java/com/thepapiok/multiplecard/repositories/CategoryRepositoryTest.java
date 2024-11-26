@@ -171,9 +171,19 @@ public class CategoryRepositoryTest {
 
   @Test
   public void shouldReturnListOfCategoryNamesAtGetCategoryNamesByPrefixWhenEverythingOk() {
-    assertEquals(
-        List.of("Category3", TEST_CATEGORY4_NAME, "Category5", TEST_CATEGORY1_NAME),
-        categoryRepository.getCategoryNamesByPrefix("^category"));
+    boolean otherName = false;
+    List<String> expectedCategoryNames =
+        List.of("Category3", TEST_CATEGORY4_NAME, "Category5", TEST_CATEGORY1_NAME);
+
+    List<String> categoryNames = categoryRepository.getCategoryNamesByPrefix("^category");
+    for (String name : categoryNames) {
+      if (!expectedCategoryNames.contains(name)) {
+        otherName = true;
+        break;
+      }
+    }
+    assertEquals(expectedCategoryNames.size(), categoryNames.size());
+    assertFalse(otherName);
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.thepapiok.multiplecard.collections.Address;
@@ -87,8 +88,18 @@ public class ShopRepositoryTest {
 
   @Test
   public void shouldReturnListOf2ShopNamesAtGetShopNamesByPrefixWhenEverythingOk() {
-    assertEquals(
-        List.of(shop2.getName(), shop1.getName()), shopRepository.getShopNamesByPrefix("^name"));
+    boolean otherName = false;
+    List<String> expectedShopNames = List.of(shop2.getName(), shop1.getName());
+
+    List<String> shopNames = shopRepository.getShopNamesByPrefix("^name");
+    for (String name : shopNames) {
+      if (!expectedShopNames.contains(name)) {
+        otherName = true;
+        break;
+      }
+    }
+    assertEquals(expectedShopNames.size(), shopNames.size());
+    assertFalse(otherName);
   }
 
   @Test
