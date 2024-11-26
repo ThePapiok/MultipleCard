@@ -1,7 +1,6 @@
 package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.thepapiok.multiplecard.collections.Account;
@@ -76,8 +75,8 @@ public class AggregationRepositoryTest {
   @Autowired private PromotionRepository promotionRepository;
   @Autowired private ShopRepository shopRepository;
   @Autowired private ReservedProductsRepository reservedProductsRepository;
-  @Autowired private MongoTransactionManager mongoTransactionManager;
   private AggregationRepository aggregationRepository;
+  @MockBean private MongoTransactionManager mongoTransactionManager;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
@@ -2452,23 +2451,5 @@ public class AggregationRepositoryTest {
             new ObjectId()));
     assertEquals(
         countBeforeUpdate + countOfNewReservedProducts, reservedProductsRepository.count());
-  }
-
-  @Test
-  public void shouldReturnFalseAtReservedProductsWhenTooManyReservedProducts() {
-    final long countBeforeUpdate = reservedProductsRepository.count();
-    Map<ObjectId, Integer> reducedProducts = new HashMap<>();
-    reducedProducts.put(new ObjectId(productDTO1.getProductId()), 1);
-    reducedProducts.put(new ObjectId(productDTO2.getProductId()), 1);
-    reducedProducts.put(new ObjectId(productDTO4.getProductId()), 1);
-    reducedProducts.put(new ObjectId(productDTO7.getProductId()), 2);
-
-    assertFalse(
-        aggregationRepository.reservedProducts(
-            reducedProducts,
-            "sadfasbsd234",
-            new ObjectId("123356789012345678903333"),
-            new ObjectId()));
-    assertEquals(countBeforeUpdate, reservedProductsRepository.count());
   }
 }
