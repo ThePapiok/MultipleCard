@@ -54,6 +54,7 @@ import org.springframework.web.multipart.MultipartFile;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AuthenticationControllerTest {
+
   private static final Locale LOCALE = new Locale.Builder().setLanguage("pl").build();
   private static final String ERROR_AT_SMS_SENDING_MESSAGE = "Błąd podczas wysyłania sms";
   private static final String ERROR_AT_EMAIL_SENDING_MESSAGE = "Błąd podczas wysyłania emailu";
@@ -381,7 +382,8 @@ public class AuthenticationControllerTest {
     when(authenticationService.getVerificationNumber()).thenReturn(TEST_CODE);
     doThrow(ApiException.class)
         .when(emailService)
-        .sendEmail(VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), LOCALE);
+        .sendEmail(
+            VERIFICATION_MESSAGE + TEST_CODE, expectedRegisterDTO.getEmail(), "Weryfikacja konta");
 
     performPostRegister(expectedRegisterDTO, httpSession, REDIRECT_VERIFICATION_ERROR);
     assertEquals(

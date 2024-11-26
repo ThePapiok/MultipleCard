@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -19,6 +21,7 @@ import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
@@ -27,16 +30,19 @@ import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +99,8 @@ public class ProductServiceTest {
   @Mock private BlockedProductRepository blockedProductRepository;
   @Mock private CategoryRepository categoryRepository;
   @Mock private ShopRepository shopRepository;
+  @Mock private PromotionRepository promotionRepository;
+  @Mock private ReservedProductService reservedProductService;
   private ProductService productService;
 
   @BeforeAll
@@ -123,7 +131,9 @@ public class ProductServiceTest {
             orderRepository,
             blockedProductRepository,
             categoryRepository,
-            shopRepository);
+            shopRepository,
+            promotionRepository,
+            reservedProductService);
   }
 
   @Test
@@ -801,26 +811,8 @@ public class ProductServiceTest {
 
   @Test
   public void shouldReturnMapOfProductInfoAndIntegerAtGetProductsInfoWhenEverythingOk() {
-    String productInfo1JSON =
-        """
-            {
-              "productId": \""""
-            + TEST_ID
-            + "\","
-            + """
-              "hasPromotion": true
-            }
-            """;
-    String productInfo2JSON =
-        """
-            {
-              "productId": \""""
-            + TEST_ID1
-            + "\","
-            + """
-              "hasPromotion": false
-            }
-            """;
+    String productInfo1JSON = setNameAtBuyProducts(TEST_ID, true);
+    String productInfo2JSON = setNameAtBuyProducts(TEST_ID1, false);
     Map<String, Integer> products = Map.of(productInfo1JSON, 1, productInfo2JSON, 1);
     Map<ProductInfo, Integer> expectedProducts =
         Map.of(new ProductInfo(TEST_ID, true), 1, new ProductInfo(TEST_ID1, false), 1);
@@ -842,5 +834,151 @@ public class ProductServiceTest {
             """;
 
     assertEquals(Map.of(), productService.getProductsInfo(Map.of(badProductInfoJSON, 1)));
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenEverythingOk() {
+    final int testPromotion1NewPrice = 444;
+    final int testPromotion2NewPrice = 51;
+    final int testPromotion3NewPrice = 100;
+    final int testPromotion3Quantity = 100;
+    final int testProduct1Quantity = 1;
+    final int testProduct2Quantity = 2;
+    final int testProduct3Quantity = 3;
+    final int testProduct4Quantity = 1;
+    final int testProduct5Quantity = 2;
+    final int testProduct2Price = 500;
+    final int testProduct5Price = 502;
+    final String testProduct4Id = "123456709832145678091423";
+    final String testCardId = "783456709832145678091423";
+    final String testOrderId = "915456709832145678091423";
+    final ObjectId testShopObjectId = new ObjectId("915451709832145628091425");
+    final ObjectId testCardObjectId = new ObjectId(testCardId);
+    final ObjectId testOrderObjectId = new ObjectId(testOrderId);
+    final ObjectId testProduct1ObjectId = new ObjectId(TEST_ID);
+    final ObjectId testProduct2ObjectId = new ObjectId(TEST_ID1);
+    final ObjectId testProduct3ObjectId = new ObjectId(TEST_ID2);
+    final ObjectId testProduct4ObjectId = new ObjectId(testProduct4Id);
+    Promotion promotion1 = new Promotion();
+    promotion1.setNewPrice(testPromotion1NewPrice);
+    promotion1.setQuantity(null);
+    promotion1.setProductId(testProduct3ObjectId);
+    Promotion promotion2 = new Promotion();
+    promotion2.setNewPrice(testPromotion2NewPrice);
+    promotion2.setQuantity(1);
+    promotion2.setProductId(testProduct1ObjectId);
+    Promotion promotion3 = new Promotion();
+    promotion3.setNewPrice(testPromotion3NewPrice);
+    promotion3.setQuantity(testPromotion3Quantity);
+    promotion3.setProductId(testProduct4ObjectId);
+    Promotion expectedPromotion3 = new Promotion();
+    expectedPromotion3.setNewPrice(testPromotion3NewPrice);
+    expectedPromotion3.setQuantity(testPromotion3Quantity - 1);
+    expectedPromotion3.setProductId(testProduct4ObjectId);
+    List<ProductPayU> productPayUS = new ArrayList<>();
+    ProductPayU productPayU1 = new ProductPayU();
+    productPayU1.setQuantity(testProduct1Quantity);
+    productPayU1.setUnitPrice(testPromotion2NewPrice);
+    productPayU1.setName(setNameAtBuyProducts(TEST_ID, true));
+    ProductPayU productPayU2 = new ProductPayU();
+    productPayU2.setQuantity(testProduct2Quantity);
+    productPayU2.setUnitPrice(testProduct2Price);
+    productPayU2.setName(setNameAtBuyProducts(TEST_ID1, false));
+    ProductPayU productPayU3 = new ProductPayU();
+    productPayU3.setQuantity(testProduct3Quantity);
+    productPayU3.setUnitPrice(testPromotion1NewPrice);
+    productPayU3.setName(setNameAtBuyProducts(TEST_ID2, true));
+    ProductPayU productPayU4 = new ProductPayU();
+    productPayU4.setQuantity(testProduct4Quantity);
+    productPayU4.setUnitPrice(testPromotion3NewPrice);
+    productPayU4.setName(setNameAtBuyProducts(testProduct4Id, true));
+    ProductPayU productPayU5 = new ProductPayU();
+    productPayU5.setQuantity(testProduct5Quantity);
+    productPayU5.setUnitPrice(testProduct5Price);
+    productPayU5.setName(setNameAtBuyProducts(TEST_ID, false));
+    productPayUS.add(productPayU1);
+    productPayUS.add(productPayU2);
+    productPayUS.add(productPayU3);
+    productPayUS.add(productPayU4);
+    productPayUS.add(productPayU5);
+    Product product = new Product();
+    product.setShopId(testShopObjectId);
+    Order order1 = new Order();
+    order1.setProductId(testProduct1ObjectId);
+    order1.setUsed(false);
+    order1.setCreatedAt(TEST_DATE);
+    order1.setShopId(testShopObjectId);
+    order1.setPrice(testPromotion2NewPrice);
+    order1.setCardId(testCardObjectId);
+    order1.setOrderId(testOrderObjectId);
+    Order order2 = new Order();
+    order2.setProductId(testProduct2ObjectId);
+    order2.setUsed(false);
+    order2.setCreatedAt(TEST_DATE);
+    order2.setShopId(testShopObjectId);
+    order2.setPrice(testProduct2Price);
+    order2.setCardId(testCardObjectId);
+    order2.setOrderId(testOrderObjectId);
+    Order order3 = new Order();
+    order3.setProductId(testProduct3ObjectId);
+    order3.setUsed(false);
+    order3.setCreatedAt(TEST_DATE);
+    order3.setShopId(testShopObjectId);
+    order3.setPrice(testPromotion1NewPrice);
+    order3.setCardId(testCardObjectId);
+    order3.setOrderId(testOrderObjectId);
+    Order order4 = new Order();
+    order4.setProductId(testProduct4ObjectId);
+    order4.setUsed(false);
+    order4.setCreatedAt(TEST_DATE);
+    order4.setShopId(testShopObjectId);
+    order4.setPrice(testPromotion3NewPrice);
+    order4.setCardId(testCardObjectId);
+    order4.setOrderId(testOrderObjectId);
+    Order order5 = new Order();
+    order5.setProductId(testProduct1ObjectId);
+    order5.setUsed(false);
+    order5.setCreatedAt(TEST_DATE);
+    order5.setShopId(testShopObjectId);
+    order5.setPrice(testProduct5Price);
+    order5.setCardId(testCardObjectId);
+    order5.setOrderId(testOrderObjectId);
+
+    when(productRepository.findShopIdById(any(ObjectId.class))).thenReturn(product);
+    when(promotionRepository.findByProductId(testProduct3ObjectId)).thenReturn(promotion1);
+    when(promotionRepository.findByProductId(testProduct1ObjectId)).thenReturn(promotion2);
+    when(promotionRepository.findByProductId(testProduct4ObjectId)).thenReturn(promotion3);
+
+    assertTrue(productService.buyProducts(productPayUS, testCardId, testOrderId));
+    verify(mongoTemplate).remove(promotion2);
+    verify(mongoTemplate).save(expectedPromotion3);
+    verify(mongoTemplate, times(testProduct1Quantity)).save(order1);
+    verify(mongoTemplate, times(testProduct2Quantity)).save(order2);
+    verify(mongoTemplate, times(testProduct3Quantity)).save(order3);
+    verify(mongoTemplate, times(testProduct4Quantity)).save(order4);
+    verify(mongoTemplate, times(testProduct5Quantity)).save(order5);
+    verify(reservedProductService).deleteAllByOrderId(testOrderId);
+  }
+
+  private String setNameAtBuyProducts(String id, boolean hasPromotion) {
+    return """
+            {
+              "productId": \""""
+        + id
+        + "\","
+        + """
+              "hasPromotion": """
+        + hasPromotion
+        + """
+            }
+            """;
+  }
+
+  @Test
+  public void shouldReturnFalseAtBuyProductsWhenGetException() {
+    ProductPayU productPayU = new ProductPayU();
+    productPayU.setName("{}");
+
+    assertFalse(productService.buyProducts(List.of(productPayU), null, null));
   }
 }

@@ -41,4 +41,6 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
 """
       })
   Long sumTotalAmountForShop(ObjectId shopId);
+
+  boolean existsByOrderId(ObjectId orderId);
 }

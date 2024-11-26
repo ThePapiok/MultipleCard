@@ -4,11 +4,13 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
@@ -17,12 +19,14 @@ import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -58,6 +62,8 @@ public class ProductService {
   private final BlockedProductRepository blockedProductRepository;
   private final CategoryRepository categoryRepository;
   private final ShopRepository shopRepository;
+  private final PromotionRepository promotionRepository;
+  private final ReservedProductService reservedProductService;
 
   @Autowired
   public ProductService(
@@ -73,7 +79,9 @@ public class ProductService {
       OrderRepository orderRepository,
       BlockedProductRepository blockedProductRepository,
       CategoryRepository categoryRepository,
-      ShopRepository shopRepository) {
+      ShopRepository shopRepository,
+      PromotionRepository promotionRepository,
+      ReservedProductService reservedProductService) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -87,6 +95,8 @@ public class ProductService {
     this.blockedProductRepository = blockedProductRepository;
     this.categoryRepository = categoryRepository;
     this.shopRepository = shopRepository;
+    this.promotionRepository = promotionRepository;
+    this.reservedProductService = reservedProductService;
   }
 
   public boolean addProduct(
@@ -358,5 +368,61 @@ public class ProductService {
     } catch (Exception e) {
       return Map.of();
     }
+  }
+
+  public boolean buyProducts(List<ProductPayU> products, String cardId, String orderId) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      LocalDateTime localDateTime = LocalDateTime.now();
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              int newQuantity;
+              Map<String, Object> productInfo;
+              ObjectId productId;
+              ObjectId shopId;
+              for (ProductPayU product : products) {
+                try {
+                  productInfo =
+                      objectMapper.readValue(
+                          product.getName(), new TypeReference<Map<String, Object>>() {});
+                  productId = new ObjectId((String) productInfo.get("productId"));
+                  shopId = productRepository.findShopIdById(productId).getShopId();
+                  for (int i = 1; i <= product.getQuantity(); i++) {
+                    Order order = new Order();
+                    order.setProductId(productId);
+                    order.setOrderId(new ObjectId(orderId));
+                    order.setUsed(false);
+                    order.setCardId(new ObjectId(cardId));
+                    order.setCreatedAt(localDateTime);
+                    order.setShopId(shopId);
+                    if ((Boolean) productInfo.get("hasPromotion")) {
+                      Promotion promotion = promotionRepository.findByProductId(productId);
+                      if (promotion.getQuantity() != null) {
+                        newQuantity = promotion.getQuantity() - 1;
+                        if (newQuantity == 0) {
+                          mongoTemplate.remove(promotion);
+                        } else {
+                          promotion.setQuantity(newQuantity);
+                          mongoTemplate.save(promotion);
+                        }
+                      }
+                    }
+                    order.setPrice(product.getUnitPrice());
+                    mongoTemplate.save(order);
+                  }
+                } catch (JsonProcessingException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+              reservedProductService.deleteAllByOrderId(orderId);
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

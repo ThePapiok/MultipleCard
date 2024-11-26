@@ -319,7 +319,7 @@ public class AuthenticationController {
               + " MultipleCard: "
               + verificationNumber,
           email,
-          locale);
+          messageSource.getMessage("subject.verification", null, locale));
       httpSession.setAttribute(CODE_EMAIL_PARAM, passwordEncoder.encode(verificationNumber));
     } catch (Exception e) {
       return false;

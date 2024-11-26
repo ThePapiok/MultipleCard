@@ -16,15 +16,18 @@ public class ReservedProductService {
   private final PasswordEncoder passwordEncoder;
   private final ReservedProductsRepository reservedProductsRepository;
   private final AggregationRepository aggregationRepository;
+  private final BlockedIpService blockedIpService;
 
   @Autowired
   public ReservedProductService(
       PasswordEncoder passwordEncoder,
       ReservedProductsRepository reservedProductsRepository,
-      AggregationRepository aggregationRepository) {
+      AggregationRepository aggregationRepository,
+      BlockedIpService blockedIpService) {
     this.passwordEncoder = passwordEncoder;
     this.reservedProductsRepository = reservedProductsRepository;
     this.aggregationRepository = aggregationRepository;
+    this.blockedIpService = blockedIpService;
   }
 
   public boolean reservedProducts(
@@ -51,5 +54,19 @@ public class ReservedProductService {
       }
     }
     return count <= maxReservedProducts;
+  }
+
+  public void deleteAndUpdateBlockedIps(String orderId, String ip) {
+    final ObjectId objectId = new ObjectId(orderId);
+    int amount = reservedProductsRepository.countByOrderId(objectId);
+    if (amount != 0) {
+      reservedProductsRepository.deleteAllByOrderId(objectId);
+      blockedIpService.updateBlockedIp(amount, ip);
+    }
+  }
+
+  public void deleteAllByOrderId(String orderId) {
+    final ObjectId objectId = new ObjectId(orderId);
+    reservedProductsRepository.deleteAllByOrderId(objectId);
   }
 }

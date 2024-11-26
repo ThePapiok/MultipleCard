@@ -29,4 +29,20 @@ public class BlockedIpService {
     }
     return true;
   }
+
+  public void updateBlockedIp(int amount, String ip) {
+    for (BlockedIp blockedIp : blockedIpRepository.findAll()) {
+      if (passwordEncoder.matches(ip, blockedIp.getEncryptedIp())) {
+        blockedIp.setAmount(blockedIp.getAmount() + amount);
+        blockedIp.setAttempts(blockedIp.getAttempts() + 1);
+        blockedIpRepository.save(blockedIp);
+        return;
+      }
+    }
+    BlockedIp blockedIp = new BlockedIp();
+    blockedIp.setAttempts(1);
+    blockedIp.setAmount(amount);
+    blockedIp.setEncryptedIp(passwordEncoder.encode(ip));
+    blockedIpRepository.save(blockedIp);
+  }
 }

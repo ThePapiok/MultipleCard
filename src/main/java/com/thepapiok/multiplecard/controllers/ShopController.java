@@ -1,9 +1,17 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.misc.ProductInfo;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.services.BlockedIpService;
+import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.OrderService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ReservedProductService;
 import com.thepapiok.multiplecard.services.ShopService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +38,10 @@ public class ShopController {
   private final ReservedProductService reservedProductService;
   private final BlockedIpService blockedIpService;
   private final PayUService payUService;
+  private final OrderService orderService;
   private final MessageSource messageSource;
+  private final EmailService emailService;
+  private final RefundService refundService;
 
   @Autowired
   public ShopController(
@@ -39,13 +50,19 @@ public class ShopController {
       ReservedProductService reservedProductService,
       BlockedIpService blockedIpService,
       PayUService payUService,
-      MessageSource messageSource) {
+      OrderService orderService,
+      MessageSource messageSource,
+      EmailService emailService,
+      RefundService refundService) {
     this.shopService = shopService;
     this.productService = productService;
     this.reservedProductService = reservedProductService;
     this.blockedIpService = blockedIpService;
     this.payUService = payUService;
+    this.orderService = orderService;
     this.messageSource = messageSource;
+    this.emailService = emailService;
+    this.refundService = refundService;
   }
 
   @PostMapping("/get_shop_names")
@@ -56,7 +73,58 @@ public class ShopController {
   @PostMapping("/buy_products")
   @ResponseBody
   public ResponseEntity<String> buyProducts(
-      @RequestBody String requestBody, @RequestHeader("OpenPayu-Signature") String header) {
+      @RequestBody String requestBody, @RequestHeader("OpenPayu-Signature") String header)
+      throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    if (!payUService.checkNotification(requestBody, header)) {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    JsonNode jsonNode = objectMapper.readTree(requestBody);
+    boolean isOrder = jsonNode.has("order");
+    if (isOrder) {
+      jsonNode = jsonNode.get("order");
+      String status = jsonNode.get("status").asText();
+      if (!"PENDING".equals(status)) {
+        String orderId = jsonNode.get("extOrderId").asText();
+        String payuOrderId = jsonNode.get("orderId").asText();
+        if ("CANCELED".equals(status)) {
+          reservedProductService.deleteAndUpdateBlockedIps(
+              orderId, jsonNode.get("customerIp").asText());
+        } else if (!orderService.checkExistsAlreadyOrder(orderId)
+            && !refundService.checkExistsAlreadyRefund(payuOrderId)) {
+          String cardId = jsonNode.get("description").asText();
+          List<ProductPayU> products =
+              objectMapper.readValue(
+                  jsonNode.get("products").toString(), new TypeReference<List<ProductPayU>>() {});
+          if (!productService.buyProducts(products, cardId, orderId)) {
+            Locale locale;
+            if ("pl".equals(jsonNode.get("additionalDescription").asText())) {
+              locale = Locale.getDefault();
+            } else {
+              locale = new Locale.Builder().setLanguage("eng").build();
+            }
+            emailService.sendEmail(
+                messageSource.getMessage("buyProducts.refund.message", null, locale),
+                jsonNode.get("buyer").get("email").asText(),
+                messageSource.getMessage("buyProducts.refund.title", null, locale)
+                    + " - "
+                    + payuOrderId);
+            reservedProductService.deleteAllByOrderId(orderId);
+            refundService.createRefund(payuOrderId);
+            if (!payUService.makeRefund(payuOrderId, locale)) {
+              emailService.sendEmail(
+                  requestBody, "multiplecard@gmail.com", "Błąd zwrotu - " + payuOrderId);
+            }
+          }
+        }
+      }
+    } else {
+      String payuOrderId = jsonNode.get("orderId").asText();
+      String status = jsonNode.get("refund").get("status").asText();
+      if ("FINALIZED".equals(status)) {
+        refundService.updateRefund(payuOrderId);
+      }
+    }
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
@@ -91,7 +159,7 @@ public class ShopController {
           HttpStatus.BAD_REQUEST);
     }
     Pair<Boolean, String> response =
-        payUService.productsOrder(productsInfo, cardId, ip, orderId.toHexString());
+        payUService.productsOrder(productsInfo, cardId, ip, orderId.toHexString(), locale);
     if (!response.getFirst()) {
       return new ResponseEntity<>(
           messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);

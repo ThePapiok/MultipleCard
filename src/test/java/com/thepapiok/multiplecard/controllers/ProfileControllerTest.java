@@ -577,7 +577,6 @@ public class ProfileControllerTest {
     profileShopDTO1.setLastName(profileShopDTO.getLastName());
     MockMultipartFile multipartFile = new MockMultipartFile(FILE_NAME, new byte[0]);
     profileShopDTO1.setFile(multipartFile);
-    System.out.println(profileShopDTO1);
 
     when(shopService.checkShopNameExists(profileShopDTO.getName(), TEST_PHONE)).thenReturn(false);
     when(shopService.checkAccountNumberExists(profileShopDTO.getAccountNumber(), TEST_PHONE))

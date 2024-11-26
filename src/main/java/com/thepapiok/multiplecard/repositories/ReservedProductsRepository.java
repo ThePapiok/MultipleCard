@@ -8,4 +8,8 @@ public interface ReservedProductsRepository extends MongoRepository<ReservedProd
   int countByCardId(ObjectId cardId);
 
   int countByPromotionId(ObjectId promotionId);
+
+  int countByOrderId(ObjectId orderId);
+
+  void deleteAllByOrderId(ObjectId orderId);
 }

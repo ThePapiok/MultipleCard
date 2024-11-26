@@ -134,8 +134,6 @@ public class ProfileController {
     final List<AddressDTO> points = profileShop.getAddress();
     final int maxListSize = 5;
     final MultipartFile file = profileShop.getFile();
-    System.out.println(file);
-    System.out.println(profileShop);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);

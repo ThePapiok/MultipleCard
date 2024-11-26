@@ -2,6 +2,8 @@ package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.ReservedProduct;
@@ -31,13 +33,14 @@ public class ReservedProductsServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private ReservedProductsRepository reservedProductsRepository;
   @Mock private AggregationRepository aggregationRepository;
+  @Mock private BlockedIpService blockedIpService;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     reservedProductService =
         new ReservedProductService(
-            passwordEncoder, reservedProductsRepository, aggregationRepository);
+            passwordEncoder, reservedProductsRepository, aggregationRepository, blockedIpService);
   }
 
   @Test
@@ -135,5 +138,30 @@ public class ReservedProductsServiceTest {
     when(passwordEncoder.matches(TEST_IP, TEST_ENCRYPTED_IP)).thenReturn(true);
 
     assertFalse(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(TEST_IP));
+  }
+
+  @Test
+  public void shouldDoNothingWhenNotFoundReservedProducts() {
+    when(reservedProductsRepository.countByOrderId(TEST_ORDER_ID)).thenReturn(0);
+
+    reservedProductService.deleteAndUpdateBlockedIps(TEST_ORDER_ID.toHexString(), TEST_IP);
+    verifyNoInteractions(blockedIpService);
+  }
+
+  @Test
+  public void
+      shouldDeleteAllByOrderIdAndUpdateBlockedIpsIdAtDeleteAndUpdateBlockedIpsWhenFoundReservedProducts() {
+    when(reservedProductsRepository.countByOrderId(TEST_ORDER_ID)).thenReturn(1);
+
+    reservedProductService.deleteAndUpdateBlockedIps(TEST_ORDER_ID.toHexString(), TEST_IP);
+    verify(blockedIpService).updateBlockedIp(1, TEST_IP);
+    verify(reservedProductsRepository).deleteAllByOrderId(TEST_ORDER_ID);
+  }
+
+  @Test
+  public void shouldDeleteAllByOrderIdAtDeleteAllByOrderIdWhenEverythingOk() {
+    reservedProductService.deleteAllByOrderId(TEST_ORDER_ID.toHexString());
+
+    verify(reservedProductsRepository).deleteAllByOrderId(TEST_ORDER_ID);
   }
 }

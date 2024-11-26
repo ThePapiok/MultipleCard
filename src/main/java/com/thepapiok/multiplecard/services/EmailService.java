@@ -26,10 +26,10 @@ public class EmailService {
     this.messageSource = messageSource;
   }
 
-  public void sendEmail(String text, String email, Locale locale) {
+  public void sendEmail(String text, String email, String title) {
     SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
     simpleMailMessage.setTo(email);
-    simpleMailMessage.setSubject(messageSource.getMessage("subject.verification", null, locale));
+    simpleMailMessage.setSubject(title);
     simpleMailMessage.setText(text);
     javaMailSender.send(simpleMailMessage);
   }
