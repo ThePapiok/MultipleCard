@@ -1,7 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,7 +51,8 @@ public class ReviewControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToLandingPageAtAddReviewWithParamSuccess() throws Exception {
+  public void shouldRedirectToLandingPageAtAddReviewWithParamSuccessWhenEverythingOk()
+      throws Exception {
     final int rating = 3;
     ReviewDTO reviewDTO = new ReviewDTO();
     reviewDTO.setDescription(TEST_DESCRIPTION1);
@@ -68,7 +68,7 @@ public class ReviewControllerTest {
                 .param(RATING_PARAM, String.valueOf(rating))
                 .session(httpSession))
         .andExpect(redirectedUrl("/?success"));
-    assertTrue((Boolean) httpSession.getAttribute("success"));
+    assertEquals("Opinia została pomyślnie dodana !", httpSession.getAttribute("successMessage"));
   }
 
   @Test

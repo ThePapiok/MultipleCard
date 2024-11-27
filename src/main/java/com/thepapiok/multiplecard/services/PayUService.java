@@ -3,6 +3,7 @@ package com.thepapiok.multiplecard.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.misc.BearerToken;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
@@ -18,7 +19,6 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -39,7 +40,7 @@ public class PayUService {
   private final RestTemplate restTemplate;
   private final ProductRepository productRepository;
   private final PromotionRepository promotionRepository;
-  private final MessageSource messageSource;
+  private final PasswordEncoder passwordEncoder;
 
   @Value("${PAYU_CLIENT_SECRET}")
   private String clientSecret;
@@ -58,11 +59,11 @@ public class PayUService {
       RestTemplate restTemplate,
       ProductRepository productRepository,
       PromotionRepository promotionRepository,
-      MessageSource messageSource) {
+      PasswordEncoder passwordEncoder) {
     this.restTemplate = restTemplate;
     this.productRepository = productRepository;
     this.promotionRepository = promotionRepository;
-    this.messageSource = messageSource;
+    this.passwordEncoder = passwordEncoder;
   }
 
   public Pair<Boolean, String> productsOrder(
@@ -72,7 +73,6 @@ public class PayUService {
       String orderId,
       Locale locale) {
     try {
-      final int maxTimeForOrderInSeconds = 900;
       ObjectId productId;
       int totalAmount = 0;
       int quantity;
@@ -81,16 +81,6 @@ public class PayUService {
       HttpHeaders headers = new HttpHeaders();
       headers.setBearerAuth(getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
-      Map<String, Object> data = new HashMap<>();
-      data.put("extOrderId", orderId);
-      data.put("notifyUrl", appUrl + "buy_products");
-      data.put("continueUrl", appUrl);
-      data.put("customerIp", ip);
-      data.put("validityTime", maxTimeForOrderInSeconds);
-      data.put("merchantPosId", clientId);
-      data.put("description", cardId);
-      data.put("additionalDescription", locale);
-      data.put("currencyCode", "PLN");
       List<ProductPayU> products = new ArrayList<>();
       for (Map.Entry<ProductInfo, Integer> entry : productsId.entrySet()) {
         productId = entry.getKey().getProductId();
@@ -110,8 +100,16 @@ public class PayUService {
         products.add(product);
         totalAmount += (price * quantity);
       }
-      data.put("totalAmount", totalAmount);
-      data.put("products", products);
+      Map<String, Object> data =
+          setData(
+              orderId,
+              ip,
+              cardId,
+              locale,
+              products,
+              totalAmount,
+              appUrl + "buy_products",
+              appUrl + "?success");
       HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(data, headers);
       ResponseEntity<String> response =
           restTemplate.exchange(
@@ -128,15 +126,14 @@ public class PayUService {
     }
   }
 
-  public boolean makeRefund(String orderId, Locale locale) {
+  public boolean makeRefund(String orderId) {
     try {
       HttpHeaders headers = new HttpHeaders();
       headers.setBearerAuth(getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
       Map<String, Object> data = new HashMap<>(1);
       Map<String, String> description = new HashMap<>(1);
-      description.put(
-          "description", messageSource.getMessage("buyProducts.refund.message", null, locale));
+      description.put("description", "refund");
       data.put("refund", description);
       HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(data, headers);
       ResponseEntity<String> response =
@@ -162,6 +159,72 @@ public class PayUService {
             .toList()
             .get(1);
     return signature.equals(DigestUtils.md5DigestAsHex((body + keyMD5).getBytes()));
+  }
+
+  public String cardOrder(
+      String cardId, String ip, Locale locale, String phone, OrderCardDTO order) {
+    final int cardPrice = 2000;
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      HttpHeaders headers = new HttpHeaders();
+      headers.setBearerAuth(getToken());
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      Map<String, String> productName = new HashMap<>(2);
+      productName.put("encryptedPin", passwordEncoder.encode(order.getPin()));
+      productName.put("name", order.getName());
+      ProductPayU productPayU = new ProductPayU();
+      productPayU.setName(objectMapper.writeValueAsString(productName));
+      productPayU.setQuantity(1);
+      productPayU.setUnitPrice(cardPrice);
+      Map<String, Object> data =
+          setData(
+              cardId,
+              ip,
+              phone,
+              locale,
+              List.of(productPayU),
+              cardPrice,
+              appUrl + "buy_card",
+              appUrl + "profile?success");
+      HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(data, headers);
+      ResponseEntity<String> response =
+          restTemplate.exchange(
+              "https://secure.snd.payu.com/api/v2_1/orders",
+              HttpMethod.POST,
+              requestEntity,
+              String.class);
+      if (!response.getStatusCode().equals(HttpStatus.FOUND)) {
+        return null;
+      }
+      return objectMapper.readTree(response.getBody()).get("redirectUri").asText();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private Map<String, Object> setData(
+      String extOrderId,
+      String ip,
+      String description,
+      Locale locale,
+      List<ProductPayU> products,
+      int totalAmount,
+      String notifyUrl,
+      String continueUrl) {
+    final int maxTimeForOrderInSeconds = 900;
+    Map<String, Object> data = new HashMap<>();
+    data.put("extOrderId", extOrderId);
+    data.put("notifyUrl", notifyUrl);
+    data.put("continueUrl", continueUrl);
+    data.put("customerIp", ip);
+    data.put("validityTime", maxTimeForOrderInSeconds);
+    data.put("merchantPosId", clientId);
+    data.put("description", description);
+    data.put("additionalDescription", locale);
+    data.put("currencyCode", "PLN");
+    data.put("totalAmount", totalAmount);
+    data.put("products", products);
+    return data;
   }
 
   private String getToken() throws JsonProcessingException {

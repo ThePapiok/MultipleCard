@@ -1,8 +1,11 @@
 package com.thepapiok.multiplecard.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Review;
@@ -30,8 +33,10 @@ public class LandingPageControllerTest {
   private static final String REVIEW_PARAM = "newReview";
   private static final String REVIEWS_SIZE_PARAM = "reviewsSize";
   private static final String LANDING_PAGE_VIEW = "landingPage";
-  private static final String SUCCESS_PARAM = "success";
+  private static final String SUCCESS_MESSAGE_PARAM = "successMessage";
+  private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String REVIEWS_PARAM = "reviews";
+  private static final String ERROR_PARAM = "error";
   private static List<ReviewGetDTO> list;
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
@@ -76,13 +81,13 @@ public class LandingPageControllerTest {
 
   @Test
   public void shouldReturnLandingPageAtGetLandingPageWithParamErrorButNoMessage() throws Exception {
-    paramWithoutMessage("error");
+    paramWithoutMessage(ERROR_PARAM);
   }
 
   @Test
   public void shouldReturnLandingPageAtGetLandingPageWithParamSuccessButNoMessage()
       throws Exception {
-    paramWithoutMessage(SUCCESS_PARAM);
+    paramWithoutMessage("success");
   }
 
   private void paramWithoutMessage(String param) throws Exception {
@@ -99,18 +104,33 @@ public class LandingPageControllerTest {
   @Test
   public void shouldReturnLandingPageAtGetLandingPageWithParamError() throws Exception {
     final String message = "Error";
-    final String errorMessageParam = "errorMessage";
     MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(errorMessageParam, message);
-    paramWithMessage("error", httpSession, message, errorMessageParam);
+    httpSession.setAttribute(ERROR_MESSAGE_PARAM, message);
+
+    paramWithMessage(ERROR_PARAM, httpSession, message, ERROR_MESSAGE_PARAM);
+    assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  public void shouldReturnLandingPageAtGetLandingPageWithParamError501() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, "success!");
+
+    mockMvc
+        .perform(get(LANDING_PAGE_URL).param(ERROR_PARAM, "501").session(httpSession))
+        .andExpect(redirectedUrl("/?error"));
+    assertEquals("Anulowano zakup produktów", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
   }
 
   @Test
   public void shouldReturnLandingPageAtGetLandingPageWithParamSuccess() throws Exception {
     final String message = "Opinia została pomyślnie dodana !";
     MockHttpSession httpSession = new MockHttpSession();
-    httpSession.setAttribute(SUCCESS_PARAM, true);
-    paramWithMessage(SUCCESS_PARAM, httpSession, message, "successMessage");
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, message);
+
+    paramWithMessage("success", httpSession, message, SUCCESS_MESSAGE_PARAM);
+    assertNull(httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
   }
 
   private void paramWithMessage(

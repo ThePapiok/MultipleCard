@@ -2,26 +2,35 @@ package com.thepapiok.multiplecard.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.services.CardService;
+import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ResultService;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -47,7 +56,8 @@ public class CardControllerTest {
   private static final String CARD_PARAM = "card";
   private static final String ERROR_PARAM = "error";
   private static final String NEW_CARD_URL = "/new_card";
-  private static final String USER_ERROR_URL = "/user?error";
+  private static final String BUY_CARD_URL = "/buy_card";
+  private static final String PROFILE_ERROR_URL = "/profile?error";
   private static final String CARDS_URL = "/cards";
   private static final String BLOCK_CARD_URL = "/block_card";
   private static final String NEW_CARD_ERROR_URL = "/new_card?error";
@@ -67,11 +77,23 @@ public class CardControllerTest {
   private static final String NEW_CARD_PAGE = "newCardPage";
   private static final String BUY_PRODUCTS_PAGE = "buyProductsPage";
   private static final String CODE_AMOUNT_SMS_PARAM = "codeAmountSms";
+  private static final String TEST_SIGNATURE = "signature=132132123123";
+  private static final String TEST_PAYU_ORDER_ID = "safdfasdfsads12312";
+  private static final String QUOTATION_MARK_WITH_COMMA = "\",";
+  private static final String TEST_ENCRYPTED_PIN = "fasasd2134132faas";
+  private static final String TEST_CARD_NAME = "cardName";
+  private static final String PAYU_STATUS_COMPLETED = "COMPLETED";
+  private static final String TEST_LANGUAGE = "pl";
+  private static final String TEST_EMAIL = "multiplecard@gmail.com";
+  private static final int STATUS_OK = 200;
   @Autowired private MockMvc mockMvc;
   @MockBean private PasswordEncoder passwordEncoder;
   @MockBean private CardService cardService;
   @MockBean private ProductService productService;
   @MockBean private ResultService resultService;
+  @MockBean private PayUService payUService;
+  @MockBean private RefundService refundService;
+  @MockBean private EmailService emailService;
   @Autowired private MessageSource messageSource;
 
   @Test
@@ -142,31 +164,161 @@ public class CardControllerTest {
   }
 
   @Test
-  @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserSuccessAtNewCardWhenEverythingOk() throws Exception {
-    MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
-    OrderCardDTO orderCardDTO = new OrderCardDTO();
-    orderCardDTO.setCode(TEST_CODE);
-    orderCardDTO.setName(TEST_NAME);
-    orderCardDTO.setPin(TEST_PIN);
-    orderCardDTO.setRetypedPin(TEST_PIN);
+  public void shouldReturnStatusUnauthorizedAtBuyCardWhenNoPayuSend() throws Exception {
+    final int unauthorizedStatus = 401;
+    when(payUService.checkNotification("{bad}", TEST_SIGNATURE)).thenReturn(false);
 
-    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(cardService.createCard(orderCardDTO, TEST_PHONE)).thenReturn(true);
+    performPostAtBuyCard("{bad}", unauthorizedStatus);
+  }
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, "/profile?success");
-    assertEquals("Pomyślnie utworzono nową kartę", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
-    checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
+  @Test
+  public void shouldReturnStatusOkAtBuyCardWhenIsRefund() throws Exception {
+    final String body =
+        """
+                {
+                  "orderId": \""""
+            + TEST_PAYU_ORDER_ID
+            + QUOTATION_MARK_WITH_COMMA
+            + """
+              "refund": {
+                "status": "FINALIZED"
+              }
+            }
+
+            """;
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+
+    performPostAtBuyCard(body, STATUS_OK);
+    verify(refundService).updateRefund(TEST_PAYU_ORDER_ID);
+  }
+
+  @Test
+  public void shouldReturnStatusOkAtBuyProductsWhenIsOrderAndStatusPending() throws Exception {
+    final String body = setBodyForBuyCard("PENDING");
+
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+
+    performPostAtBuyCard(body, STATUS_OK);
+  }
+
+  @Test
+  public void shouldReturnStatusOkAtBuyProductsWhenIsOrderAndStatusCanceled() throws Exception {
+    final String body = setBodyForBuyCard("CANCELED");
+
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+
+    performPostAtBuyCard(body, STATUS_OK);
+  }
+
+  @Test
+  public void
+      shouldReturnStatusOkAtBuyProductsWhenIsOrderAndStatusCompletedAndSuccessWithCreateCard()
+          throws Exception {
+    final String body = setBodyForBuyCard(PAYU_STATUS_COMPLETED);
+
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+    when(cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME))
+        .thenReturn(true);
+
+    performPostAtBuyCard(body, STATUS_OK);
+  }
+
+  @Test
+  public void
+      shouldReturnStatusOkAtBuyProductsWhenIsOrderAndStatusCompletedAndErrorWithCreateCardAndSuccessAtMakeRefund()
+          throws Exception {
+    final String body = setBodyForBuyCard(PAYU_STATUS_COMPLETED);
+
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+    when(cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME))
+        .thenReturn(false);
+    when(payUService.makeRefund(TEST_PAYU_ORDER_ID)).thenReturn(true);
+
+    performPostAtBuyCard(body, STATUS_OK);
+    verify(refundService).createRefund(TEST_PAYU_ORDER_ID, TEST_LANGUAGE, TEST_EMAIL);
+  }
+
+  @Test
+  public void
+      shouldReturnStatusOkAtBuyProductsWhenIsOrderAndStatusCompletedAndErrorWithCreateCardAndErrorAtMakeRefund()
+          throws Exception {
+    final String body = setBodyForBuyCard(PAYU_STATUS_COMPLETED);
+
+    when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
+    when(cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME))
+        .thenReturn(false);
+    when(payUService.makeRefund(TEST_PAYU_ORDER_ID)).thenReturn(false);
+
+    performPostAtBuyCard(body, STATUS_OK);
+    verify(refundService).createRefund(TEST_PAYU_ORDER_ID, TEST_LANGUAGE, TEST_EMAIL);
+    verify(emailService).sendEmail(body, TEST_EMAIL, "Błąd zwrotu - " + TEST_PAYU_ORDER_ID);
+  }
+
+  private String setBodyForBuyCard(String status) {
+    return new StringBuilder(
+            """
+                {
+                  "order": {
+                    "status": \""""
+                + status
+                + QUOTATION_MARK_WITH_COMMA
+                + """
+                    "orderId": \"""")
+        .append(TEST_PAYU_ORDER_ID)
+        .append(QUOTATION_MARK_WITH_COMMA)
+        .append("\"extOrderId\": \"")
+        .append(TEST_CARD_ID)
+        .append(QUOTATION_MARK_WITH_COMMA)
+        .append(
+            """
+                                    "description": \"""")
+        .append(TEST_PHONE)
+        .append(QUOTATION_MARK_WITH_COMMA)
+        .append(
+            """
+                                    "additionalDescription": "pl",
+                                    "customerIp": "127.0.0.1",
+                                    "buyer": {
+                                      "email": "multiplecard@gmail.com"
+                                    },
+                                    "products": [{
+                                      "name": \"""")
+        .append("{\\\"encryptedPin\\\": \\\"")
+        .append(TEST_ENCRYPTED_PIN)
+        .append("\\\", \\\"name\\\": \\\"")
+        .append(TEST_CARD_NAME)
+        .append("\\\"}\",")
+        .append(
+            """
+                                        "unitPrice" : "500",
+                                        "quantity": 2
+                                        }]
+                                  }
+                                }
+                                """)
+        .toString();
+  }
+
+  private void performPostAtBuyCard(String body, int status) throws Exception {
+
+    mockMvc
+        .perform(
+            post(BUY_CARD_URL)
+                .header("OpenPayu-Signature", TEST_SIGNATURE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+        .andExpect(status().is(status));
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorAtNewCardWhenTooManyAttempts() throws Exception {
+  public void shouldRedirectToProfileErrorAtOrderCardWhenTooManyAttempts() throws Exception {
     final int maxAttempts = 3;
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
     httpSession.setAttribute(ATTEMPTS_PARAM, maxAttempts);
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, USER_ERROR_URL);
+    performPostAtOrderCard(
+        httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, PROFILE_ERROR_URL);
     checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
     assertEquals(
         "Za dużo razy podałeś niepoprawne dane", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -174,7 +326,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToNewCardErrorAtNewCardWhenErrorAtValidation() throws Exception {
+  public void shouldRedirectToNewCardErrorAtOrderCardWhenErrorAtValidation() throws Exception {
     final String name = "!231";
     final String pin = "dsadas";
     OrderCardDTO expectedOrder = new OrderCardDTO();
@@ -184,7 +336,7 @@ public class CardControllerTest {
     expectedOrder.setCode("");
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
 
-    performPostAtNewCard(httpSession, name, pin, pin, "123sada12", NEW_CARD_ERROR_URL);
+    performPostAtOrderCard(httpSession, name, pin, pin, "123sada12", NEW_CARD_ERROR_URL);
     assertEquals("Podane dane są niepoprawne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(expectedOrder, httpSession.getAttribute(ORDER_PARAM));
@@ -192,7 +344,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToNewCardErrorAtNewCardWhenBadCode() throws Exception {
+  public void shouldRedirectToNewCardErrorAtOrderCardWhenBadCode() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
     OrderCardDTO expectedOrder = new OrderCardDTO();
     expectedOrder.setCode("");
@@ -202,7 +354,8 @@ public class CardControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(false);
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, NEW_CARD_ERROR_URL);
+    performPostAtOrderCard(
+        httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, NEW_CARD_ERROR_URL);
     assertEquals("Nieprawidłowy kod sms", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(expectedOrder, httpSession.getAttribute(ORDER_PARAM));
@@ -210,7 +363,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToNewCardErrorAtNewCardWhenPinsNotTheSame() throws Exception {
+  public void shouldRedirectToNewCardErrorAtOrderCardWhenPinsNotTheSame() throws Exception {
     final String badPin = "0000";
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
     OrderCardDTO expectedOrder = new OrderCardDTO();
@@ -221,7 +374,7 @@ public class CardControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, badPin, TEST_CODE, NEW_CARD_ERROR_URL);
+    performPostAtOrderCard(httpSession, TEST_NAME, TEST_PIN, badPin, TEST_CODE, NEW_CARD_ERROR_URL);
     assertEquals("Podane PINy różnią się", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(expectedOrder, httpSession.getAttribute(ORDER_PARAM));
@@ -229,7 +382,7 @@ public class CardControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldRedirectToUserErrorAtNewCardWhenErrorAtCreateCard() throws Exception {
+  public void shouldRedirectToProfileErrorAtOrderCardWhenErrorAtOrderCard() throws Exception {
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
     OrderCardDTO orderCardDTO = new OrderCardDTO();
     orderCardDTO.setCode(TEST_CODE);
@@ -238,14 +391,46 @@ public class CardControllerTest {
     orderCardDTO.setRetypedPin(TEST_PIN);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(cardService.createCard(orderCardDTO, TEST_PHONE)).thenReturn(false);
+    when(payUService.cardOrder(
+            anyString(),
+            anyString(),
+            eq(new Locale.Builder().setLanguage(TEST_LANGUAGE).build()),
+            eq(TEST_PHONE),
+            eq(orderCardDTO)))
+        .thenReturn(null);
 
-    performPostAtNewCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, USER_ERROR_URL);
+    performPostAtOrderCard(
+        httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, PROFILE_ERROR_URL);
     assertEquals("Nieoczekiwany błąd", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
   }
 
-  private void performPostAtNewCard(
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToUserSuccessAtOrderCardWhenEverythingOk() throws Exception {
+    final String redirectUrl = "payu.com";
+    MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
+    OrderCardDTO orderCardDTO = new OrderCardDTO();
+    orderCardDTO.setCode(TEST_CODE);
+    orderCardDTO.setName(TEST_NAME);
+    orderCardDTO.setPin(TEST_PIN);
+    orderCardDTO.setRetypedPin(TEST_PIN);
+
+    when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
+    when(payUService.cardOrder(
+            anyString(),
+            anyString(),
+            eq(new Locale.Builder().setLanguage(TEST_LANGUAGE).build()),
+            eq(TEST_PHONE),
+            eq(orderCardDTO)))
+        .thenReturn(redirectUrl);
+
+    performPostAtOrderCard(httpSession, TEST_NAME, TEST_PIN, TEST_PIN, TEST_CODE, redirectUrl);
+    assertEquals("Pomyślnie zakupiono nową kartę", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+    checkResetSession(httpSession, CODE_SMS_ORDER_PARAM);
+  }
+
+  private void performPostAtOrderCard(
       MockHttpSession httpSession,
       String name,
       String pin,
@@ -255,8 +440,9 @@ public class CardControllerTest {
       throws Exception {
     mockMvc
         .perform(
-            post(NEW_CARD_URL)
+            post("/order_card")
                 .session(httpSession)
+                .locale(Locale.getDefault())
                 .param("name", name)
                 .param("pin", pin)
                 .param("retypedPin", retypedPin)
@@ -331,7 +517,7 @@ public class CardControllerTest {
             post(BLOCK_CARD_URL)
                 .session(httpSession)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
     assertEquals(
         "Za dużo razy podałeś niepoprawne dane", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -382,7 +568,7 @@ public class CardControllerTest {
             post(BLOCK_CARD_URL)
                 .session(httpSession)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
     assertEquals("Karta jest już zastrzeżona", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
@@ -401,7 +587,7 @@ public class CardControllerTest {
             post(BLOCK_CARD_URL)
                 .session(httpSession)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE))
-        .andExpect(redirectedUrl(USER_ERROR_URL));
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
     checkResetSession(httpSession, CODE_SMS_BLOCK_PARAM);
     assertEquals("Nieoczekiwany błąd", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }

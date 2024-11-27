@@ -3,6 +3,8 @@ package com.thepapiok.multiplecard.services;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Shop;
+import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
@@ -34,7 +36,7 @@ public class EmailService {
     javaMailSender.send(simpleMailMessage);
   }
 
-  public void sendEmailWithAttachment(
+  public void sendVerification(
       Shop shop, Account account, Locale locale, List<MultipartFile> fileList)
       throws MessagingException {
     final String newLine = "\n";
@@ -107,6 +109,57 @@ public class EmailService {
           .append(address.getProvince());
       index++;
     }
+    mimeMessageHelper.setText(text.toString());
+    javaMailSender.send(message);
+  }
+
+  public void sendCardImage(
+      List<CustomMultipartFile> fileList, String cardId, Account account, User user)
+      throws MessagingException {
+    final String newLine = "\n";
+    MimeMessage message = javaMailSender.createMimeMessage();
+    MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, true);
+    mimeMessageHelper.setTo("multiplecard@gmail.com");
+    mimeMessageHelper.setSubject("Zamówienie karty - " + cardId);
+    for (MultipartFile multipartFile : fileList) {
+      if (multipartFile != null && !multipartFile.isEmpty()) {
+        mimeMessageHelper.addAttachment(multipartFile.getOriginalFilename(), multipartFile);
+      }
+    }
+    Address address = user.getAddress();
+    StringBuilder text = new StringBuilder();
+    text.append("Numer telefonu - ")
+        .append(account.getPhone())
+        .append(newLine)
+        .append("Email - ")
+        .append(account.getEmail())
+        .append(newLine)
+        .append("Imię - ")
+        .append(user.getFirstName())
+        .append(newLine)
+        .append("Nazwisko - ")
+        .append(user.getLastName())
+        .append(newLine)
+        .append("Kraj - ")
+        .append(address.getCountry())
+        .append(newLine)
+        .append("Województwo - ")
+        .append(address.getProvince())
+        .append(newLine)
+        .append("Ulica - ")
+        .append(address.getStreet())
+        .append(newLine)
+        .append("Nr. domu - ")
+        .append(address.getHouseNumber())
+        .append(newLine)
+        .append("Nr. lokalu - ")
+        .append(address.getApartmentNumber())
+        .append(newLine)
+        .append("Miejscowość - ")
+        .append(address.getCity())
+        .append(newLine)
+        .append("Kod pocztowy - ")
+        .append(address.getPostalCode());
     mimeMessageHelper.setText(text.toString());
     javaMailSender.send(message);
   }

@@ -88,10 +88,18 @@ public class ProfileController {
       @RequestParam(required = false) String success,
       Principal principal,
       Model model,
-      HttpSession httpSession) {
+      HttpSession httpSession,
+      Locale locale) {
     final String countriesParam = "countries";
     String phone = principal.getName();
     if (error != null) {
+      if ("501".equals(error)) {
+        httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
+        httpSession.setAttribute(
+            ERROR_MESSAGE_PARAM,
+            messageSource.getMessage("buyCard.error.canceled_order", null, locale));
+        return "redirect:/profile?error";
+      }
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);

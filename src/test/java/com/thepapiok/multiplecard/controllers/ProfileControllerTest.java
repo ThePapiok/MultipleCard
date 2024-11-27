@@ -195,20 +195,36 @@ public class ProfileControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamAndMessage() throws Exception {
+  public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamErrorAndMessage()
+      throws Exception {
     returnProfilePageWithParamAndMessage(ERROR_PARAM, ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamWithoutMessage()
+  public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamErrorAndError501()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, "success!");
+
+    mockMvc
+        .perform(get(PROFILE_URL).param(ERROR_PARAM, "501").session(httpSession))
+        .andExpect(redirectedUrl(PROFILE_ERROR_URL));
+    assertEquals("Anulowano zakup nowej karty", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnProfilePageWithErrorAtGetProfileWhenParamErrorWithoutMessage()
       throws Exception {
     successReturnProfilePage();
   }
 
   @Test
   @WithMockUser(username = TEST_PHONE)
-  public void shouldReturnProfilePageWithSuccessAtGetProfileWhenParamAndMessage() throws Exception {
+  public void shouldReturnProfilePageWithSuccessAtGetProfileWhenParamSuccessAndMessage()
+      throws Exception {
     returnProfilePageWithParamAndMessage("success", SUCCESS_MESSAGE_PARAM, SUCCESS_UPDATE_MESSAGE);
   }
 

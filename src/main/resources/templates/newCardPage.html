@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/css/newCardPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/TqDY4WA.png">
 </head>
-<body onload="atStart()">
+<body onload=atStart(true)>
 <script src="/js/page.js"></script>
 <script src="/js/disable.js"></script>
 <script src="/js/forms.js"></script>
@@ -24,7 +24,7 @@
 </div>
 <div id="body">
     <p class="title" th:text="#{newCardPage.title}"></p>
-    <form th:action="@{/new_card}" id="form" method="post" th:object="${card}">
+    <form th:action="@{/order_card}" id="form" method="post" th:object="${card}">
         <div class="block-horizontally">
             <label id="CardName">
                 <label class="inputs">

@@ -466,7 +466,7 @@ public class ProfileServiceTest {
     assertTrue(profileService.editProfileShop(profileShopDTO, null, null, list, TEST_PHONE));
     verify(mongoTemplate).save(shop);
     verify(mongoTemplate).save(account);
-    verify(emailService).sendEmailWithAttachment(eq(shop), eq(account), any(), eq(list));
+    verify(emailService).sendVerification(eq(shop), eq(account), any(), eq(list));
   }
 
   @Test
@@ -499,7 +499,7 @@ public class ProfileServiceTest {
         profileService.editProfileShop(profileShopDTO, path.toString(), null, list, TEST_PHONE));
     verify(mongoTemplate).save(expectedShopWithNewUrl);
     verify(mongoTemplate).save(account);
-    verify(emailService).sendEmailWithAttachment(eq(shop), eq(account), any(), eq(list));
+    verify(emailService).sendVerification(eq(shop), eq(account), any(), eq(list));
   }
 
   @Test

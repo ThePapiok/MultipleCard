@@ -56,7 +56,8 @@ public class ReviewController {
           errorMessageParam, messageSource.getMessage("error.unexpected", null, locale));
       return redirectLandingPageError;
     }
-    session.setAttribute("success", true);
+    session.setAttribute(
+        "successMessage", messageSource.getMessage("addReview.success.review_added", null, locale));
     return "redirect:/?success";
   }
 
