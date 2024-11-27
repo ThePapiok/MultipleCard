@@ -34,21 +34,26 @@ public class LandingPageController {
       Locale locale,
       Principal principal) {
     final String errorMessageParam = "errorMessage";
-    final String successParam = "success";
+    final String successMessageParam = "successMessage";
     String phone = null;
     if (error != null) {
+      if ("501".equals(error)) {
+        session.removeAttribute(successMessageParam);
+        session.setAttribute(
+            errorMessageParam,
+            messageSource.getMessage("buyProducts.error.canceled_order", null, locale));
+        return "redirect:/?error";
+      }
       String message = (String) session.getAttribute(errorMessageParam);
       if (message != null) {
         model.addAttribute(errorMessageParam, message);
         session.removeAttribute(errorMessageParam);
       }
     } else if (success != null) {
-      Boolean successSession = (Boolean) session.getAttribute(successParam);
-      if (successSession != null) {
-        model.addAttribute(
-            "successMessage",
-            messageSource.getMessage("landingPage.review.success_added", null, locale));
-        session.removeAttribute(successParam);
+      String message = (String) session.getAttribute(successMessageParam);
+      if (message != null) {
+        model.addAttribute(successMessageParam, message);
+        session.removeAttribute(successMessageParam);
       }
     }
     if (principal != null) {

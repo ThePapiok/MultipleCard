@@ -1,11 +1,14 @@
 let disable = true;
 
-function atStart() {
+function atStart(isCard) {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("error")) {
         enableInputs();
     }
     checkLanguage();
+    if (isCard){
+        checkCardName(document.getElementById('name'));
+    }
 }
 
 function enableInputs() {

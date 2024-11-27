@@ -33,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -185,18 +186,12 @@ public class ShopControllerTest {
     when(refundService.checkExistsAlreadyRefund(TEST_PAYU_ORDER_ID)).thenReturn(false);
     when(productService.buyProducts(products, TEST_CARD_ID, TEST_ORDER_ID)).thenReturn(false);
     when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
-    when(payUService.makeRefund(TEST_PAYU_ORDER_ID, Locale.getDefault())).thenReturn(true);
+    when(payUService.makeRefund(TEST_PAYU_ORDER_ID)).thenReturn(true);
 
     performPostBuyProducts(STATUS_OK, body, TEST_SIGNATURE);
     verify(productService).buyProducts(products, TEST_CARD_ID, TEST_ORDER_ID);
-    verify(emailService)
-        .sendEmail(
-            "Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją. "
-                + "W najbliższym czasie pieniądze trafią z powrotem na twoje konto.",
-            TEST_EMAIL,
-            "Zwrot - " + TEST_PAYU_ORDER_ID);
     verify(reservedProductService).deleteAllByOrderId(TEST_ORDER_ID);
-    verify(refundService).createRefund(TEST_PAYU_ORDER_ID);
+    verify(refundService).createRefund(TEST_PAYU_ORDER_ID, "pl", TEST_EMAIL);
   }
 
   @Test
@@ -210,18 +205,12 @@ public class ShopControllerTest {
     when(refundService.checkExistsAlreadyRefund(TEST_PAYU_ORDER_ID)).thenReturn(false);
     when(productService.buyProducts(products, TEST_CARD_ID, TEST_ORDER_ID)).thenReturn(false);
     when(payUService.checkNotification(body, TEST_SIGNATURE)).thenReturn(true);
-    when(payUService.makeRefund(TEST_PAYU_ORDER_ID, Locale.getDefault())).thenReturn(false);
+    when(payUService.makeRefund(TEST_PAYU_ORDER_ID)).thenReturn(false);
 
     performPostBuyProducts(STATUS_OK, body, TEST_SIGNATURE);
     verify(productService).buyProducts(products, TEST_CARD_ID, TEST_ORDER_ID);
-    verify(emailService)
-        .sendEmail(
-            "Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją. "
-                + "W najbliższym czasie pieniądze trafią z powrotem na twoje konto.",
-            TEST_EMAIL,
-            "Zwrot - " + TEST_PAYU_ORDER_ID);
     verify(reservedProductService).deleteAllByOrderId(TEST_ORDER_ID);
-    verify(refundService).createRefund(TEST_PAYU_ORDER_ID);
+    verify(refundService).createRefund(TEST_PAYU_ORDER_ID, "pl", TEST_EMAIL);
     verify(emailService).sendEmail(body, TEST_EMAIL, "Błąd zwrotu - " + TEST_PAYU_ORDER_ID);
   }
 
@@ -310,11 +299,13 @@ public class ShopControllerTest {
 
   @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenBlockedIp() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(false);
 
-    performPostAtMakeOrder("Zbyt dużo anulowanych transakcji, spróbuj jutro", STATUS_BAD_REQUEST);
+    performPostAtMakeOrder(
+        "Zbyt dużo anulowanych transakcji, spróbuj jutro", STATUS_BAD_REQUEST, httpSession);
   }
 
   @Test
@@ -354,6 +345,7 @@ public class ShopControllerTest {
   @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenTooManyReservedProductsByCard()
       throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
@@ -361,13 +353,14 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
         .thenReturn(false);
 
-    performPostAtMakeOrder("Zbyt dużo zarezerwowanych produktów", STATUS_BAD_REQUEST);
+    performPostAtMakeOrder("Zbyt dużo zarezerwowanych produktów", STATUS_BAD_REQUEST, httpSession);
   }
 
   @Test
   public void
       shouldReturnResponseWithErrorMessageAtMakeOrderWhenTooManyReservedProductsByIpAddress()
           throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
@@ -377,12 +370,13 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(false);
 
-    performPostAtMakeOrder("Zbyt dużo zarezerwowanych produktów", STATUS_BAD_REQUEST);
+    performPostAtMakeOrder("Zbyt dużo zarezerwowanych produktów", STATUS_BAD_REQUEST, httpSession);
   }
 
   @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorMakeOrderOfProducts()
       throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
@@ -395,12 +389,13 @@ public class ShopControllerTest {
             eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString(), any(Locale.class)))
         .thenReturn(Pair.of(false, "error"));
 
-    performPostAtMakeOrder("Nieoczekiwany błąd", STATUS_BAD_REQUEST);
+    performPostAtMakeOrder("Nieoczekiwany błąd", STATUS_BAD_REQUEST, httpSession);
   }
 
   @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorAtReservedProducts()
       throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
@@ -416,11 +411,12 @@ public class ShopControllerTest {
             eq(productsInfo), anyString(), any(ObjectId.class), eq(TEST_CARD_ID)))
         .thenReturn(false);
 
-    performPostAtMakeOrder("Błąd podczas rezerwacji produktów", STATUS_BAD_REQUEST);
+    performPostAtMakeOrder("Błąd podczas rezerwacji produktów", STATUS_BAD_REQUEST, httpSession);
   }
 
   @Test
   public void shouldReturnResponseOkWithPaymentUrlAtMakeOrderWhenEverythingOk() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
     setProductsInfoForMakeOrder();
 
     when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
@@ -436,7 +432,8 @@ public class ShopControllerTest {
             eq(productsInfo), anyString(), any(ObjectId.class), eq(TEST_CARD_ID)))
         .thenReturn(true);
 
-    performPostAtMakeOrder("payu.com", STATUS_OK);
+    performPostAtMakeOrder("payu.com", STATUS_OK, httpSession);
+    assertEquals("Pomyślnie zakupiono produkty", httpSession.getAttribute("successMessage"));
   }
 
   private void setProductsInfoForMakeOrder() {
@@ -444,7 +441,8 @@ public class ShopControllerTest {
     productsInfo = Map.of(productInfo, 1);
   }
 
-  private void performPostAtMakeOrder(String message, int status) throws Exception {
+  private void performPostAtMakeOrder(String message, int status, MockHttpSession httpSession)
+      throws Exception {
     final String productInfoJSON =
         """
                 {
@@ -466,7 +464,8 @@ public class ShopControllerTest {
                 post(MAKE_ORDER_URL)
                     .param(CARD_ID_PARAM, TEST_CARD_ID)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(productsJSON)))
+                    .content(objectMapper.writeValueAsString(productsJSON))
+                    .session(httpSession))
             .andExpect(status().is(status))
             .andReturn();
     assertEquals(message, result.getResponse().getContentAsString());

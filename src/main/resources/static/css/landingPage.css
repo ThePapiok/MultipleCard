@@ -77,6 +77,10 @@ label {
     font-size: 20px;
 }
 
+#success, #error {
+    margin-left: 5%;
+}
+
 @media only screen and (max-width: 768px) {
     #b2 {
         margin-left: 76%;

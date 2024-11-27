@@ -2,8 +2,6 @@ package com.thepapiok.multiplecard.services;
 
 import com.google.zxing.WriterException;
 import com.thepapiok.multiplecard.collections.Card;
-import com.thepapiok.multiplecard.dto.OrderCardDTO;
-import com.thepapiok.multiplecard.misc.CardConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import java.io.IOException;
@@ -21,7 +19,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class CardService {
   private final AccountRepository accountRepository;
   private final CardRepository cardRepository;
-  private final CardConverter cardConverter;
   private final CloudinaryService cloudinaryService;
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
@@ -34,14 +31,12 @@ public class CardService {
   public CardService(
       AccountRepository accountRepository,
       CardRepository cardRepository,
-      CardConverter cardConverter,
       CloudinaryService cloudinaryService,
       MongoTemplate mongoTemplate,
       MongoTransactionManager mongoTransactionManager,
       QrCodeService qrCodeService) {
     this.accountRepository = accountRepository;
     this.cardRepository = cardRepository;
-    this.cardConverter = cardConverter;
     this.cloudinaryService = cloudinaryService;
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
@@ -52,7 +47,7 @@ public class CardService {
     return cardRepository.findCardByUserId(accountRepository.findIdByPhone(phone).getId());
   }
 
-  public boolean createCard(OrderCardDTO cardDTO, String phone) {
+  public boolean createCard(String phone, String cardId, String encryptedPin, String name) {
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
       transactionTemplate.execute(
@@ -68,17 +63,17 @@ public class CardService {
                 }
                 mongoTemplate.remove(existsCard);
               }
-              String id;
-              Card card = cardConverter.getEntity(cardDTO);
+              Card card = new Card();
+              card.setName(name);
+              card.setPin(encryptedPin);
+              card.setId(new ObjectId(cardId));
               card.setAttempts(0);
               card.setUserId(accountRepository.findIdByPhone(phone).getId());
               card.setImageUrl("");
-              card = mongoTemplate.save(card);
-              id = card.getId().toString();
               try {
                 card.setImageUrl(
                     cloudinaryService.addImage(
-                        qrCodeService.generateQrCode(appUrl + "card?id=" + id), id));
+                        qrCodeService.generateQrCode(appUrl + "cards?id=" + cardId), cardId));
               } catch (WriterException | IOException e) {
                 throw new RuntimeException(e);
               }

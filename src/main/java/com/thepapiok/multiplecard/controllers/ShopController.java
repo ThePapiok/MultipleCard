@@ -15,6 +15,7 @@ import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ReservedProductService;
 import com.thepapiok.multiplecard.services.ShopService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,21 +98,12 @@ public class ShopController {
               objectMapper.readValue(
                   jsonNode.get("products").toString(), new TypeReference<List<ProductPayU>>() {});
           if (!productService.buyProducts(products, cardId, orderId)) {
-            Locale locale;
-            if ("pl".equals(jsonNode.get("additionalDescription").asText())) {
-              locale = Locale.getDefault();
-            } else {
-              locale = new Locale.Builder().setLanguage("eng").build();
-            }
-            emailService.sendEmail(
-                messageSource.getMessage("buyProducts.refund.message", null, locale),
-                jsonNode.get("buyer").get("email").asText(),
-                messageSource.getMessage("buyProducts.refund.title", null, locale)
-                    + " - "
-                    + payuOrderId);
+            refundService.createRefund(
+                payuOrderId,
+                jsonNode.get("additionalDescription").asText(),
+                jsonNode.get("buyer").get("email").asText());
             reservedProductService.deleteAllByOrderId(orderId);
-            refundService.createRefund(payuOrderId);
-            if (!payUService.makeRefund(payuOrderId, locale)) {
+            if (!payUService.makeRefund(payuOrderId)) {
               emailService.sendEmail(
                   requestBody, "multiplecard@gmail.com", "Błąd zwrotu - " + payuOrderId);
             }
@@ -133,7 +125,8 @@ public class ShopController {
       @RequestBody Map<String, Integer> productsId,
       @RequestParam String cardId,
       Locale locale,
-      HttpServletRequest httpServletRequest) {
+      HttpServletRequest httpServletRequest,
+      HttpSession httpSession) {
     final ObjectId orderId = new ObjectId();
     final String ip = httpServletRequest.getRemoteAddr();
     Map<ProductInfo, Integer> productsInfo = productService.getProductsInfo(productsId);
@@ -168,6 +161,8 @@ public class ShopController {
           messageSource.getMessage("makeOrder.error.reserved_products_already", null, locale),
           HttpStatus.BAD_REQUEST);
     }
+    httpSession.setAttribute(
+        "successMessage", messageSource.getMessage("makeOrder.success.buy_products", null, locale));
     return new ResponseEntity<>(response.getSecond(), HttpStatus.OK);
   }
 }

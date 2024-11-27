@@ -28,7 +28,7 @@ public class SecurityConfig {
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.DELETE, "/reviews")
                     .hasRole(roleUser)
-                    .requestMatchers("/new_card", "/block_card")
+                    .requestMatchers("/new_card", "/block_card", "/order_card")
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.POST, "/user")
                     .hasAnyRole(roleUser, "ADMIN")

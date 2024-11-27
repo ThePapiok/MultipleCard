@@ -2,6 +2,7 @@ package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
+import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
@@ -23,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.context.MessageSource;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,24 +42,30 @@ import org.springframework.web.client.RestTemplate;
 public class PayUServiceTest {
 
   private static final String TEST_IP = "127.0.0.1";
+  private static final String TEST_PIN = "1234";
+  private static final String TEST_ENCRYPTED_PIN = "saffsasfd123132421";
+  private static final String TEST_PHONE = "1234123412341";
   private static final String TEST_CARD_ID = "123456789012345678901234";
   private static final String TEST_ORDER_ID = "593456189012345678901231";
   private static final String PAYU_ORDERS_URL = "https://secure.snd.payu.com/api/v2_1/orders";
   private static final String PAYU_REFUNDS_URL =
       "https://secure.snd.payu.com/api/v2_1/orders/593456189012345678901231/refunds";
+  private static final String QUOTATION_MARK = "\"";
+  private static final String DESCRIPTION_FIELD = "description";
+  private static final String CARD_NAME_FIELD = "cardName";
   private final String testBearerToken = "123wasdasad423412341weqr324";
   private Map<ProductInfo, Integer> productsInfo;
   private PayUService payUService;
   @Mock private RestTemplate restTemplate;
   @Mock private ProductRepository productRepository;
   @Mock private PromotionRepository promotionRepository;
-  @Mock private MessageSource messageSource;
+  @Mock private PasswordEncoder passwordEncoder;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     payUService =
-        new PayUService(restTemplate, productRepository, promotionRepository, messageSource);
+        new PayUService(restTemplate, productRepository, promotionRepository, passwordEncoder);
   }
 
   @Test
@@ -69,7 +77,7 @@ public class PayUServiceTest {
                 {
                     "redirectUri": \""""
             + testPaymentUrl
-            + "\""
+            + QUOTATION_MARK
             + """
                 }
                 """;
@@ -167,11 +175,11 @@ public class PayUServiceTest {
     Map<String, Object> dataOrder = new HashMap<>();
     dataOrder.put("extOrderId", TEST_ORDER_ID);
     dataOrder.put("notifyUrl", "nullbuy_products");
-    dataOrder.put("continueUrl", null);
+    dataOrder.put("continueUrl", "null?success");
     dataOrder.put("customerIp", TEST_IP);
     dataOrder.put("validityTime", maxTimeForOrderInSeconds);
     dataOrder.put("merchantPosId", null);
-    dataOrder.put("description", TEST_CARD_ID);
+    dataOrder.put(DESCRIPTION_FIELD, TEST_CARD_ID);
     dataOrder.put("currencyCode", "PLN");
     dataOrder.put("totalAmount", expectedTotalAmount);
     dataOrder.put("products", products);
@@ -193,7 +201,7 @@ public class PayUServiceTest {
             PAYU_REFUNDS_URL, HttpMethod.POST, requestEntityRefund, String.class))
         .thenReturn(expectedResponseForRefund);
 
-    assertTrue(payUService.makeRefund(TEST_ORDER_ID, Locale.getDefault()));
+    assertTrue(payUService.makeRefund(TEST_ORDER_ID));
   }
 
   @Test
@@ -206,7 +214,7 @@ public class PayUServiceTest {
             PAYU_REFUNDS_URL, HttpMethod.POST, requestEntityRefund, String.class))
         .thenReturn(expectedResponseForRefund);
 
-    assertFalse(payUService.makeRefund(TEST_ORDER_ID, Locale.getDefault()));
+    assertFalse(payUService.makeRefund(TEST_ORDER_ID));
   }
 
   @Test
@@ -217,7 +225,7 @@ public class PayUServiceTest {
             PAYU_REFUNDS_URL, HttpMethod.POST, requestEntityRefund, String.class))
         .thenThrow(RuntimeException.class);
 
-    assertFalse(payUService.makeRefund(TEST_ORDER_ID, Locale.getDefault()));
+    assertFalse(payUService.makeRefund(TEST_ORDER_ID));
   }
 
   private HttpEntity<Map<String, Object>> setRequestForRefund() {
@@ -228,20 +236,9 @@ public class PayUServiceTest {
     headers.setContentType(MediaType.APPLICATION_JSON);
     Map<String, Object> data = new HashMap<>(1);
     Map<String, String> description = new HashMap<>(1);
-    description.put(
-        "description",
-        """
-            Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją.
-            W najbliższym czasie pieniądze trafią z powrotem na twoje konto.""");
+    description.put(DESCRIPTION_FIELD, "refund");
     data.put("refund", description);
-    HttpEntity<Map<String, Object>> requestEntityRefund = new HttpEntity<>(data, headers);
-
-    when(messageSource.getMessage("buyProducts.refund.message", null, Locale.getDefault()))
-        .thenReturn(
-            """
-            Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją.
-            W najbliższym czasie pieniądze trafią z powrotem na twoje konto.""");
-    return requestEntityRefund;
+    return new HttpEntity<>(data, headers);
   }
 
   @Test
@@ -271,6 +268,99 @@ public class PayUServiceTest {
   }
 
   @Test
+  public void shouldReturnNullAtCardOrderWhenBadStatus() throws JsonProcessingException {
+    setToken();
+    HttpEntity<Map<String, Object>> requestEntityOrder = setRequestForCardOrder();
+
+    ResponseEntity<String> response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    OrderCardDTO orderCardDTO = new OrderCardDTO();
+    orderCardDTO.setPin(TEST_PIN);
+    orderCardDTO.setName(CARD_NAME_FIELD);
+
+    when(passwordEncoder.encode(TEST_PIN)).thenReturn(TEST_ENCRYPTED_PIN);
+    when(restTemplate.exchange(PAYU_ORDERS_URL, HttpMethod.POST, requestEntityOrder, String.class))
+        .thenReturn(response);
+
+    assertNull(
+        payUService.cardOrder(
+            TEST_CARD_ID, TEST_IP, Locale.getDefault(), TEST_PHONE, orderCardDTO));
+  }
+
+  @Test
+  public void shouldReturnNullAtCardOrderWhenGetException() {
+    setToken();
+
+    OrderCardDTO orderCardDTO = new OrderCardDTO();
+    orderCardDTO.setPin(TEST_PIN);
+    orderCardDTO.setName(CARD_NAME_FIELD);
+
+    when(passwordEncoder.encode(TEST_PIN)).thenThrow(RuntimeException.class);
+
+    assertNull(
+        payUService.cardOrder(
+            TEST_CARD_ID, TEST_IP, Locale.getDefault(), TEST_PHONE, orderCardDTO));
+  }
+
+  @Test
+  public void shouldReturnPaymentUrlAtCardOrderWhenEverythingOk() throws JsonProcessingException {
+    final String redirectUrl = "payu.com";
+    final String body =
+        """
+      {
+        "redirectUri": \""""
+            + redirectUrl
+            + QUOTATION_MARK
+            + """
+      }
+    """;
+    setToken();
+    HttpEntity<Map<String, Object>> requestEntityOrder = setRequestForCardOrder();
+
+    ResponseEntity<String> response = new ResponseEntity<>(body, HttpStatus.FOUND);
+    OrderCardDTO orderCardDTO = new OrderCardDTO();
+    orderCardDTO.setPin(TEST_PIN);
+    orderCardDTO.setName(CARD_NAME_FIELD);
+
+    when(passwordEncoder.encode(TEST_PIN)).thenReturn(TEST_ENCRYPTED_PIN);
+    when(restTemplate.exchange(PAYU_ORDERS_URL, HttpMethod.POST, requestEntityOrder, String.class))
+        .thenReturn(response);
+
+    assertEquals(
+        redirectUrl,
+        payUService.cardOrder(
+            TEST_CARD_ID, TEST_IP, Locale.getDefault(), TEST_PHONE, orderCardDTO));
+  }
+
+  private HttpEntity<Map<String, Object>> setRequestForCardOrder() throws JsonProcessingException {
+    final int cardPrice = 2000;
+    final int maxTimeForOrderInSeconds = 900;
+    ObjectMapper objectMapper = new ObjectMapper();
+    HttpHeaders headersOrder = new HttpHeaders();
+    headersOrder.setBearerAuth(testBearerToken);
+    headersOrder.setContentType(MediaType.APPLICATION_JSON);
+    Map<String, String> productName = new HashMap<>(2);
+    productName.put("encryptedPin", TEST_ENCRYPTED_PIN);
+    productName.put("name", CARD_NAME_FIELD);
+    ProductPayU productPayU = new ProductPayU();
+    productPayU.setName(objectMapper.writeValueAsString(productName));
+    productPayU.setQuantity(1);
+    productPayU.setUnitPrice(cardPrice);
+    Map<String, Object> dataOrder = new HashMap<>();
+    dataOrder.put("extOrderId", TEST_CARD_ID);
+    dataOrder.put("notifyUrl", "nullbuy_card");
+    dataOrder.put("continueUrl", "nullprofile?success");
+    dataOrder.put("customerIp", TEST_IP);
+    dataOrder.put("validityTime", maxTimeForOrderInSeconds);
+    dataOrder.put("merchantPosId", null);
+    dataOrder.put(DESCRIPTION_FIELD, TEST_PHONE);
+    dataOrder.put("currencyCode", "PLN");
+    dataOrder.put("totalAmount", cardPrice);
+    dataOrder.put("products", List.of(productPayU));
+    dataOrder.put("additionalDescription", Locale.getDefault());
+    return new HttpEntity<>(dataOrder, headersOrder);
+  }
+
+  @Test
   public void shouldReturnNewBearerTokenAtTestBearerTokenExpiredWhenEverythingOk()
       throws JsonProcessingException {
     setToken();
@@ -293,7 +383,7 @@ public class PayUServiceTest {
                     "expires_in": 2314234,
                     "access_token": \""""
             + testBearerToken
-            + "\""
+            + QUOTATION_MARK
             + """
                 }
                 """;

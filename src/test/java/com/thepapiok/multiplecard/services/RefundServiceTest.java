@@ -7,20 +7,24 @@ import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Refund;
 import com.thepapiok.multiplecard.repositories.RefundRepository;
+import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.MessageSource;
 
 public class RefundServiceTest {
   private static final String TEST_ORDER_ID = "123456789012345678901234";
   private RefundService refundService;
   @Mock private RefundRepository refundRepository;
+  @Mock private EmailService emailService;
+  @Mock private MessageSource messageSource;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    refundService = new RefundService(refundRepository);
+    refundService = new RefundService(refundRepository, emailService, messageSource);
   }
 
   @Test
@@ -42,9 +46,22 @@ public class RefundServiceTest {
     Refund expectedRefund = new Refund();
     expectedRefund.setRefunded(false);
     expectedRefund.setOrderId(TEST_ORDER_ID);
+    Locale locale = Locale.getDefault();
 
-    refundService.createRefund(TEST_ORDER_ID);
+    when(messageSource.getMessage("buyProducts.refund.message", null, locale))
+        .thenReturn(
+            "Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją. "
+                + "W najbliższym czasie pieniądze trafią z powrotem na twoje konto.");
+    when(messageSource.getMessage("buyProducts.refund.title", null, locale)).thenReturn("Zwrot");
+
+    refundService.createRefund(TEST_ORDER_ID, "pl", "multiplecard@gmail.com");
     verify(refundRepository).save(expectedRefund);
+    verify(emailService)
+        .sendEmail(
+            "Przepraszamy, wystąpił nieoczekiwany błąd związany z twoją transakcją. "
+                + "W najbliższym czasie pieniądze trafią z powrotem na twoje konto.",
+            "multiplecard@gmail.com",
+            "Zwrot - " + TEST_ORDER_ID);
   }
 
   @Test
