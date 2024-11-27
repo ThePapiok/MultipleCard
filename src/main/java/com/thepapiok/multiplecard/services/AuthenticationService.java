@@ -169,7 +169,7 @@ public class AuthenticationService {
               account.setBanned(false);
               mongoTemplate.save(account);
               try {
-                emailService.sendEmailWithAttachment(shop, account, locale, fileList);
+                emailService.sendVerification(shop, account, locale, fileList);
               } catch (MessagingException e) {
                 throw new RuntimeException(e);
               }

@@ -11,9 +11,15 @@ import com.google.zxing.WriterException;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
+import com.thepapiok.multiplecard.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +42,9 @@ public class CardServiceTest {
   @Mock private MongoTemplate mongoTemplate;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private QrCodeService qrCodeService;
+  @Mock private ImageService imageService;
+  @Mock private EmailService emailService;
+  @Mock private UserRepository userRepository;
   private CardService cardService;
 
   @BeforeEach
@@ -48,7 +57,10 @@ public class CardServiceTest {
             cloudinaryService,
             mongoTemplate,
             mongoTransactionManager,
-            qrCodeService);
+            qrCodeService,
+            imageService,
+            emailService,
+            userRepository);
   }
 
   @Test
@@ -64,12 +76,14 @@ public class CardServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtCreateCardWhenNoCard() throws IOException, WriterException {
+  public void shouldSuccessAtCreateCardWhenNoCard()
+      throws IOException, WriterException, MessagingException {
     shouldSuccess(null);
   }
 
   @Test
-  public void shouldSuccessAtCreateCardWithCard() throws IOException, WriterException {
+  public void shouldSuccessAtCreateCardWithCard()
+      throws IOException, WriterException, MessagingException {
     Card card = new Card();
     card.setId(TEST_CARD_OBJECT_ID);
 
@@ -93,8 +107,17 @@ public class CardServiceTest {
         cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME));
   }
 
-  private void shouldSuccess(Card givenCard) throws IOException, WriterException {
+  private void shouldSuccess(Card givenCard)
+      throws IOException, WriterException, MessagingException {
     byte[] bytes = new byte[0];
+    byte[] imageFrontBytes = new byte[0];
+    byte[] imageBackBytes = new byte[0];
+    Account account = new Account();
+    account.setId(TEST_ID);
+    account.setPhone(TEST_PHONE);
+    User user = new User();
+    user.setId(TEST_ID);
+
     Card expectedCard = new Card();
     expectedCard.setName(TEST_CARD_NAME);
     expectedCard.setPin(TEST_ENCRYPTED_PIN);
@@ -103,18 +126,24 @@ public class CardServiceTest {
     expectedCard.setImageUrl("");
     expectedCard.setId(TEST_CARD_OBJECT_ID);
     expectedCard.setImageUrl("dasdas1231231@sdfasdfds");
-
-    Account account = new Account();
-    account.setId(TEST_ID);
+    CustomMultipartFile customMultipartFile1 =
+        new CustomMultipartFile("file1", "file1", "png", imageFrontBytes);
+    CustomMultipartFile customMultipartFile2 =
+        new CustomMultipartFile("file2", "file2", "png", imageBackBytes);
+    List<CustomMultipartFile> cardImage = List.of(customMultipartFile1, customMultipartFile2);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(givenCard);
     when(qrCodeService.generateQrCode("nullcards?id=" + TEST_CARD_ID)).thenReturn(bytes);
     when(cloudinaryService.addImage(bytes, TEST_CARD_ID)).thenReturn("dasdas1231231@sdfasdfds");
+    when(imageService.generateImage(bytes, TEST_CARD_NAME, TEST_CARD_ID)).thenReturn(cardImage);
+    when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
 
     assertTrue(
         cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME));
     verify(mongoTemplate).save(expectedCard);
+    verify(emailService).sendCardImage(cardImage, TEST_CARD_ID, account, user);
   }
 
   @Test

@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Shop;
+import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import jakarta.activation.DataSource;
 import jakarta.mail.internet.MimeMessage;
 import java.util.ArrayList;
@@ -27,6 +29,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 public class EmailServiceTest {
+  private static final String TEST_FILE1_NAME = "file1";
+  private static final String TEST_FILE2_NAME = "file2";
+  private static final String TEST_FORMAT_TYPE = "pdf";
   private EmailService emailService;
   @Mock private JavaMailSender javaMailSender;
   @Mock private MessageSource messageSource;
@@ -52,7 +57,7 @@ public class EmailServiceTest {
   }
 
   @Test
-  public void shouldSendEmailAtSendEmailWithAttachmentWhenEverythingOk() throws Exception {
+  public void shouldSendEmailAtSendVerificationWhenEverythingOk() throws Exception {
     final String testShopId = "123456789012345678901234";
     final String testFirstName = "shopFirstName";
     final String testLastName = "shopLastName";
@@ -109,8 +114,10 @@ public class EmailServiceTest {
     account.setEmail(testEmail);
     account.setPhone(testPhone);
     List<MultipartFile> files = new ArrayList<>();
-    MockMultipartFile file1 = new MockMultipartFile("file1", "file1", "pdf", file1Bytes);
-    MockMultipartFile file2 = new MockMultipartFile("file2", "file2", "pdf", file2Bytes);
+    MockMultipartFile file1 =
+        new MockMultipartFile(TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_FORMAT_TYPE, file1Bytes);
+    MockMultipartFile file2 =
+        new MockMultipartFile(TEST_FILE2_NAME, TEST_FILE2_NAME, TEST_FORMAT_TYPE, file2Bytes);
     files.add(file1);
     files.add(file2);
     MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -203,7 +210,95 @@ public class EmailServiceTest {
     when(messageSource.getMessage("apartmentNumber.text", null, locale)).thenReturn("Nr lokalu");
     when(messageSource.getMessage("province.text", null, locale)).thenReturn("Województwo");
 
-    emailService.sendEmailWithAttachment(shop, account, Locale.getDefault(), files);
+    emailService.sendVerification(shop, account, Locale.getDefault(), files);
+    MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage);
+    mimeMessageParser.parse();
+    MimeMessageParser expectedMimeMessageParser = new MimeMessageParser(expectedMimeMessage);
+    expectedMimeMessageParser.parse();
+    assertEquals(expectedMimeMessageParser.getSubject(), mimeMessageParser.getSubject());
+    assertEquals(expectedMimeMessageParser.getTo(), mimeMessageParser.getTo());
+    assertEquals(expectedMimeMessageParser.getPlainContent(), mimeMessageParser.getPlainContent());
+    for (int i = 0; i < mimeMessageParser.getAttachmentList().size(); i++) {
+      dataSource = mimeMessageParser.getAttachmentList().get(i);
+      expectedDataSource = expectedMimeMessageParser.getAttachmentList().get(i);
+      assertEquals(expectedDataSource.getContentType(), dataSource.getContentType());
+      assertEquals(expectedDataSource.getName(), dataSource.getName());
+    }
+  }
+
+  @Test
+  public void shouldSendEmailAtSendCardImageWhenEverythingOk() throws Exception {
+    final String newLine = "\n";
+    final String testCardId = "123456789009876543214545";
+    final byte[] file1Bytes = "testFile1".getBytes();
+    final byte[] file2Bytes = "testFile2".getBytes();
+    Account account = new Account();
+    account.setEmail("test@test.pl");
+    account.setPhone("123123123123");
+    Address address = new Address();
+    address.setCity("city");
+    address.setCountry("country");
+    address.setStreet("street");
+    address.setHouseNumber("houseNumber");
+    address.setApartmentNumber(1);
+    address.setProvince("province");
+    address.setPostalCode("postalCode");
+    User user = new User();
+    user.setFirstName("firstName");
+    user.setLastName("lastName");
+    user.setAddress(address);
+    JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+    MimeMessage mimeMessage = mailSender.createMimeMessage();
+    MimeMessage expectedMimeMessage = mailSender.createMimeMessage();
+    DataSource expectedDataSource;
+    DataSource dataSource;
+    MimeMessageHelper expectedMimeMessageHelper = new MimeMessageHelper(expectedMimeMessage, true);
+    StringBuilder text = new StringBuilder();
+    text.append("Numer telefonu - ")
+        .append(account.getPhone())
+        .append(newLine)
+        .append("Email - ")
+        .append(account.getEmail())
+        .append(newLine)
+        .append("Imię - ")
+        .append(user.getFirstName())
+        .append(newLine)
+        .append("Nazwisko - ")
+        .append(user.getLastName())
+        .append(newLine)
+        .append("Kraj - ")
+        .append(address.getCountry())
+        .append(newLine)
+        .append("Województwo - ")
+        .append(address.getProvince())
+        .append(newLine)
+        .append("Ulica - ")
+        .append(address.getStreet())
+        .append(newLine)
+        .append("Nr. domu - ")
+        .append(address.getHouseNumber())
+        .append(newLine)
+        .append("Nr. lokalu - ")
+        .append(address.getApartmentNumber())
+        .append(newLine)
+        .append("Miejscowość - ")
+        .append(address.getCity())
+        .append(newLine)
+        .append("Kod pocztowy - ")
+        .append(address.getPostalCode());
+    CustomMultipartFile file1 =
+        new CustomMultipartFile(TEST_FILE1_NAME, TEST_FILE1_NAME, TEST_FORMAT_TYPE, file1Bytes);
+    CustomMultipartFile file2 =
+        new CustomMultipartFile(TEST_FILE2_NAME, TEST_FILE2_NAME, TEST_FORMAT_TYPE, file2Bytes);
+    expectedMimeMessageHelper.setSubject("Zamówienie karty - " + testCardId);
+    expectedMimeMessageHelper.setTo("multiplecard@gmail.com");
+    expectedMimeMessageHelper.setText(text.toString());
+    expectedMimeMessageHelper.addAttachment(file1.getOriginalFilename(), file1);
+    expectedMimeMessageHelper.addAttachment(file2.getOriginalFilename(), file2);
+
+    when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+    emailService.sendCardImage(List.of(file1, file2), testCardId, account, user);
     MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage);
     mimeMessageParser.parse();
     MimeMessageParser expectedMimeMessageParser = new MimeMessageParser(expectedMimeMessage);

@@ -1,10 +1,17 @@
 package com.thepapiok.multiplecard.services;
 
 import com.google.zxing.WriterException;
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
+import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
+import com.thepapiok.multiplecard.repositories.UserRepository;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +30,9 @@ public class CardService {
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
   private final QrCodeService qrCodeService;
+  private final ImageService imageService;
+  private final EmailService emailService;
+  private final UserRepository userRepository;
 
   @Value("${app.url}")
   private String appUrl;
@@ -34,13 +44,19 @@ public class CardService {
       CloudinaryService cloudinaryService,
       MongoTemplate mongoTemplate,
       MongoTransactionManager mongoTransactionManager,
-      QrCodeService qrCodeService) {
+      QrCodeService qrCodeService,
+      ImageService imageService,
+      EmailService emailService,
+      UserRepository userRepository) {
     this.accountRepository = accountRepository;
     this.cardRepository = cardRepository;
     this.cloudinaryService = cloudinaryService;
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
     this.qrCodeService = qrCodeService;
+    this.imageService = imageService;
+    this.emailService = emailService;
+    this.userRepository = userRepository;
   }
 
   public Card getCard(String phone) {
@@ -71,13 +87,22 @@ public class CardService {
               card.setUserId(accountRepository.findIdByPhone(phone).getId());
               card.setImageUrl("");
               try {
-                card.setImageUrl(
-                    cloudinaryService.addImage(
-                        qrCodeService.generateQrCode(appUrl + "cards?id=" + cardId), cardId));
+                byte[] qrCode = qrCodeService.generateQrCode(appUrl + "cards?id=" + cardId);
+                card.setImageUrl(cloudinaryService.addImage(qrCode, cardId));
+                List<CustomMultipartFile> cardImage =
+                    imageService.generateImage(qrCode, name, cardId);
+                Account account = accountRepository.findByPhone(phone);
+                Optional<User> optionalUser = userRepository.findById(account.getId());
+                if (optionalUser.isEmpty()) {
+                  throw new RuntimeException();
+                }
+                emailService.sendCardImage(cardImage, cardId, account, optionalUser.get());
+                mongoTemplate.save(card);
               } catch (WriterException | IOException e) {
                 throw new RuntimeException(e);
+              } catch (MessagingException e) {
+                throw new RuntimeException(e);
               }
-              mongoTemplate.save(card);
             }
           });
 
