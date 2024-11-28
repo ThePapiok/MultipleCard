@@ -3,7 +3,7 @@
 Aplikacja webowa pozwalająca na korzystanie z wielokrotnych kart podarunkowych. Kartę można doładować, kupując na niej
 jakiś produkt, a następnie w sklepie można ten produkt dostać.
 
-![Logo](https://i.imgur.com/TqDY4WA.png)
+![Logo](https://i.imgur.com/3d9NnZt.png)
 
 ## Linki
 
