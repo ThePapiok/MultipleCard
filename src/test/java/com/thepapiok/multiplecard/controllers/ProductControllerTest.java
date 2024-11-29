@@ -974,12 +974,7 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldRedirectToProductsSuccessAtEditProductWhenImageNotChange() throws Exception {
     EditProductDTO editProductDTO = setDataForEditProduct();
-    editProductDTO.setFile(null);
-    List<String> categories = editProductDTO.getCategory();
-    Account account = new Account();
-    account.setId(TEST_OBJECT_ID);
-    account.setPhone(TEST_PHONE);
-    MockHttpSession httpSession = new MockHttpSession();
+    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0]));
 
     when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, editProductDTO.getCategory()))
         .thenReturn(false);
@@ -989,21 +984,9 @@ public class ProductControllerTest {
         .thenReturn(false);
     when(productService.editProduct(any(), eq(TEST_OBJECT_ID), eq(editProductDTO.getCategory())))
         .thenReturn(true);
-    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(productService.getProductById(editProductDTO.getId())).thenReturn(testProduct1);
 
-    mockMvc
-        .perform(
-            post(PRODUCTS_URL)
-                .param(ID_PARAM, editProductDTO.getId())
-                .param(NAME_PARAM, editProductDTO.getName())
-                .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
-                .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(PRICE_PARAM, editProductDTO.getPrice())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .session(httpSession))
-        .andExpect(redirectedUrl(PRODUCTS_SUCCESS_URL));
-    assertEquals(SUCCESS_EDIT_PRODUCT_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+    performPostForEditProduct(
+        editProductDTO, PRODUCTS_SUCCESS_URL, SUCCESS_MESSAGE_PARAM, SUCCESS_EDIT_PRODUCT_MESSAGE);
   }
 
   private EditProductDTO setDataForEditProduct() {
@@ -1014,7 +997,7 @@ public class ProductControllerTest {
     editProductDTO.setBarcode(TEST_BARCODE);
     editProductDTO.setPrice(TEST_PRICE);
     editProductDTO.setCategory(List.of(TEST_CATEGORY1_NAME));
-    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0]));
+    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, "testFile".getBytes()));
     return editProductDTO;
   }
 

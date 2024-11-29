@@ -265,7 +265,7 @@ public class ProductService {
               Product product = productConverter.getEntity(editProduct);
               product.setCategories(setCategories(nameOfCategories, ownerId));
               product.setUpdatedAt(LocalDateTime.now());
-              if (file != null) {
+              if (!file.isEmpty()) {
                 try {
                   product.setImageUrl(
                       cloudinaryService.addImage(file.getBytes(), product.getId().toHexString()));

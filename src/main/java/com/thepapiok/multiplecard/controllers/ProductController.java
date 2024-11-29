@@ -270,7 +270,7 @@ public class ProductController {
         && productService.checkOwnerHasTheSameBarcode(ownerId, barcode)) {
       error = true;
       message = messageSource.getMessage("error.product.the_same_barcode", null, locale);
-    } else if (editProductDTO.getFile() != null
+    } else if (!editProductDTO.getFile().isEmpty()
         && !shopService.checkImage(editProductDTO.getFile())) {
       error = true;
       message = messageSource.getMessage("error.bad_file", null, locale);

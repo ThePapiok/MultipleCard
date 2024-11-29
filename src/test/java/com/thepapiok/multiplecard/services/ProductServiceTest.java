@@ -554,6 +554,7 @@ public class ProductServiceTest {
   @Test
   public void shouldReturnTrueAtEditProductWhenFileIsNull() {
     setDataForEditProduct();
+    testEditProductDTO.setFile(new MockMultipartFile("file1", new byte[0]));
 
     assertTrue(productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
     verify(mongoTemplate).save(testExpectedProduct);
@@ -563,7 +564,7 @@ public class ProductServiceTest {
   public void shouldReturnTrueAtEditProductWhenHasFile() {
     setDataForEditProduct();
     final String testNewUrl = "newUrl";
-    final byte[] bytes = new byte[0];
+    final byte[] bytes = "testFile".getBytes();
     final MultipartFile multipartFile = new MockMultipartFile("file1", bytes);
     EditProductDTO editProductDTO = new EditProductDTO();
     editProductDTO.setName(TEST_PRODUCT_NAME);
