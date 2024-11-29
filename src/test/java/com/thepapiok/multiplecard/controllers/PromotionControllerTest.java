@@ -113,7 +113,7 @@ public class PromotionControllerTest {
   public void
       shouldReturnAddPromotionPageAtAddPromotionPageWhenItOwnerHasPromotionAndProductPriceFound()
           throws Exception {
-    final Double price = 30.12;
+    final String price = "30.12";
     PromotionDTO promotionDTO = new PromotionDTO();
     promotionDTO.setQuantity("");
     promotionDTO.setProductId(TEST_PRODUCT_ID);

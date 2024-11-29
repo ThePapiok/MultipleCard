@@ -3,6 +3,7 @@ let previous = [false, false, false, false, false, false];
 const buttonId = "addButton";
 
 function checkPrice(e) {
+    e = replaceComma(e);
     const input = e.value;
     const length = input.length;
     check(3, (length >= 5 && length <= 9 && regPrice.test(input)), ok, previous, buttonId, success, true, true);

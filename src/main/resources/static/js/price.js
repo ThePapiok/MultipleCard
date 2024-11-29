@@ -1,17 +1,38 @@
 const regPrice = new RegExp("^[0-9]*\\.?[0-9]{2}(zł)?$")
 
 function focusedPrice(e) {
-    if (e.value.toString().includes("zł")) {
-        e.value = e.value.toString().replaceAll("zł", "");
+    const value = e.value.toString();
+    if (value.includes("zł")) {
+        e.value = value.replaceAll("zł", "");
     }
 }
 
 function unfocusedPrice(e) {
-    if (!e.value.toString().includes(".")) {
-        e.value += ".00";
+    const value = e.value.toString();
+    const length = value.length;
+    if (e.value !== "" && e.value !== "0") {
+        if (value.charAt(length - 1) === "."){
+            e.value += "00";
+        }
+        else if (value.charAt(length - 2) === "."){
+            e.value += "0";
+        }
+        else if (!value.includes(".")) {
+            e.value += ".00";
+        }
+        if (!value.includes("zł")) {
+            e.value += "zł";
+        }
+        checkPrice(e);
     }
-    if (!e.value.toString().includes("zł")) {
-        e.value += "zł";
+}
+
+function replaceComma(e) {
+    let price = e.value.toString();
+    const lastCharIndex = price.length - 1;
+    if (price.charAt(lastCharIndex) === ","){
+        price = price.substring(0, lastCharIndex) + ".";
+        e.value = price;
     }
-    checkPrice(e);
+    return e;
 }

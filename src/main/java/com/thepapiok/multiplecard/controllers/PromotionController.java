@@ -56,7 +56,7 @@ public class PromotionController {
       }
     }
     if (productService.isProductOwner(principal.getName(), id)) {
-      Double price = productService.getPrice(id);
+      String price = productService.getPrice(id);
       if (price != null) {
         model.addAttribute("originalPrice", price);
       }

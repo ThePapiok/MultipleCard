@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -159,14 +160,13 @@ public class ProductService {
     return product.get().getPrice() > amountCents;
   }
 
-  public Double getPrice(String productId) {
+  public String getPrice(String productId) {
     final double centsPerZl = 100.0;
     Optional<Product> product = productRepository.findById(new ObjectId(productId));
     if (product.isEmpty()) {
       return null;
     }
-
-    return (product.get().getPrice() / centsPerZl);
+    return String.format(Locale.US, "%.2f", (product.get().getPrice() / centsPerZl));
   }
 
   public boolean deleteProduct(String productId) {
