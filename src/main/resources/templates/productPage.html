@@ -43,7 +43,7 @@
                     </label>
                     <label class="inputs">
                         <input th:field="*{name}" type="text" required th:value="*{name}"
-                               oninput="checkName(this)" minlength="2" maxlength="30"
+                               oninput="checkName(this)" minlength="2" maxlength="60"
                                onmouseenter="showValidation(this, 'Name')"
                                onmouseleave="hideValidation('Name')">
                         <img hidden id="close1" src="/images/close.png" alt="close">
@@ -56,7 +56,7 @@
                 <ul>
                     <li th:text="#{validation.starts_uppercase}"></li>
                     <li th:text="#{validation.only_letters}"></li>
-                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 30'"></li>
+                    <li th:text="#{validation.prefix_length} + ' 2 ' + #{validation.suffix_length} + ' 60'"></li>
                 </ul>
             </div>
             <label id="Barcode">

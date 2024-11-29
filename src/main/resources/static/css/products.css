@@ -29,6 +29,7 @@
 .notImageContainer {
     height: 50px;
     background-color: #eadcc2;
+    word-wrap: break-word;
 }
 
 .description {

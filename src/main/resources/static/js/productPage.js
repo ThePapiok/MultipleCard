@@ -30,7 +30,8 @@ function atStart() {
 function checkName(e) {
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 2 && length <= 30 && regProductName.test(input)), 1, name, true, e);
+    console.log(regProductName.test(input));
+    checkOnlyIfOther(input, (length >= 2 && length <= 60 && regProductName.test(input)), 1, name, true, e);
 }
 
 function checkPrice(e) {

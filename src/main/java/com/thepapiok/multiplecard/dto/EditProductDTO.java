@@ -15,8 +15,10 @@ public class EditProductDTO {
   @Size(min = 24, max = 24)
   private String id;
 
-  @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż][a-ząćęłńóśźż ]*$")
-  @Size(min = 2, max = 30)
+  @Pattern(
+      regexp =
+          "^[A-ZĄĆĘŁŃÓŚŹŻ]([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])*( ([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])+)*$")
+  @Size(min = 2, max = 60)
   @NotBlank
   private String name;
 

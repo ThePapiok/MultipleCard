@@ -16,7 +16,7 @@ function checkDescription(e, index) {
 function checkProductName(e, index) {
     const input = e.value;
     const length = input.length;
-    check(index, (length >= 2 && length <= 30 && regProductName.test(input)), ok, previous, buttonId, success, true, true);
+    check(index, (length >= 2 && length <= 60 && regProductName.test(input)), ok, previous, buttonId, success, true, true);
 }
 
 function checkBarcode(e, index) {
