@@ -48,5 +48,5 @@ function checkBarcode(e) {
 function checkDescription(e) {
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 5 && length <= 100), 5, description, true, e);
+    checkOnlyIfOther(input, (length >= 5 && length <= 1000), 5, description, true, e);
 }

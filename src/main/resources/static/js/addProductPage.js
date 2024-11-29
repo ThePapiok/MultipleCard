@@ -10,7 +10,7 @@ function checkPrice(e) {
 
 function checkDescription(e, index) {
     const length = e.value.length;
-    check(index, (length >= 5 && length <= 100), ok, previous, buttonId, success, true, true);
+    check(index, (length >= 5 && length <= 1000), ok, previous, buttonId, success, true, true);
 }
 
 function checkProductName(e, index) {

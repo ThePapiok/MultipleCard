@@ -171,7 +171,7 @@
                     </label>
                     <label class="inputs">
             <textarea id="inputEdit" th:field="*{description}" th:placeholder="#{product_description.text}" required
-                      oninput="checkDescription(this)" minlength="5" maxlength="100"
+                      oninput="checkDescription(this)" minlength="5" maxlength="1000"
                       onmouseenter="showValidation(this, 'Description')"
                       onmouseleave="hideValidation('Description')"></textarea>
                         <img hidden id="close5" src="/images/close.png" alt="close">
@@ -182,7 +182,7 @@
             <div class="validation" id="validationDescription">
                 <span th:text="#{product_description.text} + ' ' + #{validation.text}"></span>
                 <ul>
-                    <li th:text="#{validation.prefix_length} + ' 5 ' + #{validation.suffix_length} + ' 100'"></li>
+                    <li th:text="#{validation.prefix_length} + ' 5 ' + #{validation.suffix_length} + ' 1000'"></li>
                 </ul>
             </div>
         </div>

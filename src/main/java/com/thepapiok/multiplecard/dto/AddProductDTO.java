@@ -16,7 +16,7 @@ public class AddProductDTO {
   private String name;
 
   @NotBlank
-  @Size(min = 5, max = 100)
+  @Size(min = 5, max = 1000)
   private String description;
 
   @NotNull private MultipartFile file;
