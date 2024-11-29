@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Range;
 @Data
 public class ReviewDTO {
   @NotBlank
-  @Size(min = 1, max = 80)
+  @Size(min = 1, max = 1000)
   private String description;
 
   @Range(min = 0, max = 5)

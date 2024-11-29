@@ -89,8 +89,8 @@
           sec:authorize="hasRole('USER')">
         <label for="text"></label>
         <textarea th:field="*{description}" id="text" required th:placeholder="#{landingPage.review.placeholder}"
-                  minlength="1"
-                  maxlength="80" oninput="checkReview(this)"></textarea>
+                  minlength="2"
+                  maxlength="1000" oninput="checkReview(this)"></textarea>
         <div id="starsAndSubmit">
             <label>
                 <input th:field="*{rating}" hidden type="number" min="0" max="5" value="0">

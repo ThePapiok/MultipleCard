@@ -41,5 +41,5 @@ function atStart() {
 
 function checkReview(e) {
     const input = e.value;
-    check(1, (input.length >= 1), ok, previous, "addOpinionButton", success, false, true);
+    check(1, (input.length >= 1 && input.length <= 1000), ok, previous, "addOpinionButton", success, false, true);
 }
