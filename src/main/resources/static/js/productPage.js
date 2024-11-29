@@ -9,6 +9,8 @@ const buttonId = "saveButton";
 function atStart() {
     let realIndex;
     let category;
+    let realPrice;
+    let suffix;
     const length = categories.length;
     indexCategory = length + 1;
     for (let i = 0; i < length; i++) {
@@ -18,8 +20,17 @@ function atStart() {
         document.getElementById("inputCategory" + realIndex).value = category;
         document.getElementById("delete" + realIndex).style.display = "block";
     }
-    document.getElementById("price").value /= 100.0;
     name = document.getElementById("name").value;
+    realPrice = (parseInt(document.getElementById("price").value) / 100.0).toString();
+    suffix = realPrice.substring(realPrice.length - 3, realPrice.length);
+    if (suffix.charAt(1) === ".") {
+        realPrice += "0";
+    } else if (suffix.charAt(2) === ".") {
+        realPrice += "00";
+    } else if (!suffix.includes(".")) {
+        realPrice += ".00";
+    }
+    document.getElementById("price").value = realPrice;
     unfocusedPrice(document.getElementById("price"));
     price = document.getElementById("price").value;
     checkPrice(document.getElementById("price"));
@@ -30,10 +41,11 @@ function atStart() {
 function checkName(e) {
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 2 && length <= 30 && regProductName.test(input)), 1, name, true, e);
+    checkOnlyIfOther(input, (length >= 2 && length <= 60 && regProductName.test(input)), 1, name, true, e);
 }
 
 function checkPrice(e) {
+    e = replaceComma(e);
     const input = e.value;
     const length = input.length;
     checkOnlyIfOther(input, (length >= 2 && length <= 7 && regPrice.test(input)), 3, price, true, e);
@@ -48,5 +60,5 @@ function checkBarcode(e) {
 function checkDescription(e) {
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 5 && length <= 100), 5, description, true, e);
+    checkOnlyIfOther(input, (length >= 5 && length <= 1000), 5, description, true, e);
 }

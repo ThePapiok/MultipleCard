@@ -329,9 +329,35 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturn35dot91AtGetPriceWhenEverythingOk() {
+  public void shouldReturn35dot91AtGetPriceWhenAmountDecimalPart() {
+    final int amount = 3501;
+    final String amountWithoutCents = "35.01";
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setPrice(amount);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertEquals(amountWithoutCents, productService.getPrice(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturn35dot91AtGetPriceWhenAmountHundredthPart() {
+    final int amount = 3590;
+    final String amountWithoutCents = "35.90";
+    Product product = new Product();
+    product.setId(TEST_PRODUCT_ID);
+    product.setPrice(amount);
+
+    when(productRepository.findById(TEST_PRODUCT_ID)).thenReturn(Optional.of(product));
+
+    assertEquals(amountWithoutCents, productService.getPrice(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturn35dot91AtGetPriceWhenAmountHasDecimalPartAndHundredthPart() {
     final int amount = 3591;
-    final double amountWithoutCents = 35.91;
+    final String amountWithoutCents = "35.91";
     Product product = new Product();
     product.setId(TEST_PRODUCT_ID);
     product.setPrice(amount);
@@ -554,6 +580,7 @@ public class ProductServiceTest {
   @Test
   public void shouldReturnTrueAtEditProductWhenFileIsNull() {
     setDataForEditProduct();
+    testEditProductDTO.setFile(new MockMultipartFile("file1", new byte[0]));
 
     assertTrue(productService.editProduct(testEditProductDTO, TEST_OWNER_ID, testNameOfCategories));
     verify(mongoTemplate).save(testExpectedProduct);
@@ -563,7 +590,7 @@ public class ProductServiceTest {
   public void shouldReturnTrueAtEditProductWhenHasFile() {
     setDataForEditProduct();
     final String testNewUrl = "newUrl";
-    final byte[] bytes = new byte[0];
+    final byte[] bytes = "testFile".getBytes();
     final MultipartFile multipartFile = new MockMultipartFile("file1", bytes);
     EditProductDTO editProductDTO = new EditProductDTO();
     editProductDTO.setName(TEST_PRODUCT_NAME);

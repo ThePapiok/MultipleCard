@@ -44,7 +44,7 @@ public class AddProductDTOTest {
   @Test
   public void shouldSuccessAtValidationNameWithMoreThan1Part() {
     AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setName("Produkt produkt produkt");
+    addProductDTO.setName("Produkt PRODUCT produkt");
 
     Set<ConstraintViolation<AddProductDTO>> violations =
         validator.validateProperty(addProductDTO, NAME_PARAM);

@@ -140,6 +140,8 @@ public class ProductController {
       Locale locale,
       Principal principal) {
     final int maxSize = 3;
+    final int minLengthOfCategory = 2;
+    final int maxLengthOfCategory = 30;
     final ObjectId ownerId = accountRepository.findIdByPhone(principal.getName()).getId();
     List<String> categories = addProductDTO.getCategory();
     boolean error = false;
@@ -150,9 +152,12 @@ public class ProductController {
     } else if (!categories.stream()
         .allMatch(
             e ->
-                Pattern.compile("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
-                    .matcher(e)
-                    .matches())) {
+                (Pattern.compile(
+                            "^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
+                        .matcher(e)
+                        .matches()
+                    && e.length() >= minLengthOfCategory
+                    && e.length() <= maxLengthOfCategory))) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
     } else if (categories.size() == 0 || categories.size() > maxSize) {
@@ -238,6 +243,8 @@ public class ProductController {
     final String barcode = editProductDTO.getBarcode();
     final ObjectId ownerId = accountRepository.findIdByPhone(principal.getName()).getId();
     final int maxSize = 3;
+    final int minLengthOfCategory = 2;
+    final int maxLengthOfCategory = 30;
     boolean error = false;
     String message = null;
     List<String> categories = editProductDTO.getCategory();
@@ -248,9 +255,12 @@ public class ProductController {
     } else if (!categories.stream()
         .allMatch(
             e ->
-                Pattern.compile("^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
-                    .matcher(e)
-                    .matches())) {
+                (Pattern.compile(
+                            "^[A-ZĄĆĘŁŃÓŚŹŻ]([a-ząćęłńóśźż]*|[a-ząćęłńóśźż]* [a-ząćęłńóśźż]+)$")
+                        .matcher(e)
+                        .matches()
+                    && e.length() >= minLengthOfCategory
+                    && e.length() <= maxLengthOfCategory))) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);
     } else if (categories.size() == 0 || categories.size() > maxSize) {
@@ -270,7 +280,7 @@ public class ProductController {
         && productService.checkOwnerHasTheSameBarcode(ownerId, barcode)) {
       error = true;
       message = messageSource.getMessage("error.product.the_same_barcode", null, locale);
-    } else if (editProductDTO.getFile() != null
+    } else if (!editProductDTO.getFile().isEmpty()
         && !shopService.checkImage(editProductDTO.getFile())) {
       error = true;
       message = messageSource.getMessage("error.bad_file", null, locale);

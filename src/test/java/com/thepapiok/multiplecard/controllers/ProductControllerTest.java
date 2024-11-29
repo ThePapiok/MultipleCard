@@ -74,9 +74,7 @@ public class ProductControllerTest {
   private static final String DESCRIPTION_PARAM = "description";
   private static final String BARCODE_PARAM = "barcode";
   private static final String PRICE_PARAM = "price";
-  private static final String CATEGORY0_PARAM = "category[0]";
-  private static final String CATEGORY1_PARAM = "category[1]";
-  private static final String CATEGORY2_PARAM = "category[2]";
+  private static final String CATEGORY_PARAM = "category";
   private static final String PRODUCTS_URL = "/products";
   private static final String PRODUCTS_SUCCESS_URL = "/products?success";
   private static final String PRODUCTS_ID_URL = "/products?id=";
@@ -384,7 +382,7 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorAtValidationCategory()
+  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorAtValidationCategoryPattern()
       throws Exception {
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
     MockHttpSession httpSession = new MockHttpSession();
@@ -395,6 +393,44 @@ public class ProductControllerTest {
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
         List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorAtValidationCategorySize1()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
+    addProductDTO.setCategory(
+        List.of(
+            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwww"));
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorAtValidationCategorySize2()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
+    addProductDTO.setCategory(List.of("W", "Wwwwwwwww", "Wwwwwwww"));
 
     performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -426,10 +462,10 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, addProductDTO.getName())
                 .param(DESCRIPTION_PARAM, addProductDTO.getDescription())
                 .param(BARCODE_PARAM, addProductDTO.getBarcode())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .param(CATEGORY1_PARAM, categories.get(1))
-                .param(CATEGORY2_PARAM, categories.get(2))
-                .param("category[3]", categories.get(index3))
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(2))
+                .param(CATEGORY_PARAM, categories.get(index3))
                 .param(PRICE_PARAM, addProductDTO.getPrice())
                 .session(httpSession))
         .andExpect(redirectedUrl(ADD_PRODUCT_ERROR_URL));
@@ -616,9 +652,9 @@ public class ProductControllerTest {
                 .param(NAME_PARAM, addProductDTO.getName())
                 .param(DESCRIPTION_PARAM, addProductDTO.getDescription())
                 .param(BARCODE_PARAM, addProductDTO.getBarcode())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .param(CATEGORY1_PARAM, categories.get(1))
-                .param(CATEGORY2_PARAM, categories.get(2))
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(2))
                 .param(PRICE_PARAM, addProductDTO.getPrice())
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
@@ -760,6 +796,45 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductWithIdAtEditProductWhenErrorAtValidationCategoryPattern()
+      throws Exception {
+    EditProductDTO editProductDTO = setDataForEditProduct();
+    editProductDTO.setCategory(List.of("Pat", "pa", "Good"));
+    performPostForEditProduct(
+        editProductDTO,
+        PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
+        ERROR_MESSAGE_PARAM,
+        ERROR_VALIDATION_MESSAGE);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductWithIdAtEditProductWhenErrorAtValidationCategorySize1()
+      throws Exception {
+    EditProductDTO editProductDTO = setDataForEditProduct();
+    editProductDTO.setCategory(List.of("Paaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "Pa", "Goo"));
+    performPostForEditProduct(
+        editProductDTO,
+        PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
+        ERROR_MESSAGE_PARAM,
+        ERROR_VALIDATION_MESSAGE);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductWithIdAtEditProductWhenErrorAtValidationCategorySize2()
+      throws Exception {
+    EditProductDTO editProductDTO = setDataForEditProduct();
+    editProductDTO.setCategory(List.of("P", "Pa", "Goo"));
+    performPostForEditProduct(
+        editProductDTO,
+        PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM,
+        ERROR_MESSAGE_PARAM,
+        ERROR_VALIDATION_MESSAGE);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldRedirectToProductWithIdAtEditProductWhenBadSizeOfCategories() throws Exception {
     final int categoryIndex3 = 3;
     EditProductDTO editProductDTO = setDataForEditProduct();
@@ -783,10 +858,10 @@ public class ProductControllerTest {
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
                 .param(PRICE_PARAM, editProductDTO.getPrice())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .param(CATEGORY1_PARAM, categories.get(1))
-                .param(CATEGORY2_PARAM, categories.get(2))
-                .param("category[3]", categories.get(categoryIndex3))
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(2))
+                .param(CATEGORY_PARAM, categories.get(categoryIndex3))
                 .session(httpSession))
         .andExpect(redirectedUrl(PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM));
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -815,8 +890,8 @@ public class ProductControllerTest {
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
                 .param(PRICE_PARAM, editProductDTO.getPrice())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .param(CATEGORY1_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
                 .session(httpSession))
         .andExpect(redirectedUrl(PRODUCTS_ID_URL + TEST_ID + ERROR_URL_PARAM));
     assertEquals("Kategorie muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
@@ -974,12 +1049,7 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldRedirectToProductsSuccessAtEditProductWhenImageNotChange() throws Exception {
     EditProductDTO editProductDTO = setDataForEditProduct();
-    editProductDTO.setFile(null);
-    List<String> categories = editProductDTO.getCategory();
-    Account account = new Account();
-    account.setId(TEST_OBJECT_ID);
-    account.setPhone(TEST_PHONE);
-    MockHttpSession httpSession = new MockHttpSession();
+    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0]));
 
     when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, editProductDTO.getCategory()))
         .thenReturn(false);
@@ -989,21 +1059,9 @@ public class ProductControllerTest {
         .thenReturn(false);
     when(productService.editProduct(any(), eq(TEST_OBJECT_ID), eq(editProductDTO.getCategory())))
         .thenReturn(true);
-    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(productService.getProductById(editProductDTO.getId())).thenReturn(testProduct1);
 
-    mockMvc
-        .perform(
-            post(PRODUCTS_URL)
-                .param(ID_PARAM, editProductDTO.getId())
-                .param(NAME_PARAM, editProductDTO.getName())
-                .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
-                .param(BARCODE_PARAM, editProductDTO.getBarcode())
-                .param(PRICE_PARAM, editProductDTO.getPrice())
-                .param(CATEGORY0_PARAM, categories.get(0))
-                .session(httpSession))
-        .andExpect(redirectedUrl(PRODUCTS_SUCCESS_URL));
-    assertEquals(SUCCESS_EDIT_PRODUCT_MESSAGE, httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+    performPostForEditProduct(
+        editProductDTO, PRODUCTS_SUCCESS_URL, SUCCESS_MESSAGE_PARAM, SUCCESS_EDIT_PRODUCT_MESSAGE);
   }
 
   private EditProductDTO setDataForEditProduct() {
@@ -1013,8 +1071,9 @@ public class ProductControllerTest {
     editProductDTO.setDescription(TEST_DESCRIPTION);
     editProductDTO.setBarcode(TEST_BARCODE);
     editProductDTO.setPrice(TEST_PRICE);
-    editProductDTO.setCategory(List.of(TEST_CATEGORY1_NAME));
-    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, new byte[0]));
+    editProductDTO.setCategory(
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
+    editProductDTO.setFile(new MockMultipartFile(TEST_FILE_NAME, "testFile".getBytes()));
     return editProductDTO;
   }
 
@@ -1039,7 +1098,9 @@ public class ProductControllerTest {
                 .param(DESCRIPTION_PARAM, editProductDTO.getDescription())
                 .param(BARCODE_PARAM, editProductDTO.getBarcode())
                 .param(PRICE_PARAM, editProductDTO.getPrice())
-                .param(CATEGORY0_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(2))
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
     assertEquals(message, httpSession.getAttribute(param));

@@ -45,6 +45,19 @@ function checkExpiredAt(e, oneTime) {
 }
 
 function checkPrice(e) {
+    e = replaceComma(e);
+    let valuePercentage;
+    let realPrice = e.value.toString();
+    const lastCharIndex = realPrice.length - 1;
+    if(realPrice.charAt(lastCharIndex) === "%"){
+        valuePercentage = parseFloat(realPrice.substring(0, lastCharIndex));
+        if (valuePercentage != null){
+            e.value = (parseFloat(originalPrice) * parseInt(e.value.substring(0, lastCharIndex)) / 100.0).toFixed(2);
+            checkPrice(e);
+            unfocusedPrice(e);
+        }
+
+    }
     const input = e.value;
     const length = input.length;
     let cond = (length >= 5 && length <= 9 && regPrice.test(input) && parseFloat(input.toString().replace("zł", "")) < originalPrice);
@@ -70,23 +83,13 @@ function checkQuantity(e) {
 }
 
 function atStart() {
-    let suffix;
     today.setHours(0, 0, 0, 0);
-    originalPrice = (parseFloat(document.getElementById("originalPrice").textContent)).toString();
-    suffix = originalPrice.substring(originalPrice.length - 1, originalPrice.length);
-    if (suffix.charAt(1) === ".") {
-        originalPrice += "0";
-    } else if (suffix.charAt(2) === ".") {
-        originalPrice += "00";
-    } else if (!suffix.includes(".")) {
-        originalPrice += ".00";
-    }
-    originalPrice = parseFloat(originalPrice);
+    originalPrice = parseFloat(document.getElementById("originalPrice").textContent);
     checkLanguage();
     document.getElementById("startAt").value = document.getElementById("dateStartAt").textContent;
     document.getElementById("expiredAt").value = document.getElementById("dateExpiredAt").textContent;
     if (document.getElementById("hasPromotion").textContent === "true") {
-        let priceInput = document.getElementById("price");
+        let priceInput = document.getElementById("newPrice");
         ok.push(null, null, null, null);
         previous.push(null, null, null, null);
         document.getElementById("promotionButton").textContent = document.getElementById("textButtonEditPromotion").textContent;
@@ -142,13 +145,8 @@ function focused(e) {
 }
 
 function unfocused(e) {
-    const index = e.value.indexOf("%");
-    if (index === -1) {
+    if (e.value !== "" && e.value !== "0") {
         unfocusedPrice(e);
-    } else if (index === (e.value.length - 1) && index === e.value.lastIndexOf("%")) {
-        e.value = parseFloat(originalPrice) * parseInt(e.value.substring(0, index)) / 100.0.toFixed(2);
-        checkPrice(e);
-        unfocusedPrice(e);
+        e.value = e.value + " (" + originalPrice + "zł)";
     }
-    e.value = e.value + " (" + originalPrice + "zł)";
 }

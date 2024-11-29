@@ -10,13 +10,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class AddProductDTO {
-  @Pattern(regexp = "^[A-ZĄĆĘŁŃÓŚŹŻ][a-ząćęłńóśźż][a-ząćęłńóśźż ]*$")
-  @Size(min = 2, max = 30)
+  @Pattern(
+      regexp =
+          "^[A-ZĄĆĘŁŃÓŚŹŻ]([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])*( ([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])+)*$")
+  @Size(min = 2, max = 60)
   @NotBlank
   private String name;
 
   @NotBlank
-  @Size(min = 5, max = 100)
+  @Size(min = 5, max = 1000)
   private String description;
 
   @NotNull private MultipartFile file;

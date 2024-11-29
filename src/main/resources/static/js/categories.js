@@ -9,7 +9,7 @@ function checkCategory(e) {
     const text = input.toString().toLowerCase();
     let options = document.getElementsByClassName("optionSelect");
     document.getElementById("typedCategory").textContent = input;
-    if (length >= 2 && length <= 15 && regCategory.test(input)) {
+    if (length >= 2 && length <= 30 && regCategory.test(input)) {
         document.getElementById("checkTypedCategory").hidden = false;
         document.getElementById("closeTypedCategory").hidden = true;
         okTypedCategory = true;
