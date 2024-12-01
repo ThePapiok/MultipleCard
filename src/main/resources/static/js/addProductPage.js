@@ -27,5 +27,12 @@ function checkBarcode(e, index) {
 }
 
 function atStart() {
+    checkProductName(document.getElementById("name"), 1);
+    unfocusedPrice(document.getElementById("price"));
+    checkPrice(document.getElementById("price"));
+    checkBarcode(document.getElementById("barcode"), 4);
+    checkDescription(document.getElementById("description"), 5);
+    setCategories();
+    check(2, true, ok, previous, buttonId, success, true, true);
     checkLanguage();
 }

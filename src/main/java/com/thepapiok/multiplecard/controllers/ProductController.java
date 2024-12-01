@@ -42,6 +42,7 @@ public class ProductController {
   private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String SUCCESS_OK_MESSAGE = "ok";
+  private static final String PRODUCT_PARAM = "product";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -111,7 +112,7 @@ public class ProductController {
       Product product = productService.getProductById(id);
       model.addAttribute("categories", categoryService.getAllNames());
       model.addAttribute("productCategories", productService.getCategoriesNames(product));
-      model.addAttribute("product", productService.getEditProductDTO(product));
+      model.addAttribute(PRODUCT_PARAM, productService.getEditProductDTO(product));
       model.addAttribute("id", id);
       return "productPage";
     }
@@ -120,15 +121,22 @@ public class ProductController {
   @GetMapping("/add_product")
   public String addProductPage(
       @RequestParam(required = false) String error, Model model, HttpSession httpSession) {
+    final String addProductParam = "addProduct";
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+        AddProductDTO addProductDTO = (AddProductDTO) httpSession.getAttribute(PRODUCT_PARAM);
+        model.addAttribute(addProductParam, addProductDTO);
+        model.addAttribute("productCategories", addProductDTO.getCategory());
+        httpSession.removeAttribute(PRODUCT_PARAM);
       }
     }
+    if (model.getAttribute(addProductParam) == null) {
+      model.addAttribute(addProductParam, new AddProductDTO());
+    }
     model.addAttribute("categories", categoryService.getAllNames());
-    model.addAttribute("addProduct", new AddProductDTO());
     return "addProductPage";
   }
 
@@ -146,6 +154,7 @@ public class ProductController {
     List<String> categories = addProductDTO.getCategory();
     boolean error = false;
     String message = null;
+    httpSession.setAttribute(PRODUCT_PARAM, addProductDTO);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);

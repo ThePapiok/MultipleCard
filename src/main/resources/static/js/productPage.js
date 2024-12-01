@@ -7,19 +7,9 @@ let description;
 const buttonId = "saveButton";
 
 function atStart() {
-    let realIndex;
-    let category;
     let realPrice;
     let suffix;
-    const length = categories.length;
-    indexCategory = length + 1;
-    for (let i = 0; i < length; i++) {
-        category = categories[i];
-        realIndex = i + 1;
-        document.getElementById("category" + realIndex).value = category;
-        document.getElementById("inputCategory" + realIndex).value = category;
-        document.getElementById("delete" + realIndex).style.display = "block";
-    }
+    setCategories();
     name = document.getElementById("name").value;
     realPrice = (parseInt(document.getElementById("price").value) / 100.0).toString();
     suffix = realPrice.substring(realPrice.length - 3, realPrice.length);
