@@ -46,6 +46,7 @@ function checkExpiredAt(e, oneTime) {
 
 function checkPrice(e) {
     e = replaceComma(e);
+    e = checkIsMaxPrice(e);
     let valuePercentage;
     let realPrice = e.value.toString();
     const lastCharIndex = realPrice.length - 1;

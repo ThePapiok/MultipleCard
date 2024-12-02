@@ -36,9 +36,10 @@ function checkName(e) {
 
 function checkPrice(e) {
     e = replaceComma(e);
+    e = checkIsMaxPrice(e);
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 2 && length <= 7 && regPrice.test(input)), 3, price, true, e);
+    checkOnlyIfOther(input, (length >= 5 && length <= 9 && regPrice.test(input)), 3, price, true, e);
 }
 
 function checkBarcode(e) {
