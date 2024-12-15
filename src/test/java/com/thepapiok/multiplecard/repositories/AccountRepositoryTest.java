@@ -90,7 +90,7 @@ public class AccountRepositoryTest {
     account2.setPassword("asdaZ12!asd");
     account2.setActive(true);
     account2.setRole(Role.ROLE_USER);
-    mongoTemplate.save(account1);
+    account1 = mongoTemplate.save(account1);
     mongoTemplate.save(account2);
   }
 
@@ -200,5 +200,13 @@ public class AccountRepositoryTest {
   @Test
   public void shouldReturnFalseAtExistsByPointsOtherThanPhoneWhenFoundButItsYours() {
     assertFalse(accountRepository.existsByPointsOtherThanPhone(address1, TEST_PHONE1));
+  }
+
+  @Test
+  public void shouldReturnAccountWithOnlyPhoneFieldAtFindPhoneByIdWhenEverythingOk() {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE1);
+
+    assertEquals(account, accountRepository.findPhoneById(account1.getId()));
   }
 }

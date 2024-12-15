@@ -26,6 +26,10 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
+import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
@@ -247,15 +251,6 @@ public class ProductServiceTest {
     when(productRepository.existsByBarcodeAndShopId(TEST_BARCODE, TEST_OWNER_ID)).thenReturn(false);
 
     assertFalse(productService.checkOwnerHasTheSameBarcode(TEST_OWNER_ID, TEST_BARCODE));
-  }
-
-  @Test
-  public void shouldReturn12AtGetMaxPageWhenEverythingOk() {
-    final int maxPage = 12;
-
-    when(aggregationRepository.getMaxPage("", TEST_PHONE, "", "")).thenReturn(maxPage);
-
-    assertEquals(maxPage, productService.getMaxPage("", TEST_PHONE, "", ""));
   }
 
   @Test
@@ -660,14 +655,19 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductDTOAtGetProductsWhenEverythingOk() {
+  public void shouldReturnPageProductsDTOAtGetProductsWhenEverythingOk() {
+    final int maxPage = 5;
     List<ProductDTO> expectedProducts = setDataProductsDTO();
+    PageProductsDTO pageProductsDTO = new PageProductsDTO();
+    pageProductsDTO.setProducts(expectedProducts);
+    pageProductsDTO.setMaxPage(maxPage);
 
-    when(aggregationRepository.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", ""))
-        .thenReturn(expectedProducts);
+    when(aggregationRepository.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", "", false))
+        .thenReturn(pageProductsDTO);
 
     assertEquals(
-        expectedProducts, productService.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", ""));
+        pageProductsDTO,
+        productService.getProducts(TEST_PHONE, 1, COUNT_FILED, true, "", "", "", false));
   }
 
   @Test
@@ -698,22 +698,30 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfProductWithShopDTOAtGetProductsWithShopsWhenEverythingOk() {
-    List<ProductDTO> productDTOS = setDataProductsDTO();
+  public void shouldReturnPageProductsWithShopDTOAtGetProductsWithShopsWhenEverythingOk() {
+    final int maxPage = 5;
+    List<ProductDTO> expectedProducts = setDataProductsDTO();
+    PageProductsDTO pageProductsDTO = new PageProductsDTO();
+    pageProductsDTO.setProducts(expectedProducts);
+    pageProductsDTO.setMaxPage(maxPage);
+
     ProductWithShopDTO product1 =
-        new ProductWithShopDTO(productDTOS.get(0), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+        new ProductWithShopDTO(expectedProducts.get(0), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
     ProductWithShopDTO product2 =
-        new ProductWithShopDTO(productDTOS.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
+        new ProductWithShopDTO(expectedProducts.get(1), TEST_SHOP_NAME, TEST_SHOP_IMAGE_URL);
     Shop shop = new Shop();
     shop.setName(TEST_SHOP_NAME);
     shop.setImageUrl(TEST_SHOP_IMAGE_URL);
+    PageProductsWithShopDTO pageProductsWithShopDTO = new PageProductsWithShopDTO();
+    pageProductsWithShopDTO.setProducts(List.of(product1, product2));
+    pageProductsWithShopDTO.setMaxPage(maxPage);
 
-    when(aggregationRepository.getProducts(null, 1, COUNT_FILED, true, "", "", ""))
-        .thenReturn(productDTOS);
+    when(aggregationRepository.getProducts(null, 1, COUNT_FILED, true, "", "", "", true))
+        .thenReturn(pageProductsDTO);
     when(shopRepository.findImageUrlAndNameById(TEST_OWNER_ID)).thenReturn(shop);
 
     assertEquals(
-        List.of(product1, product2),
+        pageProductsWithShopDTO,
         productService.getProductsWithShops(1, COUNT_FILED, true, "", "", ""));
   }
 
@@ -1007,5 +1015,28 @@ public class ProductServiceTest {
     productPayU.setName("{}");
 
     assertFalse(productService.buyProducts(List.of(productPayU), null, null));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenEverythingOk() {
+    final String testCardId = "123451234509876543217777";
+    final int testMaxPage = 4;
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    ProductAtCardDTO product1 = new ProductAtCardDTO();
+    product1.setProductName(TEST_PRODUCT_NAME);
+    ProductAtCardDTO product2 = new ProductAtCardDTO();
+    product2.setProductName(TEST_PRODUCT_NAME);
+    products.add(product1);
+    products.add(product2);
+    PageOwnerProductsDTO pageOwnerProductsDTO = new PageOwnerProductsDTO();
+    pageOwnerProductsDTO.setProducts(products);
+    pageOwnerProductsDTO.setMaxPage(testMaxPage);
+
+    when(aggregationRepository.getProductsByOwnerCard(0, "", true, "", "", "", testCardId))
+        .thenReturn(pageOwnerProductsDTO);
+
+    assertEquals(
+        pageOwnerProductsDTO,
+        productService.getProductsByOwnerCard(0, "", true, "", "", "", testCardId));
   }
 }

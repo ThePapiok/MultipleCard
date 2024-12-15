@@ -279,7 +279,7 @@
                 <a class="cardButton" th:href="@{/new_card}">
                     <button class="blackButton" th:text="#{profilePage.card.new}"></button>
                 </a>
-                <a th:if="${card} != null" class="cardButton">
+                <a th:if="${card} != null" class="cardButton" th:href="@{'/cards?products&id=' + ${card.id}}">
                     <button class="blackButton" th:text="#{profilePage.card.products}"></button>
                 </a>
                 <a th:if="${card} != null" class="cardButton" th:href="@{/block_card}">

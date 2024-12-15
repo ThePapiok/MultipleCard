@@ -36,3 +36,13 @@ function replaceComma(e) {
     }
     return e;
 }
+
+function checkIsMaxPrice(e){
+    let price = e.value.toString();
+    const lastCharIndex = price.length - 1;
+    if (lastCharIndex === 4 && price.indexOf(".") === -1){
+        price = price.substring(0, lastCharIndex);
+        e.value = price;
+    }
+    return e;
+}

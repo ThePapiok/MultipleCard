@@ -7,19 +7,9 @@ let description;
 const buttonId = "saveButton";
 
 function atStart() {
-    let realIndex;
-    let category;
     let realPrice;
     let suffix;
-    const length = categories.length;
-    indexCategory = length + 1;
-    for (let i = 0; i < length; i++) {
-        category = categories[i];
-        realIndex = i + 1;
-        document.getElementById("category" + realIndex).value = category;
-        document.getElementById("inputCategory" + realIndex).value = category;
-        document.getElementById("delete" + realIndex).style.display = "block";
-    }
+    setCategories();
     name = document.getElementById("name").value;
     realPrice = (parseInt(document.getElementById("price").value) / 100.0).toString();
     suffix = realPrice.substring(realPrice.length - 3, realPrice.length);
@@ -46,9 +36,10 @@ function checkName(e) {
 
 function checkPrice(e) {
     e = replaceComma(e);
+    e = checkIsMaxPrice(e);
     const input = e.value;
     const length = input.length;
-    checkOnlyIfOther(input, (length >= 2 && length <= 7 && regPrice.test(input)), 3, price, true, e);
+    checkOnlyIfOther(input, (length >= 5 && length <= 9 && regPrice.test(input)), 3, price, true, e);
 }
 
 function checkBarcode(e) {

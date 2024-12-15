@@ -4,6 +4,7 @@ const buttonId = "addButton";
 
 function checkPrice(e) {
     e = replaceComma(e);
+    e = checkIsMaxPrice(e);
     const input = e.value;
     const length = input.length;
     check(3, (length >= 5 && length <= 9 && regPrice.test(input)), ok, previous, buttonId, success, true, true);
@@ -27,5 +28,12 @@ function checkBarcode(e, index) {
 }
 
 function atStart() {
+    checkProductName(document.getElementById("name"), 1);
+    unfocusedPrice(document.getElementById("price"));
+    checkPrice(document.getElementById("price"));
+    checkBarcode(document.getElementById("barcode"), 4);
+    checkDescription(document.getElementById("description"), 5);
+    setCategories();
+    check(2, true, ok, previous, buttonId, success, true, true);
     checkLanguage();
 }

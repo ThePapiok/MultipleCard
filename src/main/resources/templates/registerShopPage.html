@@ -251,7 +251,8 @@
         </div>
         <p id="error" th:text="${errorMessage}"></p>
         <a>
-            <button type="button" class="grayButton" id="nextButton" th:text="#{registerPage.button.next}"></button>
+            <button type="button" class="grayButton" id="nextButton" th:text="#{registerPage.button.next}"
+                    onclick="changeCursor(this)"></button>
         </a>
         <a th:href="@{/register}">
             <button type="button" class="blackButton" id="forUsers"

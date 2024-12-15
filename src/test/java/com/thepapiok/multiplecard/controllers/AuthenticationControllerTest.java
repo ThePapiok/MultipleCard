@@ -1374,6 +1374,7 @@ public class AuthenticationControllerTest {
                 .param(prefixAddress6 + PROVINCE_PARAM, addressDTO6.getProvince()))
         .andExpect(redirectedUrl(REGISTER_SHOP_ERROR_URL));
     assertEquals("Nieprawidłowa ilość lokali", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(registerShopDTO, httpSession.getAttribute(REGISTER_PARAM));
   }
 
   @Test
@@ -1441,6 +1442,7 @@ public class AuthenticationControllerTest {
                 .param(PARAM_ADDRESS_PREFIX1 + PROVINCE_PARAM, addressDTO1.getProvince()))
         .andExpect(redirectedUrl(REGISTER_SHOP_ERROR_URL));
     assertEquals("Lokale muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(registerShopDTO, httpSession.getAttribute(REGISTER_PARAM));
   }
 
   @Test
@@ -1621,6 +1623,7 @@ public class AuthenticationControllerTest {
                     PARAM_ADDRESS_PREFIX0 + APARTMENT_NUMBER_PARAM, addressDTO.getApartmentNumber())
                 .param(PARAM_ADDRESS_PREFIX0 + PROVINCE_PARAM, addressDTO.getProvince()))
         .andExpect(redirectedUrl(redirectUrl));
+    assertEquals(registerShopDTO, httpSession.getAttribute(REGISTER_PARAM));
   }
 
   @Test

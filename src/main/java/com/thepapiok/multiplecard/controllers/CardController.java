@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
+import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
@@ -45,6 +48,7 @@ public class CardController {
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String REDIRECT_PROFILE_ERROR = "redirect:/profile?error";
   private static final String ORDER_PARAM = "order";
+  private static final String PRODUCTS_PARAM = "products";
   private static final String SUCCESS_MESSAGE = "successMessage";
   private final PasswordEncoder passwordEncoder;
   private final MessageSource messageSource;
@@ -129,7 +133,7 @@ public class CardController {
             objectMapper.readValue(
                 objectMapper
                     .readValue(
-                        jsonNode.get("products").toString(),
+                        jsonNode.get(PRODUCTS_PARAM).toString(),
                         new TypeReference<List<Map<String, String>>>() {})
                     .get(0)
                     .get("name"),
@@ -249,12 +253,38 @@ public class CardController {
       @RequestParam String id,
       @RequestParam(required = false) String error,
       @RequestParam(required = false) String success,
+      @RequestParam(required = false) String products,
+      @RequestParam(required = false) String buy,
       HttpSession httpSession,
-      Model model) {
+      Model model,
+      Principal principal) {
     int maxPage;
     if (!cardService.cardExists(id)) {
       model.addAttribute("cardExists", false);
     } else {
+      model.addAttribute("field", field);
+      model.addAttribute("isDescending", isDescending);
+      model.addAttribute("pageSelected", page + 1);
+      model.addAttribute("id", id);
+      model.addAttribute("isBuy", false);
+      if (principal != null && cardService.isOwner(principal.getName(), id)) {
+        if (products != null) {
+          PageOwnerProductsDTO currentPage =
+              productService.getProductsByOwnerCard(
+                  page, field, isDescending, text, category, shopName, id);
+          List<ProductAtCardDTO> ownerProducts = currentPage.getProducts();
+          maxPage = currentPage.getMaxPage();
+          model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+          model.addAttribute(PRODUCTS_PARAM, ownerProducts);
+          model.addAttribute("productsEmpty", ownerProducts.size() == 0);
+          model.addAttribute("maxPage", maxPage);
+          return "ownerProductsPage";
+        } else if (buy != null) {
+          model.addAttribute("isBuy", true);
+        } else {
+          return "choiceOwnerCardPage";
+        }
+      }
       if (error != null) {
         String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
         if (message != null) {
@@ -268,18 +298,15 @@ public class CardController {
           httpSession.removeAttribute(SUCCESS_MESSAGE);
         }
       }
-      List<ProductWithShopDTO> products =
+      PageProductsWithShopDTO currentPage =
           productService.getProductsWithShops(page, field, isDescending, text, category, shopName);
-      maxPage = productService.getMaxPage(text, null, category, shopName);
-      model.addAttribute("field", field);
+      maxPage = currentPage.getMaxPage();
+      List<ProductWithShopDTO> allProducts = currentPage.getProducts();
       model.addAttribute("cardExists", true);
-      model.addAttribute("isDescending", isDescending);
-      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
-      model.addAttribute("pageSelected", page + 1);
-      model.addAttribute("products", products);
-      model.addAttribute("productsEmpty", products.size() == 0);
+      model.addAttribute("pages", resultService.getPages(page + 1, currentPage.getMaxPage()));
+      model.addAttribute(PRODUCTS_PARAM, allProducts);
+      model.addAttribute("productsEmpty", allProducts.size() == 0);
       model.addAttribute("maxPage", maxPage);
-      model.addAttribute("id", id);
     }
     return "buyProductsPage";
   }

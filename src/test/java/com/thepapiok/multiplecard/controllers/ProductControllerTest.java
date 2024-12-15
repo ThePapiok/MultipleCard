@@ -22,6 +22,7 @@ import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -53,10 +54,12 @@ public class ProductControllerTest {
   private static final String TEST_PHONE = "+4324234234234234";
   private static final String TEST_BAD_CATEGORY1_NAME = "category1";
   private static final String TEST_BAD_CATEGORY2_NAME = "category2";
+  private static final String TEST_BAD_CATEGORY3_NAME = "category3";
   private static final String TEST_FILE_NAME = "file";
   private static final String TEST_PRODUCT_NAME = "Addd";
   private static final String TEST_BARCODE = "1234567890123";
   private static final String TEST_PRICE = "123.12zł";
+  private static final String TEST_PRICE_WITHOUT_CURRENCY = "123.12";
   private static final String TEST_DESCRIPTION = "asdfds";
   private static final String TEST_CATEGORY1_NAME = "Kategoria";
   private static final String TEST_CATEGORY2_NAME = "Kateegoria";
@@ -71,6 +74,7 @@ public class ProductControllerTest {
   private static final String ADD_PRODUCT_PARAM = "addProduct";
   private static final String CATEGORIES_PARAM = "categories";
   private static final String NAME_PARAM = "name";
+  private static final String PRODUCT_PARAM = "product";
   private static final String DESCRIPTION_PARAM = "description";
   private static final String BARCODE_PARAM = "barcode";
   private static final String PRICE_PARAM = "price";
@@ -261,7 +265,7 @@ public class ProductControllerTest {
     mockMvc
         .perform(get(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
         .andExpect(model().attribute(CATEGORIES_PARAM, allCategories))
-        .andExpect(model().attribute("product", editProductDTO))
+        .andExpect(model().attribute(PRODUCT_PARAM, editProductDTO))
         .andExpect(model().attribute(ID_PARAM, TEST_ID))
         .andExpect(model().attribute("productCategories", List.of(productCategory)))
         .andExpect(view().name("productPage"));
@@ -308,11 +312,13 @@ public class ProductControllerTest {
     productDTO2.setStartAtPromotion(null);
     productDTO2.setExpiredAtPromotion(null);
     testProducts = List.of(productDTO1, productDTO2);
+    PageProductsDTO pageProductsDTO = new PageProductsDTO();
+    pageProductsDTO.setMaxPage(1);
+    pageProductsDTO.setProducts(testProducts);
     testPages = List.of(1);
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", ""))
-        .thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE, "", "")).thenReturn(1);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", "", false))
+        .thenReturn(pageProductsDTO);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
   }
 
@@ -348,8 +354,16 @@ public class ProductControllerTest {
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnAddProductPageAtAddProductPageWithErrorParam() throws Exception {
+    List<String> productCategories = List.of("fastfood", "kosmetyki");
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setCategory(productCategories);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
+    httpSession.setAttribute(PRODUCT_PARAM, addProductDTO);
     List<String> categories = List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME);
 
     when(categoryService.getAllNames()).thenReturn(categories);
@@ -357,10 +371,12 @@ public class ProductControllerTest {
     mockMvc
         .perform(get(ADD_PRODUCT_URL).param(ERROR_PARAM, "").session(httpSession))
         .andExpect(model().attribute(CATEGORIES_PARAM, categories))
-        .andExpect(model().attribute(ADD_PRODUCT_PARAM, new AddProductDTO()))
+        .andExpect(model().attribute(ADD_PRODUCT_PARAM, addProductDTO))
+        .andExpect(model().attribute("productCategories", productCategories))
         .andExpect(model().attribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE))
         .andExpect(view().name(ADD_PRODUCT_PAGE));
     assertNull(httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertNull(httpSession.getAttribute(PRODUCT_PARAM));
   }
 
   @Test
@@ -371,12 +387,21 @@ public class ProductControllerTest {
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName("gg123213123123123");
     addProductDTO.setBarcode("aa");
-    addProductDTO.setPrice("123");
+    addProductDTO.setPrice("123.00zł");
     addProductDTO.setDescription("asdf");
     addProductDTO.setCategory(
-        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+    addProductDTO.setFile(multipartFile);
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName("gg123213123123123");
+    expectedAddProductDTO.setBarcode("aa");
+    expectedAddProductDTO.setPrice("123.00");
+    expectedAddProductDTO.setDescription("asdf");
+    expectedAddProductDTO.setCategory(
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+    expectedAddProductDTO.setFile(multipartFile);
 
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -392,9 +417,18 @@ public class ProductControllerTest {
     addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
-        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, "category3"));
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+    addProductDTO.setFile(multipartFile);
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
+    expectedAddProductDTO.setBarcode(TEST_BARCODE);
+    expectedAddProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
+    expectedAddProductDTO.setCategory(
+        List.of(TEST_BAD_CATEGORY1_NAME, TEST_BAD_CATEGORY2_NAME, TEST_BAD_CATEGORY3_NAME));
+    expectedAddProductDTO.setFile(multipartFile);
 
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -402,6 +436,7 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldRedirectToAddProductErrorAtAddProductWhenErrorAtValidationCategorySize1()
       throws Exception {
+    final String testBadSizeCategory = "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwww";
     MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
     MockHttpSession httpSession = new MockHttpSession();
     AddProductDTO addProductDTO = new AddProductDTO();
@@ -410,12 +445,18 @@ public class ProductControllerTest {
     addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(
-        List.of(
-            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-            "Wwwwwwwwwwwwwwwwwwwwwwwwwwwwww"));
+        List.of("Wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", testBadSizeCategory, testBadSizeCategory));
+    addProductDTO.setFile(multipartFile);
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
+    expectedAddProductDTO.setBarcode(TEST_BARCODE);
+    expectedAddProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
+    expectedAddProductDTO.setCategory(
+        List.of("Wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", testBadSizeCategory, testBadSizeCategory));
+    expectedAddProductDTO.setFile(multipartFile);
 
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -431,8 +472,16 @@ public class ProductControllerTest {
     addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
     addProductDTO.setCategory(List.of("W", "Wwwwwwwww", "Wwwwwwww"));
+    addProductDTO.setFile(multipartFile);
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
+    expectedAddProductDTO.setBarcode(TEST_BARCODE);
+    expectedAddProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
+    expectedAddProductDTO.setCategory(List.of("W", "Wwwwwwwww", "Wwwwwwww"));
+    expectedAddProductDTO.setFile(multipartFile);
 
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
     assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
   }
 
@@ -441,205 +490,24 @@ public class ProductControllerTest {
   public void shouldRedirectToAddProductErrorAtAddProductWhenErrorBadSizeOfCategories()
       throws Exception {
     final int index3 = 3;
+    final MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    List<String> categories =
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME, "Kateeeegoria");
     MockHttpSession httpSession = new MockHttpSession();
     AddProductDTO addProductDTO = new AddProductDTO();
     addProductDTO.setName(TEST_PRODUCT_NAME);
     addProductDTO.setBarcode(TEST_BARCODE);
     addProductDTO.setPrice(TEST_PRICE);
     addProductDTO.setDescription(TEST_DESCRIPTION);
-    addProductDTO.setCategory(
-        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME, "Kateeeegoria"));
-    List<String> categories = addProductDTO.getCategory();
-    Account account = new Account();
-    account.setId(TEST_OBJECT_ID);
-
-    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-
-    mockMvc
-        .perform(
-            multipart(ADD_PRODUCT_URL)
-                .file(new MockMultipartFile(TEST_FILE_NAME, new byte[0]))
-                .param(NAME_PARAM, addProductDTO.getName())
-                .param(DESCRIPTION_PARAM, addProductDTO.getDescription())
-                .param(BARCODE_PARAM, addProductDTO.getBarcode())
-                .param(CATEGORY_PARAM, categories.get(0))
-                .param(CATEGORY_PARAM, categories.get(1))
-                .param(CATEGORY_PARAM, categories.get(2))
-                .param(CATEGORY_PARAM, categories.get(index3))
-                .param(PRICE_PARAM, addProductDTO.getPrice())
-                .session(httpSession))
-        .andExpect(redirectedUrl(ADD_PRODUCT_ERROR_URL));
-    assertEquals("Zła ilość kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorCategoriesNotUnique()
-      throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setName(TEST_PRODUCT_NAME);
-    addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setPrice(TEST_PRICE);
-    addProductDTO.setDescription(TEST_DESCRIPTION);
-    addProductDTO.setCategory(
-        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME));
-
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals("Kategorie muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorBadImage() throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(false);
-
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals("Niepoprawny plik", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTooManyCategoriesCreated()
-      throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(true);
-
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(
-        "Za dużo stworzyłeś nowych kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameProductName()
-      throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
-        .thenReturn(true);
-
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(
-        "Posiadasz już produkt o takiej nazwie", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameBarcode()
-      throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
-        .thenReturn(true);
-
-    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, multipartFile);
-    assertEquals(
-        "Posiadasz już produkt o takim kodzie kreskowym",
-        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToProductsErrorAtAddProductWhenErrorAtAddProduct() throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-    AddProductDTO expectedAddProductDTO = new AddProductDTO();
-    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
-    expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setPrice("123.12");
-    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
-    expectedAddProductDTO.setCategory(
-        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
-    expectedAddProductDTO.setFile(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
-        .thenReturn(false);
-    when(productService.addProduct(
-            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(false);
-
-    performPostAddProduct(addProductDTO, httpSession, "/products?error", multipartFile);
-    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
-  }
-
-  @Test
-  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToProductsSuccessAtAddProductWhenEverythingOk() throws Exception {
-    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
-    MockHttpSession httpSession = new MockHttpSession();
-    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
-    AddProductDTO expectedAddProductDTO = new AddProductDTO();
-    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
-    expectedAddProductDTO.setBarcode(TEST_BARCODE);
-    expectedAddProductDTO.setPrice("123.12");
-    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
-    expectedAddProductDTO.setCategory(
-        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
-    expectedAddProductDTO.setFile(multipartFile);
-
-    when(shopService.checkImage(multipartFile)).thenReturn(true);
-    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
-        .thenReturn(false);
-    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
-        .thenReturn(false);
-    when(productService.addProduct(
-            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
-        .thenReturn(true);
-
-    performPostAddProduct(addProductDTO, httpSession, PRODUCTS_SUCCESS_URL, multipartFile);
-    assertEquals("Pomyślnie dodany nowy produkt", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
-  }
-
-  private AddProductDTO setUpAddProductDTO(MockMultipartFile multipartFile) {
-    AddProductDTO addProductDTO = new AddProductDTO();
-    addProductDTO.setName(TEST_PRODUCT_NAME);
-    addProductDTO.setBarcode(TEST_BARCODE);
-    addProductDTO.setPrice(TEST_PRICE);
-    addProductDTO.setDescription(TEST_DESCRIPTION);
-    addProductDTO.setCategory(
-        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
+    addProductDTO.setCategory(categories);
     addProductDTO.setFile(multipartFile);
-    return addProductDTO;
-  }
-
-  private void performPostAddProduct(
-      AddProductDTO addProductDTO,
-      MockHttpSession httpSession,
-      String redirectUrl,
-      MockMultipartFile multipartFile)
-      throws Exception {
-    List<String> categories = addProductDTO.getCategory();
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
+    expectedAddProductDTO.setBarcode(TEST_BARCODE);
+    expectedAddProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
+    expectedAddProductDTO.setCategory(categories);
+    expectedAddProductDTO.setFile(multipartFile);
     Account account = new Account();
     account.setId(TEST_OBJECT_ID);
 
@@ -655,9 +523,212 @@ public class ProductControllerTest {
                 .param(CATEGORY_PARAM, categories.get(0))
                 .param(CATEGORY_PARAM, categories.get(1))
                 .param(CATEGORY_PARAM, categories.get(2))
+                .param(CATEGORY_PARAM, categories.get(index3))
+                .param(PRICE_PARAM, addProductDTO.getPrice())
+                .session(httpSession))
+        .andExpect(redirectedUrl(ADD_PRODUCT_ERROR_URL));
+    assertEquals("Zła ilość kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(expectedAddProductDTO, httpSession.getAttribute(PRODUCT_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorCategoriesNotUnique()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
+    addProductDTO.setCategory(
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME));
+    addProductDTO.setFile(multipartFile);
+    AddProductDTO expectedAddProductDTO = new AddProductDTO();
+    expectedAddProductDTO.setName(TEST_PRODUCT_NAME);
+    expectedAddProductDTO.setBarcode(TEST_BARCODE);
+    expectedAddProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    expectedAddProductDTO.setDescription(TEST_DESCRIPTION);
+    expectedAddProductDTO.setCategory(
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME));
+    expectedAddProductDTO.setFile(multipartFile);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
+    assertEquals("Kategorie muszą być unikalne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenErrorBadImage() throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(false);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
+    assertEquals("Niepoprawny plik", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTooManyCategoriesCreated()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
+    assertEquals(
+        "Za dużo stworzyłeś nowych kategorii", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameProductName()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
+    assertEquals(
+        "Posiadasz już produkt o takiej nazwie", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToAddProductErrorAtAddProductWhenOwnerHasTheSameBarcode()
+      throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, ADD_PRODUCT_ERROR_URL, expectedAddProductDTO);
+    assertEquals(
+        "Posiadasz już produkt o takim kodzie kreskowym",
+        httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductsErrorAtAddProductWhenErrorAtAddProduct() throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
+        .thenReturn(false);
+    when(productService.addProduct(
+            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+
+    performPostAddProduct(addProductDTO, httpSession, "/products?error", expectedAddProductDTO);
+    assertEquals(ERROR_UNEXPECTED_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "SHOP")
+  public void shouldRedirectToProductsSuccessAtAddProductWhenEverythingOk() throws Exception {
+    MockMultipartFile multipartFile = new MockMultipartFile(TEST_FILE_NAME, new byte[0]);
+    MockHttpSession httpSession = new MockHttpSession();
+    AddProductDTO addProductDTO = setUpAddProductDTO(multipartFile);
+    AddProductDTO expectedAddProductDTO = setUpAddProductDTOAfterAspect(multipartFile);
+
+    when(shopService.checkImage(multipartFile)).thenReturn(true);
+    when(categoryService.checkOwnerHas20Categories(TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameNameProduct(TEST_OBJECT_ID, addProductDTO.getName()))
+        .thenReturn(false);
+    when(productService.checkOwnerHasTheSameBarcode(TEST_OBJECT_ID, addProductDTO.getBarcode()))
+        .thenReturn(false);
+    when(productService.addProduct(
+            expectedAddProductDTO, TEST_OBJECT_ID, addProductDTO.getCategory()))
+        .thenReturn(true);
+
+    performPostAddProduct(addProductDTO, httpSession, PRODUCTS_SUCCESS_URL, expectedAddProductDTO);
+    assertEquals("Pomyślnie dodany nowy produkt", httpSession.getAttribute(SUCCESS_MESSAGE_PARAM));
+  }
+
+  private AddProductDTO setUpAddProductDTO(MockMultipartFile multipartFile) {
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
+    addProductDTO.setCategory(
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
+    addProductDTO.setFile(multipartFile);
+    return addProductDTO;
+  }
+
+  private AddProductDTO setUpAddProductDTOAfterAspect(MockMultipartFile multipartFile) {
+    AddProductDTO addProductDTO = new AddProductDTO();
+    addProductDTO.setName(TEST_PRODUCT_NAME);
+    addProductDTO.setBarcode(TEST_BARCODE);
+    addProductDTO.setPrice(TEST_PRICE_WITHOUT_CURRENCY);
+    addProductDTO.setDescription(TEST_DESCRIPTION);
+    addProductDTO.setCategory(
+        List.of(TEST_CATEGORY1_NAME, TEST_CATEGORY2_NAME, TEST_CATEGORY3_NAME));
+    addProductDTO.setFile(multipartFile);
+    return addProductDTO;
+  }
+
+  private void performPostAddProduct(
+      AddProductDTO addProductDTO,
+      MockHttpSession httpSession,
+      String redirectUrl,
+      AddProductDTO expectedAddProductDTO)
+      throws Exception {
+    List<String> categories = addProductDTO.getCategory();
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+
+    mockMvc
+        .perform(
+            multipart(ADD_PRODUCT_URL)
+                .file((MockMultipartFile) addProductDTO.getFile())
+                .param(NAME_PARAM, addProductDTO.getName())
+                .param(DESCRIPTION_PARAM, addProductDTO.getDescription())
+                .param(BARCODE_PARAM, addProductDTO.getBarcode())
+                .param(CATEGORY_PARAM, categories.get(0))
+                .param(CATEGORY_PARAM, categories.get(1))
+                .param(CATEGORY_PARAM, categories.get(2))
                 .param(PRICE_PARAM, addProductDTO.getPrice())
                 .session(httpSession))
         .andExpect(redirectedUrl(redirectUrl));
+    assertEquals(expectedAddProductDTO, httpSession.getAttribute(PRODUCT_PARAM));
   }
 
   @Test

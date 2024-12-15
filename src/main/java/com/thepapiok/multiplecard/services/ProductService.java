@@ -15,6 +15,9 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
@@ -136,10 +139,6 @@ public class ProductService {
 
   public boolean checkOwnerHasTheSameBarcode(ObjectId ownerId, String barcode) {
     return productRepository.existsByBarcodeAndShopId(barcode, ownerId);
-  }
-
-  public int getMaxPage(String text, String phone, String category, String shopName) {
-    return aggregationRepository.getMaxPage(text, phone, category, shopName);
   }
 
   public boolean isProductOwner(String phone, String id) {
@@ -298,16 +297,17 @@ public class ProductService {
     return categories;
   }
 
-  public List<ProductDTO> getProducts(
+  public PageProductsDTO getProducts(
       String phone,
       int page,
       String field,
       boolean isDescending,
       String text,
       String category,
-      String shopName) {
+      String shopName,
+      boolean hiddenBlock) {
     return aggregationRepository.getProducts(
-        phone, page, field, isDescending, text, category, shopName);
+        phone, page, field, isDescending, text, category, shopName, hiddenBlock);
   }
 
   public List<ProductWithShopDTO> getProductsByIds(List<String> productsInfo)
@@ -323,16 +323,16 @@ public class ProductService {
     return aggregationRepository.findProductsByIdsAndType(products);
   }
 
-  public List<ProductWithShopDTO> getProductsWithShops(
+  public PageProductsWithShopDTO getProductsWithShops(
       int page, String field, boolean isDescending, String text, String category, String shopName) {
-    List<ProductDTO> productDTOS =
-        getProducts(null, page, field, isDescending, text, category, shopName);
+    PageProductsDTO pageProductsDTO =
+        getProducts(null, page, field, isDescending, text, category, shopName, true);
     List<ProductWithShopDTO> products = new ArrayList<>();
-    for (ProductDTO productDTO : productDTOS) {
+    for (ProductDTO productDTO : pageProductsDTO.getProducts()) {
       Shop shop = shopRepository.findImageUrlAndNameById(productDTO.getShopId());
       products.add(new ProductWithShopDTO(productDTO, shop.getName(), shop.getImageUrl()));
     }
-    return products;
+    return new PageProductsWithShopDTO(pageProductsDTO.getMaxPage(), products);
   }
 
   public boolean checkProductsQuantity(Map<ProductInfo, Integer> products) {
@@ -424,5 +424,17 @@ public class ProductService {
       return false;
     }
     return true;
+  }
+
+  public PageOwnerProductsDTO getProductsByOwnerCard(
+      int page,
+      String field,
+      boolean isDescending,
+      String text,
+      String category,
+      String shopName,
+      String cardId) {
+    return aggregationRepository.getProductsByOwnerCard(
+        page, field, isDescending, text, category, shopName, cardId);
   }
 }

@@ -230,4 +230,37 @@ public class CardServiceTest {
   public void shouldReturnFalseAtCardExistsWhenBadId() {
     assertFalse(cardService.cardExists("1234"));
   }
+
+  @Test
+  public void shouldReturnFalseAtIsOwnerWhenCardNotFound() {
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.empty());
+
+    assertFalse(cardService.isOwner(TEST_PHONE, TEST_CARD_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsOwnerWhenIsNotOwner() {
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    Account account = new Account();
+    account.setPhone("123123123");
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+    when(accountRepository.findPhoneById(TEST_ID)).thenReturn(account);
+
+    assertFalse(cardService.isOwner(TEST_PHONE, TEST_CARD_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsOwnerWhenIsOwner() {
+    Card card = new Card();
+    card.setUserId(TEST_ID);
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+    when(accountRepository.findPhoneById(TEST_ID)).thenReturn(account);
+
+    assertTrue(cardService.isOwner(TEST_PHONE, TEST_CARD_ID));
+  }
 }

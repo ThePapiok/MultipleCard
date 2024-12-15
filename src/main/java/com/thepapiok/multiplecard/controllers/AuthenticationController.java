@@ -512,6 +512,7 @@ public class AuthenticationController {
     final int maxListSize = 5;
     boolean error = false;
     String message = "";
+    httpSession.setAttribute(REGISTER_PARAM, register);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);

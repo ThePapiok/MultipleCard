@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
+import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
@@ -46,6 +49,7 @@ public class CardControllerTest {
   private static final String TEST_PIN = "1234";
   private static final String TEST_NAME = "test";
   private static final String ID_PARAM = "id";
+  private static final String IS_BUY_PARAM = "isBuy";
   private static final String FIELD_PARAM = "field";
   private static final String IS_DESCENDING_PARAM = "isDescending";
   private static final String COUNT_FIELD = "count";
@@ -603,9 +607,12 @@ public class CardControllerTest {
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenEverythingOk() throws Exception {
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenEverythingOkAndNoOwner()
+      throws Exception {
     final int size = 3;
-    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
+
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(false);
 
     mockMvc
         .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID))
@@ -614,51 +621,134 @@ public class CardControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_PARAM, page.getProducts()))
         .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(IS_BUY_PARAM, false))
         .andExpect(view().name(BUY_PRODUCTS_PAGE));
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithoutMessage()
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenEverythingAndOwnerWithBuyParam()
       throws Exception {
-    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    final int size = 3;
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
 
-    performPostAtBuyProductsWithParamWithoutMessage(products, "error");
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(true);
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID).param("buy", ""))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(CARD_EXISTS_PARAM, true))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PRODUCTS_PARAM, page.getProducts()))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(IS_BUY_PARAM, true))
+        .andExpect(view().name(BUY_PRODUCTS_PAGE));
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithMessage()
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnChoiceOwnerCardPageAtBuyProductsPageWhenEverythingAndOwnerWithNoParam()
       throws Exception {
-    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(true);
+    when(cardService.cardExists(TEST_CARD_ID)).thenReturn(true);
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(IS_BUY_PARAM, false))
+        .andExpect(view().name("choiceOwnerCardPage"));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void
+      shouldReturnChoiceOwnerCardPageAtBuyProductsPageWhenEverythingAndOwnerWithProductsParam()
+          throws Exception {
+    final int size = 2;
+    ProductAtCardDTO product1 = new ProductAtCardDTO();
+    product1.setProductName(TEST_NAME);
+    ProductAtCardDTO product2 = new ProductAtCardDTO();
+    product2.setProductName(TEST_NAME);
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    page.setProducts(List.of(product1, product2));
+    page.setMaxPage(1);
+
+    when(resultService.getPages(1, 1)).thenReturn(List.of(1));
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(true);
+    when(cardService.cardExists(TEST_CARD_ID)).thenReturn(true);
+    when(productService.getProductsByOwnerCard(0, COUNT_FIELD, true, "", "", "", TEST_CARD_ID))
+        .thenReturn(page);
+
+    mockMvc
+        .perform(get(CARDS_URL).param(ID_PARAM, TEST_CARD_ID).param("products", ""))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(IS_BUY_PARAM, false))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(view().name("ownerProductsPage"));
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithoutMessageAndNoOwner()
+      throws Exception {
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
+
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(false);
+
+    performPostAtBuyProductsWithParamWithoutMessage(page, "error");
+  }
+
+  @Test
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenErrorParamWithMessageAndNoOwner()
+      throws Exception {
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
 
-    performPostAtBuyProductsWithParamWithMessage(products, ERROR_PARAM, ERROR_MESSAGE, httpSession);
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(false);
+
+    performPostAtBuyProductsWithParamWithMessage(page, ERROR_PARAM, ERROR_MESSAGE, httpSession);
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithoutMessage()
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithoutMessageAndNoOwner()
       throws Exception {
-    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
 
-    performPostAtBuyProductsWithParamWithoutMessage(products, "success");
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(false);
+
+    performPostAtBuyProductsWithParamWithoutMessage(page, "success");
   }
 
   @Test
-  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithMessage()
+  public void shouldReturnBuyProductsPageAtBuyProductsPageWhenSuccessParamWithMessageAndNoOwner()
       throws Exception {
-    final List<ProductWithShopDTO> products = getProductsForBuyProducts();
+    final PageProductsWithShopDTO page = getPageOfProductsForBuyProducts();
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, "success!");
 
-    performPostAtBuyProductsWithParamWithMessage(products, "success", "success!", httpSession);
+    when(cardService.isOwner(TEST_PHONE, TEST_CARD_ID)).thenReturn(false);
+
+    performPostAtBuyProductsWithParamWithMessage(page, "success", "success!", httpSession);
   }
 
   private void performPostAtBuyProductsWithParamWithoutMessage(
-      List<ProductWithShopDTO> products, String param) throws Exception {
+      PageProductsWithShopDTO page, String param) throws Exception {
     final int size = 3;
 
     mockMvc
@@ -668,15 +758,16 @@ public class CardControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_PARAM, page.getProducts()))
         .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
+        .andExpect(model().attribute(IS_BUY_PARAM, false))
         .andExpect(view().name(BUY_PRODUCTS_PAGE));
   }
 
   private void performPostAtBuyProductsWithParamWithMessage(
-      List<ProductWithShopDTO> products, String param, String message, MockHttpSession httpSession)
+      PageProductsWithShopDTO page, String param, String message, MockHttpSession httpSession)
       throws Exception {
     final String paramMessage = param + "Message";
     final int size = 3;
@@ -688,16 +779,17 @@ public class CardControllerTest {
         .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
         .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
-        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_PARAM, page.getProducts()))
         .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, size == 0))
         .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
         .andExpect(model().attribute(ID_PARAM, TEST_CARD_ID))
         .andExpect(model().attribute(paramMessage, message))
+        .andExpect(model().attribute(IS_BUY_PARAM, false))
         .andExpect(view().name(BUY_PRODUCTS_PAGE));
     assertNull(httpSession.getAttribute(paramMessage));
   }
 
-  private List<ProductWithShopDTO> getProductsForBuyProducts() {
+  private PageProductsWithShopDTO getPageOfProductsForBuyProducts() {
     final int testPrice = 500;
     final int testQuantity = 5;
     final LocalDate testStartAt = LocalDate.now();
@@ -727,15 +819,15 @@ public class CardControllerTest {
     productDTO3.setStartAtPromotion(null);
     productDTO3.setShopName(TEST_NAME);
     productDTO3.setShopImageUrl(testShopImageUrl);
-    List<ProductWithShopDTO> products = List.of(productDTO1, productDTO2, productDTO3);
+    PageProductsWithShopDTO page = new PageProductsWithShopDTO();
+    page.setProducts(List.of(productDTO1, productDTO2, productDTO3));
+    page.setMaxPage(1);
 
-    when(productService.getProductsWithShops(0, COUNT_FIELD, true, "", "", ""))
-        .thenReturn(products);
-    when(productService.getMaxPage("", null, "", "")).thenReturn(1);
+    when(productService.getProductsWithShops(0, COUNT_FIELD, true, "", "", "")).thenReturn(page);
     when(resultService.getPages(1, 1)).thenReturn(List.of(1));
     when(cardService.cardExists(TEST_CARD_ID)).thenReturn(true);
 
-    return products;
+    return page;
   }
 
   @Test

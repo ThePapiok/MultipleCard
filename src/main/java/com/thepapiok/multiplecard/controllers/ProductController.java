@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -42,6 +43,7 @@ public class ProductController {
   private static final String ERROR_UNEXPECTED_MESSAGE = "error.unexpected";
   private static final String ERROR_NOT_OWNER_MESSAGE = "error.not_owner";
   private static final String SUCCESS_OK_MESSAGE = "ok";
+  private static final String PRODUCT_PARAM = "product";
   private final CategoryService categoryService;
   private final ShopService shopService;
   private final MessageSource messageSource;
@@ -93,15 +95,16 @@ public class ProductController {
       }
     }
     if (id == null) {
-      List<ProductDTO> products =
-          productService.getProducts(phone, page, field, isDescending, text, "", "");
-      maxPage = productService.getMaxPage(text, phone, "", "");
+      PageProductsDTO currentPage =
+          productService.getProducts(phone, page, field, isDescending, text, "", "", false);
+      List<ProductDTO> allProducts = currentPage.getProducts();
+      maxPage = currentPage.getMaxPage();
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
       model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("pageSelected", page + 1);
-      model.addAttribute("products", products);
-      model.addAttribute("productsEmpty", products.size() == 0);
+      model.addAttribute("products", allProducts);
+      model.addAttribute("productsEmpty", allProducts.size() == 0);
       model.addAttribute("maxPage", maxPage);
       return "productsPage";
     } else {
@@ -111,7 +114,7 @@ public class ProductController {
       Product product = productService.getProductById(id);
       model.addAttribute("categories", categoryService.getAllNames());
       model.addAttribute("productCategories", productService.getCategoriesNames(product));
-      model.addAttribute("product", productService.getEditProductDTO(product));
+      model.addAttribute(PRODUCT_PARAM, productService.getEditProductDTO(product));
       model.addAttribute("id", id);
       return "productPage";
     }
@@ -120,15 +123,22 @@ public class ProductController {
   @GetMapping("/add_product")
   public String addProductPage(
       @RequestParam(required = false) String error, Model model, HttpSession httpSession) {
+    final String addProductParam = "addProduct";
     if (error != null) {
       String message = (String) httpSession.getAttribute(ERROR_MESSAGE_PARAM);
       if (message != null) {
         model.addAttribute(ERROR_MESSAGE_PARAM, message);
         httpSession.removeAttribute(ERROR_MESSAGE_PARAM);
+        AddProductDTO addProductDTO = (AddProductDTO) httpSession.getAttribute(PRODUCT_PARAM);
+        model.addAttribute(addProductParam, addProductDTO);
+        model.addAttribute("productCategories", addProductDTO.getCategory());
+        httpSession.removeAttribute(PRODUCT_PARAM);
       }
     }
+    if (model.getAttribute(addProductParam) == null) {
+      model.addAttribute(addProductParam, new AddProductDTO());
+    }
     model.addAttribute("categories", categoryService.getAllNames());
-    model.addAttribute("addProduct", new AddProductDTO());
     return "addProductPage";
   }
 
@@ -146,6 +156,7 @@ public class ProductController {
     List<String> categories = addProductDTO.getCategory();
     boolean error = false;
     String message = null;
+    httpSession.setAttribute(PRODUCT_PARAM, addProductDTO);
     if (bindingResult.hasErrors()) {
       error = true;
       message = messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale);

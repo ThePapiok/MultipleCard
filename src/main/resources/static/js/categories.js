@@ -134,3 +134,17 @@ function checkCategories() {
         }
     }
 }
+
+function setCategories() {
+    let category;
+    let realIndex;
+    const length = categories.length;
+    indexCategory = length + 1;
+    for (let i = 0; i < length; i++) {
+        category = categories[i];
+        realIndex = i + 1;
+        document.getElementById("category" + realIndex).value = category;
+        document.getElementById("inputCategory" + realIndex).value = category;
+        document.getElementById("delete" + realIndex).style.display = "block";
+    }
+}
