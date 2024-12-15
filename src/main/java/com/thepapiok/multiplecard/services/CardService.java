@@ -136,4 +136,13 @@ public class CardService {
       return false;
     }
   }
+
+  public boolean isOwner(String phone, String cardId) {
+    Optional<Card> optionalCard = cardRepository.findById(new ObjectId(cardId));
+    if (optionalCard.isEmpty()) {
+      return false;
+    }
+    Card card = optionalCard.get();
+    return accountRepository.findPhoneById(card.getUserId()).getPhone().equals(phone);
+  }
 }

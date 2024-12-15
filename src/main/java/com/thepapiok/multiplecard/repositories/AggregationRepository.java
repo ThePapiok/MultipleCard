@@ -1,7 +1,6 @@
 package com.thepapiok.multiplecard.repositories;
 
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.limit;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.addFields;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.lookup;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
@@ -12,14 +11,14 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.unwi
 
 import com.mongodb.BasicDBObject;
 import com.thepapiok.multiplecard.collections.ReservedProduct;
-import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.CustomProjectAggregationOperation;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -38,6 +37,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Repository
 public class AggregationRepository {
   private static final String COUNT_FIELD = "count";
+  private static final String DATE_FIELD = "date";
+  private static final String PRICE_FIELD = "price";
+  private static final String ORDER_FIELD = "order";
   private static final String ID_FIELD = "_id";
   private static final String PRODUCTS_COLLECTION = "products";
   private static final String BLOCKED_FIELD = "blockedProducts";
@@ -66,17 +68,17 @@ public class AggregationRepository {
     this.reservedProductsRepository = reservedProductsRepository;
   }
 
-  public List<ProductDTO> getProducts(
+  public PageProductsDTO getProducts(
       String phone,
       int page,
       String field,
       boolean isDescending,
       String text,
       String category,
-      String shopName) {
-    final int countReviewsAtPage = 12;
+      String shopName,
+      boolean hiddenBlocked) {
+    final long skip = 12L * page;
     final String createdAtField = "order.createdAt";
-    final String dateField = "date";
     final String realPriceField = "realPrice";
     final String updatedAtField = "updatedAt";
     final String isNullField = "isNull";
@@ -85,11 +87,11 @@ public class AggregationRepository {
     SortOperation sortOperation = null;
     boolean hasOrders = false;
     List<AggregationOperation> stages = new ArrayList<>();
-    matchByTextCategoryOrShopName(stages, text, category, shopName, phone);
+    matchProducts(stages, text, category, shopName, phone, hiddenBlocked);
     switch (field) {
       case COUNT_FIELD:
         groupOperation =
-            Aggregation.group(ID_FIELD).count().as(COUNT_FIELD).min(createdAtField).as(dateField);
+            Aggregation.group(ID_FIELD).count().as(COUNT_FIELD).min(createdAtField).as(DATE_FIELD);
         if (isDescending) {
           sortOperation =
               Aggregation.sort(
@@ -101,21 +103,21 @@ public class AggregationRepository {
         }
         hasOrders = true;
         break;
-      case dateField:
+      case DATE_FIELD:
         if (isDescending) {
-          groupOperation = Aggregation.group(ID_FIELD).max(createdAtField).as(dateField);
+          groupOperation = Aggregation.group(ID_FIELD).max(createdAtField).as(DATE_FIELD);
           sortOperation =
               Aggregation.sort(
-                  Sort.by(isNullField).ascending().and(Sort.by(dateField).descending()));
+                  Sort.by(isNullField).ascending().and(Sort.by(DATE_FIELD).descending()));
         } else {
-          groupOperation = Aggregation.group(ID_FIELD).min(createdAtField).as(dateField);
+          groupOperation = Aggregation.group(ID_FIELD).max(createdAtField).as(DATE_FIELD);
           sortOperation =
               Aggregation.sort(
-                  Sort.by(isNullField).descending().and(Sort.by(dateField).ascending()));
+                  Sort.by(isNullField).descending().and(Sort.by(DATE_FIELD).ascending()));
         }
         hasOrders = true;
         break;
-      case "price":
+      case PRICE_FIELD:
         if (isDescending) {
           sortOperation = Aggregation.sort(Sort.by(realPriceField).descending());
         } else {
@@ -158,7 +160,7 @@ public class AggregationRepository {
                                           }
                                         }
                                     """));
-      stages.add(unwind("order", true));
+      stages.add(unwind(ORDER_FIELD, true));
       stages.add(groupOperation);
       stages.add(
           new CustomProjectAggregationOperation(
@@ -188,14 +190,14 @@ public class AggregationRepository {
       stages.add(
           new CustomProjectAggregationOperation(
               """
-            {
-              $addFields: {
-                "realPrice": {
-                  $ifNull: ["$promotion.newPrice", "$price"]
-                }
-              }
-            }
-            """));
+                                    {
+                                      $addFields: {
+                                        "realPrice": {
+                                          $ifNull: ["$promotion.newPrice", "$price"]
+                                        }
+                                      }
+                                    }
+                                    """));
       stages.add(sortOperation);
       stages.add(
           new CustomProjectAggregationOperation(
@@ -259,8 +261,6 @@ public class AggregationRepository {
                                 }
                                 """));
     stages.add(unwind("reservedProduct", true));
-    stages.add(skip((long) countReviewsAtPage * page));
-    stages.add(limit(countReviewsAtPage));
     stages.add(
         new CustomProjectAggregationOperation(
             """
@@ -307,39 +307,64 @@ public class AggregationRepository {
                                     }
                                   }
                                 """));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                {
+                                    $facet: {
+                                        "total": [
+                                            {
+                                                $group: {
+                                                    "_id": "_id",
+                                                    "count": {
+                                                        $count: {}
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                $project: {
+                                                    "_id": 0
+                                                }
+                                            },
+                                            {
+                                                $addFields: {
+                                                    "count": {
+                                                        $ceil: {
+                                                            $divide: ["$count", 12]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "products": [
+                                                                {
+                                                                    $skip: """
+                + skip
+                + ","
+                + """
+                                                                },
+                                                                {
+                                                                  $limit: 12
+                                                                }
+                                                              ]
+                                    }
+                                }
+                """));
+    stages.add(unwind("total", true));
+    stages.add(addFields().build().addField("maxPage", "$total.count"));
     Aggregation aggregation = newAggregation(stages);
     return mongoTemplate
-        .aggregate(aggregation, PRODUCTS_COLLECTION, ProductDTO.class)
-        .getMappedResults();
+        .aggregate(aggregation, PRODUCTS_COLLECTION, PageProductsDTO.class)
+        .getUniqueMappedResult();
   }
 
-  public int getMaxPage(String text, String phone, String category, String shopName) {
-    final float countProductsAtPage = 12.0F;
-    List<AggregationOperation> stages = new ArrayList<>();
-    matchByTextCategoryOrShopName(stages, text, category, shopName, phone);
-    stages.add(group("id").count().as(COUNT_FIELD));
-    stages.add(project(COUNT_FIELD).andExclude(ID_FIELD));
-    Aggregation aggregation = newAggregation(stages);
-    Document result =
-        mongoTemplate
-            .aggregate(aggregation, PRODUCTS_COLLECTION, Document.class)
-            .getUniqueMappedResult();
-    Integer pages = null;
-    if (result != null) {
-      pages = result.getInteger(COUNT_FIELD);
-    }
-    if (pages == null) {
-      pages = 0;
-    }
-    return (int) Math.ceil(pages / countProductsAtPage);
-  }
-
-  private void matchByTextCategoryOrShopName(
+  private void matchProducts(
       List<AggregationOperation> stages,
       String text,
       String category,
       String shopName,
-      String phone) {
+      String phone,
+      boolean hiddenBlocked) {
     if (phone != null) {
       ObjectId shopId = accountRepository.findIdByPhone(phone).getId();
       if ("".equals(text)) {
@@ -356,8 +381,10 @@ public class AggregationRepository {
       if (!"".equals(text)) {
         stages.add(match(Criteria.where("$text").is(new BasicDBObject("$search", text))));
       }
-      stages.add(lookup(BLOCKED_FIELD, ID_FIELD, PRODUCT_ID_FIELD, BLOCKED_FIELD));
-      stages.add(match(Criteria.where(BLOCKED_FIELD).size(0)));
+      if (hiddenBlocked) {
+        stages.add(lookup(BLOCKED_FIELD, ID_FIELD, PRODUCT_ID_FIELD, BLOCKED_FIELD));
+        stages.add(match(Criteria.where(BLOCKED_FIELD).size(0)));
+      }
     }
     if (!"".equals(category)) {
       stages.add(unwind("categories", true));
@@ -532,14 +559,14 @@ public class AggregationRepository {
         if (!productInfo.isHasPromotion()) {
           query.append(
               """
-                                {
-                                    $unionWith: {
-                                        coll: "products",
-                                        pipeline: [
-                                            {
-                                                $match: {
-                                                    $expr: {
-                                                        $eq: ["$_id", """);
+                                    {
+                                        $unionWith: {
+                                            coll: "products",
+                                            pipeline: [
+                                                {
+                                                    $match: {
+                                                        $expr: {
+                                                            $eq: ["$_id", """);
           query.append(productId);
           query.append(
               """
@@ -588,117 +615,117 @@ public class AggregationRepository {
         } else {
           query.append(
               """
-                                {
-                                    $unionWith: {
-                                        coll: "products",
-                                        pipeline: [
-                                            {
-                                               $match: {
-                                                    $expr: {
-                                                        $eq: ["$_id", """);
+                                    {
+                                        $unionWith: {
+                                            coll: "products",
+                                            pipeline: [
+                                                {
+                                                   $match: {
+                                                        $expr: {
+                                                            $eq: ["$_id", """);
           query.append(productId);
           query.append(
               """
-                                                        }
-                                                   }
-                                           },
-                                           {
-                                                $lookup: {
-                                                    "from": "shops",
-                                                    "localField": "shopId",
-                                                    "foreignField": "_id",
-                                                    "as": "shop"
-                                                    }
-                                                },
-                                           {
-                                                $unwind: {
-                                                    "path": "$shop",
-                                                    "preserveNullAndEmptyArrays": true
-                                                    }
-                                           },
-                                           {
-                                                $lookup: {
-                                                     "from": "promotions",
-                                                     "localField": "_id",
-                                                     "foreignField": "productId",
-                                                     "as": "promotion"
+                                                 }
+                                            }
+                                    },
+                                    {
+                                         $lookup: {
+                                             "from": "shops",
+                                             "localField": "shopId",
+                                             "foreignField": "_id",
+                                             "as": "shop"
+                                             }
+                                         },
+                                    {
+                                         $unwind: {
+                                             "path": "$shop",
+                                             "preserveNullAndEmptyArrays": true
+                                             }
+                                    },
+                                    {
+                                         $lookup: {
+                                              "from": "promotions",
+                                              "localField": "_id",
+                                              "foreignField": "productId",
+                                              "as": "promotion"
+                                              }
+                                    },
+                                    {
+                                          $unwind: {
+                                               "path": "$promotion",
+                                               "preserveNullAndEmptyArrays": true
+                                               }
+                                    },
+                                    {
+                                         $lookup: {
+                                             "from": "reservedProducts",
+                                             "localField": "promotion._id",
+                                             "foreignField": "promotionId",
+                                             "as": "reservedProduct",
+                                             "let": {
+                                                 "promotionId": "$promotion._id"
+                                             },
+                                             "pipeline": [{
+                                                 $group: {
+                                                     "_id": "$promotionId",
+                                                     "quantity": {
+                                                         $count: {}
+                                                         }
                                                      }
-                                           },
-                                           {
-                                                 $unwind: {
-                                                      "path": "$promotion",
-                                                      "preserveNullAndEmptyArrays": true
-                                                      }
-                                           },
-                                           {
-                                                $lookup: {
-                                                    "from": "reservedProducts",
-                                                    "localField": "promotion._id",
-                                                    "foreignField": "promotionId",
-                                                    "as": "reservedProduct",
-                                                    "let": {
-                                                        "promotionId": "$promotion._id"
-                                                    },
-                                                    "pipeline": [{
-                                                        $group: {
-                                                            "_id": "$promotionId",
-                                                            "quantity": {
-                                                                $count: {}
-                                                                }
-                                                            }
-                                                        },
-                                                     {
-                                                        $match: {
-                                                            $expr: {
-                                                                $eq: ["$_id", "$$promotionId"]
-                                                                }
-                                                            }
-                                                     }]
+                                                 },
+                                              {
+                                                 $match: {
+                                                     $expr: {
+                                                         $eq: ["$_id", "$$promotionId"]
+                                                         }
+                                                     }
+                                              }]
 
-                                                }
-                                            },
-                                            {
-                                                $unwind: {
-                                                    "path": "$reservedProduct",
-                                                    "preserveNullAndEmptyArrays": true
-                                                    }
-                                            },
-                                            {
-                                                $addFields: {
-                                                    "productId": "$_id",
-                                                    "productName": "$name",
-                                                    "productImageUrl": "$imageUrl",
-                                                    "startAtPromotion": "$promotion.startAt",
-                                                    "expiredAtPromotion": "$promotion.expiredAt",
-                                                    "quantityPromotion": {
-                                                        $subtract: ["$promotion.quantity", {
-                                                            $ifNull: ["$reservedProduct.quantity", 0]}
-                                                            ]
-                                                    },
-                                                    "newPricePromotion": "$promotion.newPrice",
-                                                    "isActive": true,
-                                                    "shopName": "$shop.name",
-                                                    "shopImageUrl": "$shop.imageUrl"
-                                                    }
-                                            },
-                                            {
-                                                $project: {
-                                                    "productId": 1,
-                                                    "productName": 1,
-                                                    "description": 1,
-                                                    "productImageUrl": 1,
-                                                    "price": 1,
-                                                    "shopId": 1,
-                                                    "startAtPromotion": 1,
-                                                    "expiredAtPromotion": 1,
-                                                    "quantityPromotion": 1,
-                                                    "newPricePromotion": 1,
-                                                    "isActive": 1,
-                                                    "shopName": 1,
-                                                    "shopImageUrl": 1
-                                                    }
-                                            }]}}
-                                            """);
+                                         }
+                                     },
+                                     {
+                                         $unwind: {
+                                             "path": "$reservedProduct",
+                                             "preserveNullAndEmptyArrays": true
+                                             }
+                                     },
+                                     {
+                                         $addFields: {
+                                             "productId": "$_id",
+                                             "productName": "$name",
+                                             "productImageUrl": "$imageUrl",
+                                             "startAtPromotion": "$promotion.startAt",
+                                             "expiredAtPromotion": "$promotion.expiredAt",
+                                             "quantityPromotion": {
+                                                 $subtract: ["$promotion.quantity", {
+                                                     $ifNull: ["$reservedProduct.quantity", 0]}
+                                                     ]
+                                             },
+                                             "newPricePromotion": "$promotion.newPrice",
+                                             "isActive": true,
+                                             "shopName": "$shop.name",
+                                             "shopImageUrl": "$shop.imageUrl"
+                                             }
+                                     },
+                                     {
+                                         $project: {
+                                             "productId": 1,
+                                             "productName": 1,
+                                             "description": 1,
+                                             "productImageUrl": 1,
+                                             "price": 1,
+                                             "shopId": 1,
+                                             "startAtPromotion": 1,
+                                             "expiredAtPromotion": 1,
+                                             "quantityPromotion": 1,
+                                             "newPricePromotion": 1,
+                                             "isActive": 1,
+                                             "shopName": 1,
+                                             "shopImageUrl": 1
+                                             }
+                                     }]}}
+                                     """);
           stages.add(new CustomProjectAggregationOperation(query.toString()));
         }
       }
@@ -747,5 +774,204 @@ public class AggregationRepository {
       return false;
     }
     return true;
+  }
+
+  public PageOwnerProductsDTO getProductsByOwnerCard(
+      int page,
+      String field,
+      boolean isDescending,
+      String text,
+      String category,
+      String shopName,
+      String cardId) {
+    final long skip = 12L * page;
+    SortOperation sortOperation = null;
+    switch (field) {
+      case COUNT_FIELD:
+        if (isDescending) {
+          sortOperation = Aggregation.sort(Sort.by(COUNT_FIELD).descending());
+        } else {
+          sortOperation = Aggregation.sort(Sort.by(COUNT_FIELD).ascending());
+        }
+        break;
+      case DATE_FIELD:
+        if (isDescending) {
+          sortOperation = Aggregation.sort(Sort.by(DATE_FIELD).descending());
+        } else {
+          sortOperation = Aggregation.sort(Sort.by(DATE_FIELD).ascending());
+        }
+        break;
+      case PRICE_FIELD:
+        if (isDescending) {
+          sortOperation = Aggregation.sort(Sort.by(PRICE_FIELD).descending());
+        } else {
+          sortOperation = Aggregation.sort(Sort.by(PRICE_FIELD).ascending());
+        }
+        break;
+      default:
+        break;
+    }
+    List<AggregationOperation> stages = new ArrayList<>();
+    matchProducts(stages, text, category, shopName, null, false);
+    stages.add(lookup("orders", "_id", "productId", ORDER_FIELD));
+    stages.add(unwind(ORDER_FIELD, true));
+    stages.add(
+        match(
+            Criteria.where("order.cardId").is(new ObjectId(cardId)).and("order.isUsed").is(false)));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                    {
+                        $group: {
+                            "_id": {
+                                "_id": "$order.productId",
+                                "price": "$order.price"
+                            },
+                            "count": {
+                                $count: {}
+                            },
+                            "date": {
+                                $max: "$order.createdAt"
+                            }
+                        }
+                    }
+                    """));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                    {
+                        $addFields: {
+                            "productId": "$_id._id",
+                            "price": "$_id.price",
+                        }
+                    }
+                """));
+    stages.add(sortOperation);
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                    {
+                        $project: {
+                            "productId": 1,
+                            "price": 1,
+                            "count": 1
+                        }
+                    }
+                """));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                {
+                    $lookup: {
+                        "from": "products",
+                        "localField": "productId",
+                        "foreignField": "_id",
+                        "as": "product",
+                        "pipeline": [
+                            {
+                                $project: {
+                                    "name": 1,
+                                    "description": 1,
+                                    "imageUrl": 1,
+                                    "shopId": 1
+                                }
+                            }
+                        ]
+                    }
+                }
+                """));
+    stages.add(unwind("product", true));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                {
+                    $lookup: {
+                        "from": "shops",
+                        "localField": "product.shopId",
+                        "foreignField": "_id",
+                        "as": "shop",
+                        "pipeline": [
+                            {
+                                $project: {
+                                    "name": 1,
+                                    "imageUrl": 1,
+                                }
+                            }
+                        ]
+                    }
+                }
+                """));
+    stages.add(unwind("shop", true));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                {
+                    $addFields: {
+                        "productName": "$product.name",
+                        "description": "$product.description",
+                        "productImageUrl": "$product.imageUrl",
+                        "shopName": "$shop.name",
+                        "shopImageUrl": "$shop.imageUrl",
+                    }
+                }
+                """));
+    stages.add(
+        project(
+            "productName",
+            "description",
+            "productImageUrl",
+            PRICE_FIELD,
+            "shopName",
+            "shopImageUrl",
+            COUNT_FIELD));
+    stages.add(
+        new CustomProjectAggregationOperation(
+            """
+                {
+                    $facet: {
+                        "total": [
+                            {
+                                $group: {
+                                    "_id": "_id",
+                                    "count": {
+                                        $count: {}
+                                    }
+                                }
+                            },
+                            {
+                                $project: {
+                                    "_id": 0
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    "count": {
+                                        $ceil: {
+                                            $divide: ["$count", 12]
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "products": [
+                                                {
+                                                    $skip: """
+                + skip
+                + ","
+                + """
+                                                },
+                                                {
+                                                  $limit: 12
+                                                }
+
+                                              ]
+                    }
+                }
+                """));
+    stages.add(unwind("total", true));
+    stages.add(addFields().build().addField("maxPage", "$total.count"));
+    return mongoTemplate
+        .aggregate(newAggregation(stages), "products", PageOwnerProductsDTO.class)
+        .getUniqueMappedResult();
   }
 }

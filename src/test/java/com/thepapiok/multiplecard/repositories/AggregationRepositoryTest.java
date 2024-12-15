@@ -14,11 +14,15 @@ import com.thepapiok.multiplecard.collections.ReservedProduct;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.configs.DbConfig;
+import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +46,8 @@ import org.springframework.web.client.RestTemplate;
 public class AggregationRepositoryTest {
   private static final ObjectId TEST_OWNER_ID = new ObjectId("123456789012345678901234");
   private static final ObjectId TEST_ORDER_ID = new ObjectId("123459789012345678901211");
+  private static final ObjectId TEST_CARD_ID = new ObjectId("423459789013345678901215");
+  private static final ObjectId TEST_OTHER_CARD_ID = new ObjectId("517459789013345678901215");
   private static final String TEST_PHONE = "+48132423412342314231";
   private static final String TEST_PHONE3 = "+48135304342921";
   private static final String TEST_PRODUCT_NAME = "product";
@@ -67,6 +73,12 @@ public class AggregationRepositoryTest {
   private ProductDTO productDTO17;
   private Shop shop1;
   private Shop shop3;
+  private Product product10;
+  private Product product1;
+  private Product product6;
+  private ProductAtCardDTO productAtCardDTO1;
+  private ProductAtCardDTO productAtCardDTO2;
+  private ProductAtCardDTO productAtCardDTO3;
 
   @Autowired private MongoTemplate mongoTemplate;
   @Autowired private CategoryRepository categoryRepository;
@@ -75,13 +87,13 @@ public class AggregationRepositoryTest {
   @Autowired private PromotionRepository promotionRepository;
   @Autowired private ShopRepository shopRepository;
   @Autowired private ReservedProductsRepository reservedProductsRepository;
+  @Autowired private OrderRepository orderRepository;
   private AggregationRepository aggregationRepository;
   @MockBean private MongoTransactionManager mongoTransactionManager;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
   public void setUp() {
-    final ObjectId testCardId = new ObjectId("123456789012345678901111");
     final ObjectId testOtherCardId = new ObjectId("855456789019940678901112");
     final int testProduct1Price = 1233;
     final int testProduct2Price = 123;
@@ -223,6 +235,9 @@ public class AggregationRepositoryTest {
     final int testHour18 = 3;
     final int testMinute18 = 10;
     final int testPromotionQuantity = 5;
+    final int testCount1 = 3;
+    final int testCount2 = 2;
+    final int testCount3 = 1;
     final LocalDateTime testDate1 =
         LocalDateTime.of(testYear1, testMonth1, testDay1, testHour1, testMinute1);
     final LocalDateTime testDate2 =
@@ -326,7 +341,7 @@ public class AggregationRepositoryTest {
     shop4.setPoints(List.of(address));
     shop4.setAccountNumber("account4");
     shop4 = mongoTemplate.save(shop4);
-    Product product1 = new Product();
+    product1 = new Product();
     product1.setImageUrl("url1");
     product1.setName(TEST_PRODUCT_NAME);
     product1.setDescription("description1");
@@ -371,7 +386,7 @@ public class AggregationRepositoryTest {
     product5.setShopId(shop3.getId());
     product5.setCategories(List.of(category3.getId()));
     product5.setUpdatedAt(testDate5);
-    Product product6 = new Product();
+    product6 = new Product();
     product6.setImageUrl("url6");
     product6.setName(TEST_PRODUCT_NAME);
     product6.setDescription("description6");
@@ -407,7 +422,7 @@ public class AggregationRepositoryTest {
     product9.setShopId(shop3.getId());
     product9.setCategories(List.of(category1.getId()));
     product9.setUpdatedAt(testDate9);
-    Product product10 = new Product();
+    product10 = new Product();
     product10.setImageUrl("url10");
     product10.setName("product10");
     product10.setDescription("description10");
@@ -484,11 +499,11 @@ public class AggregationRepositoryTest {
     mongoTemplate.save(product3);
     product4 = mongoTemplate.save(product4);
     mongoTemplate.save(product5);
-    mongoTemplate.save(product6);
+    product6 = mongoTemplate.save(product6);
     mongoTemplate.save(product7);
     mongoTemplate.save(product8);
     mongoTemplate.save(product9);
-    mongoTemplate.save(product10);
+    product10 = mongoTemplate.save(product10);
     mongoTemplate.save(product11);
     mongoTemplate.save(product12);
     mongoTemplate.save(product13);
@@ -587,32 +602,59 @@ public class AggregationRepositoryTest {
     account4.setPassword("password4");
     mongoTemplate.save(account4);
     Order order1 = new Order();
-    order1.setCardId(testCardId);
+    order1.setCardId(TEST_CARD_ID);
     order1.setPrice(testOrder1Price);
     order1.setProductId(product1.getId());
-    order1.setUsed(true);
+    order1.setUsed(false);
     order1.setCreatedAt(testDate1);
     order1.setShopId(shop1.getId());
     order1.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order1);
     Order order2 = new Order();
-    order2.setCardId(testCardId);
+    order2.setCardId(TEST_OTHER_CARD_ID);
     order2.setPrice(testOrder2Price);
     order2.setProductId(product1.getId());
-    order2.setUsed(true);
+    order2.setUsed(false);
     order2.setCreatedAt(testDate2);
     order2.setShopId(shop1.getId());
     order2.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order2);
     Order order3 = new Order();
-    order3.setCardId(testCardId);
+    order3.setCardId(TEST_OTHER_CARD_ID);
     order3.setPrice(testOrder3Price);
     order3.setProductId(product1.getId());
-    order3.setUsed(true);
+    order3.setUsed(false);
     order3.setCreatedAt(testDate3);
     order3.setShopId(shop1.getId());
     order3.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order3);
+    Order order143 = new Order();
+    order143.setCardId(TEST_CARD_ID);
+    order143.setPrice(testOrder1Price);
+    order143.setProductId(product1.getId());
+    order143.setUsed(true);
+    order143.setCreatedAt(testDate1);
+    order143.setShopId(shop1.getId());
+    order143.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order143);
+    Order order144 = new Order();
+    order144.setCardId(TEST_OTHER_CARD_ID);
+    order144.setPrice(testOrder2Price);
+    order144.setProductId(product1.getId());
+    order144.setUsed(true);
+    order144.setCreatedAt(testDate2);
+    order144.setShopId(shop1.getId());
+    order144.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order144);
+    Order order145 = new Order();
+    order145.setCardId(TEST_OTHER_CARD_ID);
+    order145.setPrice(testOrder3Price);
+    order145.setProductId(product1.getId());
+    order145.setUsed(true);
+    order145.setCreatedAt(testDate3);
+    order145.setShopId(shop1.getId());
+    order145.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order145);
     Order order4 = new Order();
     order4.setCardId(testOtherCardId);
     order4.setPrice(testOrder4Price);
@@ -740,23 +782,23 @@ public class AggregationRepositoryTest {
     order14.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order14);
     Order order15 = new Order();
-    order15.setCardId(testOtherCardId);
-    order15.setPrice(testOrder4Price);
+    order15.setCardId(TEST_CARD_ID);
+    order15.setPrice(testOrder3Price);
     order15.setProductId(product6.getId());
-    order15.setUsed(true);
+    order15.setUsed(false);
     order15.setCreatedAt(testDate7);
     order15.setShopId(shop3.getId());
     order15.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order15);
     Order order16 = new Order();
-    order16.setCardId(testOtherCardId);
-    order16.setPrice(testOrder4Price);
+    order16.setCardId(TEST_CARD_ID);
+    order16.setPrice(testOrder3Price);
     order16.setProductId(product6.getId());
-    order16.setUsed(true);
+    order16.setUsed(false);
     order16.setCreatedAt(testDate7);
     order16.setShopId(shop3.getId());
     order16.setOrderId(TEST_ORDER_ID);
-    mongoTemplate.save(order16);
+    order16 = mongoTemplate.save(order16);
     Order order17 = new Order();
     order17.setCardId(testOtherCardId);
     order17.setPrice(testOrder4Price);
@@ -946,20 +988,47 @@ public class AggregationRepositoryTest {
     order38.setShopId(shop3.getId());
     order38.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order38);
+    Order order146 = new Order();
+    order146.setCardId(testOtherCardId);
+    order146.setPrice(testOrder4Price);
+    order146.setProductId(product10.getId());
+    order146.setUsed(true);
+    order146.setCreatedAt(testDate11);
+    order146.setShopId(shop3.getId());
+    order146.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order146);
+    Order order147 = new Order();
+    order147.setCardId(testOtherCardId);
+    order147.setPrice(testOrder4Price);
+    order147.setProductId(product10.getId());
+    order147.setUsed(true);
+    order147.setCreatedAt(testDate11);
+    order147.setShopId(shop3.getId());
+    order147.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order147);
+    Order order148 = new Order();
+    order148.setCardId(testOtherCardId);
+    order148.setPrice(testOrder4Price);
+    order148.setProductId(product10.getId());
+    order148.setUsed(true);
+    order148.setCreatedAt(testDate11);
+    order148.setShopId(shop3.getId());
+    order148.setOrderId(TEST_ORDER_ID);
+    mongoTemplate.save(order148);
     Order order39 = new Order();
-    order39.setCardId(testOtherCardId);
+    order39.setCardId(TEST_CARD_ID);
     order39.setPrice(testOrder4Price);
     order39.setProductId(product10.getId());
-    order39.setUsed(true);
+    order39.setUsed(false);
     order39.setCreatedAt(testDate11);
     order39.setShopId(shop3.getId());
     order39.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order39);
     Order order40 = new Order();
-    order40.setCardId(testOtherCardId);
+    order40.setCardId(TEST_CARD_ID);
     order40.setPrice(testOrder4Price);
     order40.setProductId(product10.getId());
-    order40.setUsed(true);
+    order40.setUsed(false);
     order40.setCreatedAt(testDate11);
     order40.setShopId(shop3.getId());
     order40.setOrderId(TEST_ORDER_ID);
@@ -1010,10 +1079,10 @@ public class AggregationRepositoryTest {
     order45.setOrderId(TEST_ORDER_ID);
     mongoTemplate.save(order45);
     Order order46 = new Order();
-    order46.setCardId(testOtherCardId);
+    order46.setCardId(TEST_CARD_ID);
     order46.setPrice(testOrder4Price);
     order46.setProductId(product10.getId());
-    order46.setUsed(true);
+    order46.setUsed(false);
     order46.setCreatedAt(testDate11);
     order46.setShopId(shop3.getId());
     order46.setOrderId(TEST_ORDER_ID);
@@ -2030,6 +2099,30 @@ public class AggregationRepositoryTest {
     productDTO17.setProductImageUrl(product17.getImageUrl());
     productDTO17.setStartAtPromotion(null);
     productDTO17.setExpiredAtPromotion(null);
+    productAtCardDTO1 = new ProductAtCardDTO();
+    productAtCardDTO1.setCount(testCount1);
+    productAtCardDTO1.setPrice(testOrder4Price);
+    productAtCardDTO1.setProductName(product10.getName());
+    productAtCardDTO1.setProductImageUrl(product10.getImageUrl());
+    productAtCardDTO1.setDescription(product10.getDescription());
+    productAtCardDTO1.setShopImageUrl(shop3.getImageUrl());
+    productAtCardDTO1.setShopName(shop3.getName());
+    productAtCardDTO2 = new ProductAtCardDTO();
+    productAtCardDTO2.setCount(testCount2);
+    productAtCardDTO2.setPrice(testOrder3Price);
+    productAtCardDTO2.setProductName(product6.getName());
+    productAtCardDTO2.setProductImageUrl(product6.getImageUrl());
+    productAtCardDTO2.setDescription(product6.getDescription());
+    productAtCardDTO2.setShopImageUrl(shop3.getImageUrl());
+    productAtCardDTO2.setShopName(shop3.getName());
+    productAtCardDTO3 = new ProductAtCardDTO();
+    productAtCardDTO3.setCount(testCount3);
+    productAtCardDTO3.setPrice(testOrder1Price);
+    productAtCardDTO3.setProductName(this.product1.getName());
+    productAtCardDTO3.setProductImageUrl(this.product1.getImageUrl());
+    productAtCardDTO3.setDescription(this.product1.getDescription());
+    productAtCardDTO3.setShopImageUrl(shop1.getImageUrl());
+    productAtCardDTO3.setShopName(shop1.getName());
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
@@ -2047,85 +2140,122 @@ public class AggregationRepositoryTest {
     shopRepository.deleteAll();
     categoryRepository.deleteAll();
     reservedProductsRepository.deleteAll();
+    orderRepository.deleteAll();
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO15, productDTO14, productDTO1, productDTO3));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO15, productDTO14, productDTO1, productDTO3),
-        aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsAscendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenCountFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO3, productDTO1, productDTO14, productDTO15));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO3, productDTO1, productDTO14, productDTO15),
-        aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, false, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, COUNT_FIELD, false, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenDateFieldAndIsDescendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenDateFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO14, productDTO15, productDTO1, productDTO3));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO14, productDTO15, productDTO1, productDTO3),
-        aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, true, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, true, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenDateFieldAndIsAscendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenDateFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO3, productDTO1, productDTO15, productDTO14));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO3, productDTO1, productDTO15, productDTO14),
-        aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, false, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, DATE_FIELD, false, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsDescendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenPriceFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO3, productDTO1, productDTO14, productDTO15));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO3, productDTO1, productDTO14, productDTO15),
-        aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, true, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, true, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenPriceFieldAndIsAscendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenPriceFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO15, productDTO14, productDTO1, productDTO3));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO15, productDTO14, productDTO1, productDTO3),
-        aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, false, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, PRICE_FIELD, false, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenAddedFieldAndIsDescendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenAddedFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO14, productDTO15, productDTO3, productDTO1));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO14, productDTO15, productDTO3, productDTO1),
-        aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, true, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, true, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenAddedFieldAndIsAscendingWithoutText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenAddedFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO1, productDTO3, productDTO15, productDTO14));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO1, productDTO3, productDTO15, productDTO14),
-        aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, false, "", "", ""));
+        page,
+        aggregationRepository.getProducts(TEST_PHONE, 0, ADDED_FIELD, false, "", "", "", false));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithText() {
+      shouldReturnPageOfProductDTOAtGetProductsOwnerWhenCountFieldAndIsDescendingWithText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO1, productDTO3));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO1, productDTO3),
+        page,
         aggregationRepository.getProducts(
-            TEST_PHONE, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME, "", ""));
+            TEST_PHONE, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME, "", "", false));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutText() {
+    PageProductsDTO expectedPage = new PageProductsDTO();
+    expectedPage.setProducts(
         List.of(
             productDTO17,
             productDTO15,
@@ -2138,14 +2268,20 @@ public class AggregationRepositoryTest {
             productDTO7,
             productDTO5,
             productDTO1,
-            productDTO4),
-        aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, "", "", ""));
+            productDTO4));
+    expectedPage.setMaxPage(2);
+
+    PageProductsDTO page =
+        aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, "", "", "", true);
+    assertEquals(expectedPage.getMaxPage(), page.getMaxPage());
+    List<ProductDTO> products = page.getProducts();
+    assertTrue(products.containsAll(expectedPage.getProducts()));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsAscendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenCountFieldAndIsAscendingWithoutText() {
+    PageProductsDTO expectedPage = new PageProductsDTO();
+    expectedPage.setProducts(
         List.of(
             productDTO2,
             productDTO4,
@@ -2158,14 +2294,20 @@ public class AggregationRepositoryTest {
             productDTO11,
             productDTO13,
             productDTO14,
-            productDTO15),
-        aggregationRepository.getProducts(null, 0, COUNT_FIELD, false, "", "", ""));
+            productDTO15));
+    expectedPage.setMaxPage(2);
+
+    PageProductsDTO page =
+        aggregationRepository.getProducts(null, 0, COUNT_FIELD, false, "", "", "", true);
+    assertEquals(expectedPage.getMaxPage(), page.getMaxPage());
+    List<ProductDTO> products = page.getProducts();
+    assertTrue(products.containsAll(expectedPage.getProducts()));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenDateFieldAndIsDescendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenDateFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO13,
             productDTO14,
@@ -2178,13 +2320,17 @@ public class AggregationRepositoryTest {
             productDTO5,
             productDTO4,
             productDTO2,
-            productDTO1),
-        aggregationRepository.getProducts(null, 0, DATE_FIELD, true, "", "", ""));
+            productDTO1));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, DATE_FIELD, true, "", "", "", true));
   }
 
   @Test
-  public void shouldReturnListOfProductGetDTOAtGetProductsWhenDateFieldAndIsAscendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenDateFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO17,
             productDTO1,
@@ -2197,14 +2343,17 @@ public class AggregationRepositoryTest {
             productDTO11,
             productDTO10,
             productDTO15,
-            productDTO14),
-        aggregationRepository.getProducts(null, 0, DATE_FIELD, false, "", "", ""));
+            productDTO14));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, DATE_FIELD, false, "", "", "", true));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsDescendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenPriceFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO2,
             productDTO1,
@@ -2217,14 +2366,17 @@ public class AggregationRepositoryTest {
             productDTO9,
             productDTO8,
             productDTO5,
-            productDTO4),
-        aggregationRepository.getProducts(null, 0, PRICE_FIELD, true, "", "", ""));
+            productDTO4));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, PRICE_FIELD, true, "", "", "", true));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenPriceFieldAndIsAscendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenPriceFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO7,
             productDTO4,
@@ -2237,14 +2389,17 @@ public class AggregationRepositoryTest {
             productDTO17,
             productDTO10,
             productDTO14,
-            productDTO1),
-        aggregationRepository.getProducts(null, 0, PRICE_FIELD, false, "", "", ""));
+            productDTO1));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, PRICE_FIELD, false, "", "", "", true));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenAddedFieldAndIsDescendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenAddedFieldAndIsDescendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO17,
             productDTO14,
@@ -2257,14 +2412,17 @@ public class AggregationRepositoryTest {
             productDTO7,
             productDTO5,
             productDTO4,
-            productDTO2),
-        aggregationRepository.getProducts(null, 0, ADDED_FIELD, true, "", "", ""));
+            productDTO2));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, ADDED_FIELD, true, "", "", "", true));
   }
 
   @Test
-  public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenAddedFieldAndIsAscendingWithoutText() {
-    assertEquals(
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenAddedFieldAndIsAscendingWithoutText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(
         List.of(
             productDTO1,
             productDTO2,
@@ -2277,71 +2435,49 @@ public class AggregationRepositoryTest {
             productDTO13,
             productDTO11,
             productDTO15,
-            productDTO14),
-        aggregationRepository.getProducts(null, 0, ADDED_FIELD, false, "", "", ""));
+            productDTO14));
+    page.setMaxPage(2);
+
+    assertEquals(
+        page, aggregationRepository.getProducts(null, 0, ADDED_FIELD, false, "", "", "", true));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutTextWithCategory() {
+      shouldReturnPageOfProductDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutTextWithCategory() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO13, productDTO10, productDTO9, productDTO1, productDTO2));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO13, productDTO10, productDTO9, productDTO1, productDTO2),
-        aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, "", TEST_CATEGORY_NAME, ""));
+        page,
+        aggregationRepository.getProducts(
+            null, 0, COUNT_FIELD, true, "", TEST_CATEGORY_NAME, "", true));
   }
 
   @Test
   public void
-      shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutTextWithShopName() {
+      shouldReturnPageOfProductDTOAtGetProductsWhenCountFieldAndIsDescendingWithoutTextWithShopName() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO15, productDTO14, productDTO1));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO15, productDTO14, productDTO1),
-        aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, "", "", TEST_SHOP_NAME));
+        page,
+        aggregationRepository.getProducts(
+            null, 0, COUNT_FIELD, true, "", "", TEST_SHOP_NAME, true));
   }
 
   @Test
-  public void shouldReturnListOfProductGetDTOAtGetProductsWhenCountFieldAndIsDescendingWithText() {
+  public void shouldReturnPageOfProductDTOAtGetProductsWhenCountFieldAndIsDescendingWithText() {
+    PageProductsDTO page = new PageProductsDTO();
+    page.setProducts(List.of(productDTO17, productDTO7, productDTO5, productDTO1));
+    page.setMaxPage(1);
+
     assertEquals(
-        List.of(productDTO17, productDTO7, productDTO5, productDTO1),
-        aggregationRepository.getProducts(null, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME, "", ""));
-  }
-
-  @Test
-  public void shouldReturn1AtGetMaxPageWhenCount4ProductsAtGetOwnerProducts() {
-    assertEquals(1, aggregationRepository.getMaxPage("", TEST_PHONE, "", ""));
-  }
-
-  @Test
-  public void shouldReturn0AtGetMaxPageWhenCount0ProductsAtGetOwnerProducts() {
-    assertEquals(0, aggregationRepository.getMaxPage("", "+48121347392923", "", ""));
-  }
-
-  @Test
-  public void shouldReturn2AtGetMaxPageWhenCount13ProductsAtGetOwnerProducts() {
-    assertEquals(2, aggregationRepository.getMaxPage("", TEST_PHONE3, "", ""));
-  }
-
-  @Test
-  public void shouldReturn1AtGetMaxPageWhenCount4ProductsAtGetOwnerProductsAndText() {
-    assertEquals(1, aggregationRepository.getMaxPage(TEST_PRODUCT_NAME, TEST_PHONE3, "", ""));
-  }
-
-  @Test
-  public void shouldReturn2AtGetMaxPageWhenCount13ProductsAtGetAllProducts() {
-    assertEquals(2, aggregationRepository.getMaxPage("", null, "", ""));
-  }
-
-  @Test
-  public void shouldReturn1AtGetMaxPageWhenCount5ProductsAtGetAllProductsAndCategory() {
-    assertEquals(1, aggregationRepository.getMaxPage("", null, TEST_CATEGORY_NAME, ""));
-  }
-
-  @Test
-  public void shouldReturn1AtGetMaxPageWhenCount3ProductsAtGetAllProductsAndShopName() {
-    assertEquals(1, aggregationRepository.getMaxPage("", null, "", TEST_SHOP_NAME));
-  }
-
-  @Test
-  public void shouldReturn2AtGetMaxPageWhenCount4ProductsAtGetAllProductsAndText() {
-    assertEquals(1, aggregationRepository.getMaxPage(TEST_PRODUCT_NAME, null, "", ""));
+        page,
+        aggregationRepository.getProducts(
+            null, 0, COUNT_FIELD, true, TEST_PRODUCT_NAME, "", "", true));
   }
 
   @Test
@@ -2451,5 +2587,180 @@ public class AggregationRepositoryTest {
             new ObjectId()));
     assertEquals(
         countBeforeUpdate + countOfNewReservedProducts, reservedProductsRepository.count());
+  }
+
+  @Test
+  public void
+      shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenCountParamAndDescending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO1);
+    products.add(productAtCardDTO2);
+    products.add(productAtCardDTO3);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, true, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenCountParamAndAscending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO3);
+    products.add(productAtCardDTO2);
+    products.add(productAtCardDTO1);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, false, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenDateParamAndDescending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO1);
+    products.add(productAtCardDTO2);
+    products.add(productAtCardDTO3);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, DATE_FIELD, true, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenDateParamAndAscending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO3);
+    products.add(productAtCardDTO2);
+    products.add(productAtCardDTO1);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, DATE_FIELD, false, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void
+      shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenPriceParamAndDescending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO2);
+    products.add(productAtCardDTO3);
+    products.add(productAtCardDTO1);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, PRICE_FIELD, true, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenPriceParamAndAscending() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO1);
+    products.add(productAtCardDTO3);
+    products.add(productAtCardDTO2);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, PRICE_FIELD, false, "", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenTextNotEmpty() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO1);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, true, "product10", "", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenCategoryNotEmpty() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO1);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, true, "", "other", "", TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenShopNameNotEmpty() {
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    PageOwnerProductsDTO page = new PageOwnerProductsDTO();
+    products.add(productAtCardDTO3);
+    page.setMaxPage(1);
+    page.setProducts(products);
+
+    assertEquals(
+        page,
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, true, "", "", TEST_SHOP_NAME, TEST_CARD_ID.toString()));
+  }
+
+  @Test
+  public void
+      shouldReturnPageOwnerProductsDTOAtGetProductsByOwnerCardWhenProductsHasMoreThanOnePrice() {
+    final int testPrice1 = 123;
+    final int testPrice2 = 1200;
+    List<ProductAtCardDTO> products = new ArrayList<>();
+    ProductAtCardDTO product1 = new ProductAtCardDTO();
+    product1.setCount(1);
+    product1.setPrice(testPrice2);
+    product1.setProductName(this.product1.getName());
+    product1.setProductImageUrl(this.product1.getImageUrl());
+    product1.setDescription(this.product1.getDescription());
+    product1.setShopImageUrl(shop1.getImageUrl());
+    product1.setShopName(shop1.getName());
+    ProductAtCardDTO product2 = new ProductAtCardDTO();
+    product2.setCount(1);
+    product2.setPrice(testPrice1);
+    product2.setProductName(this.product1.getName());
+    product2.setProductImageUrl(this.product1.getImageUrl());
+    product2.setDescription(this.product1.getDescription());
+    product2.setShopImageUrl(shop1.getImageUrl());
+    product2.setShopName(shop1.getName());
+    PageOwnerProductsDTO expectedPage = new PageOwnerProductsDTO();
+    products.add(product1);
+    products.add(product2);
+    expectedPage.setMaxPage(1);
+    expectedPage.setProducts(products);
+
+    PageOwnerProductsDTO page =
+        aggregationRepository.getProductsByOwnerCard(
+            0, COUNT_FIELD, true, "", "", "", TEST_OTHER_CARD_ID.toString());
+    assertEquals(expectedPage.getMaxPage(), page.getMaxPage());
+    assertTrue(expectedPage.getProducts().containsAll(page.getProducts()));
   }
 }

@@ -22,6 +22,7 @@ import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -311,11 +312,13 @@ public class ProductControllerTest {
     productDTO2.setStartAtPromotion(null);
     productDTO2.setExpiredAtPromotion(null);
     testProducts = List.of(productDTO1, productDTO2);
+    PageProductsDTO pageProductsDTO = new PageProductsDTO();
+    pageProductsDTO.setMaxPage(1);
+    pageProductsDTO.setProducts(testProducts);
     testPages = List.of(1);
 
-    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", ""))
-        .thenReturn(testProducts);
-    when(productService.getMaxPage("", TEST_PHONE, "", "")).thenReturn(1);
+    when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", "", false))
+        .thenReturn(pageProductsDTO);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
   }
 

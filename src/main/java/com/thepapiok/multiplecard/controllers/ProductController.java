@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
+import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
@@ -94,15 +95,16 @@ public class ProductController {
       }
     }
     if (id == null) {
-      List<ProductDTO> products =
-          productService.getProducts(phone, page, field, isDescending, text, "", "");
-      maxPage = productService.getMaxPage(text, phone, "", "");
+      PageProductsDTO currentPage =
+          productService.getProducts(phone, page, field, isDescending, text, "", "", false);
+      List<ProductDTO> allProducts = currentPage.getProducts();
+      maxPage = currentPage.getMaxPage();
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
       model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("pageSelected", page + 1);
-      model.addAttribute("products", products);
-      model.addAttribute("productsEmpty", products.size() == 0);
+      model.addAttribute("products", allProducts);
+      model.addAttribute("productsEmpty", allProducts.size() == 0);
       model.addAttribute("maxPage", maxPage);
       return "productsPage";
     } else {

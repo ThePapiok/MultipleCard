@@ -10,7 +10,7 @@ function checkLanguage() {
 }
 
 function setLanguage() {
-    const urlParams = new URLSearchParams(window.location.search);
+    let urlParams = new URLSearchParams(window.location.search);
     const is = sessionStorage.getItem("isEn");
     if (is != null) {
         if (is === 'true') {

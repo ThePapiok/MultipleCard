@@ -356,4 +356,7 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
                             """
       })
   boolean existsByPointsOtherThanPhone(Address address, String phone);
+
+  @Query(value = "{'_id': ?0}", fields = "{'_id': 0, 'phone': 1}")
+  Account findPhoneById(ObjectId id);
 }

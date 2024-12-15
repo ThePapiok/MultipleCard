@@ -1,4 +1,4 @@
-function setParams(url, type, isBuy) {
+function setParams(url, type) {
     const value = parseInt(document.getElementById("searchSelect").value);
     const text = document.getElementById("searchInput").value;
     let sort = null;
@@ -17,12 +17,6 @@ function setParams(url, type, isBuy) {
             break;
         case 5:
             sort = "field=price&isDescending=false";
-            break;
-        case 6:
-            sort = "field=added";
-            break;
-        case 7:
-            sort = "field=added&isDescending=false";
             break;
     }
     if (sort != null) {
@@ -58,17 +52,11 @@ function setParams(url, type, isBuy) {
             }
         }
     }
-    if (isBuy) {
-        if (url.indexOf("?") === -1) {
-            url += ("?buy=true");
-        } else {
-            url += ("&buy=true");
-        }
-    }
     window.location = url;
 }
 
-function atStart(page, isDescending, field, maxPage, type) {
+
+function atStart(page, isDescending, field, maxPage) {
     checkLanguage();
     let selectedPage = document.getElementById("page" + page);
     if (selectedPage != null) {
@@ -83,9 +71,6 @@ function atStart(page, isDescending, field, maxPage, type) {
             case "price":
                 searchSelect.value = 4;
                 break;
-            case "added":
-                searchSelect.value = 6;
-                break;
         }
     } else {
         switch (field) {
@@ -97,9 +82,6 @@ function atStart(page, isDescending, field, maxPage, type) {
                 break;
             case "price":
                 searchSelect.value = 5;
-                break;
-            case "added":
-                searchSelect.value = 7;
                 break;
         }
     }

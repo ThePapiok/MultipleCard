@@ -1,38 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MultipleCard</title>
     <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/results.css">
     <link rel="stylesheet" href="/css/products.css">
     <link rel="stylesheet" href="/css/shopInfo.css">
     <link rel="stylesheet" href="/css/searchBar.css">
-    <link rel="stylesheet" href="/css/buyProductsPage.css">
+    <link rel="stylesheet" href="/css/ownerProductsPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
 </head>
-<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}', false)|">
+<body th:attr="onload=|atStart('${pageSelected}', '${isDescending}', '${field}', '${maxPage}')|">
 <script src="/js/page.js"></script>
 <script src="/js/results.js"></script>
-<script src="/js/products.js"></script>
-<script src="/js/productsId.js"></script>
 <script src="/js/shopInfo.js"></script>
 <script src="/js/searchBar.js"></script>
-<script src="/js/buyProductsPage.js"></script>
+<script src="/js/ownerProductsPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
-    <a th:href="@{/logout}" class="h1 headerButton" sec:authorize="isAuthenticated()">
+    <a th:href="@{/logout}" class="h1 headerButton">
         <button class="redButton" th:text="#{button.logout}"></button>
     </a>
 </div>
 <div id="body">
-    <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <p class="title" th:text="#{products.text}"></p>
-    <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
-    <div th:if="${cardExists} == true">
+    <div>
         <div id="searchBar">
             <input type="text" id="searchInput" th:title="#{search.text}" th:placeholder="#{search.text}"
                    th:value="${param.text}">
@@ -58,39 +55,20 @@
                 <option th:text="#{select_option.oldest}" value="3"></option>
                 <option th:text="#{select_option.most_expensive}" value="4"></option>
                 <option th:text="#{select_option.cheapest}" value="5"></option>
-                <option th:text="#{select_option.latest_add}" value="6"></option>
-                <option th:text="#{select_option.oldest_add}" value="7"></option>
             </select>
-            <div id="searchButton" th:attr="onclick=|setParams('/cards?id=${id}', true, ${isBuy})|">
+            <div id="searchButton" th:attr="onclick=|setParams('/cards?products&id=${id}', true)|">
                 <img id="searchImage" src="/images/search.png" alt="search">
             </div>
-            <div id="basket">
-                <span id="basketQuantity" data-empty="true">0</span>
-                <a class="basketUrl" id="emptyBasket">
-                    <img class="basketImage" src="/images/basket_empty.png" alt="basket">
-                </a>
-                <a class="basketUrl" id="notEmptyBasket" th:attr="onclick=|goToBasket('${id}')|">
-                    <img class="basketImage" src="/images/basket.png" alt="basket">
-                </a>
-            </div>
         </div>
-        <p id="error" th:text="${errorMessage}"></p>
-        <p id="success" th:text="${successMessage}"></p>
         <div id="allResults">
             <div id="results">
-                <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}"
-                     th:id="'product' + ${product.productId}">
+                <div class="result" th:if="${productsEmpty} != true" th:each="product : ${products}">
                     <div class="result-vertical">
                         <div class="result-horizontal notImageContainer">
                             <span class="name" th:text="${product.productName}"></span>
-                            <span class="quantity">0</span>
-                            <a class="resultIcons"
-                               th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
-                                <img src="/images/plus.png" alt="add">
-                            </a>
-                            <a class="resultIcons"
-                               th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
-                                <img src="/images/minus.png" alt="minus">
+                            <span class="quantity" th:text="${product.count}"></span>
+                            <a class="cart">
+                                <img src="/images/shopping_cart.png" alt="cart">
                             </a>
                         </div>
                         <div class="result-horizontal imageContainer">
@@ -104,29 +82,7 @@
                             </div>
                         </div>
                         <div class="result-horizontal notImageContainer">
-                            <span hidden class="realPrice" th:text="${product.price}/100 + 'zł'"></span>
-                            <span class="price fullPrice" th:text="${product.price}/100 + 'zł'"
-                                  th:if="${product.startAtPromotion} == null"></span>
-                            <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
-                                <div class="result-horizontal">
-                                    <div class="result-vertical promotionInfo">
-                                        <div class="date">
-                                            <span th:text="${product.startAtPromotion}"></span>
-                                            <span>-</span>
-                                            <span th:text="${product.expiredAtPromotion}"></span>
-                                        </div>
-                                        <span class="productsLeft" th:if="${product.quantityPromotion} != null"
-                                              th:data-actual-value="${product.quantityPromotion}"
-                                              th:data-start-value="${product.quantityPromotion}"
-                                              th:id="'count' + ${product.productId}"
-                                              th:text="${product.quantityPromotion} + ' ' + #{promotion.left_products}"></span>
-                                    </div>
-                                    <div class="promotionPrice">
-                                        <span class="price promotion" th:text="${product.price}/100"></span>
-                                        <span class="price" th:text="${product.newPricePromotion}/100 + 'zł'"></span>
-                                    </div>
-                                </div>
-                            </div>
+                            <span class="price fullPrice" th:text="${product.price}/100 + 'zł'"></span>
                         </div>
                     </div>
                 </div>
