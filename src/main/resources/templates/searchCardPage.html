@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/searchCardPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/searchCardPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <p class="title" th:text="#{searchCardPage.title.text}"></p>
+    <form th:action="@{/check_credentials}" id="form" method="post" th:object="${searchCard}">
+        <div class="block-horizontally">
+            <label id="CardUrl">
+                <label class="inputs">
+                    <input th:field="*{cardId}" type="text"
+                           th:placeholder="#{searchCardPage.card_scan.text}" required
+                           onmouseenter="showValidation(this, 'CardUrl')"
+                           onmouseleave="hideValidation('CardUrl')">
+                    <img id="close1" src="/images/close.png" alt="close">
+                    <img hidden id="check1" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{searchCardPage.card_id.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.prefix_length_is} + ' 24'"></li>
+                </ul>
+            </div>
+        </div>
+        <div class="block-horizontally">
+            <label id="CardName">
+                <label class="inputs">
+                    <input type="text" th:field="*{cardName}"
+                           th:placeholder="#{name_card.text}" required
+                           oninput="checkCardName(this)"
+                           minlength="4" maxlength="9" onmouseenter="showValidation(this, 'CardName')"
+                           onmouseleave="hideValidation('CardName')">
+                    <img id="close2" src="/images/close.png" alt="close">
+                    <img hidden id="check2" src="/images/check.png" alt="check">
+                </label>
+            </label>
+            <div class="validation">
+                <span th:text="#{name_card.text} + ' ' + #{validation.text}"></span>
+                <ul>
+                    <li th:text="#{validation.prefix_length} + ' 4 ' + #{validation.suffix_length} + ' 9'"></li>
+                    <li th:text="#{validation.only_letters}"></li>
+                    <li th:text="#{validation.only_digits}"></li>
+                </ul>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <a>
+            <button type="button" class="grayButton" id="searchCardButton"
+                    th:text="#{searchCardPage.title.text}"></button>
+        </a>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

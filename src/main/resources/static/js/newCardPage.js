@@ -2,7 +2,6 @@ let ok = [false, false, false, false];
 let previous = [false, false, false, false];
 const buttonId = "orderButton";
 const regPin = new RegExp("^[0-9]*$");
-const regCardName = new RegExp("^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*$");
 
 function checkCardName(e) {
     const input = e.value;

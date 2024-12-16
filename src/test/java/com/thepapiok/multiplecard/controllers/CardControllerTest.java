@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,6 +19,7 @@ import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
+import com.thepapiok.multiplecard.dto.SearchCardDTO;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.PayUService;
@@ -27,6 +29,7 @@ import com.thepapiok.multiplecard.services.ResultService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,11 +47,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class CardControllerTest {
+  private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
   private static final String TEST_ENCODE_CODE = "sadfas123sdfcvcxfdf";
   private static final String TEST_CODE = "111 222";
   private static final String TEST_PIN = "1234";
   private static final String TEST_NAME = "test";
   private static final String ID_PARAM = "id";
+  private static final String PIN_PARAM = "pin";
+  private static final String CARD_ID_PARAM = "cardId";
   private static final String IS_BUY_PARAM = "isBuy";
   private static final String FIELD_PARAM = "field";
   private static final String IS_DESCENDING_PARAM = "isDescending";
@@ -57,12 +63,16 @@ public class CardControllerTest {
   private static final String TEST_PHONE = "12312312312323";
   private static final String TEST_CARD_ID = "523956189032345658901294";
   private static final String PHONE_PARAM = "phone";
+  private static final String STEP_PARAM = "step";
   private static final String CARD_PARAM = "card";
   private static final String ERROR_PARAM = "error";
   private static final String NEW_CARD_URL = "/new_card";
   private static final String BUY_CARD_URL = "/buy_card";
+  private static final String CHECK_PIN_URL = "/check_pin";
+  private static final String ORDERS_ERROR_URL = "/orders?error";
   private static final String PROFILE_ERROR_URL = "/profile?error";
   private static final String CARDS_URL = "/cards";
+  private static final String CHECK_CREDENTIALS_URL = "/check_credentials";
   private static final String BLOCK_CARD_URL = "/block_card";
   private static final String NEW_CARD_ERROR_URL = "/new_card?error";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
@@ -86,6 +96,7 @@ public class CardControllerTest {
   private static final String QUOTATION_MARK_WITH_COMMA = "\",";
   private static final String TEST_ENCRYPTED_PIN = "fasasd2134132faas";
   private static final String TEST_CARD_NAME = "cardName";
+  private static final String CARD_NAME_PARAM = "cardName";
   private static final String PAYU_STATUS_COMPLETED = "COMPLETED";
   private static final String TEST_LANGUAGE = "pl";
   private static final String TEST_EMAIL = "multiplecard@gmail.com";
@@ -341,7 +352,7 @@ public class CardControllerTest {
     MockHttpSession httpSession = setSession(CODE_SMS_ORDER_PARAM);
 
     performPostAtOrderCard(httpSession, name, pin, pin, "123sada12", NEW_CARD_ERROR_URL);
-    assertEquals("Podane dane są niepoprawne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
     assertEquals(expectedOrder, httpSession.getAttribute(ORDER_PARAM));
   }
@@ -448,7 +459,7 @@ public class CardControllerTest {
                 .session(httpSession)
                 .locale(Locale.getDefault())
                 .param("name", name)
-                .param("pin", pin)
+                .param(PIN_PARAM, pin)
                 .param("retypedPin", retypedPin)
                 .param("code", code))
         .andExpect(redirectedUrl(redirectUrl));
@@ -497,7 +508,7 @@ public class CardControllerTest {
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
     when(cardService.blockCard(TEST_PHONE)).thenReturn(true);
-    when(cardService.isBlocked(TEST_PHONE)).thenReturn(true);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(false);
 
     mockMvc
         .perform(
@@ -538,7 +549,7 @@ public class CardControllerTest {
                 .session(httpSession)
                 .param(VERIFICATION_NUMBER_SMS_PARAM, TEST_CODE + "s"))
         .andExpect(redirectedUrl("/block_card?error"));
-    assertEquals("Podane dane są niepoprawne", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
     assertEquals(1, httpSession.getAttribute(ATTEMPTS_PARAM));
   }
 
@@ -565,7 +576,7 @@ public class CardControllerTest {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(cardService.isBlocked(TEST_PHONE)).thenReturn(false);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(true);
 
     mockMvc
         .perform(
@@ -583,7 +594,7 @@ public class CardControllerTest {
     MockHttpSession httpSession = setSession(CODE_SMS_BLOCK_PARAM);
 
     when(passwordEncoder.matches(TEST_CODE, TEST_ENCODE_CODE)).thenReturn(true);
-    when(cardService.isBlocked(TEST_PHONE)).thenReturn(true);
+    when(cardService.isBlocked(TEST_PHONE)).thenReturn(false);
     when(cardService.blockCard(TEST_PHONE)).thenReturn(false);
 
     mockMvc
@@ -836,5 +847,132 @@ public class CardControllerTest {
         .perform(get("/cart"))
         .andExpect(model().attribute(PAGE_SELECTED_PARAM, 0))
         .andExpect(view().name("cartPage"));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldRedirectToOrdersErrorAtSearchCardWhenHasErrorAtValidation() throws Exception {
+    SearchCardDTO searchCardDTO = new SearchCardDTO();
+    searchCardDTO.setCardName("3123fs!a");
+    searchCardDTO.setCardId("fsdafdzs12312312faffsad");
+    MockHttpSession httpSession = new MockHttpSession();
+
+    mockMvc
+        .perform(
+            post(CHECK_CREDENTIALS_URL)
+                .param(CARD_NAME_PARAM, searchCardDTO.getCardName())
+                .param(CARD_ID_PARAM, searchCardDTO.getCardId())
+                .session(httpSession))
+        .andExpect(redirectedUrl(ORDERS_ERROR_URL));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldRedirectToOrdersErrorAtSearchCardWhenCredentialsAreInvalid() throws Exception {
+    SearchCardDTO searchCardDTO = new SearchCardDTO();
+    searchCardDTO.setCardName("abcde");
+    searchCardDTO.setCardId(new ObjectId().toString());
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(cardService.checkIdAndNameIsValid(searchCardDTO)).thenReturn(false);
+
+    mockMvc
+        .perform(
+            post(CHECK_CREDENTIALS_URL)
+                .param(CARD_NAME_PARAM, searchCardDTO.getCardName())
+                .param(CARD_ID_PARAM, searchCardDTO.getCardId())
+                .session(httpSession))
+        .andExpect(redirectedUrl(ORDERS_ERROR_URL));
+    assertEquals("Złe id lub nazwa karty", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldRedirectToOrdersAtSearchCardWhenEverythingIsOk() throws Exception {
+    SearchCardDTO searchCardDTO = new SearchCardDTO();
+    searchCardDTO.setCardName("abcde");
+    searchCardDTO.setCardId(new ObjectId().toString());
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(cardService.checkIdAndNameIsValid(searchCardDTO)).thenReturn(true);
+
+    mockMvc
+        .perform(
+            post(CHECK_CREDENTIALS_URL)
+                .param(CARD_NAME_PARAM, searchCardDTO.getCardName())
+                .param(CARD_ID_PARAM, searchCardDTO.getCardId())
+                .session(httpSession))
+        .andExpect(redirectedUrl("/orders"));
+    assertEquals(searchCardDTO.getCardId(), httpSession.getAttribute(CARD_ID_PARAM));
+    assertEquals(1, httpSession.getAttribute(STEP_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldReturnOrdersErrorAtCheckPinWhenErrorAtValidation() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+
+    mockMvc
+        .perform(post(CHECK_PIN_URL).session(httpSession).param(PIN_PARAM, "asbs"))
+        .andExpect(content().string(ORDERS_ERROR_URL));
+    assertEquals(ERROR_VALIDATION_MESSAGE, httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldReturnOrdersErrorAtCheckPinWhenCardIsBlocked() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CARD_ID_PARAM, TEST_CARD_ID);
+
+    when(cardService.isBlocked(new ObjectId(TEST_CARD_ID))).thenReturn(true);
+
+    mockMvc
+        .perform(post(CHECK_PIN_URL).session(httpSession).param(PIN_PARAM, TEST_PIN))
+        .andExpect(content().string(ORDERS_ERROR_URL));
+    assertEquals("Karta jest zablokowana", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldReturnOrdersErrorAtCheckPinWhenPinIsBad() throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CARD_ID_PARAM, TEST_CARD_ID);
+
+    when(cardService.isBlocked(new ObjectId(TEST_CARD_ID))).thenReturn(false);
+    when(cardService.checkPin(TEST_CARD_ID, TEST_PIN)).thenReturn(false);
+
+    mockMvc
+        .perform(post(CHECK_PIN_URL).session(httpSession).param(PIN_PARAM, TEST_PIN))
+        .andExpect(content().string(ORDERS_ERROR_URL));
+    assertEquals("Niepoprawny kod PIN", httpSession.getAttribute(ERROR_MESSAGE_PARAM));
+  }
+
+  @Test
+  @WithMockUser(roles = "SHOP")
+  public void shouldReturnOrdersAtCheckPinWhenEverythingOk() throws Exception {
+    final int testStep = 2;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CARD_ID_PARAM, TEST_CARD_ID);
+
+    when(cardService.isBlocked(new ObjectId(TEST_CARD_ID))).thenReturn(false);
+    when(cardService.checkPin(TEST_CARD_ID, TEST_PIN)).thenReturn(true);
+
+    mockMvc
+        .perform(post(CHECK_PIN_URL).session(httpSession).param(PIN_PARAM, TEST_PIN))
+        .andExpect(content().string("/orders"));
+    assertEquals(testStep, httpSession.getAttribute(STEP_PARAM));
+  }
+
+  @Test
+  public void shouldRedirectToLandingPageAtResetCardWhenEverythingOk() throws Exception {
+    final int testStep = 2;
+    MockHttpSession httpSession = new MockHttpSession();
+    httpSession.setAttribute(CARD_ID_PARAM, TEST_CARD_ID);
+    httpSession.setAttribute(STEP_PARAM, testStep);
+
+    mockMvc.perform(get("/reset_card").session(httpSession)).andExpect(redirectedUrl("/"));
+    assertNull(httpSession.getAttribute(CARD_ID_PARAM));
+    assertNull(httpSession.getAttribute(STEP_PARAM));
   }
 }

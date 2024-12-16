@@ -1,0 +1,93 @@
+@font-face {
+    font-family: "DS-Digi";
+    src: url('/fonts/DS-DIGI.TTF') format('truetype');
+}
+
+
+#form {
+    width: 60%;
+}
+
+#keyboard {
+    display: flex;
+    flex-wrap: wrap;
+    width: 400px;
+    height: 300px;
+    margin: 20px;
+}
+
+#pin {
+    width: 400px;
+    height: 100px;
+    margin-left: 20px;
+    font-size: 70px;
+    display: flex;
+    font-family: "DS-Digi", monospace;
+    border: 1px solid lightgray;
+    background-color: #F4F2F2;
+    justify-content: center;
+}
+
+.num {
+    position: relative;
+    width: 70px;
+}
+
+.underline {
+    position: absolute;
+    left: 0;
+}
+
+.char {
+    width: 100px;
+    height: 100px;
+    box-sizing: border-box;
+    border: 1px solid lightgray;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    display: flex;
+}
+
+.charNum {
+    background-color: #F4F2F2;
+    font-family: "DS-Digi", monospace;
+    font-size: 70px;
+}
+
+.charNum:hover {
+    background-color: #E8E6E6;
+}
+
+.charBad {
+    background-color: #4D4B46;
+}
+
+.charOk {
+    background-color: #A4FFA2;
+}
+
+.charOk:hover {
+    background-color: #97EB95;
+}
+
+#charDel {
+    background-color: #E56464;
+}
+
+#charDel:hover {
+    background-color: #D65E5E;
+}
+
+.imgChar {
+    top: auto;
+}
+
+#error {
+    margin-left: 5%;
+}
+
+#resetButton {
+    margin-left: 20%;
+}

@@ -9,6 +9,7 @@ import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
+import com.thepapiok.multiplecard.dto.SearchCardDTO;
 import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.PayUService;
@@ -42,12 +43,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class CardController {
+  private static final String ERROR_VALIDATION_MESSAGE = "validation.incorrect_data";
   private static final String ATTEMPTS_PARAM = "attempts";
   private static final String CODE_SMS_ORDER_PARAM = "codeSmsOrder";
   private static final String CODE_SMS_BLOCK_PARAM = "codeSmsBlock";
   private static final String ERROR_MESSAGE_PARAM = "errorMessage";
   private static final String REDIRECT_PROFILE_ERROR = "redirect:/profile?error";
   private static final String ORDER_PARAM = "order";
+  private static final String CARD_ID_PARAM = "cardId";
+  private static final String STEP_PARAM = "step";
   private static final String PRODUCTS_PARAM = "products";
   private static final String SUCCESS_MESSAGE = "successMessage";
   private final PasswordEncoder passwordEncoder;
@@ -219,11 +223,11 @@ public class CardController {
       authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       return REDIRECT_PROFILE_ERROR;
     } else if (!pattern.matcher(verificationNumberSms).matches()) {
-      return redirectErrorPage(httpSession, amount, "validation.incorrect_data", locale, null);
+      return redirectErrorPage(httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, null);
     } else if (!passwordEncoder.matches(
         verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_BLOCK_PARAM))) {
       return redirectErrorPage(httpSession, amount, "error.bad_sms_code", locale, null);
-    } else if (!cardService.isBlocked(phone)) {
+    } else if (cardService.isBlocked(phone)) {
       authenticationController.resetSession(httpSession, CODE_SMS_BLOCK_PARAM, ORDER_PARAM);
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM,
@@ -337,7 +341,7 @@ public class CardController {
       authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
       return REDIRECT_PROFILE_ERROR;
     } else if (bindingResult.hasErrors()) {
-      return redirectErrorPage(httpSession, amount, "validation.incorrect_data", locale, order);
+      return redirectErrorPage(httpSession, amount, ERROR_VALIDATION_MESSAGE, locale, order);
     } else if (!passwordEncoder.matches(
         order.getCode(), (String) httpSession.getAttribute(CODE_SMS_ORDER_PARAM))) {
       return redirectErrorPage(httpSession, amount, "error.bad_sms_code", locale, order);
@@ -362,5 +366,59 @@ public class CardController {
         SUCCESS_MESSAGE, messageSource.getMessage("orderCard.success.buy_new_card", null, locale));
     authenticationController.resetSession(httpSession, CODE_SMS_ORDER_PARAM, ORDER_PARAM);
     return "redirect:" + paymentUrl;
+  }
+
+  @PostMapping("/check_credentials")
+  public String searchCard(
+      @Valid @ModelAttribute SearchCardDTO searchCard,
+      BindingResult bindingResult,
+      HttpSession httpSession,
+      Locale locale) {
+    final int nextStep = 1;
+    if (bindingResult.hasErrors()) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
+      return "redirect:/orders?error";
+    } else if (!cardService.checkIdAndNameIsValid(searchCard)) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage("searchCard.error.bad_credentials", null, locale));
+      return "redirect:/orders?error";
+    }
+    httpSession.setAttribute(CARD_ID_PARAM, searchCard.getCardId());
+    httpSession.setAttribute(STEP_PARAM, nextStep);
+    return "redirect:/orders";
+  }
+
+  @PostMapping("/check_pin")
+  @ResponseBody
+  public String checkPin(@RequestParam String pin, HttpSession httpSession, Locale locale) {
+    final int nextStep = 2;
+    final int maxPinLength = 4;
+    final String ordersErrorUrl = "/orders?error";
+    String cardId = (String) httpSession.getAttribute(CARD_ID_PARAM);
+    if (!Pattern.compile("^[0-9]*$").matcher(pin).matches() || pin.length() != maxPinLength) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_VALIDATION_MESSAGE, null, locale));
+      return ordersErrorUrl;
+    } else if (cardService.isBlocked(new ObjectId(cardId))) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM,
+          messageSource.getMessage("checkPin.error.blocked_card", null, locale));
+      return ordersErrorUrl;
+    } else if (!cardService.checkPin(cardId, pin)) {
+      httpSession.setAttribute(
+          ERROR_MESSAGE_PARAM, messageSource.getMessage("checkPin.error.bad_pin", null, locale));
+      return ordersErrorUrl;
+    }
+    httpSession.setAttribute(STEP_PARAM, nextStep);
+    return "/orders";
+  }
+
+  @GetMapping("/reset_card")
+  public String resetCard(HttpSession httpSession) {
+    httpSession.removeAttribute(STEP_PARAM);
+    httpSession.removeAttribute(CARD_ID_PARAM);
+    return "redirect:/";
   }
 }
