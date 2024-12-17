@@ -91,3 +91,9 @@
 #resetButton {
     margin-left: 20%;
 }
+
+#pinpad {
+    position: relative;
+    left: 20%;
+    width: 400px;
+}

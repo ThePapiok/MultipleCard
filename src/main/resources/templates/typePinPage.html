@@ -23,41 +23,43 @@
 </div>
 <div id="body">
     <p class="title" th:text="#{typePinPage.title.text}"></p>
-    <div id="pin">
-        <div class="num" id="char1">
-            <span></span>
-            <span class="underline">_</span>
+    <div id="pinpad">
+        <div id="pin">
+            <div class="num" id="char1">
+                <span></span>
+                <span class="underline">_</span>
+            </div>
+            <div class="num" id="char2">
+                <span></span>
+                <span class="underline">_</span>
+            </div>
+            <div class="num" id="char3">
+                <span></span>
+                <span class="underline">_</span>
+            </div>
+            <div class="num" id="char4">
+                <span></span>
+                <span class="underline">_</span>
+            </div>
         </div>
-        <div class="num" id="char2">
-            <span></span>
-            <span class="underline">_</span>
+        <div id="keyboard">
+            <div class="char charNum" onclick="addNum(1)">1</div>
+            <div class="char charNum" onclick="addNum(2)">2</div>
+            <div class="char charNum" onclick="addNum(3)">3</div>
+            <div class="char charBad" id="charSubmit" onclick="submitPin()">
+                <img src="/images/check.png" class="imgChar">
+            </div>
+            <div class="char charNum" onclick="addNum(4)">4</div>
+            <div class="char charNum" onclick="addNum(5)">5</div>
+            <div class="char charNum" onclick="addNum(6)">6</div>
+            <div class="char" id="charDel" onclick="delNum()">
+                <img src="/images/backspace.png" class="imgChar">
+            </div>
+            <div class="char charNum" onclick="addNum(7)">7</div>
+            <div class="char charNum" onclick="addNum(8)">8</div>
+            <div class="char charNum" onclick="addNum(9)">9</div>
+            <div class="char charNum" onclick="addNum(0)">0</div>
         </div>
-        <div class="num" id="char3">
-            <span></span>
-            <span class="underline">_</span>
-        </div>
-        <div class="num" id="char4">
-            <span></span>
-            <span class="underline">_</span>
-        </div>
-    </div>
-    <div id="keyboard">
-        <div class="char charNum" onclick="addNum(1)">1</div>
-        <div class="char charNum" onclick="addNum(2)">2</div>
-        <div class="char charNum" onclick="addNum(3)">3</div>
-        <div class="char charBad" id="charSubmit" onclick="submitPin()">
-            <img src="/images/check.png" class="imgChar">
-        </div>
-        <div class="char charNum" onclick="addNum(4)">4</div>
-        <div class="char charNum" onclick="addNum(5)">5</div>
-        <div class="char charNum" onclick="addNum(6)">6</div>
-        <div class="char" id="charDel" onclick="delNum()">
-            <img src="/images/backspace.png" class="imgChar">
-        </div>
-        <div class="char charNum" onclick="addNum(7)">7</div>
-        <div class="char charNum" onclick="addNum(8)">8</div>
-        <div class="char charNum" onclick="addNum(9)">9</div>
-        <div class="char charNum" onclick="addNum(0)">0</div>
     </div>
     <p id="error" th:text="${errorMessage}"></p>
     <a href="/reset_card" id="resetButton">
