@@ -46,7 +46,8 @@ public class SecurityConfig {
                         "/unblock_product",
                         "/orders",
                         "/check_credentials",
-                        "/check_pin")
+                        "/check_pin",
+                        "/finish_order")
                     .hasRole("SHOP")
                     .anyRequest()
                     .permitAll())

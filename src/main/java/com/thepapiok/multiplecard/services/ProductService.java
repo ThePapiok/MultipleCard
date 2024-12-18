@@ -19,6 +19,7 @@ import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductOrderDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.misc.ProductInfo;
@@ -436,5 +437,10 @@ public class ProductService {
       String cardId) {
     return aggregationRepository.getProductsByOwnerCard(
         page, field, isDescending, text, category, shopName, cardId);
+  }
+
+  public List<ProductOrderDTO> getProductsAtCard(String phone, String cardId) {
+    return orderRepository.getProductsAtCard(
+        accountRepository.findIdByPhone(phone).getId(), new ObjectId(cardId));
   }
 }
