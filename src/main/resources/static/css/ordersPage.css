@@ -110,3 +110,33 @@
     height: 40px;
     position: static;
 }
+
+@media only screen and (max-width: 768px) {
+    #barcode {
+        width: 100%;
+    }
+
+    input {
+        height: auto !important;
+    }
+
+    #imageContainer {
+        height: 400px;
+    }
+
+    #results {
+        flex-direction: column;
+        width: 70%;
+    }
+
+    #productsContainer {
+        height: 1000px;
+        width: auto;
+    }
+
+    .productButton {
+        width: 5%;
+        padding: 20px;
+    }
+
+}

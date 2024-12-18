@@ -97,3 +97,23 @@
     left: 20%;
     width: 400px;
 }
+
+@media only screen and (max-width: 768px) {
+    #pinpad {
+        left: 0;
+    }
+
+    #keyboard {
+        height: auto;
+        width: 90%;
+    }
+
+    #pin {
+        width: 90%;
+    }
+
+    .char {
+        height: 80px;
+        width: 80px;
+    }
+}
