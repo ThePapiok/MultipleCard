@@ -55,6 +55,7 @@ public class ShopControllerTest {
   private static final String STATUS_PAYU_COMPLETED = "COMPLETED";
   private static final String TEST_SIGNATURE = "signature=sadfsda12312";
   private static final String QUOTATION_MARK_WITH_COMMA = "\",";
+  private static final String TEST_PHONE = "12341234123412341";
 
   private Map<ProductInfo, Integer> productsInfo;
 

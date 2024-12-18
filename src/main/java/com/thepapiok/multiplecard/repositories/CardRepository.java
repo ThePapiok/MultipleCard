@@ -8,4 +8,6 @@ public interface CardRepository extends MongoRepository<Card, ObjectId> {
   Card findCardByUserId(ObjectId id);
 
   boolean existsCardById(ObjectId id);
+
+  boolean existsCardByIdAndName(ObjectId id, String name);
 }

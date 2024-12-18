@@ -31,6 +31,7 @@ import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
+import com.thepapiok.multiplecard.dto.ProductOrderDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.misc.ProductConverter;
 import com.thepapiok.multiplecard.misc.ProductInfo;
@@ -1038,5 +1039,31 @@ public class ProductServiceTest {
     assertEquals(
         pageOwnerProductsDTO,
         productService.getProductsByOwnerCard(0, "", true, "", "", "", testCardId));
+  }
+
+  @Test
+  public void shouldListOfProductOrderDTOAtGetProductsAtCardWhenEverythingOk() {
+    final ObjectId testAccountId = new ObjectId("923456781009875643211237");
+    Account account = new Account();
+    account.setId(testAccountId);
+    List<ProductOrderDTO> productOrderDTOS = new ArrayList<>();
+    ProductOrderDTO product1 = new ProductOrderDTO();
+    product1.setBarcode(TEST_BARCODE);
+    product1.setName(TEST_PRODUCT_NAME);
+    product1.setImageUrl(TEST_URL);
+    product1.setId(TEST_ID1);
+    ProductOrderDTO product2 = new ProductOrderDTO();
+    product2.setBarcode(TEST_BARCODE + "5");
+    product2.setName(TEST_PRODUCT_NAME + "A");
+    product2.setImageUrl(TEST_URL + "C");
+    product2.setId(TEST_ID2);
+    productOrderDTOS.add(product1);
+    productOrderDTOS.add(product2);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(orderRepository.getProductsAtCard(testAccountId, new ObjectId(TEST_ID)))
+        .thenReturn(productOrderDTOS);
+
+    assertEquals(productOrderDTOS, productService.getProductsAtCard(TEST_PHONE, TEST_ID));
   }
 }

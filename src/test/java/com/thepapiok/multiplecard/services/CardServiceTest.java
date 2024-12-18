@@ -12,6 +12,7 @@ import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.SearchCardDTO;
 import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class CardServiceTest {
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
@@ -45,6 +47,7 @@ public class CardServiceTest {
   @Mock private ImageService imageService;
   @Mock private EmailService emailService;
   @Mock private UserRepository userRepository;
+  @Mock private PasswordEncoder passwordEncoder;
   private CardService cardService;
 
   @BeforeEach
@@ -60,7 +63,8 @@ public class CardServiceTest {
             qrCodeService,
             imageService,
             emailService,
-            userRepository);
+            userRepository,
+            passwordEncoder);
   }
 
   @Test
@@ -184,7 +188,7 @@ public class CardServiceTest {
   }
 
   @Test
-  public void shouldSuccessAtIsBlocked() {
+  public void shouldReturnFalseAtIsBlockedWhenIsNotBlocked() {
     Account account = new Account();
     account.setId(TEST_ID);
     Card card = new Card();
@@ -194,11 +198,11 @@ public class CardServiceTest {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
 
-    assertTrue(cardService.isBlocked(TEST_PHONE));
+    assertFalse(cardService.isBlocked(TEST_PHONE));
   }
 
   @Test
-  public void shouldFailAtIsBlocked() {
+  public void shouldReturnTrueAtIsBlockedWhenIsBlocked() {
     final int maxAttempts = 3;
     Account account = new Account();
     account.setId(TEST_ID);
@@ -209,7 +213,7 @@ public class CardServiceTest {
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
     when(cardRepository.findCardByUserId(TEST_ID)).thenReturn(card);
 
-    assertFalse(cardService.isBlocked(TEST_PHONE));
+    assertTrue(cardService.isBlocked(TEST_PHONE));
   }
 
   @Test
@@ -262,5 +266,95 @@ public class CardServiceTest {
     when(accountRepository.findPhoneById(TEST_ID)).thenReturn(account);
 
     assertTrue(cardService.isOwner(TEST_PHONE, TEST_CARD_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtIsBlockedObjectIdWhenCardIsEmpty() {
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.empty());
+
+    assertTrue(cardService.isBlocked(TEST_CARD_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtIsBlockedObjectIdWhenIsBlocked() {
+    final int testAttempts = 3;
+    Card card = new Card();
+    card.setAttempts(testAttempts);
+    card.setId(TEST_CARD_OBJECT_ID);
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+
+    assertTrue(cardService.isBlocked(TEST_CARD_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtIsBlockedObjectIdWhenIsNotBlocked() {
+    final int testAttempts = 1;
+    Card card = new Card();
+    card.setAttempts(testAttempts);
+    card.setId(TEST_CARD_OBJECT_ID);
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+
+    assertFalse(cardService.isBlocked(TEST_CARD_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckIdAndNameIsValidWhenEverythingOk() {
+    SearchCardDTO searchCardDTO = new SearchCardDTO();
+    searchCardDTO.setCardId(TEST_CARD_ID);
+    searchCardDTO.setCardName(TEST_CARD_NAME);
+
+    when(cardRepository.existsCardByIdAndName(TEST_CARD_OBJECT_ID, TEST_CARD_NAME))
+        .thenReturn(true);
+
+    assertTrue(cardService.checkIdAndNameIsValid(searchCardDTO));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckIdAndNameIsValidWhenIsNotValid() {
+    SearchCardDTO searchCardDTO = new SearchCardDTO();
+    searchCardDTO.setCardId(TEST_CARD_ID);
+    searchCardDTO.setCardName(TEST_CARD_NAME + "A");
+
+    when(cardRepository.existsCardByIdAndName(TEST_CARD_OBJECT_ID, TEST_CARD_NAME + "A"))
+        .thenReturn(false);
+
+    assertFalse(cardService.checkIdAndNameIsValid(searchCardDTO));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckPinWhenCardNotFound() {
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.empty());
+
+    assertFalse(cardService.checkPin(TEST_CARD_ID, TEST_PIN));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckPinWhenPinMatches() {
+    Card card = new Card();
+    card.setAttempts(0);
+    card.setPin(TEST_ENCRYPTED_PIN);
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+    when(passwordEncoder.matches(TEST_PIN, TEST_ENCRYPTED_PIN)).thenReturn(true);
+
+    assertTrue(cardService.checkPin(TEST_CARD_ID, TEST_PIN));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckPinWhenPinNotMatches() {
+    Card card = new Card();
+    card.setAttempts(0);
+    card.setPin(TEST_ENCRYPTED_PIN);
+    Card expectedCard = new Card();
+    expectedCard.setAttempts(1);
+    expectedCard.setPin(TEST_ENCRYPTED_PIN);
+
+    when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
+    when(passwordEncoder.matches(TEST_PIN, TEST_ENCRYPTED_PIN)).thenReturn(false);
+
+    assertFalse(cardService.checkPin(TEST_CARD_ID, TEST_PIN));
+    verify(cardRepository).save(expectedCard);
   }
 }

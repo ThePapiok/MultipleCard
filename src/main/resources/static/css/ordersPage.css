@@ -1,0 +1,142 @@
+
+#barcode {
+    width: 50%;
+    height: 60px;
+    display: flex;
+}
+
+#searchButton {
+    width: 20%;
+    font-family: "Inter", sans-serif;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom-right-radius: 15px;
+    border-top-right-radius: 15px;
+    background-color: #CFCBCB;
+}
+
+#imageContainer {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    background-color: #F4F2F2;
+    border: 1px solid lightgray;
+    margin: 20px;
+    justify-content: flex-end;
+    align-items: flex-end;
+    display: flex;
+}
+
+#image {
+    width: 100%;
+    height: 100%;
+    top: auto;
+}
+
+#amount {
+    z-index: 2;
+    position: absolute;
+    display: flex;
+    width: 40%;
+    height: 60px;
+    font-family: "Inter", sans-serif;
+}
+
+#buttonAmount {
+    background-color: #CFCBCB;
+    width: 40%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#inputAmount {
+    width: 60%;
+}
+
+#productsContainer {
+    width: 95%;
+    height: 400px;
+    position: relative;
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.productButton {
+    height: 100%;
+    width: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid lightgray;
+    background-color: #F4F2F2;
+    padding: 10px;
+}
+
+.productButton img {
+    top: auto;
+}
+
+#results {
+    height: 100%;
+    width: 90%;
+}
+
+.productImage {
+    position: relative;
+    top: 0;
+}
+
+.imageContainer {
+    cursor: auto;
+}
+
+.foot {
+    height: 100px;
+}
+
+.result {
+    height: 300px;
+    width: 350px;
+}
+
+.imageClose {
+    width: 40px;
+    height: 40px;
+    position: static;
+}
+
+@media only screen and (max-width: 768px) {
+    #barcode {
+        width: 100%;
+    }
+
+    input {
+        height: auto !important;
+    }
+
+    #imageContainer {
+        height: 400px;
+    }
+
+    #results {
+        flex-direction: column;
+        width: 70%;
+    }
+
+    #productsContainer {
+        height: 1000px;
+        width: auto;
+    }
+
+    .productButton {
+        width: 5%;
+        padding: 20px;
+    }
+
+}

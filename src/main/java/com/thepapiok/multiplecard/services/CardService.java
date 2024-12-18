@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.SearchCardDTO;
 import com.thepapiok.multiplecard.misc.CustomMultipartFile;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -33,6 +35,7 @@ public class CardService {
   private final ImageService imageService;
   private final EmailService emailService;
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Value("${app.url}")
   private String appUrl;
@@ -47,7 +50,8 @@ public class CardService {
       QrCodeService qrCodeService,
       ImageService imageService,
       EmailService emailService,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      PasswordEncoder passwordEncoder) {
     this.accountRepository = accountRepository;
     this.cardRepository = cardRepository;
     this.cloudinaryService = cloudinaryService;
@@ -57,6 +61,7 @@ public class CardService {
     this.imageService = imageService;
     this.emailService = emailService;
     this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   public Card getCard(String phone) {
@@ -126,7 +131,17 @@ public class CardService {
 
   public boolean isBlocked(String phone) {
     final int maxAttempts = 3;
-    return getCard(phone).getAttempts() != maxAttempts;
+    return getCard(phone).getAttempts() == maxAttempts;
+  }
+
+  public boolean isBlocked(ObjectId cardID) {
+    final int maxAttempts = 3;
+    Optional<Card> optionalCard = cardRepository.findById(cardID);
+    if (optionalCard.isEmpty()) {
+      return true;
+    }
+    Card card = optionalCard.get();
+    return card.getAttempts() == maxAttempts;
   }
 
   public boolean cardExists(String cardId) {
@@ -144,5 +159,25 @@ public class CardService {
     }
     Card card = optionalCard.get();
     return accountRepository.findPhoneById(card.getUserId()).getPhone().equals(phone);
+  }
+
+  public boolean checkIdAndNameIsValid(SearchCardDTO searchCardDTO) {
+    return cardRepository.existsCardByIdAndName(
+        new ObjectId(searchCardDTO.getCardId()), searchCardDTO.getCardName());
+  }
+
+  public boolean checkPin(String cardId, String pin) {
+    Optional<Card> optionalCard = cardRepository.findById(new ObjectId(cardId));
+    if (optionalCard.isEmpty()) {
+      return false;
+    }
+    Card card = optionalCard.get();
+    boolean result = passwordEncoder.matches(pin, card.getPin());
+    if (!result) {
+      card.setAttempts(card.getAttempts() + 1);
+      cardRepository.save(card);
+      return false;
+    }
+    return true;
   }
 }

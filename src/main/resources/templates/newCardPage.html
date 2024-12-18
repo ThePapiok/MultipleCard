@@ -29,7 +29,7 @@
             <label id="CardName">
                 <label class="inputs">
                     <input th:field="*{name}" type="text" disabled
-                           th:placeholder="#{newCardPage.name_card.text}"
+                           th:placeholder="#{name_card.text}"
                            required oninput="checkCardName(this)" minlength="4" maxlength="9"
                            onmouseenter="showValidation(this, 'CardName')"
                            onmouseleave="hideValidation('CardName')">
@@ -38,7 +38,7 @@
                 </label>
             </label>
             <div class="validation">
-                <span th:text="#{newCardPage.name_card.text} + ' ' + #{validation.text}"></span>
+                <span th:text="#{name_card.text} + ' ' + #{validation.text}"></span>
                 <ul>
                     <li th:text="#{validation.only_digits}"></li>
                     <li th:text="#{validation.only_letters}"></li>

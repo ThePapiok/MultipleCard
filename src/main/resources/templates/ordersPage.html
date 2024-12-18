@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/ordersPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/ordersPage.js"></script>
+<script th:inline="javascript">
+    const products = /*[[${products}]]*/ [];
+</script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden id="textProductNotFound" th:text="#{ordersPage.error.product_not_found}"></span>
+    <span hidden id="textTooManyProducts" th:text="#{ordersPage.error.too_many_products}"></span>
+    <span hidden id="textBadProducts" th:text="#{ordersPage.error.bad_products}"></span>
+    <p class="title" th:text="#{ordersPage.title.text}"></p>
+    <form th:action="@{/orders}" id="form" method="post" th:object="${products}">
+        <div id="barcode">
+            <input type="text" th:placeholder="#{product_barcode.text}"
+                   oninput="checkBarcode(this)" minlength="13" maxlength="13">
+            <span id="searchButton" th:text="#{search.text}" onclick="searchProduct(this.previousElementSibling)">
+            </span>
+        </div>
+        <div id="imageContainer">
+            <img src="/images/nothing.png" id="image" alt="img">
+            <div id="amount">
+                <input type="text" id="inputAmount" maxlength="4" oninput="checkAmount(this)">
+                <span id="buttonAmount" th:text="#{ordersPage.button.add_product}"
+                      onclick="addProduct(this.previousElementSibling)">
+                </span>
+            </div>
+        </div>
+        <p id="error" th:text="${errorMessage}"></p>
+        <div id="productsContainer">
+            <div class="productButton" id="leftButton" onclick="goLeft()" onmouseenter="checkCanClickLeftButton(this)"
+                 onmouseleave="hideButton(this)">
+                <img src="/images/arrow_left.png" alt="arrowLeft">
+            </div>
+            <div id="results">
+            </div>
+            <div class="productButton" id="rightButton" onclick="goRight()"
+                 onmouseenter="checkCanClickRightButton(this)" onmouseleave="hideButton(this)">
+                <img src="/images/arrow_right.png" alt="arrowRight">
+            </div>
+        </div>
+        <a onclick="buyProducts()">
+            <button type="button" class="grayButton" id="orderButton"
+                    th:text="#{ordersPage.button.finish_order}"></button>
+        </a>
+        <a href="/reset_card" id="resetButton">
+            <button type="button" class="redButton" id="searchCardButton"
+                    th:text="#{button.reset}"></button>
+        </a>
+    </form>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

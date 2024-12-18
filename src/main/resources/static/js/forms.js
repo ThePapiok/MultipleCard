@@ -10,6 +10,7 @@ const regPostalCode = new RegExp("^[0-9]{2}-[0-9]{3}$");
 const regAccountNumber = new RegExp("^[0-9]*$");
 const regProductName = new RegExp("^[A-ZĄĆĘŁŃÓŚŹŻ]([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])*( ([A-ZĄĆĘŁŃÓŚŹŻ]|[a-ząćęłńóśźż])+)*$");
 const regBarcode = new RegExp("^[0-9]*$");
+const regCardName = new RegExp("^[a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*$");
 let previousPostalCode = "";
 let country = false;
 let callingCode = false;
