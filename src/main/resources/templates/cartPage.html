@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/css/results.css">
     <link rel="stylesheet" href="/css/products.css">
     <link rel="stylesheet" href="/css/shopInfo.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <link rel="stylesheet" href="/css/confirmation.css">
     <link rel="stylesheet" href="/css/cartPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
 </head>
@@ -25,17 +27,52 @@
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <span hidden th:text="#{cartPage.error.new_quantity_promotion}" id="textGetNewQuantity"></span>
     <span hidden th:text="#{cartPage.error.too_many_products}" id="textTooManyProducts"></span>
+    <span hidden th:text="${points}" id="points"></span>
     <p class="title" th:text="#{cartPage.title}"></p>
-    <div id="buyContainer">
+    <div class="block-horizontally" id="yourPoints">
+        <label>
+            <label class="placeholderWithInput">
+                <label class="placeholderInput" th:text="#{points_text}"
+                       id="placeholderTotalAmount">
+                </label>
+                <label class="inputs" id="inputTotalAmount">
+                    <span th:text="${points}"></span>
+                </label>
+            </label>
+        </label>
+    </div>
+    <div class="buyContainer">
         <span id="totalAmount"></span>
-        <a id="buyUrl" onclick="buyProducts(this.firstElementChild)">
+        <a class="buyUrl" onclick="buyProducts(this.firstElementChild)">
             <button id="buyButton" class="grayButton" th:text="#{cartPage.button.buy_products}"></button>
+        </a>
+    </div>
+    <div id="conf"></div>
+    <div class="buyContainer">
+        <span id="totalPoints"></span>
+        <a class="buyUrl" onclick="showOrHideBuyProducts(this.parentElement.previousElementSibling)">
+            <button id="buyButtonPoints" class="grayButton" th:text="#{cartPage.button.buy_products}"></button>
         </a>
     </div>
     <p id="error"></p>
     <div id="allResults">
         <div id="results">
             <span data-results-empty="true" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
+    </div>
+    <div id="buy" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{cartPage.buy_confirmation_message}" class="confirmationTitle"></p>
+            <div>
+                <a>
+                    <button type="button" class="darkGreenButton" th:text="#{button.yes}"
+                            th:attr="onclick=|buyProductsByPoints(document.getElementById('buyButtonPoints'))|"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBuyProducts()"></button>
+                </a>
+            </div>
         </div>
     </div>
 </div>
