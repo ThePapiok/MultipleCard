@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
@@ -14,6 +15,7 @@ import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ProfileService;
 import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ResultService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,6 +65,7 @@ public class CardController {
   private final PayUService payUService;
   private final RefundService refundService;
   private final EmailService emailService;
+  private final ProfileService profileService;
 
   @Autowired
   public CardController(
@@ -74,7 +77,8 @@ public class CardController {
       ResultService resultService,
       PayUService payUService,
       RefundService refundService,
-      EmailService emailService) {
+      EmailService emailService,
+      ProfileService profileService) {
     this.passwordEncoder = passwordEncoder;
     this.messageSource = messageSource;
     this.cardService = cardService;
@@ -84,6 +88,7 @@ public class CardController {
     this.payUService = payUService;
     this.refundService = refundService;
     this.emailService = emailService;
+    this.profileService = profileService;
   }
 
   @GetMapping("/new_card")
@@ -316,8 +321,10 @@ public class CardController {
   }
 
   @GetMapping("/cart")
-  public String cartPage(@RequestParam(defaultValue = "0") Integer page, Model model) {
-    model.addAttribute("pageSelected", page);
+  public String cartPage(Model model, Principal principal) {
+    if (principal != null && profileService.checkRole(principal.getName(), Role.ROLE_USER)) {
+      model.addAttribute("points", profileService.getPoints(principal.getName()));
+    }
     return "cartPage";
   }
 

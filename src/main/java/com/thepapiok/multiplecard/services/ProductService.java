@@ -32,6 +32,7 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
+import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,6 +70,7 @@ public class ProductService {
   private final ShopRepository shopRepository;
   private final PromotionRepository promotionRepository;
   private final ReservedProductService reservedProductService;
+  private final UserRepository userRepository;
 
   @Autowired
   public ProductService(
@@ -86,7 +88,8 @@ public class ProductService {
       CategoryRepository categoryRepository,
       ShopRepository shopRepository,
       PromotionRepository promotionRepository,
-      ReservedProductService reservedProductService) {
+      ReservedProductService reservedProductService,
+      UserRepository userRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -102,6 +105,7 @@ public class ProductService {
     this.shopRepository = shopRepository;
     this.promotionRepository = promotionRepository;
     this.reservedProductService = reservedProductService;
+    this.userRepository = userRepository;
   }
 
   public boolean addProduct(
@@ -371,7 +375,8 @@ public class ProductService {
     }
   }
 
-  public boolean buyProducts(List<ProductPayU> products, String cardId, String orderId) {
+  public boolean buyProducts(
+      List<ProductPayU> products, String cardId, String orderId, Integer points, String phone) {
     ObjectMapper objectMapper = new ObjectMapper();
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
@@ -419,6 +424,16 @@ public class ProductService {
                 }
               }
               reservedProductService.deleteAllByOrderId(orderId);
+              if (points != null) {
+                Optional<User> optionalUser =
+                    userRepository.findById(accountRepository.findIdByPhone(phone).getId());
+                if (optionalUser.isEmpty()) {
+                  throw new RuntimeException();
+                }
+                User user = optionalUser.get();
+                user.setPoints(user.getPoints() - points);
+                mongoTemplate.save(user);
+              }
             }
           });
     } catch (Exception e) {
@@ -442,5 +457,32 @@ public class ProductService {
   public List<ProductOrderDTO> getProductsAtCard(String phone, String cardId) {
     return orderRepository.getProductsAtCard(
         accountRepository.findIdByPhone(phone).getId(), new ObjectId(cardId));
+  }
+
+  public List<ProductPayU> getProductsPayU(Map<ProductInfo, Integer> products)
+      throws JsonProcessingException {
+    ProductInfo productInfo;
+    ObjectMapper objectMapper = new ObjectMapper();
+    int price = 0;
+    List<ProductPayU> productPayUS = new ArrayList<>();
+    ObjectId productId;
+    for (Map.Entry<ProductInfo, Integer> entry : products.entrySet()) {
+      productInfo = entry.getKey();
+      productId = productInfo.getProductId();
+      if (productInfo.isHasPromotion()) {
+        price = promotionRepository.findNewPriceByProductId(productId).getNewPrice();
+      } else {
+        price = productRepository.findPriceById(productId).getPrice();
+      }
+      Map<String, Object> name = new HashMap<>(2);
+      name.put("productId", productId.toHexString());
+      name.put("hasPromotion", productInfo.isHasPromotion());
+      ProductPayU productPayU = new ProductPayU();
+      productPayU.setUnitPrice(price);
+      productPayU.setQuantity(entry.getValue());
+      productPayU.setName(objectMapper.writeValueAsString(name));
+      productPayUS.add(productPayU);
+    }
+    return productPayUS;
   }
 }

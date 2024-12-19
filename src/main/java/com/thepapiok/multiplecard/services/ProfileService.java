@@ -15,11 +15,13 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -53,6 +55,7 @@ public class ProfileService {
   private final CloudinaryService cloudinaryService;
   private final ShopRepository shopRepository;
   private final EmailService emailService;
+  private final PromotionRepository promotionRepository;
 
   @Autowired
   public ProfileService(
@@ -66,7 +69,8 @@ public class ProfileService {
       MongoTransactionManager mongoTransactionManager,
       CloudinaryService cloudinaryService,
       ShopRepository shopRepository,
-      EmailService emailService) {
+      EmailService emailService,
+      PromotionRepository promotionRepository) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.profileConverter = profileConverter;
@@ -78,6 +82,7 @@ public class ProfileService {
     this.cloudinaryService = cloudinaryService;
     this.shopRepository = shopRepository;
     this.emailService = emailService;
+    this.promotionRepository = promotionRepository;
   }
 
   public ProfileDTO getProfile(String phone) {
@@ -224,5 +229,23 @@ public class ProfileService {
       return false;
     }
     return true;
+  }
+
+  public int getPoints(String phone) {
+    Optional<User> optionalUser =
+        userRepository.findById(accountRepository.findIdByPhone(phone).getId());
+    if (optionalUser.isEmpty()) {
+      return 0;
+    }
+    return optionalUser.get().getPoints();
+  }
+
+  public int calculatePoints(List<ProductPayU> productPayUS) {
+    final float centsPerZl = 100.0F;
+    int price = 0;
+    for (ProductPayU productPayU : productPayUS) {
+      price += (productPayU.getUnitPrice() * productPayU.getQuantity());
+    }
+    return (int) Math.ceil(price / centsPerZl);
   }
 }

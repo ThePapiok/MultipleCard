@@ -11,11 +11,13 @@ import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.OrderService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ProfileService;
 import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ReservedProductService;
 import com.thepapiok.multiplecard.services.ShopService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ShopController {
+  private static final String ERROR_BAD_PRODUCTS_MESSAGE = "error.bad_products";
+  private static final String ERROR_RESERVED_TOO_MANY_PRODUCTS_MESSAGE =
+      "error.reserved_products_too_many";
   private final ShopService shopService;
   private final ProductService productService;
   private final ReservedProductService reservedProductService;
@@ -43,6 +48,7 @@ public class ShopController {
   private final MessageSource messageSource;
   private final EmailService emailService;
   private final RefundService refundService;
+  private final ProfileService profileService;
 
   @Autowired
   public ShopController(
@@ -54,7 +60,8 @@ public class ShopController {
       OrderService orderService,
       MessageSource messageSource,
       EmailService emailService,
-      RefundService refundService) {
+      RefundService refundService,
+      ProfileService profileService) {
     this.shopService = shopService;
     this.productService = productService;
     this.reservedProductService = reservedProductService;
@@ -64,6 +71,7 @@ public class ShopController {
     this.messageSource = messageSource;
     this.emailService = emailService;
     this.refundService = refundService;
+    this.profileService = profileService;
   }
 
   @PostMapping("/get_shop_names")
@@ -97,7 +105,7 @@ public class ShopController {
           List<ProductPayU> products =
               objectMapper.readValue(
                   jsonNode.get("products").toString(), new TypeReference<List<ProductPayU>>() {});
-          if (!productService.buyProducts(products, cardId, orderId)) {
+          if (!productService.buyProducts(products, cardId, orderId, null, null)) {
             refundService.createRefund(
                 payuOrderId,
                 jsonNode.get("additionalDescription").asText(),
@@ -132,23 +140,22 @@ public class ShopController {
     Map<ProductInfo, Integer> productsInfo = productService.getProductsInfo(productsId);
     if (productsInfo.size() == 0) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.bad_products", null, locale),
+          messageSource.getMessage(ERROR_BAD_PRODUCTS_MESSAGE, null, locale),
           HttpStatus.BAD_REQUEST);
     } else if (!blockedIpService.checkIpIsNotBlocked(ip)) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.ip_blocked", null, locale),
-          HttpStatus.BAD_REQUEST);
+          messageSource.getMessage("error.ip_blocked", null, locale), HttpStatus.BAD_REQUEST);
     } else if (!productService.checkProductsQuantity(productsInfo)) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.bad_products", null, locale),
+          messageSource.getMessage(ERROR_BAD_PRODUCTS_MESSAGE, null, locale),
           HttpStatus.BAD_REQUEST);
     } else if (!reservedProductService.checkReservedProductsIsLessThan100ByCardId(cardId)) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.reserved_products_too_many", null, locale),
+          messageSource.getMessage(ERROR_RESERVED_TOO_MANY_PRODUCTS_MESSAGE, null, locale),
           HttpStatus.BAD_REQUEST);
     } else if (!reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(ip)) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.reserved_products_too_many", null, locale),
+          messageSource.getMessage(ERROR_RESERVED_TOO_MANY_PRODUCTS_MESSAGE, null, locale),
           HttpStatus.BAD_REQUEST);
     }
     Pair<Boolean, String> response =
@@ -158,11 +165,64 @@ public class ShopController {
           messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);
     } else if (!reservedProductService.reservedProducts(productsInfo, ip, orderId, cardId)) {
       return new ResponseEntity<>(
-          messageSource.getMessage("makeOrder.error.reserved_products_already", null, locale),
+          messageSource.getMessage("error.reserved_products_already", null, locale),
           HttpStatus.BAD_REQUEST);
     }
     httpSession.setAttribute(
-        "successMessage", messageSource.getMessage("makeOrder.success.buy_products", null, locale));
+        "successMessage", messageSource.getMessage("success.buy_products", null, locale));
     return new ResponseEntity<>(response.getSecond(), HttpStatus.OK);
+  }
+
+  @PostMapping("/buy_for_points")
+  public ResponseEntity<String> buyForPoints(
+      @RequestBody Map<String, Integer> productsId,
+      @RequestParam String cardId,
+      Locale locale,
+      HttpServletRequest httpServletRequest,
+      HttpSession httpSession,
+      Principal principal)
+      throws JsonProcessingException {
+    final ObjectId orderId = new ObjectId();
+    final String ip = httpServletRequest.getRemoteAddr();
+    final String phone = principal.getName();
+    Map<ProductInfo, Integer> productsInfo = productService.getProductsInfo(productsId);
+    if (productsInfo.size() == 0) {
+      return new ResponseEntity<>(
+          messageSource.getMessage(ERROR_BAD_PRODUCTS_MESSAGE, null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!blockedIpService.checkIpIsNotBlocked(ip)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.ip_blocked", null, locale), HttpStatus.BAD_REQUEST);
+    } else if (!productService.checkProductsQuantity(productsInfo)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage(ERROR_BAD_PRODUCTS_MESSAGE, null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!reservedProductService.checkReservedProductsIsLessThan100ByCardId(cardId)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage(ERROR_RESERVED_TOO_MANY_PRODUCTS_MESSAGE, null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(ip)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage(ERROR_RESERVED_TOO_MANY_PRODUCTS_MESSAGE, null, locale),
+          HttpStatus.BAD_REQUEST);
+    }
+    List<ProductPayU> products = productService.getProductsPayU(productsInfo);
+    int points = profileService.calculatePoints(products);
+    if (profileService.getPoints(phone) < points) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("buyForPoints.error.too_few_points", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!reservedProductService.reservedProducts(productsInfo, ip, orderId, cardId)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.reserved_products_already", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!productService.buyProducts(
+        products, cardId, orderId.toHexString(), points, phone)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);
+    }
+    httpSession.setAttribute(
+        "successMessage", messageSource.getMessage("success.buy_products", null, locale));
+    return new ResponseEntity<>("ok", HttpStatus.OK);
   }
 }

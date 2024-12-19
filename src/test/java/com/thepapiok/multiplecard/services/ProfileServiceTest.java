@@ -27,11 +27,13 @@ import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.AddressDTO;
 import com.thepapiok.multiplecard.dto.ProfileDTO;
 import com.thepapiok.multiplecard.dto.ProfileShopDTO;
+import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -82,6 +84,7 @@ public class ProfileServiceTest {
   @Mock private CloudinaryService cloudinaryService;
   @Mock private ShopRepository shopRepository;
   @Mock private EmailService emailService;
+  @Mock private PromotionRepository promotionRepository;
   private ProfileService profileService;
 
   @BeforeEach
@@ -148,7 +151,8 @@ public class ProfileServiceTest {
             mongoTransactionManager,
             cloudinaryService,
             shopRepository,
-            emailService);
+            emailService,
+            promotionRepository);
   }
 
   @Test
@@ -508,5 +512,63 @@ public class ProfileServiceTest {
     doThrow(MongoWriteException.class).when(mongoTemplate).save(shop);
 
     assertFalse(profileService.editProfileShop(profileShopDTO, null, null, null, TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturn0AtGetPointsWhenUserIsEmpty() {
+    Account account = new Account();
+    account.setId(TEST_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+
+    assertEquals(0, profileService.getPoints(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturn5AtGetPointsWhenEverythingOk() {
+    final int testPoints = 5;
+    Account account = new Account();
+    account.setId(TEST_ID);
+    User user1 = new User();
+    user1.setPoints(testPoints);
+    user1.setId(TEST_ID);
+
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user1));
+
+    assertEquals(testPoints, profileService.getPoints(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturn89AtCalculatePointsWhenEverythingOk() {
+    final int testUnitPrice1 = 555;
+    final int testQuantity1 = 3;
+    final int testUnitPrice2 = 1536;
+    final int testQuantity2 = 2;
+    final int testUnitPrice3 = 790;
+    final int testQuantity3 = 5;
+    final int testUnitPrice4 = 156;
+    final int testQuantity4 = 1;
+    final int resultOfCalculatePoints = 89;
+    List<ProductPayU> productPayUS = new ArrayList<>();
+    ProductPayU productPayU1 = new ProductPayU();
+    productPayU1.setUnitPrice(testUnitPrice1);
+    productPayU1.setQuantity(testQuantity1);
+    ProductPayU productPayU2 = new ProductPayU();
+    productPayU2.setUnitPrice(testUnitPrice2);
+    productPayU2.setQuantity(testQuantity2);
+    ProductPayU productPayU3 = new ProductPayU();
+    productPayU3.setUnitPrice(testUnitPrice3);
+    productPayU3.setQuantity(testQuantity3);
+    ProductPayU productPayU4 = new ProductPayU();
+    productPayU4.setUnitPrice(testUnitPrice4);
+    productPayU4.setQuantity(testQuantity4);
+    productPayUS.add(productPayU1);
+    productPayUS.add(productPayU2);
+    productPayUS.add(productPayU3);
+    productPayUS.add(productPayU4);
+
+    assertEquals(resultOfCalculatePoints, profileService.calculatePoints(productPayUS));
   }
 }

@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.OrderCardDTO;
 import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
@@ -24,6 +25,7 @@ import com.thepapiok.multiplecard.services.CardService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ProfileService;
 import com.thepapiok.multiplecard.services.RefundService;
 import com.thepapiok.multiplecard.services.ResultService;
 import java.time.LocalDate;
@@ -49,6 +51,8 @@ import org.springframework.test.web.servlet.MockMvc;
 public class CardControllerTest {
   private static final String ERROR_VALIDATION_MESSAGE = "Podane dane są niepoprawne";
   private static final String TEST_ENCODE_CODE = "sadfas123sdfcvcxfdf";
+  private static final String CART_URL = "/cart";
+  private static final String CART_PAGE = "cartPage";
   private static final String TEST_CODE = "111 222";
   private static final String TEST_PIN = "1234";
   private static final String TEST_NAME = "test";
@@ -109,6 +113,7 @@ public class CardControllerTest {
   @MockBean private PayUService payUService;
   @MockBean private RefundService refundService;
   @MockBean private EmailService emailService;
+  @MockBean private ProfileService profileService;
   @Autowired private MessageSource messageSource;
 
   @Test
@@ -842,11 +847,30 @@ public class CardControllerTest {
   }
 
   @Test
-  public void shouldReturnCartPageAtCartPageWhenEverythingOk() throws Exception {
+  public void shouldReturnCartPageAtCartPageWithoutPrincipal() throws Exception {
+    mockMvc.perform(get(CART_URL)).andExpect(view().name(CART_PAGE));
+  }
+
+  @Test
+  @WithMockUser(roles = "USER", username = TEST_PHONE)
+  public void shouldReturnCartPageAtCartPageWithPrincipalRoleOtherThanUser() throws Exception {
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(false);
+
+    mockMvc.perform(get(CART_URL)).andExpect(view().name(CART_PAGE));
+  }
+
+  @Test
+  @WithMockUser(roles = "USER", username = TEST_PHONE)
+  public void shouldReturnCartPageAtCartPageWithPrincipalRoleUser() throws Exception {
+    final int testPoints = 3454;
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_USER)).thenReturn(true);
+    when(profileService.getPoints(TEST_PHONE)).thenReturn(testPoints);
+
     mockMvc
-        .perform(get("/cart"))
-        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 0))
-        .andExpect(view().name("cartPage"));
+        .perform(get(CART_URL))
+        .andExpect(model().attribute("points", testPoints))
+        .andExpect(view().name(CART_PAGE));
   }
 
   @Test

@@ -24,7 +24,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.POST, "/reviews/*")
+                    .requestMatchers(HttpMethod.POST, "/reviews/*", "/buy_for_points")
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.DELETE, "/reviews")
                     .hasRole(roleUser)

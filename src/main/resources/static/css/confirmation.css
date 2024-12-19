@@ -1,6 +1,6 @@
 .confirmation {
-    width: 40%;
-    height: 300px;
+    width: 30%;
+    height: 200px;
     position: absolute;
     top: 45%;
     z-index: 1;
@@ -8,8 +8,8 @@
 }
 
 .confirmationChoice {
-    width: 60%;
-    height: 60%;
+    width: 100%;
+    height: 100%;
     background-color: wheat;
     opacity: 90%;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), -4px 8px 20px rgba(0, 0, 0, 0.10);

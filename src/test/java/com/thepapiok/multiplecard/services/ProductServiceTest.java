@@ -14,6 +14,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
@@ -44,6 +45,7 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
+import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -106,6 +108,7 @@ public class ProductServiceTest {
   @Mock private ShopRepository shopRepository;
   @Mock private PromotionRepository promotionRepository;
   @Mock private ReservedProductService reservedProductService;
+  @Mock private UserRepository userRepository;
   private ProductService productService;
 
   @BeforeAll
@@ -138,7 +141,8 @@ public class ProductServiceTest {
             categoryRepository,
             shopRepository,
             promotionRepository,
-            reservedProductService);
+            reservedProductService,
+            userRepository);
   }
 
   @Test
@@ -985,7 +989,7 @@ public class ProductServiceTest {
     when(promotionRepository.findByProductId(testProduct1ObjectId)).thenReturn(promotion2);
     when(promotionRepository.findByProductId(testProduct4ObjectId)).thenReturn(promotion3);
 
-    assertTrue(productService.buyProducts(productPayUS, testCardId, testOrderId));
+    assertTrue(productService.buyProducts(productPayUS, testCardId, testOrderId, null, null));
     verify(mongoTemplate).remove(promotion2);
     verify(mongoTemplate).save(expectedPromotion3);
     verify(mongoTemplate, times(testProduct1Quantity)).save(order1);
@@ -994,6 +998,144 @@ public class ProductServiceTest {
     verify(mongoTemplate, times(testProduct4Quantity)).save(order4);
     verify(mongoTemplate, times(testProduct5Quantity)).save(order5);
     verify(reservedProductService).deleteAllByOrderId(testOrderId);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBuyProductsWhenGetPoints() {
+    final int testPromotion1NewPrice = 444;
+    final int testPromotion2NewPrice = 51;
+    final int testPromotion3NewPrice = 100;
+    final int testPromotion3Quantity = 100;
+    final int testProduct1Quantity = 1;
+    final int testProduct2Quantity = 2;
+    final int testProduct3Quantity = 3;
+    final int testProduct4Quantity = 1;
+    final int testProduct5Quantity = 2;
+    final int testProduct2Price = 500;
+    final int testProduct5Price = 502;
+    final int testUserPoints = 1234;
+    final int testPoints = 1004;
+    final String testProduct4Id = "123456709832145678091423";
+    final String testCardId = "783456709832145678091423";
+    final String testOrderId = "915456709832145678091423";
+    final ObjectId testShopObjectId = new ObjectId("915451709832145628091425");
+    final ObjectId testCardObjectId = new ObjectId(testCardId);
+    final ObjectId testOrderObjectId = new ObjectId(testOrderId);
+    final ObjectId testProduct1ObjectId = new ObjectId(TEST_ID);
+    final ObjectId testProduct2ObjectId = new ObjectId(TEST_ID1);
+    final ObjectId testProduct3ObjectId = new ObjectId(TEST_ID2);
+    final ObjectId testProduct4ObjectId = new ObjectId(testProduct4Id);
+    Promotion promotion1 = new Promotion();
+    promotion1.setNewPrice(testPromotion1NewPrice);
+    promotion1.setQuantity(null);
+    promotion1.setProductId(testProduct3ObjectId);
+    Promotion promotion2 = new Promotion();
+    promotion2.setNewPrice(testPromotion2NewPrice);
+    promotion2.setQuantity(1);
+    promotion2.setProductId(testProduct1ObjectId);
+    Promotion promotion3 = new Promotion();
+    promotion3.setNewPrice(testPromotion3NewPrice);
+    promotion3.setQuantity(testPromotion3Quantity);
+    promotion3.setProductId(testProduct4ObjectId);
+    Promotion expectedPromotion3 = new Promotion();
+    expectedPromotion3.setNewPrice(testPromotion3NewPrice);
+    expectedPromotion3.setQuantity(testPromotion3Quantity - 1);
+    expectedPromotion3.setProductId(testProduct4ObjectId);
+    List<ProductPayU> productPayUS = new ArrayList<>();
+    ProductPayU productPayU1 = new ProductPayU();
+    productPayU1.setQuantity(testProduct1Quantity);
+    productPayU1.setUnitPrice(testPromotion2NewPrice);
+    productPayU1.setName(setNameAtBuyProducts(TEST_ID, true));
+    ProductPayU productPayU2 = new ProductPayU();
+    productPayU2.setQuantity(testProduct2Quantity);
+    productPayU2.setUnitPrice(testProduct2Price);
+    productPayU2.setName(setNameAtBuyProducts(TEST_ID1, false));
+    ProductPayU productPayU3 = new ProductPayU();
+    productPayU3.setQuantity(testProduct3Quantity);
+    productPayU3.setUnitPrice(testPromotion1NewPrice);
+    productPayU3.setName(setNameAtBuyProducts(TEST_ID2, true));
+    ProductPayU productPayU4 = new ProductPayU();
+    productPayU4.setQuantity(testProduct4Quantity);
+    productPayU4.setUnitPrice(testPromotion3NewPrice);
+    productPayU4.setName(setNameAtBuyProducts(testProduct4Id, true));
+    ProductPayU productPayU5 = new ProductPayU();
+    productPayU5.setQuantity(testProduct5Quantity);
+    productPayU5.setUnitPrice(testProduct5Price);
+    productPayU5.setName(setNameAtBuyProducts(TEST_ID, false));
+    productPayUS.add(productPayU1);
+    productPayUS.add(productPayU2);
+    productPayUS.add(productPayU3);
+    productPayUS.add(productPayU4);
+    productPayUS.add(productPayU5);
+    Product product = new Product();
+    product.setShopId(testShopObjectId);
+    Order order1 = new Order();
+    order1.setProductId(testProduct1ObjectId);
+    order1.setUsed(false);
+    order1.setCreatedAt(TEST_DATE);
+    order1.setShopId(testShopObjectId);
+    order1.setPrice(testPromotion2NewPrice);
+    order1.setCardId(testCardObjectId);
+    order1.setOrderId(testOrderObjectId);
+    Order order2 = new Order();
+    order2.setProductId(testProduct2ObjectId);
+    order2.setUsed(false);
+    order2.setCreatedAt(TEST_DATE);
+    order2.setShopId(testShopObjectId);
+    order2.setPrice(testProduct2Price);
+    order2.setCardId(testCardObjectId);
+    order2.setOrderId(testOrderObjectId);
+    Order order3 = new Order();
+    order3.setProductId(testProduct3ObjectId);
+    order3.setUsed(false);
+    order3.setCreatedAt(TEST_DATE);
+    order3.setShopId(testShopObjectId);
+    order3.setPrice(testPromotion1NewPrice);
+    order3.setCardId(testCardObjectId);
+    order3.setOrderId(testOrderObjectId);
+    Order order4 = new Order();
+    order4.setProductId(testProduct4ObjectId);
+    order4.setUsed(false);
+    order4.setCreatedAt(TEST_DATE);
+    order4.setShopId(testShopObjectId);
+    order4.setPrice(testPromotion3NewPrice);
+    order4.setCardId(testCardObjectId);
+    order4.setOrderId(testOrderObjectId);
+    Order order5 = new Order();
+    order5.setProductId(testProduct1ObjectId);
+    order5.setUsed(false);
+    order5.setCreatedAt(TEST_DATE);
+    order5.setShopId(testShopObjectId);
+    order5.setPrice(testProduct5Price);
+    order5.setCardId(testCardObjectId);
+    order5.setOrderId(testOrderObjectId);
+    Account account = new Account();
+    account.setId(TEST_OWNER_ID);
+    User user = new User();
+    user.setPoints(testUserPoints);
+    user.setId(TEST_OWNER_ID);
+    User expectedUser = new User();
+    expectedUser.setPoints(testUserPoints - testPoints);
+    expectedUser.setId(TEST_OWNER_ID);
+
+    when(productRepository.findShopIdById(any(ObjectId.class))).thenReturn(product);
+    when(promotionRepository.findByProductId(testProduct3ObjectId)).thenReturn(promotion1);
+    when(promotionRepository.findByProductId(testProduct1ObjectId)).thenReturn(promotion2);
+    when(promotionRepository.findByProductId(testProduct4ObjectId)).thenReturn(promotion3);
+    when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
+    when(userRepository.findById(TEST_OWNER_ID)).thenReturn(Optional.of(user));
+
+    assertTrue(
+        productService.buyProducts(productPayUS, testCardId, testOrderId, testPoints, TEST_PHONE));
+    verify(mongoTemplate).remove(promotion2);
+    verify(mongoTemplate).save(expectedPromotion3);
+    verify(mongoTemplate, times(testProduct1Quantity)).save(order1);
+    verify(mongoTemplate, times(testProduct2Quantity)).save(order2);
+    verify(mongoTemplate, times(testProduct3Quantity)).save(order3);
+    verify(mongoTemplate, times(testProduct4Quantity)).save(order4);
+    verify(mongoTemplate, times(testProduct5Quantity)).save(order5);
+    verify(reservedProductService).deleteAllByOrderId(testOrderId);
+    verify(mongoTemplate).save(expectedUser);
   }
 
   private String setNameAtBuyProducts(String id, boolean hasPromotion) {
@@ -1015,7 +1157,7 @@ public class ProductServiceTest {
     ProductPayU productPayU = new ProductPayU();
     productPayU.setName("{}");
 
-    assertFalse(productService.buyProducts(List.of(productPayU), null, null));
+    assertFalse(productService.buyProducts(List.of(productPayU), null, null, null, null));
   }
 
   @Test
@@ -1065,5 +1207,52 @@ public class ProductServiceTest {
         .thenReturn(productOrderDTOS);
 
     assertEquals(productOrderDTOS, productService.getProductsAtCard(TEST_PHONE, TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnListOfProductPayUAtGetProductsPayUWhenEverythingOk()
+      throws JsonProcessingException {
+    final ObjectId testProductId1 = new ObjectId("523467890123456879054231");
+    final ObjectId testProductId2 = new ObjectId("723867890124456879054231");
+    final int testQuantity1 = 2;
+    final int testQuantity2 = 5;
+    final int testPrice1 = 54324;
+    final int testPrice2 = 134;
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<ProductInfo, Integer> products = new HashMap<>();
+    ProductInfo productInfo1 = new ProductInfo();
+    productInfo1.setProductId(testProductId1);
+    productInfo1.setHasPromotion(false);
+    ProductInfo productInfo2 = new ProductInfo();
+    productInfo2.setProductId(testProductId2);
+    productInfo2.setHasPromotion(true);
+    products.put(productInfo1, testQuantity1);
+    products.put(productInfo2, testQuantity2);
+    List<ProductPayU> expectedProducts = new ArrayList<>();
+    Map<String, Object> name1 = new HashMap<>(2);
+    name1.put("productId", testProductId1.toHexString());
+    name1.put("hasPromotion", false);
+    ProductPayU productPayU1 = new ProductPayU();
+    productPayU1.setUnitPrice(testPrice1);
+    productPayU1.setQuantity(testQuantity1);
+    productPayU1.setName(objectMapper.writeValueAsString(name1));
+    Map<String, Object> name2 = new HashMap<>(2);
+    name2.put("productId", testProductId2.toHexString());
+    name2.put("hasPromotion", true);
+    ProductPayU productPayU2 = new ProductPayU();
+    productPayU2.setUnitPrice(testPrice2);
+    productPayU2.setQuantity(testQuantity2);
+    productPayU2.setName(objectMapper.writeValueAsString(name2));
+    expectedProducts.add(productPayU2);
+    expectedProducts.add(productPayU1);
+    Product product = new Product();
+    product.setPrice(testPrice1);
+    Promotion promotion = new Promotion();
+    promotion.setNewPrice(testPrice2);
+
+    when(productRepository.findPriceById(testProductId1)).thenReturn(product);
+    when(promotionRepository.findNewPriceByProductId(testProductId2)).thenReturn(promotion);
+
+    assertEquals(expectedProducts, productService.getProductsPayU(products));
   }
 }
