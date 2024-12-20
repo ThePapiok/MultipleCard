@@ -30,4 +30,6 @@ public interface ShopRepository extends MongoRepository<Shop, ObjectId> {
 """
       })
   List<String> getShopNamesByPrefix(String pattern);
+
+  Shop getShopByName(String name);
 }

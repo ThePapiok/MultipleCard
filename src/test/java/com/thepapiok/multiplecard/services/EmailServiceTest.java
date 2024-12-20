@@ -153,6 +153,9 @@ public class EmailServiceTest {
         .append(newLine)
         .append("Lokal 1 :")
         .append(newLine)
+        .append(" - Kraj: ")
+        .append(testCountry1)
+        .append(newLine)
         .append(" - Miejscowość: ")
         .append(testCity1)
         .append(newLine)
@@ -172,6 +175,9 @@ public class EmailServiceTest {
         .append(testProvince1)
         .append(newLine)
         .append("Lokal 2 :")
+        .append(newLine)
+        .append(" - Kraj: ")
+        .append(testCountry2)
         .append(newLine)
         .append(" - Miejscowość: ")
         .append(testCity2)
@@ -209,6 +215,7 @@ public class EmailServiceTest {
     when(messageSource.getMessage("houseNumber.text", null, locale)).thenReturn("Nr domu");
     when(messageSource.getMessage("apartmentNumber.text", null, locale)).thenReturn("Nr lokalu");
     when(messageSource.getMessage("province.text", null, locale)).thenReturn("Województwo");
+    when(messageSource.getMessage("country.text", null, locale)).thenReturn("Kraj");
 
     emailService.sendVerification(shop, account, Locale.getDefault(), files);
     MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage);

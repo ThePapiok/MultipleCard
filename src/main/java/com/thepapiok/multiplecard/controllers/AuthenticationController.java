@@ -645,7 +645,7 @@ public class AuthenticationController {
           ERROR_MESSAGE_PARAM, messageSource.getMessage(ERROR_BAD_SMS_CODE_MESSAGE, null, locale));
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);
       return REDIRECT_SHOP_VERIFICATION_ERROR;
-    } else if (fileList.size() <= 1 || fileList.size() >= maxSize) {
+    } else if (fileList.size() < 1 || fileList.size() >= maxSize) {
       httpSession.setAttribute(
           ERROR_MESSAGE_PARAM, messageSource.getMessage("error.bad_size", null, locale));
       httpSession.setAttribute(ATTEMPTS_PARAM, attempts + 1);

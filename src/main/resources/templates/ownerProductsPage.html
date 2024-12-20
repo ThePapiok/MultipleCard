@@ -71,7 +71,8 @@
                                 <img src="/images/shopping_cart.png" alt="cart">
                             </a>
                         </div>
-                        <div class="result-horizontal imageContainer">
+                        <div class="result-horizontal imageContainer"
+                             th:attr="onclick=|findTheNearestPlace('${product.shopName}')|">
                             <div class="shopLogo" th:title="${product.shopName}">
                                 <img class="shopImage" th:src="${product.shopImageUrl}">
                             </div>

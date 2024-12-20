@@ -81,6 +81,7 @@ public class EmailService {
                 + shop.getImageUrl());
     int index = 1;
     String placeLocale = messageSource.getMessage("place.text", null, locale);
+    String countryLocale = messageSource.getMessage("country.text", null, locale);
     String cityLocale = messageSource.getMessage("city.text", null, locale);
     String postalCodeLocale = messageSource.getMessage("postalCode.text", null, locale);
     String streetLocale = messageSource.getMessage("street.text", null, locale);
@@ -89,6 +90,10 @@ public class EmailService {
     String provinceLocale = messageSource.getMessage("province.text", null, locale);
     for (Address address : shop.getPoints()) {
       text.append(newLine).append(placeLocale).append(" ").append(index).append(" :");
+      text.append(newLineWithMinus)
+          .append(countryLocale)
+          .append(colon)
+          .append(address.getCountry());
       text.append(newLineWithMinus).append(cityLocale).append(colon).append(address.getCity());
       text.append(newLineWithMinus)
           .append(postalCodeLocale)
