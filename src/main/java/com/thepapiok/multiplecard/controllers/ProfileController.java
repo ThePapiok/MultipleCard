@@ -269,7 +269,7 @@ public class ProfileController {
           verificationNumberSms, (String) httpSession.getAttribute(CODE_SMS_EDIT_SHOP_PARAM))) {
         return redirectErrorPage(
             httpSession, amount, ERROR_BAD_SMS_CODE_PARAM, locale, redirectEditProfileError);
-      } else if (file.size() <= 1 || file.size() >= maxSize) {
+      } else if (file.size() < 1 || file.size() >= maxSize) {
         return redirectErrorPage(
             httpSession, amount, "error.bad_size", locale, redirectEditProfileError);
       } else if (!shopService.checkFiles(file)) {

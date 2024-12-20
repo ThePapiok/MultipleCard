@@ -8,6 +8,7 @@ import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.services.BlockedIpService;
 import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.GoogleMapsService;
 import com.thepapiok.multiplecard.services.OrderService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
@@ -49,6 +50,7 @@ public class ShopController {
   private final EmailService emailService;
   private final RefundService refundService;
   private final ProfileService profileService;
+  private final GoogleMapsService googleMapsService;
 
   @Autowired
   public ShopController(
@@ -61,7 +63,8 @@ public class ShopController {
       MessageSource messageSource,
       EmailService emailService,
       RefundService refundService,
-      ProfileService profileService) {
+      ProfileService profileService,
+      GoogleMapsService googleMapsService) {
     this.shopService = shopService;
     this.productService = productService;
     this.reservedProductService = reservedProductService;
@@ -72,6 +75,7 @@ public class ShopController {
     this.emailService = emailService;
     this.refundService = refundService;
     this.profileService = profileService;
+    this.googleMapsService = googleMapsService;
   }
 
   @PostMapping("/get_shop_names")
@@ -224,5 +228,28 @@ public class ShopController {
     httpSession.setAttribute(
         "successMessage", messageSource.getMessage("success.buy_products", null, locale));
     return new ResponseEntity<>("ok", HttpStatus.OK);
+  }
+
+  @PostMapping("/find_nearest")
+  @ResponseBody
+  public String findTheNearestPlace(@RequestParam String shopName, Principal principal)
+      throws JsonProcessingException {
+    Map<String, Double> origins = googleMapsService.getCoordsOfOrigins(principal.getName());
+    List<Map<String, Double>> destinations = googleMapsService.getCoordsOfDestinations(shopName);
+    if (origins.size() == 0 || destinations.size() == 0) {
+      return "bad";
+    }
+    Map<String, Double> bestPoint = googleMapsService.getTheNearestPlace(origins, destinations);
+    if (bestPoint.size() == 0) {
+      return "bad";
+    }
+    return "https://www.google.com/maps/dir/"
+        + origins.get("lat")
+        + ","
+        + origins.get("lng")
+        + "/"
+        + bestPoint.get("lat")
+        + ","
+        + bestPoint.get("lng");
   }
 }

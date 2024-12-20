@@ -87,3 +87,24 @@ function atStart(page, isDescending, field, maxPage) {
     }
     checkButtonPages(page, maxPage);
 }
+
+function findTheNearestPlace(shopName) {
+    fetch("/find_nearest", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            "shopName": shopName
+        })
+    })
+        .then(content => content.text())
+        .then(content => {
+            if (content.includes("https://www.google.com/maps/dir")) {
+                window.location = content;
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        })
+}

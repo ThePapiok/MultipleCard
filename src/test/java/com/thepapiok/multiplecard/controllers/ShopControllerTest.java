@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +17,7 @@ import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.services.BlockedIpService;
 import com.thepapiok.multiplecard.services.EmailService;
+import com.thepapiok.multiplecard.services.GoogleMapsService;
 import com.thepapiok.multiplecard.services.OrderService;
 import com.thepapiok.multiplecard.services.PayUService;
 import com.thepapiok.multiplecard.services.ProductService;
@@ -51,12 +53,17 @@ public class ShopControllerTest {
       "Zbyt dużo zarezerwowanych produktów";
   private static final String TEST_CARD_ID = "123456789012345678901234";
   private static final String TEST_ORDER_ID = "123454289012345678901231";
+  private static final String TEST_SHOP_NAME = "shopName";
   private static final String TEST_PAYU_ORDER_ID = "1ewrqerqwerqwer12131";
   private static final String TEST_PRODUCT_ID = "123456789012345678901231";
   private static final String TEST_EMAIL = "multiplecard@gmail.com";
   private static final String MAKE_ORDER_URL = "/make_order";
   private static final String BUY_FOR_POINTS_URL = "/buy_for_points";
   private static final String CARD_ID_PARAM = "cardId";
+  private static final String BAD_MESSAGE = "bad";
+  private static final String FIND_NEAREST_URL = "/find_nearest";
+  private static final String LAT_PARAM = "lat";
+  private static final String LNG_PARAM = "lng";
   private static final int STATUS_BAD_REQUEST = 400;
   private static final int STATUS_OK = 200;
   private static final String STATUS_PAYU_COMPLETED = "COMPLETED";
@@ -86,6 +93,7 @@ public class ShopControllerTest {
   @MockBean private OrderService orderService;
   @MockBean private EmailService emailService;
   @MockBean private ProfileService profileService;
+  @MockBean private GoogleMapsService googleMapsService;
 
   @Test
   public void shouldReturnListOfShopNamesAtGetShopNamesWhenEverythingOk() throws Exception {
@@ -713,5 +721,101 @@ public class ShopControllerTest {
     productPayU.setName(objectMapper.writeValueAsString(name));
     productPayUS.add(productPayU);
     return productPayUS;
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnBadAtFindTheNearestPlaceWhenOriginsIsNull() throws Exception {
+    final double testLat = 234.2314;
+    final double testLng = 412.2434;
+    List<Map<String, Double>> destinations = new ArrayList<>();
+    Map<String, Double> coords = new HashMap<>(2);
+    coords.put(LAT_PARAM, testLat);
+    coords.put(LNG_PARAM, testLng);
+    destinations.add(coords);
+
+    when(googleMapsService.getCoordsOfOrigins(TEST_PHONE)).thenReturn(Map.of());
+    when(googleMapsService.getCoordsOfDestinations(TEST_SHOP_NAME)).thenReturn(destinations);
+
+    mockMvc
+        .perform(post(FIND_NEAREST_URL).param(TEST_SHOP_NAME, TEST_SHOP_NAME))
+        .andExpect(content().string(BAD_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnBadAtFindTheNearestPlaceWhenDestinationsIsNull() throws Exception {
+    final double testLat = 234.2314;
+    final double testLng = 412.2434;
+    Map<String, Double> coords = new HashMap<>(2);
+    coords.put(LAT_PARAM, testLat);
+    coords.put(LNG_PARAM, testLng);
+
+    when(googleMapsService.getCoordsOfOrigins(TEST_PHONE)).thenReturn(coords);
+    when(googleMapsService.getCoordsOfDestinations(TEST_SHOP_NAME)).thenReturn(List.of());
+
+    mockMvc
+        .perform(post(FIND_NEAREST_URL).param(TEST_SHOP_NAME, TEST_SHOP_NAME))
+        .andExpect(content().string(BAD_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnBadAtFindTheNearestPlaceWhenBestPointIsNull() throws Exception {
+    final double testLat1 = 234.2314;
+    final double testLng1 = 412.2434;
+    final double testLat2 = 22.234;
+    final double testLng2 = 17.2454;
+    List<Map<String, Double>> destinations = new ArrayList<>();
+    Map<String, Double> coords1 = new HashMap<>(2);
+    coords1.put(LAT_PARAM, testLat1);
+    coords1.put(LNG_PARAM, testLng1);
+    destinations.add(coords1);
+    Map<String, Double> coords2 = new HashMap<>(2);
+    coords2.put(LAT_PARAM, testLat2);
+    coords2.put(LNG_PARAM, testLng2);
+
+    when(googleMapsService.getCoordsOfOrigins(TEST_PHONE)).thenReturn(coords2);
+    when(googleMapsService.getCoordsOfDestinations(TEST_SHOP_NAME)).thenReturn(destinations);
+    when(googleMapsService.getTheNearestPlace(coords2, destinations)).thenReturn(Map.of());
+
+    mockMvc
+        .perform(post(FIND_NEAREST_URL).param(TEST_SHOP_NAME, TEST_SHOP_NAME))
+        .andExpect(content().string(BAD_MESSAGE));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnGoogleMapsUrlAtFindTheNearestPlaceWhenEverythingOk() throws Exception {
+    final double testLat1 = 234.2314;
+    final double testLng1 = 412.2434;
+    final double testLat2 = 22.234;
+    final double testLng2 = 17.2454;
+    List<Map<String, Double>> destinations = new ArrayList<>();
+    Map<String, Double> coords1 = new HashMap<>(2);
+    coords1.put(LAT_PARAM, testLat1);
+    coords1.put(LNG_PARAM, testLng1);
+    destinations.add(coords1);
+    Map<String, Double> coords2 = new HashMap<>(2);
+    coords2.put(LAT_PARAM, testLat2);
+    coords2.put(LNG_PARAM, testLng2);
+
+    when(googleMapsService.getCoordsOfOrigins(TEST_PHONE)).thenReturn(coords2);
+    when(googleMapsService.getCoordsOfDestinations(TEST_SHOP_NAME)).thenReturn(destinations);
+    when(googleMapsService.getTheNearestPlace(coords2, destinations)).thenReturn(coords1);
+
+    mockMvc
+        .perform(post(FIND_NEAREST_URL).param(TEST_SHOP_NAME, TEST_SHOP_NAME))
+        .andExpect(
+            content()
+                .string(
+                    "https://www.google.com/maps/dir/"
+                        + testLat2
+                        + ','
+                        + testLng2
+                        + '/'
+                        + testLat1
+                        + ','
+                        + testLng1));
   }
 }

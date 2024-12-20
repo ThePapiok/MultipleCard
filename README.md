@@ -25,6 +25,7 @@ jakiś produkt, a następnie w sklepie można ten produkt dostać.
 - PayU
 - Checkstyle
 - Spotless
+- Google Maps
 
 ## Zmienne Środowiskowe
 
@@ -59,6 +60,8 @@ Aby projekt działał, potrzebuje on dodania zmiennych środowiskowych oraz usta
 `PAYU_CLIENT_ID` - client id dla PayU
 
 `PAYU_KEY_MD5` - klucz md5 dla PayU
+
+`GOOGLE_API_KEY` - klucz api dla Google maps
 
 ## Uruchomienie z dockerem
 

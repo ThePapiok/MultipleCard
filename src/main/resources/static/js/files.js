@@ -29,7 +29,7 @@ function setFile(e) {
             uploadFile.id = "file" + (size + 1);
             input.type = "file";
             input.className = "inputFile";
-            input.name = "file[" + size + "]";
+            input.name = "file";
             input.oninput = () => setFile(input);
             uploadFile.appendChild(input);
             uploadFiles.appendChild(uploadFile);
@@ -79,7 +79,6 @@ function deleteFiles(e, index) {
     for (let i = index + 1; i <= size + 1; i++) {
         let uploadFile = document.getElementById("file" + i);
         uploadFile.id = "file" + (i - 1);
-        uploadFile.firstElementChild.name = "file[" + (i - 2) + "]";
         let deleteFile = uploadFile.getElementsByClassName("deleteFile")[0];
         if (deleteFile != null) {
             deleteFile.onclick = () => deleteFiles(uploadFile, i - 1);
