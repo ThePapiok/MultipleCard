@@ -62,10 +62,10 @@
             <span class="cell banned" th:text="${user.banned}"
                   th:attr="onclick=|showOrHideOptions(this, false, '${user.id}')|"></span>
         </div>
-        <div id="options" hidden>
-            <span class="option" onclick="changeToTrue(this.parentElement)">true</span>
-            <span class="option" onclick="changeToFalse(this.parentElement)">false</span>
-        </div>
+    </div>
+    <div id="options" hidden>
+        <span class="option" onclick="changeToTrue(this.parentElement)">true</span>
+        <span class="option" onclick="changeToFalse(this.parentElement)">false</span>
     </div>
 </div>
 <div id="footer">

@@ -8,12 +8,13 @@ function atStart() {
 function showOrHideOptions(e, type, id) {
     const coords = e.getBoundingClientRect();
     const options = document.getElementById("options");
+    options.style.width = e.offsetWidth.toString() + "px";
     let hidden = options.hidden;
     if (hidden && !showOptions) {
         showOptions = true;
         options.hidden = !hidden;
-        options.style.left = coords.right + window.scrollX - 272 + 'px';
-        options.style.top = coords.top + window.scrollY - 240 + 'px';
+        options.style.left = coords.left + window.scrollX + 'px';
+        options.style.top = coords.top + 50 + window.scrollY + 'px';
         options.dataset.type = type;
         options.dataset.id = id;
     } else if (showOptions && !hidden) {
