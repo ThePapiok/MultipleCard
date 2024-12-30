@@ -653,5 +653,7 @@ db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
 db.refunds.createIndex({"orderId": 1}, {"unique": true});
+db.reports.createIndex({"userId": 1, "reportedId": 1}, {"unique": true});
+
 
 
