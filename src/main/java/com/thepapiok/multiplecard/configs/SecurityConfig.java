@@ -50,6 +50,8 @@ public class SecurityConfig {
                         "/check_pin",
                         "/finish_order")
                     .hasRole("SHOP")
+                    .requestMatchers("/admin_panel", "/change_user")
+                    .hasRole("ADMIN")
                     .anyRequest()
                     .permitAll())
         .formLogin(

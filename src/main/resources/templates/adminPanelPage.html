@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/adminPanelPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/disable.js"></script>
+<script src="/js/forms.js"></script>
+<script src="/js/adminPanelPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/reports}" class="h2 headerButton">
+        <button class="blackButton" th:text="#{adminPanelPage.button.reports}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="#{error.unexpected}" id="textErrorUnexpected"></span>
+    <p class="title" th:text="#{adminPanelPage.title}"></p>
+    <p id="error"></p>
+    <div id="searchBar">
+        <input type="text" id="searchInput" oninput="changeButton(this.nextElementSibling, this)"
+               th:placeholder="#{adminPanelPage.searchInput.placeHolder}">
+        <span id="searchButton" th:text="#{search.text}" onclick="searchUsers(this.previousElementSibling)"
+              onmouseenter="changeToGreenButton(this, this.previousElementSibling)"
+              onmouseleave="changeButton(this, this.previousElementSibling)">
+        </span>
+    </div>
+    <span id="notFound" th:if="${emptyUsers}" th:text="#{select.no_results}"></span>
+    <div id="adminPanel" th:unless="${emptyUsers}">
+        <div id="columns" class="row">
+            <span id="cell0" class="cell cellColumn" onclick="setSearch(0, this)">Id</span>
+            <span id="cell1" class="cell cellColumn" onclick="setSearch(1, this)" th:text="#{firstName.text}"></span>
+            <span id="cell2" class="cell cellColumn" onclick="setSearch(2, this)" th:text="#{lastName.text}"></span>
+            <span id="cell3" class="cell cellColumn" onclick="setSearch(3, this)" th:text="#{phone.text}"></span>
+            <span id="cell4" class="cell cellColumn" onclick="setSearch(4, this)"
+                  th:text="#{adminPanelPage.role.text}"></span>
+            <span id="cell5" class="cell cellColumn" onclick="setSearch(5, this)"
+                  th:text="#{adminPanelPage.isActive.text}"></span>
+            <span id="cell6" class="cell cellColumn" onclick="setSearch(6, this)"
+                  th:text="#{adminPanelPage.isBanned.text}"></span>
+        </div>
+        <div class="row" th:each="user : ${users}" th:id="${user.id}">
+            <span class="cell" th:text="${user.id}"></span>
+            <span class="cell" th:text="${user.firstName}"></span>
+            <span class="cell" th:text="${user.lastName}"></span>
+            <span class="cell" th:text="${user.phone}"></span>
+            <span class="cell" th:text="${user.role}"></span>
+            <span class="cell active" th:text="${user.active}"
+                  th:attr="onclick=|showOrHideOptions(this, true, '${user.id}')|"></span>
+            <span class="cell banned" th:text="${user.banned}"
+                  th:attr="onclick=|showOrHideOptions(this, false, '${user.id}')|"></span>
+        </div>
+        <div id="options" hidden>
+            <span class="option" onclick="changeToTrue(this.parentElement)">true</span>
+            <span class="option" onclick="changeToFalse(this.parentElement)">false</span>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>
