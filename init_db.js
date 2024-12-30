@@ -309,6 +309,10 @@ db.createCollection("users", {
                     "bsonType": "string",
                     "description": "lastName is required and must be string"
                 },
+                "restricted": {
+                    "bsonType": "bool",
+                    "description": "restricted is required and must be bool"
+                },
                 "address": {
                     "bsonType": "object",
                     "required": ["country", "city", "postalCode", "street", "houseNumber", "province"],
