@@ -604,7 +604,7 @@ db.createCollection("reports", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "orderId", "reportedId", "isProduct", "createdAt", "description", "_class"],
+            "required": ["_id", "userId", "reportedId", "isProduct", "createdAt", "description", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {

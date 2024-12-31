@@ -2,8 +2,15 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
+import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.UserService;
+import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +21,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class AdminPanelController {
   private final AccountService accountService;
+  private final UserService userService;
+  private final MessageSource messageSource;
+  private final ReportService reportService;
 
   @Autowired
-  public AdminPanelController(AccountService accountService) {
+  public AdminPanelController(
+      AccountService accountService,
+      UserService userService,
+      MessageSource messageSource,
+      ReportService reportService) {
     this.accountService = accountService;
+    this.userService = userService;
+    this.messageSource = messageSource;
+    this.reportService = reportService;
   }
 
   @GetMapping("/admin_panel")
@@ -44,5 +61,41 @@ public class AdminPanelController {
     } else {
       return accountService.changeBanned(id, value);
     }
+  }
+
+  @PostMapping("/report")
+  @ResponseBody
+  public ResponseEntity<String> reportProduct(
+      @RequestParam String id,
+      @RequestParam String description,
+      @RequestParam boolean isProduct,
+      Principal principal,
+      Locale locale) {
+    final int maxLength = 1000;
+    final int minLength = 10;
+    String phone = principal.getName();
+    if (userService.checkIsRestricted(phone)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("reportProduct.error.isRestricted", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (description.length() > maxLength || description.length() < minLength) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("validation.incorrect_data", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (reportService.checkIsOwner(id, phone, isProduct)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("reportProduct.error.is_owner", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (reportService.checkReportAlreadyExists(id, phone)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("reportProduct.error.already_reported", null, locale),
+          HttpStatus.BAD_REQUEST);
+    } else if (!reportService.addReport(isProduct, id, phone, description)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.unexpected", null, locale), HttpStatus.BAD_REQUEST);
+    }
+    return new ResponseEntity<>(
+        messageSource.getMessage("reportProduct.success.report_added", null, locale),
+        HttpStatus.OK);
   }
 }

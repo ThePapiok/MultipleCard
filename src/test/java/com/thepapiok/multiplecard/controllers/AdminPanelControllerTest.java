@@ -5,10 +5,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
+import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -25,12 +28,17 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AdminPanelControllerTest {
+  private static final String TEST_PHONE = "+423423141234";
   private static final String TEST_ID = "12312312sdffsafas";
+  private static final String TEST_DESCRIPTION = "test sadfasdfasdfasdfafsdf";
   private static final String TRUE_VALUE = "true";
   private static final String FALSE_VALUE = "false";
+  private static final int BAD_REQUEST_STATUS = 400;
 
   @Autowired private MockMvc mockMvc;
   @MockBean private AccountService accountService;
+  @MockBean private UserService userService;
+  @MockBean private ReportService reportService;
 
   @Test
   @WithMockUser(roles = "ADMIN")
@@ -96,6 +104,91 @@ public class AdminPanelControllerTest {
       throws Exception {
     mockMvc
         .perform(post("/change_user").param("type", type).param("id", id).param("value", value))
+        .andExpect(content().string(content));
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnIsRestrictedErrorAtReportProductWhenUserIsRestricted() throws Exception {
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(true);
+
+    performPostAtReportProduct(
+        TEST_DESCRIPTION, BAD_REQUEST_STATUS, "Twój dostęp jest ograniczony");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnValidationErrorAtReportProductWhenLengthIsBad1() throws Exception {
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+
+    performPostAtReportProduct("cos", BAD_REQUEST_STATUS, "Podane dane są niepoprawne");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnValidationErrorAtReportProductWhenLengthIsBad2() throws Exception {
+    final int badLength = 1001;
+    StringBuilder description = new StringBuilder();
+    description.append("c".repeat(badLength));
+
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+
+    performPostAtReportProduct(
+        description.toString(), BAD_REQUEST_STATUS, "Podane dane są niepoprawne");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnOwnerErrorAtReportProductWhenIsOwner() throws Exception {
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+    when(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true)).thenReturn(true);
+
+    performPostAtReportProduct(TEST_DESCRIPTION, BAD_REQUEST_STATUS, "Jesteś tego właścicielem");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnAlreadyReportedErrorAtReportProductWhenReportExists() throws Exception {
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+    when(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true)).thenReturn(false);
+    when(reportService.checkReportAlreadyExists(TEST_ID, TEST_PHONE)).thenReturn(true);
+
+    performPostAtReportProduct(TEST_DESCRIPTION, BAD_REQUEST_STATUS, "Już to zgłosiłeś");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnUnexpectedErrorAtReportProductWhenErrorAtAddReport() throws Exception {
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+    when(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true)).thenReturn(false);
+    when(reportService.checkReportAlreadyExists(TEST_ID, TEST_PHONE)).thenReturn(false);
+    when(reportService.addReport(true, TEST_ID, TEST_PHONE, TEST_DESCRIPTION)).thenReturn(false);
+
+    performPostAtReportProduct(TEST_DESCRIPTION, BAD_REQUEST_STATUS, "Nieoczekiwany błąd");
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldReturnSuccessMessageAtReportProductWhenEverythingOk() throws Exception {
+    final int okStatus = 200;
+
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(false);
+    when(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true)).thenReturn(false);
+    when(reportService.checkReportAlreadyExists(TEST_ID, TEST_PHONE)).thenReturn(false);
+    when(reportService.addReport(true, TEST_ID, TEST_PHONE, TEST_DESCRIPTION)).thenReturn(true);
+
+    performPostAtReportProduct(TEST_DESCRIPTION, okStatus, "Pomyślnie wysłano zgłoszenie");
+  }
+
+  private void performPostAtReportProduct(String description, int status, String content)
+      throws Exception {
+    mockMvc
+        .perform(
+            post("/report")
+                .param("id", TEST_ID)
+                .param("description", description)
+                .param("isProduct", "true"))
+        .andExpect(status().is(status))
         .andExpect(content().string(content));
   }
 }

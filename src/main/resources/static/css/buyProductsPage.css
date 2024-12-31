@@ -55,11 +55,20 @@
     font-size: 20px;
 }
 
+#reportMessage {
+    width: 100%;
+    height: 50%;
+    margin-bottom: 5px;
+}
+
+.confirmationTitle {
+    margin-bottom: 5%;
+}
+
 @media only screen and (max-width: 768px) {
     #basketQuantity {
         font-size: 13px;
         top: 23px;
         left: 33px;
     }
-
 }

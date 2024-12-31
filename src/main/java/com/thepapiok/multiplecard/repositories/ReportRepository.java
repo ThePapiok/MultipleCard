@@ -4,4 +4,6 @@ import com.thepapiok.multiplecard.collections.Report;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface ReportRepository extends MongoRepository<Report, ObjectId> {}
+public interface ReportRepository extends MongoRepository<Report, ObjectId> {
+  boolean existsByUserIdAndReportedId(ObjectId userId, ObjectId reportedId);
+}

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/products.css">
     <link rel="stylesheet" href="/css/shopInfo.css">
     <link rel="stylesheet" href="/css/searchBar.css">
+    <link rel="stylesheet" href="/css/confirmation.css">
     <link rel="stylesheet" href="/css/buyProductsPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
 </head>
@@ -92,6 +93,11 @@
                                th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
                                 <img src="/images/minus.png" alt="minus">
                             </a>
+                            <a class="resultIcons" th:unless="${isBuy}"
+                               th:attr="onclick=|showOrHideReportProduct('${product.productId}', this.parentElement.parentElement.parentElement)|"
+                               sec:authorize="hasRole('USER')">
+                                <img src="/images/report.png" alt="report">
+                            </a>
                         </div>
                         <div class="result-horizontal imageContainer">
                             <div class="shopLogo" th:title="${product.shopName}">
@@ -146,6 +152,22 @@
                 <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
                         th:attr="onclick=|nextPage('${maxPage}')|"></button>
             </a>
+        </div>
+    </div>
+    <div id="report" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{buyProductsPage.report.title}" class="confirmationTitle"></p>
+            <textarea id="reportMessage" maxlength="1000" oninput="checkTextLength(this)"></textarea>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmation" class="grayButton" th:text="#{button.yes}"
+                            th:attr="onclick=|reportProduct()|"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideReportProduct()"></button>
+                </a>
+            </div>
         </div>
     </div>
 </div>

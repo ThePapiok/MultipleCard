@@ -8,6 +8,10 @@
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
+textarea {
+    resize: none;
+}
+
 label {
     display: block;
 }
