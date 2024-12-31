@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/css/page.css">
     <link rel="stylesheet" href="/css/reviews.css">
     <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/confirmation.css">
+    <link rel="stylesheet" href="/css/reports.css">
     <link rel="stylesheet" href="/css/landingPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
 </head>
@@ -14,6 +16,7 @@
 <script src="/js/page.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/reviews.js"></script>
+<script src="/js/reports.js"></script>
 <script src="/js/landingPage.js"></script>
 <script th:inline="javascript">
     resetBasket();
@@ -68,6 +71,11 @@
                              th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
                         <img class="resultIcons emptyHearth" src="/images/hearth_empty.png" alt="hearth"
                              th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
+                        <a class="resultIcons" th:unless="${review.owner}"
+                           th:attr="onclick=|showOrHideReportProduct('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|"
+                           sec:authorize="hasRole('USER')">
+                            <img src="/images/report.png" alt="report">
+                        </a>
                     </div>
                 </div>
                 <span class="description" th:text="'&quot;' + ${review.review.description} + '&quot;'"></span>
@@ -124,6 +132,22 @@
             </a>
         </div>
     </form>
+    <div id="report" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{report.title}" class="confirmationTitle"></p>
+            <textarea id="reportMessage" maxlength="1000" oninput="checkTextLength(this)"></textarea>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmation" class="grayButton" th:text="#{button.yes}"
+                            onclick="reportProduct(false)"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideReportProduct()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">

@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.services;
 
+import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Report;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
@@ -54,7 +55,8 @@ public class ReportService {
       if (!isProduct) {
         return accountRepository.findIdByPhone(phone).getId().equals(new ObjectId(reportedId));
       } else {
-        return false;
+        Product product = productRepository.findShopIdById(new ObjectId(reportedId));
+        return product == null;
       }
     } catch (Exception e) {
       return true;

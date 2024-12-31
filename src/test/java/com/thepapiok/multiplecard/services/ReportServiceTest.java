@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Report;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
@@ -124,8 +125,17 @@ public class ReportServiceTest {
   }
 
   @Test
-  public void shouldReturnFalseAtCheckIsOwnerWhenIsProduct() {
+  public void shouldReturnFalseAtCheckIsOwnerWhenIsProductAndFoundProduct() {
+    when(productRepository.findShopIdById(TEST_OBJECT_ID)).thenReturn(new Product());
+
     assertFalse(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckIsOwnerWhenIsProductAndNotFoundProduct() {
+    when(productRepository.findShopIdById(TEST_OBJECT_ID)).thenReturn(null);
+
+    assertTrue(reportService.checkIsOwner(TEST_ID, TEST_PHONE, true));
   }
 
   @Test

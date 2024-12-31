@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/shopInfo.css">
     <link rel="stylesheet" href="/css/searchBar.css">
     <link rel="stylesheet" href="/css/confirmation.css">
+    <link rel="stylesheet" href="/css/reports.css">
     <link rel="stylesheet" href="/css/buyProductsPage.css">
     <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
 </head>
@@ -20,6 +21,7 @@
 <script src="/js/productsId.js"></script>
 <script src="/js/shopInfo.js"></script>
 <script src="/js/searchBar.js"></script>
+<script src="/js/reports.js"></script>
 <script src="/js/buyProductsPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -156,12 +158,12 @@
     </div>
     <div id="report" class="confirmation" hidden data-id="">
         <div class="confirmationChoice">
-            <p th:text="#{buyProductsPage.report.title}" class="confirmationTitle"></p>
+            <p th:text="#{report.title}" class="confirmationTitle"></p>
             <textarea id="reportMessage" maxlength="1000" oninput="checkTextLength(this)"></textarea>
             <div>
                 <a>
                     <button type="button" id="buttonConfirmation" class="grayButton" th:text="#{button.yes}"
-                            th:attr="onclick=|reportProduct()|"></button>
+                            onclick="reportProduct(true)"></button>
                 </a>
                 <a>
                     <button type="button" class="redButton" th:text="#{button.no}"

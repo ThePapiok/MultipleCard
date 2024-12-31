@@ -15,6 +15,7 @@ import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
+import com.thepapiok.multiplecard.services.UserService;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class ReviewControllerTest {
+  private static final String ERROR_MESSAGE_PARAM = "errorMessage";
+  private static final String LANDING_PAGE_ERROR_URL = "/?error";
   private static final String TEST_PHONE = "12312312312";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
   private static final String ID_PARAM = "id";
@@ -48,6 +51,7 @@ public class ReviewControllerTest {
   @Autowired private MockMvc mockMvc;
   @MockBean private ReviewService reviewService;
   @MockBean private ResultService resultService;
+  @MockBean private UserService userService;
 
   @Test
   @WithMockUser(username = TEST_PHONE)
@@ -61,14 +65,13 @@ public class ReviewControllerTest {
 
     when(reviewService.addReview(reviewDTO, TEST_PHONE)).thenReturn(true);
 
-    mockMvc
-        .perform(
-            post(REVIEWS_URL)
-                .param(DESCRIPTION_PARAM, reviewDTO.getDescription())
-                .param(RATING_PARAM, String.valueOf(rating))
-                .session(httpSession))
-        .andExpect(redirectedUrl("/?success"));
-    assertEquals("Opinia została pomyślnie dodana !", httpSession.getAttribute("successMessage"));
+    performPostAtAddReview(
+        httpSession,
+        reviewDTO,
+        rating,
+        "Opinia została pomyślnie dodana !",
+        "successMessage",
+        "/?success");
   }
 
   @Test
@@ -76,19 +79,38 @@ public class ReviewControllerTest {
   public void shouldRedirectToLandingPageAtAddReviewWithParamErrorWhenValidationError()
       throws Exception {
     final int rating = 6;
-    final String message = "Podane dane są niepoprawne";
     ReviewDTO reviewDTO = new ReviewDTO();
     reviewDTO.setRating(rating);
     MockHttpSession httpSession = new MockHttpSession();
 
-    mockMvc
-        .perform(
-            post(REVIEWS_URL)
-                .param(DESCRIPTION_PARAM, reviewDTO.getDescription())
-                .param(RATING_PARAM, String.valueOf(rating))
-                .session(httpSession))
-        .andExpect(redirectedUrl("/?error"));
-    assertEquals(message, httpSession.getAttribute("errorMessage"));
+    performPostAtAddReview(
+        httpSession,
+        reviewDTO,
+        rating,
+        "Podane dane są niepoprawne",
+        ERROR_MESSAGE_PARAM,
+        LANDING_PAGE_ERROR_URL);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE)
+  public void shouldRedirectToLandingPageAtAddReviewWithParamErrorWhenUserIsRestricted()
+      throws Exception {
+    final int rating = 3;
+    ReviewDTO reviewDTO = new ReviewDTO();
+    reviewDTO.setDescription(TEST_DESCRIPTION1);
+    reviewDTO.setRating(rating);
+    MockHttpSession httpSession = new MockHttpSession();
+
+    when(userService.checkIsRestricted(TEST_PHONE)).thenReturn(true);
+
+    performPostAtAddReview(
+        httpSession,
+        reviewDTO,
+        rating,
+        "Twój dostęp jest ograniczony",
+        ERROR_MESSAGE_PARAM,
+        LANDING_PAGE_ERROR_URL);
   }
 
   @Test
@@ -96,7 +118,6 @@ public class ReviewControllerTest {
   public void shouldRedirectToLandingPageAtAddReviewWithParamErrorWhenErrorAtAddReview()
       throws Exception {
     final int rating = 3;
-    final String message = "Nieoczekiwany błąd";
     ReviewDTO reviewDTO = new ReviewDTO();
     reviewDTO.setDescription(TEST_DESCRIPTION1);
     reviewDTO.setRating(rating);
@@ -104,14 +125,31 @@ public class ReviewControllerTest {
 
     when(reviewService.addReview(reviewDTO, TEST_PHONE)).thenReturn(false);
 
+    performPostAtAddReview(
+        httpSession,
+        reviewDTO,
+        rating,
+        "Nieoczekiwany błąd",
+        ERROR_MESSAGE_PARAM,
+        LANDING_PAGE_ERROR_URL);
+  }
+
+  private void performPostAtAddReview(
+      MockHttpSession httpSession,
+      ReviewDTO reviewDTO,
+      int rating,
+      String message,
+      String param,
+      String url)
+      throws Exception {
     mockMvc
         .perform(
             post(REVIEWS_URL)
                 .param(DESCRIPTION_PARAM, reviewDTO.getDescription())
                 .param(RATING_PARAM, String.valueOf(rating))
                 .session(httpSession))
-        .andExpect(redirectedUrl("/?error"));
-    assertEquals(message, httpSession.getAttribute("errorMessage"));
+        .andExpect(redirectedUrl(url));
+    assertEquals(message, httpSession.getAttribute(param));
   }
 
   @Test
