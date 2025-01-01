@@ -132,6 +132,7 @@ public class ProductRepositoryTest {
     Account account = new Account();
     account.setEmail(account.getEmail());
     account.setPhone(account.getPhone());
+    account.setId(account.getId());
 
     assertEquals(account, productRepository.findAccountByProductId(product.getId()));
   }

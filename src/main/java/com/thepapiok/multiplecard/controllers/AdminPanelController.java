@@ -119,4 +119,22 @@ public class AdminPanelController {
     adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
     return true;
   }
+
+  @PostMapping("/block_user")
+  @ResponseBody
+  public Boolean blockUser(@RequestParam String id, @RequestParam boolean isShop) {
+    Account account;
+    if (isShop) {
+      account = accountService.getAccountByProductId(id);
+      id = account.getId().toString();
+    } else {
+      account = accountService.getAccountById(id);
+    }
+    String email = account.getEmail();
+    if (email == null || !accountService.changeBanned(id, true)) {
+      return false;
+    }
+    adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
+    return true;
+  }
 }

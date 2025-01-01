@@ -401,11 +401,24 @@ public class AccountServiceTest {
   public void shouldReturnAccountAtGetAccountByProductIdWhenEverythingOk() {
     final String testEmail = "testEmail";
     Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
     account.setPhone(TEST_PHONE);
     account.setEmail(testEmail);
 
     when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account);
 
     assertEquals(account, accountService.getAccountByProductId(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnAccountAtGetAccountByIdWhenEverythingOk() {
+    final String testEmail = "testEmail";
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(testEmail);
+
+    when(accountRepository.findAccountById(TEST_OBJECT_ID)).thenReturn(account);
+
+    assertEquals(account, accountService.getAccountById(TEST_ID));
   }
 }

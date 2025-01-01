@@ -32,6 +32,7 @@
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
     <span hidden th:text="#{productsAdminPage.success.delete_product}" id="textSuccessDelete"></span>
+    <span hidden th:text="#{success.block_user}" id="textSuccessBlockUser"></span>
     <p class="title" th:text="#{products.text}"></p>
     <div id="searchBar">
         <input type="text" id="searchInput" th:title="#{search.text}" th:placeholder="#{search.text}"
@@ -77,6 +78,10 @@
                         <a class="resultIcons"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
+                        </a>
+                        <a class="resultIcons"
+                           th:attr="onclick=|showOrHideBlockShop('${product.productId}', this.parentElement.parentElement.parentElement)|">
+                            <img src="/images/block_user.png" alt="block">
                         </a>
                     </div>
                     <div class="result-horizontal imageContainer">
@@ -135,7 +140,7 @@
     </div>
     <div id="delete" class="confirmation" hidden data-id="">
         <div class="confirmationChoice">
-            <p th:text="#{delete.title}" class="confirmationTitle" id="withoutText"></p>
+            <p th:text="#{delete.title}" class="confirmationTitle"></p>
             <div>
                 <a>
                     <button type="button" id="buttonConfirmationDelete" class="greenButton" th:text="#{button.yes}"
@@ -144,6 +149,21 @@
                 <a>
                     <button type="button" class="redButton" th:text="#{button.no}"
                             onclick="showOrHideDeleteProduct()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="block" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{block.title}" class="confirmationTitle"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationBlock" class="greenButton" th:text="#{button.yes}"
+                            onclick="blockShop()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBlockShop()"></button>
                 </a>
             </div>
         </div>

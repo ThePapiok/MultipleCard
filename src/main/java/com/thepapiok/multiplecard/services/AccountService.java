@@ -161,4 +161,8 @@ public class AccountService {
   public Account getAccountByProductId(String productId) {
     return productRepository.findAccountByProductId(new ObjectId(productId));
   }
+
+  public Account getAccountById(String id) {
+    return accountRepository.findAccountById(new ObjectId(id));
+  }
 }

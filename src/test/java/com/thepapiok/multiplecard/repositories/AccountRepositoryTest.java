@@ -28,6 +28,7 @@ import org.springframework.web.client.RestTemplate;
 @Import(DbConfig.class)
 public class AccountRepositoryTest {
   private static final String TEST_PHONE1 = "+21413241234";
+  private static final String TEST_EMAIL1 = "email1";
   private static final String TEST_SHOP_NAME1 = "shop1";
   private static final String TEST_ACCOUNT_NUMBER1 = "132345346457568657342343464575685667";
   private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
@@ -44,7 +45,7 @@ public class AccountRepositoryTest {
     final ObjectId otherIdTest = new ObjectId("123456789012345678901235");
     account1 = new Account();
     account1.setPhone(TEST_PHONE1);
-    account1.setEmail("email1");
+    account1.setEmail(TEST_EMAIL1);
     account1.setId(TEST_ID);
     account1.setPassword("Zasdq1!2dss");
     account1.setActive(true);
@@ -208,5 +209,24 @@ public class AccountRepositoryTest {
     account.setPhone(TEST_PHONE1);
 
     assertEquals(account, accountRepository.findPhoneById(account1.getId()));
+  }
+
+  @Test
+  public void shouldReturnNullAtFindPhoneByIdWhenAccountNotFound() {
+    assertNull(accountRepository.findPhoneById(new ObjectId()));
+  }
+
+  @Test
+  public void shouldReturnAccountWithFieldPhoneAndEmailAtFindAccountByIdWhenEverythingOk() {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE1);
+    account.setEmail(TEST_EMAIL1);
+
+    assertEquals(account, accountRepository.findAccountById(account1.getId()));
+  }
+
+  @Test
+  public void shouldReturnNullAtFindAccountByIdWhenAccountNotFound() {
+    assertNull(accountRepository.findAccountById(new ObjectId()));
   }
 }

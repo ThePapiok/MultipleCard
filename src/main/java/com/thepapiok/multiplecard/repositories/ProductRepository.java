@@ -60,7 +60,8 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
   {
     $addFields: {
       "phone": "$account.phone",
-      "email": "$account.email"
+      "email": "$account.email",
+      "_id": "$account._id"
     }
   }
 """

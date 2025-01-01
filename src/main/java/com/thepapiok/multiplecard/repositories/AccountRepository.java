@@ -359,4 +359,7 @@ public interface AccountRepository extends MongoRepository<Account, ObjectId> {
 
   @Query(value = "{'_id': ?0}", fields = "{'_id': 0, 'phone': 1}")
   Account findPhoneById(ObjectId id);
+
+  @Query(value = "{'_id': ?0}", fields = "{'_id': 0, 'phone': 1, 'email': 1}")
+  Account findAccountById(ObjectId id);
 }

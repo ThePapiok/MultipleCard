@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.controllers;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class AdminPanelControllerTest {
   private static final String TEST_PHONE = "+423423141234";
+  private static final String TEST_EMAIL = "testEmail";
   private static final String ID_PARAM = "id";
   private static final String TEST_ID = "12312312sdffsafas";
   private static final String TEST_DESCRIPTION = "test sadfasdfasdfasdfafsdf";
@@ -215,10 +217,9 @@ public class AdminPanelControllerTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
-    final String testEmail = "testEmail";
     Account account = new Account();
     account.setPhone(TEST_PHONE);
-    account.setEmail(testEmail);
+    account.setEmail(TEST_EMAIL);
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
     when(productService.deleteProduct(TEST_ID)).thenReturn(false);
@@ -231,10 +232,9 @@ public class AdminPanelControllerTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   public void shouldReturnTrueAtDeleteProductWhenEverythingOk() throws Exception {
-    final String testEmail = "testEmail";
     Account account = new Account();
     account.setPhone(TEST_PHONE);
-    account.setEmail(testEmail);
+    account.setEmail(TEST_EMAIL);
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
     when(productService.deleteProduct(TEST_ID)).thenReturn(true);
@@ -242,5 +242,64 @@ public class AdminPanelControllerTest {
     mockMvc
         .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
         .andExpect(content().string(TRUE_VALUE));
+  }
+
+  @Test
+  public void shouldReturnFalseAtBlockUserWhenEmailIsNullWithUserParam() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+
+    performPostAtBlockUser(false, FALSE_VALUE);
+  }
+
+  @Test
+  public void shouldReturnFalseAtBlockUserWhenErrorAtChangeBannedWithUserParam() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(accountService.changeBanned(TEST_ID, true)).thenReturn(false);
+
+    performPostAtBlockUser(false, FALSE_VALUE);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithUserParam() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(accountService.changeBanned(TEST_ID, true)).thenReturn(true);
+
+    performPostAtBlockUser(false, TRUE_VALUE);
+    verify(adminPanelService).sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  @Test
+  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithShopParam() throws Exception {
+    final ObjectId testId = new ObjectId("123456789009876543210987");
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    account.setId(testId);
+
+    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
+    when(accountService.changeBanned(testId.toString(), true)).thenReturn(true);
+
+    performPostAtBlockUser(true, TRUE_VALUE);
+    verify(adminPanelService)
+        .sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, testId.toString());
+  }
+
+  private void performPostAtBlockUser(boolean isShop, String content) throws Exception {
+
+    mockMvc
+        .perform(
+            post("/block_user").param(ID_PARAM, TEST_ID).param("isShop", String.valueOf(isShop)))
+        .andExpect(content().string(content));
   }
 }
