@@ -40,7 +40,10 @@
     <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin_panel}" class="h3 headerButton">
         <button class="blackButton">Admin panel</button>
     </a>
-    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" id="h4" class="headerButton">
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/products}" class="h4 headerButton">
+        <button class="blackButton" th:text="#{button.products}"></button>
+    </a>
+    <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" class="h4 headerButton">
         <button class="blackButton" th:text="#{button.orders}"></button>
     </a>
 </div>

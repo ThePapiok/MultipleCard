@@ -1,7 +1,10 @@
 package com.thepapiok.multiplecard.controllers;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
+import com.thepapiok.multiplecard.services.AdminPanelService;
+import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.security.Principal;
@@ -24,17 +27,23 @@ public class AdminPanelController {
   private final UserService userService;
   private final MessageSource messageSource;
   private final ReportService reportService;
+  private final ProductService productService;
+  private final AdminPanelService adminPanelService;
 
   @Autowired
   public AdminPanelController(
       AccountService accountService,
       UserService userService,
       MessageSource messageSource,
-      ReportService reportService) {
+      ReportService reportService,
+      ProductService productService,
+      AdminPanelService adminPanelService) {
     this.accountService = accountService;
     this.userService = userService;
     this.messageSource = messageSource;
     this.reportService = reportService;
+    this.productService = productService;
+    this.adminPanelService = adminPanelService;
   }
 
   @GetMapping("/admin_panel")
@@ -97,5 +106,17 @@ public class AdminPanelController {
     return new ResponseEntity<>(
         messageSource.getMessage("reportProduct.success.report_added", null, locale),
         HttpStatus.OK);
+  }
+
+  @PostMapping("/delete_product")
+  @ResponseBody
+  public Boolean deleteProduct(@RequestParam String id) {
+    Account account = accountService.getAccountByProductId(id);
+    String email = account.getEmail();
+    if (email == null || !productService.deleteProduct(id)) {
+      return false;
+    }
+    adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
+    return true;
   }
 }

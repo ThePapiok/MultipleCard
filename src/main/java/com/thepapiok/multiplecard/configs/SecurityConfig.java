@@ -21,6 +21,7 @@ public class SecurityConfig {
       throws Exception {
     final String loginUrl = "/login";
     final String roleUser = "USER";
+    final String roleAdmin = "ADMIN";
     http.authorizeHttpRequests(
             authorize ->
                 authorize
@@ -36,7 +37,7 @@ public class SecurityConfig {
                     .requestMatchers("/new_card", "/block_card", "/order_card")
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.POST, "/user")
-                    .hasAnyRole(roleUser, "ADMIN")
+                    .hasAnyRole(roleUser, roleAdmin)
                     .requestMatchers("/register", "/password_reset", "/register_shop")
                     .anonymous()
                     .requestMatchers("/password_change", "/delete_account", "/edit_profile")
@@ -44,7 +45,6 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/profile")
                     .authenticated()
                     .requestMatchers(
-                        "/products",
                         "/add_product",
                         "/promotions",
                         "/block_product",
@@ -54,8 +54,10 @@ public class SecurityConfig {
                         "/check_pin",
                         "/finish_order")
                     .hasRole("SHOP")
-                    .requestMatchers("/admin_panel", "/change_user")
-                    .hasRole("ADMIN")
+                    .requestMatchers("/admin_panel", "/change_user", "/delete_product")
+                    .hasRole(roleAdmin)
+                    .requestMatchers("/products")
+                    .hasAnyRole("SHOP", roleAdmin)
                     .anyRequest()
                     .permitAll())
         .formLogin(

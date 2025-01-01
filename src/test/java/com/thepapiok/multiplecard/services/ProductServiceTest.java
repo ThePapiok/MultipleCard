@@ -44,6 +44,7 @@ import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.PromotionRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
@@ -109,6 +110,7 @@ public class ProductServiceTest {
   @Mock private PromotionRepository promotionRepository;
   @Mock private ReservedProductService reservedProductService;
   @Mock private UserRepository userRepository;
+  @Mock private ReportRepository reportRepository;
   private ProductService productService;
 
   @BeforeAll
@@ -142,7 +144,8 @@ public class ProductServiceTest {
             shopRepository,
             promotionRepository,
             reservedProductService,
-            userRepository);
+            userRepository,
+            reportRepository);
   }
 
   @Test
@@ -434,6 +437,7 @@ public class ProductServiceTest {
     verify(promotionService).deletePromotion(TEST_ID);
     verify(productRepository).deleteById(productId);
     verify(blockedProductRepository).deleteByProductId(productId);
+    verify(reportRepository).deleteAllByReportedId(productId);
   }
 
   @Test

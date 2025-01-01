@@ -13,6 +13,7 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.ArrayList;
@@ -38,11 +39,13 @@ public class AccountServiceTest {
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
   @Mock private ShopRepository shopRepository;
+  @Mock private ProductRepository productRepository;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    accountService = new AccountService(accountRepository, userRepository, shopRepository);
+    accountService =
+        new AccountService(accountRepository, userRepository, shopRepository, productRepository);
   }
 
   @Test
@@ -392,5 +395,17 @@ public class AccountServiceTest {
 
     assertTrue(accountService.changeBanned(TEST_ID, true));
     verify(accountRepository).save(expectedAccount);
+  }
+
+  @Test
+  public void shouldReturnAccountAtGetAccountByProductIdWhenEverythingOk() {
+    final String testEmail = "testEmail";
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(testEmail);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account);
+
+    assertEquals(account, accountService.getAccountByProductId(TEST_ID));
   }
 }

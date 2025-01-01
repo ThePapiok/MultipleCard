@@ -8,8 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
+import com.thepapiok.multiplecard.services.AdminPanelService;
+import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.ArrayList;
@@ -29,16 +32,20 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 public class AdminPanelControllerTest {
   private static final String TEST_PHONE = "+423423141234";
+  private static final String ID_PARAM = "id";
   private static final String TEST_ID = "12312312sdffsafas";
   private static final String TEST_DESCRIPTION = "test sadfasdfasdfasdfafsdf";
   private static final String TRUE_VALUE = "true";
   private static final String FALSE_VALUE = "false";
+  private static final String DELETE_PRODUCT_URL = "/delete_product";
   private static final int BAD_REQUEST_STATUS = 400;
 
   @Autowired private MockMvc mockMvc;
   @MockBean private AccountService accountService;
   @MockBean private UserService userService;
   @MockBean private ReportService reportService;
+  @MockBean private ProductService productService;
+  @MockBean private AdminPanelService adminPanelService;
 
   @Test
   @WithMockUser(roles = "ADMIN")
@@ -103,7 +110,7 @@ public class AdminPanelControllerTest {
   private void performPostAtChangeUser(String content, String type, String id, String value)
       throws Exception {
     mockMvc
-        .perform(post("/change_user").param("type", type).param("id", id).param("value", value))
+        .perform(post("/change_user").param("type", type).param(ID_PARAM, id).param("value", value))
         .andExpect(content().string(content));
   }
 
@@ -185,10 +192,55 @@ public class AdminPanelControllerTest {
     mockMvc
         .perform(
             post("/report")
-                .param("id", TEST_ID)
+                .param(ID_PARAM, TEST_ID)
                 .param("description", description)
-                .param("isProduct", "true"))
+                .param("isProduct", TRUE_VALUE))
         .andExpect(status().is(status))
         .andExpect(content().string(content));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteProductWhenNotFoundEmail() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
+
+    mockMvc
+        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(FALSE_VALUE));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
+    final String testEmail = "testEmail";
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(testEmail);
+
+    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
+    when(productService.deleteProduct(TEST_ID)).thenReturn(false);
+
+    mockMvc
+        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(FALSE_VALUE));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnTrueAtDeleteProductWhenEverythingOk() throws Exception {
+    final String testEmail = "testEmail";
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(testEmail);
+
+    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
+    when(productService.deleteProduct(TEST_ID)).thenReturn(true);
+
+    mockMvc
+        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(TRUE_VALUE));
   }
 }

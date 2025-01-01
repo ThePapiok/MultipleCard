@@ -1,10 +1,13 @@
 package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import java.time.LocalDateTime;
@@ -27,12 +30,14 @@ import org.springframework.web.client.RestTemplate;
 public class ProductRepositoryTest {
   private static Shop testShop;
   private Product product;
+  private Account account;
 
   @Autowired private ProductRepository productRepository;
   @Autowired private CategoryRepository categoryRepository;
   @Autowired private PromotionRepository promotionRepository;
   @Autowired private ShopRepository shopRepository;
   @Autowired private BlockedProductRepository blockedProductRepository;
+  @Autowired private AccountRepository accountRepository;
   @Autowired private MongoTemplate mongoTemplate;
   @MockBean private RestTemplate restTemplate;
 
@@ -83,6 +88,14 @@ public class ProductRepositoryTest {
     product.setCategories(List.of(category.getId()));
     product.setUpdatedAt(localDateTime);
     product = mongoTemplate.save(product);
+    account = new Account();
+    account.setBanned(false);
+    account.setActive(false);
+    account.setRole(Role.ROLE_SHOP);
+    account.setPassword("afsdasdf123");
+    account.setEmail("testEmail");
+    account.setPhone("+24142134321");
+    account = mongoTemplate.save(account);
   }
 
   @AfterEach
@@ -92,6 +105,7 @@ public class ProductRepositoryTest {
     promotionRepository.deleteAll();
     blockedProductRepository.deleteAll();
     shopRepository.deleteAll();
+    accountRepository.deleteAll();
   }
 
   @Test
@@ -111,5 +125,19 @@ public class ProductRepositoryTest {
     expectedProduct.setPrice(expectedPrice);
 
     assertEquals(expectedProduct, productRepository.findPriceById(product.getId()));
+  }
+
+  @Test
+  public void shouldReturnAccountAtFindAccountByProductIdWhenEverythingOk() {
+    Account account = new Account();
+    account.setEmail(account.getEmail());
+    account.setPhone(account.getPhone());
+
+    assertEquals(account, productRepository.findAccountByProductId(product.getId()));
+  }
+
+  @Test
+  public void shouldReturnNullAtFindAccountByProductIdWhenProductNotFound() {
+    assertNull(productRepository.findAccountByProductId(new ObjectId()));
   }
 }

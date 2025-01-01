@@ -31,6 +31,7 @@ import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.PromotionRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
@@ -71,6 +72,7 @@ public class ProductService {
   private final PromotionRepository promotionRepository;
   private final ReservedProductService reservedProductService;
   private final UserRepository userRepository;
+  private final ReportRepository reportRepository;
 
   @Autowired
   public ProductService(
@@ -89,7 +91,8 @@ public class ProductService {
       ShopRepository shopRepository,
       PromotionRepository promotionRepository,
       ReservedProductService reservedProductService,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      ReportRepository reportRepository) {
     this.categoryService = categoryService;
     this.productConverter = productConverter;
     this.productRepository = productRepository;
@@ -106,6 +109,7 @@ public class ProductService {
     this.promotionRepository = promotionRepository;
     this.reservedProductService = reservedProductService;
     this.userRepository = userRepository;
+    this.reportRepository = reportRepository;
   }
 
   public boolean addProduct(
@@ -186,6 +190,7 @@ public class ProductService {
                 promotionService.deletePromotion(productId);
                 productRepository.deleteById(objectId);
                 blockedProductRepository.deleteByProductId(objectId);
+                reportRepository.deleteAllByReportedId(objectId);
                 List<Order> orders = orderRepository.findAllByProductIdAndIsUsed(objectId, false);
                 for (Order order : orders) {
                   mongoTemplate.updateFirst(
