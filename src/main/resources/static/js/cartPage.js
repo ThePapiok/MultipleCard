@@ -137,15 +137,15 @@ function atStart(page) {
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.productName + `</span>
                         <span class="quantity">` + quantity + `</span>
-                        <a class="resultIcons"
+                        <a class="resultIcons" title="` + document.getElementById("textAddProduct").textContent + `"
                            onclick="addProduct('` + productId + `', this.previousElementSibling, ` + hasPromotion + `, this.parentElement.parentElement.parentElement, ` + related + `, true)">
                             <img src="/images/plus.png" alt="add">
                         </a>
-                        <a class="resultIcons"
+                        <a class="resultIcons" title="` + document.getElementById("textDeleteProduct").textContent + `"
                            onclick="deleteProduct('` + productId + `', this.previousElementSibling.previousElementSibling, ` + hasPromotion + `, this.parentElement.parentElement.parentElement, ` + related + `)">
                             <img src="/images/minus.png" alt="minus">
                         </a>
-                        <a class="resultIcons" onclick="removeProduct('` + productId + `' , this.parentElement.parentElement.parentElement,` + (product.startAtPromotion != null) + `)">
+                        <a class="resultIcons" title="` + document.getElementById("textDelete").textContent + `" onclick="removeProduct('` + productId + `' , this.parentElement.parentElement.parentElement,` + (product.startAtPromotion != null) + `)">
                             <img src="/images/close.png" alt="close">
                         </a>
                     </div>

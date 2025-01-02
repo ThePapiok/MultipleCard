@@ -24,6 +24,7 @@
     <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
     <span hidden th:text="#{upload_file.bad_type}" id="textBadType"></span>
     <span hidden th:text="#{upload_file.too_many}" id="textTooMany"></span>
+    <span hidden th:text="#{delete_file.title_window}" id="textDeleteFile"></span>
     <p class="title" th:text="#{verificationShopPage.title}"></p>
     <form th:action="@{/shop_verifications}" id="form" method="post" enctype="multipart/form-data">
         <p th:text="#{upload_file.text}" id="titleUploadFile"></p>
@@ -104,10 +105,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

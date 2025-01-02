@@ -54,18 +54,18 @@ function addProductId(id, e, hasPromotion, product, related, isCart) {
                     <div class="result-horizontal notImageContainer">
                         <span class="name">` + product.getElementsByClassName("name")[0].textContent + `</span>
                         <span class="quantity">0</span>
-                        <a class="resultIcons"
+                        <a class="resultIcons" title="` + document.getElementById("textAddProduct").textContent + `"
                            onclick="addProduct('` + id + `', this.previousElementSibling, false, this.parentElement.parentElement.parentElement, true, ` + isCart + `)">
                             <img src="/images/plus.png" alt="add">
                         </a>
-                        <a class="resultIcons"
+                        <a class="resultIcons" title="` + document.getElementById("textDeleteProduct").textContent + `"
                            onclick="deleteProduct('` + id + `', this.previousElementSibling.previousElementSibling, false, this.parentElement.parentElement.parentElement, true)">
                             <img src="/images/minus.png" alt="minus">
                         </a>
                 `;
                     if (isCart) {
                         innerHtml += `
-                    <a class="resultIcons" onclick="removeProduct('` + id + `' , this.parentElement.parentElement.parentElement,` + false + `)">
+                    <a class="resultIcons" title="` + document.getElementById("textDelete").textContent + `" onclick="removeProduct('` + id + `' , this.parentElement.parentElement.parentElement,` + false + `)">
                             <img src="/images/close.png" alt="close">
                         </a>
                     `;

@@ -71,18 +71,21 @@
                         <input hidden id="inputCategory1" type="text" name="category[0]">
                         <input readonly id="category1" th:value="#{category.not_selected}">
                         <img id="delete1" class="deleteCategory" src="/images/close.png" alt="close"
+                             th:title="#{delete.title_window}"
                              onclick="deleteCategory(this)">
                     </label>
                     <label class="inputs selectedCategory">
                         <input hidden id="inputCategory2" type="text" name="category[1]">
                         <input readonly id="category2" th:value="#{category.not_selected}">
                         <img id="delete2" class="deleteCategory" src="/images/close.png" alt="close"
+                             th:title="#{delete.title_window}"
                              onclick="deleteCategory(this)">
                     </label>
                     <label class="inputs selectedCategory">
                         <input hidden id="inputCategory3" type="text" name="category[2]">
                         <input readonly id="category3" th:value="#{category.not_selected}">
                         <img id="delete3" class="deleteCategory" src="/images/close.png" alt="close"
+                             th:title="#{delete.title_window}"
                              onclick="deleteCategory(this)">
                     </label>
                 </div>
@@ -203,10 +206,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

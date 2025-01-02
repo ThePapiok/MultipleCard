@@ -63,7 +63,7 @@
             <option th:text="#{select_option.latest_add}" value="6"></option>
             <option th:text="#{select_option.oldest_add}" value="7"></option>
         </select>
-        <div id="searchButton" th:attr="onclick=|setParams('/products', true, false)|">
+        <div id="searchButton" th:attr="onclick=|setParams('/products', true, false)|" th:title="#{search.text}">
             <img id="searchImage" src="/images/search.png" alt="search">
         </div>
     </div>
@@ -76,11 +76,11 @@
                 <div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name" th:text="${product.productName}"></span>
-                        <a class="resultIcons"
+                        <a class="resultIcons" th:title="#{delete_product.title_window}"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
-                        <a class="resultIcons"
+                        <a class="resultIcons" th:title="#{block.title_window}"
                            th:attr="onclick=|showOrHideBlockUser('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/block_user.png" alt="block">
                         </a>
@@ -172,10 +172,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

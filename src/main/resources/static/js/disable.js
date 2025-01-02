@@ -6,7 +6,7 @@ function atStart(isCard) {
         enableInputs();
     }
     checkLanguage();
-    if (isCard){
+    if (isCard) {
         checkCardName(document.getElementById('name'));
     }
 }

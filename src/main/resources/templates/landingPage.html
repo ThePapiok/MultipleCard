@@ -76,23 +76,25 @@
                         <img class="resultIcons notLoginHearth" src="/images/hearth.png" alt="hearth"
                              th:unless="${principal}">
                         <img class="resultIcons fullHearth" src="/images/hearth.png" alt="hearth"
+                             th:title="#{delete_like.title_window}"
                              th:attr="onclick=|deleteLike('${review.id}', this)|" th:if="${principal}">
                         <img class="resultIcons emptyHearth" src="/images/hearth_empty.png" alt="hearth"
+                             th:title="#{add_like.title_window}"
                              th:attr="onclick=|addLike('${review.id}', this)|" th:if="${principal}">
-                        <a class="resultIcons" th:unless="${review.owner}"
+                        <a class="resultIcons" th:unless="${review.owner}" th:title="#{report.title_window}"
                            th:attr="onclick=|showOrHideReportProduct('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|"
                            sec:authorize="hasRole('USER')">
                             <img src="/images/report.png" alt="report">
                         </a>
-                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')"
+                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')" th:title="#{delete_review.title_window}"
                            th:attr="onclick=|showOrHideDeleteReview('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
-                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')"
+                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')" th:title="#{mute.title_window}"
                            th:attr="onclick=|showOrHideMuteUser('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|">
                             <img src="/images/mute.png" alt="mute">
                         </a>
-                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')"
+                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')" th:title="#{block.title_window}"
                            th:attr="onclick=|showOrHideBlockUser('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|">
                             <img src="/images/block_user.png" alt="block">
                         </a>
@@ -107,7 +109,8 @@
                              th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}"
                              th:if="${review.review.rating} < 5">
                     </div>
-                    <img class="resultIcons delete" src="/images/close.png" alt="delete" th:if="${review.owner}"
+                    <img th:title="#{delete_review.title_window}" class="resultIcons delete" src="/images/close.png"
+                         alt="delete" th:if="${review.owner}"
                          th:attr="onclick=|removeReview('${review.id}', this)|">
                 </div>
             </div>
@@ -216,10 +219,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

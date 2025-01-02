@@ -33,6 +33,9 @@
 </div>
 <div id="body">
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
+    <span hidden th:text="#{add_product.text}" id="textAddProduct"></span>
+    <span hidden th:text="#{delete_product.title_window}" id="textDeleteProduct"></span>
+    <span hidden th:text="#{delete.title_window}" id="textDelete"></span>
     <p class="title" th:text="#{products.text}"></p>
     <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
     <div th:if="${cardExists} == true">
@@ -64,7 +67,8 @@
                 <option th:text="#{select_option.latest_add}" value="6"></option>
                 <option th:text="#{select_option.oldest_add}" value="7"></option>
             </select>
-            <div id="searchButton" th:attr="onclick=|setParams('/cards?id=${id}', true, ${isBuy})|">
+            <div id="searchButton" th:attr="onclick=|setParams('/cards?id=${id}', true, ${isBuy})|"
+                 th:title="#{search.text}">
                 <img id="searchImage" src="/images/search.png" alt="search">
             </div>
             <div id="basket">
@@ -72,7 +76,8 @@
                 <a class="basketUrl" id="emptyBasket">
                     <img class="basketImage" src="/images/basket_empty.png" alt="basket">
                 </a>
-                <a class="basketUrl" id="notEmptyBasket" th:attr="onclick=|goToBasket('${id}')|">
+                <a class="basketUrl" id="notEmptyBasket" th:attr="onclick=|goToBasket('${id}')|"
+                   th:title="#{buy.title_window}">
                     <img class="basketImage" src="/images/basket.png" alt="basket">
                 </a>
             </div>
@@ -87,15 +92,15 @@
                         <div class="result-horizontal notImageContainer">
                             <span class="name" th:text="${product.productName}"></span>
                             <span class="quantity">0</span>
-                            <a class="resultIcons"
+                            <a class="resultIcons" th:title="#{add_product.text}"
                                th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
                                 <img src="/images/plus.png" alt="add">
                             </a>
-                            <a class="resultIcons"
+                            <a class="resultIcons" th:title="#{delete_product.title_window}"
                                th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
                                 <img src="/images/minus.png" alt="minus">
                             </a>
-                            <a class="resultIcons" th:unless="${isBuy}"
+                            <a class="resultIcons" th:unless="${isBuy}" th:title="#{report.title_window}"
                                th:attr="onclick=|showOrHideReportProduct('${product.productId}', this.parentElement.parentElement.parentElement)|"
                                sec:authorize="hasRole('USER')">
                                 <img src="/images/report.png" alt="report">
@@ -175,10 +180,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

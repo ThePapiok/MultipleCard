@@ -78,6 +78,7 @@ function addPlace(e, streetValue, houseNumberValue, apartmentNumberValue, postal
         block.appendChild(place);
         minus.src = "/images/minus.png";
         minus.alt = "minus";
+        minus.title = document.getElementById("textDeletePlace").textContent;
         minus.className = "minus";
         minus.onclick = () => removePlace(placeSelect, type);
         block.appendChild(minus);

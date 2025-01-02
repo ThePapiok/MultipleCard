@@ -31,6 +31,9 @@
     <span hidden th:text="#{cartPage.error.new_quantity_promotion}" id="textGetNewQuantity"></span>
     <span hidden th:text="#{cartPage.error.too_many_products}" id="textTooManyProducts"></span>
     <span hidden th:text="${points}" id="points"></span>
+    <span hidden th:text="#{add_product.text}" id="textAddProduct"></span>
+    <span hidden th:text="#{delete_product.title_window}" id="textDeleteProduct"></span>
+    <span hidden th:text="#{delete.title_window}" id="textDelete"></span>
     <p class="title" th:text="#{cartPage.title}"></p>
     <div class="block-horizontally" id="yourPoints">
         <label>
@@ -81,10 +84,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>
