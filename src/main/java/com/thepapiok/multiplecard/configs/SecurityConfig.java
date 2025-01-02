@@ -54,7 +54,13 @@ public class SecurityConfig {
                         "/check_pin",
                         "/finish_order")
                     .hasRole("SHOP")
-                    .requestMatchers("/admin_panel", "/change_user", "/delete_product")
+                    .requestMatchers(
+                        "/admin_panel",
+                        "/change_user",
+                        "/delete_product",
+                        "/block_user",
+                        "/delete_review",
+                        "/mute_user")
                     .hasRole(roleAdmin)
                     .requestMatchers("/products")
                     .hasAnyRole("SHOP", roleAdmin)

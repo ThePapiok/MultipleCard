@@ -19,6 +19,7 @@
 <script src="/js/products.js"></script>
 <script src="/js/shopInfo.js"></script>
 <script src="/js/searchBar.js"></script>
+<script src="/js/block.js"></script>
 <script src="/js/productsAdminPage.js"></script>
 <div id="header">
     <a th:href="@{/}" id="h5" class="headerButton">
@@ -31,7 +32,7 @@
 <div id="body">
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
-    <span hidden th:text="#{productsAdminPage.success.delete_product}" id="textSuccessDelete"></span>
+    <span hidden th:text="#{success.delete}" id="textSuccessDelete"></span>
     <span hidden th:text="#{success.block_user}" id="textSuccessBlockUser"></span>
     <p class="title" th:text="#{products.text}"></p>
     <div id="searchBar">
@@ -80,7 +81,7 @@
                             <img src="/images/close.png" alt="close">
                         </a>
                         <a class="resultIcons"
-                           th:attr="onclick=|showOrHideBlockShop('${product.productId}', this.parentElement.parentElement.parentElement)|">
+                           th:attr="onclick=|showOrHideBlockUser('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/block_user.png" alt="block">
                         </a>
                     </div>
@@ -159,11 +160,11 @@
             <div>
                 <a>
                     <button type="button" id="buttonConfirmationBlock" class="greenButton" th:text="#{button.yes}"
-                            onclick="blockShop()"></button>
+                            onclick="blockUser(true)"></button>
                 </a>
                 <a>
                     <button type="button" class="redButton" th:text="#{button.no}"
-                            onclick="showOrHideBlockShop()"></button>
+                            onclick="showOrHideBlockUser()"></button>
                 </a>
             </div>
         </div>

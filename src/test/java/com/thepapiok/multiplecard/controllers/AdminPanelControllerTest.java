@@ -15,6 +15,7 @@ import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.ReviewService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +36,10 @@ public class AdminPanelControllerTest {
   private static final String TEST_PHONE = "+423423141234";
   private static final String TEST_EMAIL = "testEmail";
   private static final String ID_PARAM = "id";
-  private static final String TEST_ID = "12312312sdffsafas";
+  private static final String TEST_ID = "123456789012345678901234";
   private static final String TEST_DESCRIPTION = "test sadfasdfasdfasdfafsdf";
   private static final String TRUE_VALUE = "true";
   private static final String FALSE_VALUE = "false";
-  private static final String DELETE_PRODUCT_URL = "/delete_product";
   private static final int BAD_REQUEST_STATUS = 400;
 
   @Autowired private MockMvc mockMvc;
@@ -48,6 +48,7 @@ public class AdminPanelControllerTest {
   @MockBean private ReportService reportService;
   @MockBean private ProductService productService;
   @MockBean private AdminPanelService adminPanelService;
+  @MockBean private ReviewService reviewService;
 
   @Test
   @WithMockUser(roles = "ADMIN")
@@ -209,14 +210,12 @@ public class AdminPanelControllerTest {
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
 
-    mockMvc
-        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(FALSE_VALUE));
+    performPostAtDeleteProduct(FALSE_VALUE);
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
+  public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
@@ -224,9 +223,7 @@ public class AdminPanelControllerTest {
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
     when(productService.deleteProduct(TEST_ID)).thenReturn(false);
 
-    mockMvc
-        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(FALSE_VALUE));
+    performPostAtDeleteProduct(FALSE_VALUE);
   }
 
   @Test
@@ -239,12 +236,18 @@ public class AdminPanelControllerTest {
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
     when(productService.deleteProduct(TEST_ID)).thenReturn(true);
 
+    performPostAtDeleteProduct(TRUE_VALUE);
+    verify(adminPanelService).sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  private void performPostAtDeleteProduct(String content) throws Exception {
     mockMvc
-        .perform(post(DELETE_PRODUCT_URL).param(ID_PARAM, TEST_ID))
-        .andExpect(content().string(TRUE_VALUE));
+        .perform(post("/delete_product").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(content));
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   public void shouldReturnFalseAtBlockUserWhenEmailIsNullWithUserParam() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
@@ -255,6 +258,7 @@ public class AdminPanelControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   public void shouldReturnFalseAtBlockUserWhenErrorAtChangeBannedWithUserParam() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
@@ -267,6 +271,7 @@ public class AdminPanelControllerTest {
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   public void shouldReturnTrueAtBlockUserWhenEverythingOkWithUserParam() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
@@ -276,10 +281,11 @@ public class AdminPanelControllerTest {
     when(accountService.changeBanned(TEST_ID, true)).thenReturn(true);
 
     performPostAtBlockUser(false, TRUE_VALUE);
-    verify(adminPanelService).sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, TEST_ID);
+    verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
   }
 
   @Test
+  @WithMockUser(roles = "ADMIN")
   public void shouldReturnTrueAtBlockUserWhenEverythingOkWithShopParam() throws Exception {
     final ObjectId testId = new ObjectId("123456789009876543210987");
     Account account = new Account();
@@ -291,8 +297,7 @@ public class AdminPanelControllerTest {
     when(accountService.changeBanned(testId.toString(), true)).thenReturn(true);
 
     performPostAtBlockUser(true, TRUE_VALUE);
-    verify(adminPanelService)
-        .sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, testId.toString());
+    verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, testId.toString());
   }
 
   private void performPostAtBlockUser(boolean isShop, String content) throws Exception {
@@ -300,6 +305,94 @@ public class AdminPanelControllerTest {
     mockMvc
         .perform(
             post("/block_user").param(ID_PARAM, TEST_ID).param("isShop", String.valueOf(isShop)))
+        .andExpect(content().string(content));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteReviewWhenNotFoundEmail() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+
+    performPostAtDeleteReview(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteReviewWhenErrorAtDeleteReview() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(reviewService.removeReview(new ObjectId(TEST_ID), TEST_PHONE)).thenReturn(false);
+
+    performPostAtDeleteReview(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnTrueAtDeleteReviewWhenEverythingOk() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(reviewService.removeReview(new ObjectId(TEST_ID), TEST_PHONE)).thenReturn(true);
+
+    performPostAtDeleteReview(TRUE_VALUE);
+    verify(adminPanelService).sendInfoAboutDeletedReview(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  private void performPostAtDeleteReview(String content) throws Exception {
+    mockMvc
+        .perform(post("/delete_review").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(content));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtMuteUserWhenNotFoundEmail() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+
+    performPostAtMuteUser(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtMuteUserWhenErrorAtDeleteReview() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(userService.changeRestricted(TEST_ID, true)).thenReturn(false);
+
+    performPostAtMuteUser(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnTrueAtMuteUserWhenEverythingOk() throws Exception {
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+    when(userService.changeRestricted(TEST_ID, true)).thenReturn(true);
+
+    performPostAtMuteUser(TRUE_VALUE);
+    verify(adminPanelService).sendInfoAboutMutedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  private void performPostAtMuteUser(String content) throws Exception {
+    mockMvc
+        .perform(post("/mute_user").param(ID_PARAM, TEST_ID))
         .andExpect(content().string(content));
   }
 }

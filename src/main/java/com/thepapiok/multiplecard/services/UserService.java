@@ -8,6 +8,7 @@ import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
 import java.util.Optional;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,5 +54,20 @@ public class UserService implements UserDetailsService {
     }
     User user = optionalUser.get();
     return user.isRestricted();
+  }
+
+  public boolean changeRestricted(String id, boolean value) {
+    try {
+      Optional<User> optionalUser = userRepository.findById(new ObjectId(id));
+      if (optionalUser.isEmpty()) {
+        return false;
+      }
+      User user = optionalUser.get();
+      user.setRestricted(value);
+      userRepository.save(user);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

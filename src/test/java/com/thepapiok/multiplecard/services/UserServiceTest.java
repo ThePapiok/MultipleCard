@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.exceptions.BannedException;
@@ -28,7 +30,8 @@ public class UserServiceTest {
   private static final String TEST_PHONE = "+4823423411423";
   private static final String TEST_EMAIL = "email";
   private static final String TEST_PASSWORD = "123wefasdfasd123bsedf";
-  private static final ObjectId TEST_ID = new ObjectId("123456789012345678901234");
+  private static final String TEST_ID = "123456789012345678901234";
+  private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
   private UserService userService;
@@ -43,7 +46,7 @@ public class UserServiceTest {
   public void shouldSuccessAtLoadUserByUsernameWhenEverythingOk() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
-    expectedAccount.setId(TEST_ID);
+    expectedAccount.setId(TEST_OBJECT_ID);
     expectedAccount.setEmail(TEST_EMAIL);
     expectedAccount.setActive(true);
     expectedAccount.setBanned(false);
@@ -72,7 +75,7 @@ public class UserServiceTest {
   public void shouldFailAtLoadUserByUsernameWhenUserNotActive() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
-    expectedAccount.setId(TEST_ID);
+    expectedAccount.setId(TEST_OBJECT_ID);
     expectedAccount.setEmail(TEST_EMAIL);
     expectedAccount.setActive(false);
     expectedAccount.setBanned(false);
@@ -88,7 +91,7 @@ public class UserServiceTest {
   public void shouldFailAtLoadUserByUsernameWhenUserBanned() {
     Account expectedAccount = new Account();
     expectedAccount.setPhone(TEST_PHONE);
-    expectedAccount.setId(TEST_ID);
+    expectedAccount.setId(TEST_OBJECT_ID);
     expectedAccount.setEmail(TEST_EMAIL);
     expectedAccount.setActive(true);
     expectedAccount.setBanned(true);
@@ -103,10 +106,10 @@ public class UserServiceTest {
   @Test
   public void shouldReturnTrueAtCheckIsRestrictedWhenUserNotFound() {
     Account account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_OBJECT_ID);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.empty());
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
 
     assertTrue(userService.checkIsRestricted(TEST_PHONE));
   }
@@ -114,13 +117,13 @@ public class UserServiceTest {
   @Test
   public void shouldReturnTrueAtCheckIsRestrictedWhenUserIsRestricted() {
     Account account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_OBJECT_ID);
     com.thepapiok.multiplecard.collections.User user =
         new com.thepapiok.multiplecard.collections.User();
     user.setRestricted(true);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
 
     assertTrue(userService.checkIsRestricted(TEST_PHONE));
   }
@@ -128,14 +131,56 @@ public class UserServiceTest {
   @Test
   public void shouldReturnFalseAtCheckIsRestrictedWhenUserIsNotRestricted() {
     Account account = new Account();
-    account.setId(TEST_ID);
+    account.setId(TEST_OBJECT_ID);
     com.thepapiok.multiplecard.collections.User user =
         new com.thepapiok.multiplecard.collections.User();
     user.setRestricted(false);
 
     when(accountRepository.findIdByPhone(TEST_PHONE)).thenReturn(account);
-    when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
 
     assertFalse(userService.checkIsRestricted(TEST_PHONE));
+  }
+
+  @Test
+  public void shouldReturnFalseAtChangeRestrictedWhenUserIsNotFound() {
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
+
+    assertFalse(userService.changeRestricted(TEST_ID, true));
+  }
+
+  @Test
+  public void shouldReturnTrueAtChangeRestrictedWhenEverythingOk() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(false);
+    user.setId(TEST_OBJECT_ID);
+    com.thepapiok.multiplecard.collections.User excpetedUser =
+        new com.thepapiok.multiplecard.collections.User();
+    excpetedUser.setRestricted(true);
+    excpetedUser.setId(TEST_OBJECT_ID);
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+
+    assertTrue(userService.changeRestricted(TEST_ID, true));
+    verify(userRepository).save(excpetedUser);
+  }
+
+  @Test
+  public void shouldReturnFalseAtChangeRestrictedWhenGetException() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(false);
+    user.setId(TEST_OBJECT_ID);
+    com.thepapiok.multiplecard.collections.User excpetedUser =
+        new com.thepapiok.multiplecard.collections.User();
+    excpetedUser.setRestricted(true);
+    excpetedUser.setId(TEST_OBJECT_ID);
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(userRepository.save(excpetedUser)).thenThrow(MongoWriteException.class);
+
+    assertFalse(userService.changeRestricted(TEST_ID, true));
+    verify(userRepository).save(excpetedUser);
   }
 }

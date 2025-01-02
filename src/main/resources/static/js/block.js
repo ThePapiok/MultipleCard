@@ -1,46 +1,48 @@
-let deleteProd = false;
-let isDeleted = false;
+let block = false;
+let isBlocked = false;
 
-function showOrHideDeleteProduct(id, e) {
-    deleteProd = !deleteProd;
-    let confirmation = document.getElementById("delete");
-    confirmation.hidden = !deleteProd;
-    if (deleteProd) {
+
+function showOrHideBlockUser(id, e) {
+    block = !block;
+    let confirmation = document.getElementById("block");
+    confirmation.hidden = !block;
+    if (block) {
         const cord = e.getBoundingClientRect();
         confirmation.style.left = cord.left + window.scrollX + 'px';
         confirmation.style.top = cord.top + window.scrollY + 'px';
         confirmation.dataset.id = id;
     } else {
         confirmation.dataset.id = "";
-        isDeleted = false;
+        isBlocked = false;
     }
 }
 
-function deleteProductAdmin() {
-    if (!isDeleted) {
-        isDeleted = true;
-        let button = document.getElementById("buttonConfirmationDelete");
+function blockUser(isShop) {
+    if (!isBlocked) {
+        isBlocked = true;
+        let button = document.getElementById("buttonConfirmationBlock");
         button.className = "grayButton";
         button.style.cursor = "wait";
-        let confirmation = document.getElementById("delete");
-        fetch("/delete_product", {
+        let confirmation = document.getElementById("block");
+        fetch("/block_user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             body: new URLSearchParams({
                 "id": confirmation.dataset.id,
+                "isShop": isShop
             })
         })
             .then(content => content.text())
             .then(content => {
-                showOrHideDeleteProduct();
+                showOrHideBlockUser();
                 if (content === "true") {
-                    location.reload();
-                    document.getElementById("success").textContent = document.getElementById("textSuccessDelete").textContent;
+                    document.getElementById("success").textContent = document.getElementById("textSuccessBlockUser").textContent;
                 } else {
                     document.getElementById("error").textContent = document.getElementById("textUnexpectedError").textContent;
                 }
             })
+
     }
 }

@@ -6,10 +6,12 @@ import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.ReviewService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ public class AdminPanelController {
   private final ReportService reportService;
   private final ProductService productService;
   private final AdminPanelService adminPanelService;
+  private final ReviewService reviewService;
 
   @Autowired
   public AdminPanelController(
@@ -37,13 +40,15 @@ public class AdminPanelController {
       MessageSource messageSource,
       ReportService reportService,
       ProductService productService,
-      AdminPanelService adminPanelService) {
+      AdminPanelService adminPanelService,
+      ReviewService reviewService) {
     this.accountService = accountService;
     this.userService = userService;
     this.messageSource = messageSource;
     this.reportService = reportService;
     this.productService = productService;
     this.adminPanelService = adminPanelService;
+    this.reviewService = reviewService;
   }
 
   @GetMapping("/admin_panel")
@@ -134,7 +139,31 @@ public class AdminPanelController {
     if (email == null || !accountService.changeBanned(id, true)) {
       return false;
     }
-    adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
+    adminPanelService.sendInfoAboutBlockedUser(email, account.getPhone(), id);
+    return true;
+  }
+
+  @PostMapping("/delete_review")
+  @ResponseBody
+  public Boolean deleteReview(@RequestParam String id) {
+    Account account = accountService.getAccountById(id);
+    String email = account.getEmail();
+    if (email == null || !reviewService.removeReview(new ObjectId(id), account.getPhone())) {
+      return false;
+    }
+    adminPanelService.sendInfoAboutDeletedReview(email, account.getPhone(), id);
+    return true;
+  }
+
+  @PostMapping("/mute_user")
+  @ResponseBody
+  public Boolean muteUser(@RequestParam String id) {
+    Account account = accountService.getAccountById(id);
+    String email = account.getEmail();
+    if (email == null || !userService.changeRestricted(id, true)) {
+      return false;
+    }
+    adminPanelService.sendInfoAboutMutedUser(email, account.getPhone(), id);
     return true;
   }
 }
