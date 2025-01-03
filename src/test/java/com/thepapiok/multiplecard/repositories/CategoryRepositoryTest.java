@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Category;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -29,7 +31,9 @@ public class CategoryRepositoryTest {
   private static final String TEST_CATEGORY4_NAME = "Category4";
 
   private Category category1;
+  private Account account;
   @Autowired private CategoryRepository categoryRepository;
+  @Autowired private AccountRepository accountRepository;
   @MockBean private RestTemplate restTemplate;
   @Autowired private MongoTemplate mongoTemplate;
 
@@ -114,11 +118,21 @@ public class CategoryRepositoryTest {
     mongoTemplate.save(category17);
     mongoTemplate.save(category18);
     mongoTemplate.save(category19);
+    account = new Account();
+    account.setRole(Role.ROLE_SHOP);
+    account.setId(TEST_OWNER_ID);
+    account.setPhone("+21342134312434");
+    account.setEmail("testEmail");
+    account.setActive(true);
+    account.setBanned(false);
+    account.setPassword("testPassword");
+    accountRepository.save(account);
   }
 
   @AfterEach
   public void cleanUp() {
     categoryRepository.deleteAll();
+    accountRepository.deleteAll();
   }
 
   @Test
@@ -189,5 +203,15 @@ public class CategoryRepositoryTest {
   @Test
   public void shouldReturnEmptyListAtGetCategoryNamesByPrefixWhenNotFound() {
     assertEquals(List.of(), categoryRepository.getCategoryNamesByPrefix("^pp"));
+  }
+
+  @Test
+  public void shouldReturnAccountAtFindAccountByCategoryNameWhenEverythingOk() {
+    Account expectedAccount = new Account();
+    expectedAccount.setPhone(account.getPhone());
+    expectedAccount.setEmail(account.getEmail());
+
+    assertEquals(
+        expectedAccount, categoryRepository.findAccountByCategoryName(TEST_CATEGORY1_NAME));
   }
 }

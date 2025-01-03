@@ -6,6 +6,7 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
@@ -22,17 +23,20 @@ public class AccountService {
   private final UserRepository userRepository;
   private final ShopRepository shopRepository;
   private final ProductRepository productRepository;
+  private final CategoryRepository categoryRepository;
 
   @Autowired
   public AccountService(
       AccountRepository accountRepository,
       UserRepository userRepository,
       ShopRepository shopRepository,
-      ProductRepository productRepository) {
+      ProductRepository productRepository,
+      CategoryRepository categoryRepository) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.shopRepository = shopRepository;
     this.productRepository = productRepository;
+    this.categoryRepository = categoryRepository;
   }
 
   public List<UserDTO> getUsers(Integer type, String value) {
@@ -164,5 +168,9 @@ public class AccountService {
 
   public Account getAccountById(String id) {
     return accountRepository.findAccountById(new ObjectId(id));
+  }
+
+  public Account getAccountByCategoryName(String name) {
+    return categoryRepository.findAccountByCategoryName(name);
   }
 }

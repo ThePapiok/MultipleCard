@@ -48,6 +48,9 @@
     <a sec:authorize="hasRole('SHOP')" th:href="@{/orders}" class="h4 headerButton">
         <button class="blackButton" th:text="#{button.orders}"></button>
     </a>
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/categories}" id="h6" class="headerButton">
+        <button class="blackButton" th:text="#{categories.title}"></button>
+    </a>
 </div>
 <div id="body">
     <div id="info">

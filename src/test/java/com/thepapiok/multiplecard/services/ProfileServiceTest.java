@@ -195,6 +195,7 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(List.of());
+    when(productService.deleteProducts(List.of())).thenReturn(true);
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -217,12 +218,11 @@ public class ProfileServiceTest {
     products.add(product1);
     products.add(product2);
     products.add(product3);
+    List<ObjectId> productsId = List.of(TEST_PRODUCT_ID1, TEST_PRODUCT_ID2, TEST_PRODUCT_ID3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(productService.deleteProduct(TEST_PRODUCT_ID1.toString())).thenReturn(true);
-    when(productService.deleteProduct(TEST_PRODUCT_ID2.toString())).thenReturn(true);
-    when(productService.deleteProduct(TEST_PRODUCT_ID3.toString())).thenReturn(true);
+    when(productService.deleteProducts(productsId)).thenReturn(true);
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -245,10 +245,11 @@ public class ProfileServiceTest {
     products.add(product1);
     products.add(product2);
     products.add(product3);
+    List<ObjectId> productsId = List.of(TEST_PRODUCT_ID1, TEST_PRODUCT_ID2, TEST_PRODUCT_ID3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(productService.deleteProduct(TEST_PRODUCT_ID1.toString())).thenReturn(false);
+    when(productService.deleteProducts(productsId)).thenReturn(false);
 
     assertFalse(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);

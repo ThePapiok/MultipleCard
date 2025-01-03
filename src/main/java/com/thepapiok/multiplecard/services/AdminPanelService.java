@@ -63,8 +63,23 @@ public class AdminPanelService {
       title = "Nadanie ograniczeń - " + id;
       text = "Z pewnych względów twoje konto zostało ograniczone.";
     } else {
-      title = "Removal of the item - " + id;
+      title = "Give restriction - " + id;
       text = "For some reasons your account has been restricted.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutDeletedCategory(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Usunięcie kategorii - " + id;
+      text =
+          "Twoja kategoria naruszyła pewne normy, z przykrością musimy poinformować, że została ona usunięta.";
+    } else {
+      title = "Removal of the category - " + id;
+      text =
+          "Your category violated certain standards, we regret to inform you that it has been removed.";
     }
     emailService.sendEmail(text, email, title);
   }

@@ -67,4 +67,38 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
 """
       })
   Account findAccountByProductId(ObjectId id);
+
+  @Aggregation(
+      pipeline = {
+        """
+  {
+    $project: {
+      "categories": 1
+    }
+  }
+""",
+        """
+  {
+    $unwind: {
+      "path": "$categories",
+      "preserveNullAndEmptyArrays": true
+    }
+  }
+""",
+        """
+  {
+    $match: {
+      "categories": ?0
+    }
+  }
+""",
+        """
+    {
+      $project: {
+        "categories": 0,
+      }
+    }
+"""
+      })
+  List<ObjectId> getProductsIdByCategoryId(ObjectId categoryId);
 }

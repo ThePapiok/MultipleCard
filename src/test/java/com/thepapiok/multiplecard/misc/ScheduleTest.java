@@ -8,6 +8,7 @@ import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.repositories.BlockedIpRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.services.BlockedProductService;
+import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.ProductService;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class ScheduleTest {
   @Mock private BlockedIpRepository blockedIpRepository;
   @Mock private ProductService productService;
   @Mock private RestTemplate restTemplate;
+  @Mock private EmailService emailService;
 
   @BeforeEach
   public void setUp() {
@@ -37,7 +39,8 @@ public class ScheduleTest {
             blockedIpRepository,
             productService,
             blockedProductService,
-            restTemplate);
+            restTemplate,
+            emailService);
   }
 
   @Test
@@ -100,7 +103,7 @@ public class ScheduleTest {
   }
 
   @Test
-  public void shouldDeleteBlockedIpsAndDeleteProductAtCheckBlockedWhenPeriodIs0() {
+  public void shouldDeleteBlockedIpsAndDeleteProductAtCheckBlockedWhenPeriodIs0AndEverythingOk() {
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
     blockedProduct.setProductId(TEST_PRODUCT_ID);
@@ -108,10 +111,32 @@ public class ScheduleTest {
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
+    when(productService.deleteProducts(List.of(TEST_PRODUCT_ID))).thenReturn(true);
 
     schedule.checkBlocked();
     verify(blockedIpRepository).deleteAll();
-    verify(productService).deleteProduct(TEST_PRODUCT_ID.toString());
+    verifyNoInteractions(blockedProductService);
+  }
+
+  @Test
+  public void
+      shouldDeleteBlockedIpsAndSendEmailAtCheckBlockedWhenPeriodIs0AndErrorAtDeleteProducts() {
+    List<BlockedProduct> blockedProducts = new ArrayList<>();
+    BlockedProduct blockedProduct = new BlockedProduct();
+    blockedProduct.setProductId(TEST_PRODUCT_ID);
+    blockedProduct.setExpiredAt(LocalDate.now());
+    blockedProducts.add(blockedProduct);
+
+    when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
+    when(productService.deleteProducts(List.of(TEST_PRODUCT_ID))).thenReturn(false);
+
+    schedule.checkBlocked();
+    verify(blockedIpRepository).deleteAll();
+    verify(emailService)
+        .sendEmail(
+            "Błąd - " + blockedProduct.getProductId(),
+            "multiplecard@gmail.com",
+            "Wystąpił błąd podczas usuwania produktu po upłynięciu terminu blokady.");
     verifyNoInteractions(blockedProductService);
   }
 }

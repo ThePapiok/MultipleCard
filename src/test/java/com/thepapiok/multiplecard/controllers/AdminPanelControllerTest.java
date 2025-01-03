@@ -215,13 +215,13 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
+  public void shouldReturnFalseAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(false);
+    when(productService.deleteProducts(List.of(new ObjectId(TEST_ID)))).thenReturn(false);
 
     performPostAtDeleteProduct(FALSE_VALUE);
   }
@@ -234,7 +234,7 @@ public class AdminPanelControllerTest {
     account.setEmail(TEST_EMAIL);
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(true);
+    when(productService.deleteProducts(List.of(new ObjectId(TEST_ID)))).thenReturn(true);
 
     performPostAtDeleteProduct(TRUE_VALUE);
     verify(adminPanelService).sendInfoAboutDeletedProduct(TEST_EMAIL, TEST_PHONE, TEST_ID);
@@ -248,7 +248,7 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtBlockUserWhenEmailIsNullWithUserParam() throws Exception {
+  public void shouldReturnFalseAtBlockUserWhenEmailIsNullWithNotProductParam() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
 
@@ -259,7 +259,8 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtBlockUserWhenErrorAtChangeBannedWithUserParam() throws Exception {
+  public void shouldReturnFalseAtBlockUserWhenErrorAtChangeBannedWithNotProductParam()
+      throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
@@ -272,7 +273,7 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithUserParam() throws Exception {
+  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithNotProductParam() throws Exception {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
@@ -286,7 +287,7 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithShopParam() throws Exception {
+  public void shouldReturnTrueAtBlockUserWhenEverythingOkWithProductParam() throws Exception {
     final ObjectId testId = new ObjectId("123456789009876543210987");
     Account account = new Account();
     account.setPhone(TEST_PHONE);
@@ -300,11 +301,13 @@ public class AdminPanelControllerTest {
     verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, testId.toString());
   }
 
-  private void performPostAtBlockUser(boolean isShop, String content) throws Exception {
+  private void performPostAtBlockUser(boolean isProduct, String content) throws Exception {
 
     mockMvc
         .perform(
-            post("/block_user").param(ID_PARAM, TEST_ID).param("isShop", String.valueOf(isShop)))
+            post("/block_user")
+                .param(ID_PARAM, TEST_ID)
+                .param("isProduct", String.valueOf(isProduct)))
         .andExpect(content().string(content));
   }
 

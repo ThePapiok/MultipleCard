@@ -14,6 +14,8 @@ import com.thepapiok.multiplecard.collections.ReservedProduct;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.configs.DbConfig;
+import com.thepapiok.multiplecard.dto.CategoryDTO;
+import com.thepapiok.multiplecard.dto.PageCategoryDTO;
 import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsDTO;
 import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
@@ -56,6 +58,7 @@ public class AggregationRepositoryTest {
   private static final String PRICE_FIELD = "price";
   private static final String ADDED_FIELD = "added";
   private static final String TEST_CATEGORY_NAME = "category";
+  private static final String TEST_CATEGORY_OTHER_NAME = "other";
   private static final String TEST_SHOP_NAME = "shop1";
   private ProductDTO productDTO1;
   private ProductDTO productDTO2;
@@ -79,6 +82,11 @@ public class AggregationRepositoryTest {
   private ProductAtCardDTO productAtCardDTO1;
   private ProductAtCardDTO productAtCardDTO2;
   private ProductAtCardDTO productAtCardDTO3;
+  private CategoryDTO categoryDTO1;
+  private CategoryDTO categoryDTO2;
+  private CategoryDTO categoryDTO3;
+  private CategoryDTO categoryDTO4;
+  private CategoryDTO categoryDTO5;
 
   @Autowired private MongoTemplate mongoTemplate;
   @Autowired private CategoryRepository categoryRepository;
@@ -291,7 +299,7 @@ public class AggregationRepositoryTest {
     category2 = mongoTemplate.save(category2);
     Category category3 = new Category();
     category3.setOwnerId(TEST_OWNER_ID);
-    category3.setName("other");
+    category3.setName(TEST_CATEGORY_OTHER_NAME);
     category3 = mongoTemplate.save(category3);
     Category category4 = new Category();
     category4.setOwnerId(TEST_OWNER_ID);
@@ -301,6 +309,21 @@ public class AggregationRepositoryTest {
     category5.setOwnerId(TEST_OWNER_ID);
     category5.setName("mat");
     category5 = mongoTemplate.save(category5);
+    categoryDTO1 = new CategoryDTO();
+    categoryDTO1.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTO1.setName(TEST_CATEGORY_NAME);
+    categoryDTO2 = new CategoryDTO();
+    categoryDTO2.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTO2.setName("Category2");
+    categoryDTO3 = new CategoryDTO();
+    categoryDTO3.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTO3.setName(TEST_CATEGORY_OTHER_NAME);
+    categoryDTO4 = new CategoryDTO();
+    categoryDTO4.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTO4.setName("other category");
+    categoryDTO5 = new CategoryDTO();
+    categoryDTO5.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTO5.setName("mat");
     Address address = new Address();
     address.setCountry("country");
     address.setCity("city");
@@ -2712,7 +2735,7 @@ public class AggregationRepositoryTest {
     assertEquals(
         page,
         aggregationRepository.getProductsByOwnerCard(
-            0, COUNT_FIELD, true, "", "other", "", TEST_CARD_ID.toString()));
+            0, COUNT_FIELD, true, "", TEST_CATEGORY_OTHER_NAME, "", TEST_CARD_ID.toString()));
   }
 
   @Test
@@ -2762,5 +2785,24 @@ public class AggregationRepositoryTest {
             0, COUNT_FIELD, true, "", "", "", TEST_OTHER_CARD_ID.toString());
     assertEquals(expectedPage.getMaxPage(), page.getMaxPage());
     assertTrue(expectedPage.getProducts().containsAll(page.getProducts()));
+  }
+
+  @Test
+  public void shouldReturnPageCategoryDTOAtGetCategoriesWhenWithoutName() {
+    PageCategoryDTO pageCategoryDTO = new PageCategoryDTO();
+    pageCategoryDTO.setMaxPage(1);
+    pageCategoryDTO.setCategories(
+        List.of(categoryDTO1, categoryDTO2, categoryDTO3, categoryDTO4, categoryDTO5));
+
+    assertEquals(pageCategoryDTO, aggregationRepository.getCategories(0, ""));
+  }
+
+  @Test
+  public void shouldReturnPageCategoryDTOAtGetCategoriesWhenWithName() {
+    PageCategoryDTO pageCategoryDTO = new PageCategoryDTO();
+    pageCategoryDTO.setCategories(List.of(categoryDTO1, categoryDTO4));
+    pageCategoryDTO.setMaxPage(1);
+
+    assertEquals(pageCategoryDTO, aggregationRepository.getCategories(0, TEST_CATEGORY_NAME));
   }
 }

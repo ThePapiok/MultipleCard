@@ -29,8 +29,10 @@ import org.springframework.web.client.RestTemplate;
 @Import(DbConfig.class)
 public class ProductRepositoryTest {
   private static Shop testShop;
-  private Product product;
+  private Product product1;
+  private Product product2;
   private Account account;
+  private Category category;
 
   @Autowired private ProductRepository productRepository;
   @Autowired private CategoryRepository categoryRepository;
@@ -74,20 +76,30 @@ public class ProductRepositoryTest {
     shop.setAccountNumber("accountNumber1");
     shop.setPoints(List.of(address));
     testShop = mongoTemplate.save(shop);
-    Category category = new Category();
+    category = new Category();
     category.setName("category");
     category.setOwnerId(testShop.getId());
-    mongoTemplate.save(category);
-    product = new Product();
-    product.setShopId(shop.getId());
-    product.setImageUrl("url");
-    product.setName("name");
-    product.setBarcode("barcode");
-    product.setDescription("description");
-    product.setPrice(price);
-    product.setCategories(List.of(category.getId()));
-    product.setUpdatedAt(localDateTime);
-    product = mongoTemplate.save(product);
+    category = mongoTemplate.save(category);
+    product1 = new Product();
+    product1.setShopId(shop.getId());
+    product1.setImageUrl("url1");
+    product1.setName("name1");
+    product1.setBarcode("barcode1");
+    product1.setDescription("description1");
+    product1.setPrice(price);
+    product1.setCategories(List.of(category.getId()));
+    product1.setUpdatedAt(localDateTime);
+    product1 = mongoTemplate.save(product1);
+    product2 = new Product();
+    product2.setShopId(shop.getId());
+    product2.setImageUrl("url2");
+    product2.setName("name2");
+    product2.setBarcode("barcode2");
+    product2.setDescription("description2");
+    product2.setPrice(price);
+    product2.setCategories(List.of(category.getId()));
+    product2.setUpdatedAt(localDateTime);
+    product2 = mongoTemplate.save(product2);
     account = new Account();
     account.setBanned(false);
     account.setActive(false);
@@ -111,7 +123,7 @@ public class ProductRepositoryTest {
   @Test
   public void shouldReturnProductAtFindShopIdByIdWhenEverythingOk() {
     ObjectId productId;
-    productId = product.getId();
+    productId = product1.getId();
     Product expectedProduct = new Product();
     expectedProduct.setShopId(testShop.getId());
 
@@ -124,7 +136,7 @@ public class ProductRepositoryTest {
     Product expectedProduct = new Product();
     expectedProduct.setPrice(expectedPrice);
 
-    assertEquals(expectedProduct, productRepository.findPriceById(product.getId()));
+    assertEquals(expectedProduct, productRepository.findPriceById(product1.getId()));
   }
 
   @Test
@@ -134,11 +146,18 @@ public class ProductRepositoryTest {
     account.setPhone(account.getPhone());
     account.setId(account.getId());
 
-    assertEquals(account, productRepository.findAccountByProductId(product.getId()));
+    assertEquals(account, productRepository.findAccountByProductId(product1.getId()));
   }
 
   @Test
   public void shouldReturnNullAtFindAccountByProductIdWhenProductNotFound() {
     assertNull(productRepository.findAccountByProductId(new ObjectId()));
+  }
+
+  @Test
+  public void shouldReturnListOfProductsIdAtGetProductsIdByCategoryIdWhenEverythingOk() {
+    assertEquals(
+        List.of(product1.getId(), product2.getId()),
+        productRepository.getProductsIdByCategoryId(category.getId()));
   }
 }

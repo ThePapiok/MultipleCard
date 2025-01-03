@@ -1,0 +1,31 @@
+#searchInput {
+    width: 100%;
+}
+
+#error, #success {
+    margin-left: 5%;
+}
+
+.name {
+    justify-content: center;
+    display: flex;
+    width: 100%;
+}
+
+.resultIcons {
+    margin-right: unset;
+}
+
+.result {
+    min-height: 60px;
+}
+
+.resultsIcons {
+    justify-content: flex-end;
+}
+
+@media only screen and (max-width: 768px) {
+    .result {
+        height: auto;
+    }
+}

@@ -135,7 +135,7 @@ public class ProductController {
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
       model.addAttribute("pageSelected", page + 1);
-      model.addAttribute("pages", resultService.getPages(page + 1, currentPage.getMaxPage()));
+      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("products", allProducts);
       model.addAttribute("productsEmpty", allProducts.size() == 0);
       model.addAttribute("maxPage", maxPage);
@@ -233,7 +233,7 @@ public class ProductController {
   public String deleteProduct(@RequestParam String id, Locale locale, Principal principal) {
     if (!productService.isProductOwner(principal.getName(), id)) {
       return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
-    } else if (!productService.deleteProduct(id)) {
+    } else if (!productService.deleteProducts(List.of(new ObjectId(id)))) {
       return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
     }
     return SUCCESS_OK_MESSAGE;

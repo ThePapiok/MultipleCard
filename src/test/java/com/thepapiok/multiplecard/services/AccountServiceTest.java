@@ -13,6 +13,7 @@ import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
@@ -27,6 +28,7 @@ import org.mockito.MockitoAnnotations;
 
 public class AccountServiceTest {
   private static final String TEST_PHONE = "+4823412341242134";
+  private static final String TEST_EMAIL = "testEmail";
   private static final String ROLE_ADMIN = "ROLE_ADMIN";
   private static final String ROLE_SHOP = "ROLE_SHOP";
   private static final String TEST_OTHER_PHONE = "+481352312341234423";
@@ -40,12 +42,18 @@ public class AccountServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private ShopRepository shopRepository;
   @Mock private ProductRepository productRepository;
+  @Mock private CategoryRepository categoryRepository;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     accountService =
-        new AccountService(accountRepository, userRepository, shopRepository, productRepository);
+        new AccountService(
+            accountRepository,
+            userRepository,
+            shopRepository,
+            productRepository,
+            categoryRepository);
   }
 
   @Test
@@ -399,11 +407,10 @@ public class AccountServiceTest {
 
   @Test
   public void shouldReturnAccountAtGetAccountByProductIdWhenEverythingOk() {
-    final String testEmail = "testEmail";
     Account account = new Account();
     account.setId(TEST_OBJECT_ID);
     account.setPhone(TEST_PHONE);
-    account.setEmail(testEmail);
+    account.setEmail(TEST_EMAIL);
 
     when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account);
 
@@ -412,13 +419,24 @@ public class AccountServiceTest {
 
   @Test
   public void shouldReturnAccountAtGetAccountByIdWhenEverythingOk() {
-    final String testEmail = "testEmail";
     Account account = new Account();
     account.setPhone(TEST_PHONE);
-    account.setEmail(testEmail);
+    account.setEmail(TEST_EMAIL);
 
     when(accountRepository.findAccountById(TEST_OBJECT_ID)).thenReturn(account);
 
     assertEquals(account, accountService.getAccountById(TEST_ID));
+  }
+
+  @Test
+  public void shouldReturnAccountAtGetAccountByCategoryNameWhenEverythingOk() {
+    final String testName = "testName";
+    Account account = new Account();
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+
+    when(categoryRepository.findAccountByCategoryName(testName)).thenReturn(account);
+
+    assertEquals(account, accountService.getAccountByCategoryName(testName));
   }
 }

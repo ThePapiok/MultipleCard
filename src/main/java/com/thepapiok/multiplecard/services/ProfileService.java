@@ -117,11 +117,9 @@ public class ProfileService {
                   throw new RuntimeException(e);
                 }
                 mongoTemplate.remove(query(where(idParam).is(id)), Shop.class);
-                List<Product> products = productRepository.getAllByShopId(id);
-                for (Product product : products) {
-                  if (!productService.deleteProduct(product.getId().toString())) {
-                    throw new RuntimeException();
-                  }
+                if (!productService.deleteProducts(
+                    productRepository.getAllByShopId(id).stream().map(Product::getId).toList())) {
+                  throw new RuntimeException();
                 }
               } else {
                 if (!role.equals(Role.ROLE_ADMIN)) {

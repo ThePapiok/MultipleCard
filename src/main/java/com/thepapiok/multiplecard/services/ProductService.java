@@ -177,7 +177,7 @@ public class ProductService {
     return String.format(Locale.US, "%.2f", (product.get().getPrice() / centsPerZl));
   }
 
-  public boolean deleteProduct(String productId) {
+  public boolean deleteProducts(List<ObjectId> productsId) {
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
       transactionTemplate.execute(
@@ -185,21 +185,23 @@ public class ProductService {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
               try {
-                final ObjectId objectId = new ObjectId(productId);
                 final float centsPerZloty = 100;
-                promotionService.deletePromotion(productId);
-                productRepository.deleteById(objectId);
-                blockedProductRepository.deleteByProductId(objectId);
-                reportRepository.deleteAllByReportedId(objectId);
-                List<Order> orders = orderRepository.findAllByProductIdAndIsUsed(objectId, false);
-                for (Order order : orders) {
-                  mongoTemplate.updateFirst(
-                      query(where("cardId").is(order.getCardId())),
-                      new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
-                      User.class);
-                  mongoTemplate.remove(order);
+                for (ObjectId productId : productsId) {
+                  promotionService.deletePromotion(productId.toString());
+                  productRepository.deleteById(productId);
+                  blockedProductRepository.deleteByProductId(productId);
+                  reportRepository.deleteAllByReportedId(productId);
+                  List<Order> orders =
+                      orderRepository.findAllByProductIdAndIsUsed(productId, false);
+                  for (Order order : orders) {
+                    mongoTemplate.updateFirst(
+                        query(where("cardId").is(order.getCardId())),
+                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
+                        User.class);
+                    mongoTemplate.remove(order);
+                  }
+                  cloudinaryService.deleteImage(productId.toHexString());
                 }
-                cloudinaryService.deleteImage(productId);
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
@@ -489,5 +491,24 @@ public class ProductService {
       productPayUS.add(productPayU);
     }
     return productPayUS;
+  }
+
+  public boolean deleteCategoryAndProducts(String id) {
+    TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+    try {
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              categoryRepository.deleteById(new ObjectId(id));
+              if (!deleteProducts(productRepository.getProductsIdByCategoryId(new ObjectId(id)))) {
+                throw new RuntimeException();
+              }
+            }
+          });
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

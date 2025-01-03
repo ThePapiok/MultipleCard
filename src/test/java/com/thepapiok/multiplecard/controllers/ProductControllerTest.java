@@ -847,9 +847,9 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
+  public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
     when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(false);
+    when(productService.deleteProducts(List.of(TEST_OBJECT_ID))).thenReturn(false);
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
@@ -860,7 +860,7 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtDeleteProductWhenEverythingOk() throws Exception {
     when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(true);
+    when(productService.deleteProducts(List.of(TEST_OBJECT_ID))).thenReturn(true);
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))

@@ -4,9 +4,11 @@ import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.repositories.BlockedIpRepository;
 import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.services.BlockedProductService;
+import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.ProductService;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +23,7 @@ public class Schedule {
   private final ProductService productService;
   private final BlockedProductService blockedProductService;
   private final RestTemplate restTemplate;
+  private final EmailService emailService;
 
   @Autowired
   public Schedule(
@@ -28,12 +31,14 @@ public class Schedule {
       BlockedIpRepository blockedIpRepository,
       ProductService productService,
       BlockedProductService blockedProductService,
-      RestTemplate restTemplate) {
+      RestTemplate restTemplate,
+      EmailService emailService) {
     this.blockedProductRepository = blockedProductRepository;
     this.blockedIpRepository = blockedIpRepository;
     this.productService = productService;
     this.blockedProductService = blockedProductService;
     this.restTemplate = restTemplate;
+    this.emailService = emailService;
   }
 
   @Scheduled(fixedRate = 840000)
@@ -56,7 +61,12 @@ public class Schedule {
         blockedProductService.sendWarning(
             blockedProduct.getProductId(), "blockedProductService.warning.text_1day");
       } else if (days == periodIs0) {
-        productService.deleteProduct(blockedProduct.getProductId().toString());
+        if (!productService.deleteProducts(List.of(blockedProduct.getProductId()))) {
+          emailService.sendEmail(
+              "Błąd - " + blockedProduct.getProductId(),
+              "multiplecard@gmail.com",
+              "Wystąpił błąd podczas usuwania produktu po upłynięciu terminu blokady.");
+        }
       }
     }
     blockedIpRepository.deleteAll();

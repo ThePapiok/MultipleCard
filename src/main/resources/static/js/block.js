@@ -17,7 +17,7 @@ function showOrHideBlockUser(id, e) {
     }
 }
 
-function blockUser(isShop) {
+function blockUser(isProduct) {
     if (!isBlocked) {
         isBlocked = true;
         let button = document.getElementById("buttonConfirmationBlock");
@@ -31,7 +31,7 @@ function blockUser(isShop) {
             },
             body: new URLSearchParams({
                 "id": confirmation.dataset.id,
-                "isShop": isShop
+                "isProduct": isProduct
             })
         })
             .then(content => content.text())

@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
+import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
 import com.thepapiok.multiplecard.services.ReviewService;
@@ -32,6 +33,7 @@ public class AdminPanelController {
   private final ProductService productService;
   private final AdminPanelService adminPanelService;
   private final ReviewService reviewService;
+  private final CategoryService categoryService;
 
   @Autowired
   public AdminPanelController(
@@ -41,7 +43,8 @@ public class AdminPanelController {
       ReportService reportService,
       ProductService productService,
       AdminPanelService adminPanelService,
-      ReviewService reviewService) {
+      ReviewService reviewService,
+      CategoryService categoryService) {
     this.accountService = accountService;
     this.userService = userService;
     this.messageSource = messageSource;
@@ -49,6 +52,7 @@ public class AdminPanelController {
     this.productService = productService;
     this.adminPanelService = adminPanelService;
     this.reviewService = reviewService;
+    this.categoryService = categoryService;
   }
 
   @GetMapping("/admin_panel")
@@ -118,7 +122,7 @@ public class AdminPanelController {
   public Boolean deleteProduct(@RequestParam String id) {
     Account account = accountService.getAccountByProductId(id);
     String email = account.getEmail();
-    if (email == null || !productService.deleteProduct(id)) {
+    if (email == null || !productService.deleteProducts(List.of(new ObjectId(id)))) {
       return false;
     }
     adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
@@ -127,9 +131,9 @@ public class AdminPanelController {
 
   @PostMapping("/block_user")
   @ResponseBody
-  public Boolean blockUser(@RequestParam String id, @RequestParam boolean isShop) {
+  public Boolean blockUser(@RequestParam String id, @RequestParam boolean isProduct) {
     Account account;
-    if (isShop) {
+    if (isProduct) {
       account = accountService.getAccountByProductId(id);
       id = account.getId().toString();
     } else {
@@ -164,6 +168,19 @@ public class AdminPanelController {
       return false;
     }
     adminPanelService.sendInfoAboutMutedUser(email, account.getPhone(), id);
+    return true;
+  }
+
+  @PostMapping("/delete_category")
+  @ResponseBody
+  public Boolean deleteCategory(@RequestParam String name) {
+    Account account = accountService.getAccountByCategoryName(name);
+    String id = categoryService.getCategoryIdByName(name).toString();
+    String email = account.getEmail();
+    if (email == null || !productService.deleteCategoryAndProducts(id)) {
+      return false;
+    }
+    adminPanelService.sendInfoAboutDeletedCategory(email, account.getPhone(), id);
     return true;
   }
 }

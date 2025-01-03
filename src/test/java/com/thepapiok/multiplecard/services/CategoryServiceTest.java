@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Category;
+import com.thepapiok.multiplecard.dto.CategoryDTO;
+import com.thepapiok.multiplecard.dto.PageCategoryDTO;
+import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
+import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,12 +26,13 @@ public class CategoryServiceTest {
   private static final List<String> TEST_NAME_CATEGORIES =
       List.of(TEST_CATEGORY_NAME, TEST_CATEGORY_OTHER_NAME);
   @Mock private CategoryRepository categoryRepository;
+  @Mock private AggregationRepository aggregationRepository;
   private CategoryService categoryService;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    categoryService = new CategoryService(categoryRepository);
+    categoryService = new CategoryService(categoryRepository, aggregationRepository);
   }
 
   @Test
@@ -99,5 +104,25 @@ public class CategoryServiceTest {
   @Test
   public void shouldReturnEmptyListAtGetCategoriesByPrefixWhenPrefixIsBlank() {
     assertEquals(List.of(), categoryService.getCategoriesByPrefix(""));
+  }
+
+  @Test
+  public void shouldReturnPageCategoryDTOAtGetCurrentPageWhenEverythingOk() {
+    List<CategoryDTO> categoryDTOS = new ArrayList<>();
+    CategoryDTO categoryDTO1 = new CategoryDTO();
+    categoryDTO1.setName("category1");
+    categoryDTO1.setOwnerId(TEST_OWNER_ID.toString());
+    CategoryDTO categoryDTO2 = new CategoryDTO();
+    categoryDTO2.setName("category2");
+    categoryDTO2.setOwnerId(TEST_OWNER_ID.toString());
+    categoryDTOS.add(categoryDTO1);
+    categoryDTOS.add(categoryDTO2);
+    PageCategoryDTO pageCategoryDTO = new PageCategoryDTO();
+    pageCategoryDTO.setCategories(categoryDTOS);
+    pageCategoryDTO.setMaxPage(1);
+
+    when(aggregationRepository.getCategories(0, "")).thenReturn(pageCategoryDTO);
+
+    assertEquals(pageCategoryDTO, categoryService.getCurrentPage(0, ""));
   }
 }

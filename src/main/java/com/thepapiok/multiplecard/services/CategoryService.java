@@ -1,6 +1,8 @@
 package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Category;
+import com.thepapiok.multiplecard.dto.PageCategoryDTO;
+import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -10,10 +12,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class CategoryService {
   private final CategoryRepository categoryRepository;
+  private final AggregationRepository aggregationRepository;
 
   @Autowired
-  public CategoryService(CategoryRepository categoryRepository) {
+  public CategoryService(
+      CategoryRepository categoryRepository, AggregationRepository aggregationRepository) {
     this.categoryRepository = categoryRepository;
+    this.aggregationRepository = aggregationRepository;
   }
 
   public List<String> getAllNames() {
@@ -42,5 +47,9 @@ public class CategoryService {
       return List.of();
     }
     return categoryRepository.getCategoryNamesByPrefix("^" + prefix);
+  }
+
+  public PageCategoryDTO getCurrentPage(int page, String name) {
+    return aggregationRepository.getCategories(page, name);
   }
 }

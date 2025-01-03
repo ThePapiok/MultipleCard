@@ -90,10 +90,30 @@ public class AdminPanelServiceTest {
 
   @Test
   public void shouldSendEmailAtSendInfoAboutMutedUserWhenIsFromOtherCountry() {
-    final String title = "Removal of the item - " + TEST_ID;
+    final String title = "Give restriction - " + TEST_ID;
     final String text = "For some reasons your account has been restricted.";
 
     adminPanelService.sendInfoAboutMutedUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutDeletedCategoryWhenIsFromPoland() {
+    final String title = "Usunięcie kategorii - " + TEST_ID;
+    final String text =
+        "Twoja kategoria naruszyła pewne normy, z przykrością musimy poinformować, że została ona usunięta.";
+
+    adminPanelService.sendInfoAboutDeletedCategory(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutDeletedCategoryWhenIsFromOtherCountry() {
+    final String title = "Removal of the category - " + TEST_ID;
+    final String text =
+        "Your category violated certain standards, we regret to inform you that it has been removed.";
+
+    adminPanelService.sendInfoAboutDeletedCategory(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
     verify(emailService).sendEmail(text, TEST_EMAIL, title);
   }
 }
