@@ -1,17 +1,21 @@
 let showOptions = false;
+let showOptionsRole = false;
 let searchOption = -1;
 
 function atStart() {
     checkLanguage();
 }
 
-function showOrHideOptions(e, type, id) {
+function showOrHideOptions(e, type, id, firstValue, secondValue) {
     const coords = e.getBoundingClientRect();
     const options = document.getElementById("options");
     options.style.width = e.offsetWidth.toString() + "px";
     let hidden = options.hidden;
-    if (hidden && !showOptions) {
+    if (hidden && !showOptions && (type === "role" && (e.textContent === "ROLE_ADMIN" || e.textContent === "ROLE_USER")) || (type !== "role")) {
         showOptions = true;
+        let option = document.getElementsByClassName("option");
+        option[0].textContent = firstValue;
+        option[1].textContent = secondValue;
         options.hidden = !hidden;
         options.style.left = coords.left + window.scrollX + 'px';
         options.style.top = coords.top + 50 + window.scrollY + 'px';
@@ -23,9 +27,13 @@ function showOrHideOptions(e, type, id) {
     }
 }
 
-function changeToTrue(e) {
-    const id = e.dataset.id;
-    const type = e.dataset.type;
+function changeUser(options, e) {
+    const id = options.dataset.id;
+    const type = options.dataset.type;
+    const value = e.textContent;
+    let option = document.getElementsByClassName("option");
+    option[0].style.cursor = "wait";
+    option[1].style.cursor = "wait";
     fetch("/change_user", {
         method: "POST",
         headers: {
@@ -34,56 +42,19 @@ function changeToTrue(e) {
         body: new URLSearchParams({
             "id": id,
             "type": type,
-            "value": true
+            "value": value
         })
     })
         .then(content => content.text())
         .then(content => {
-            const cell = document.getElementById(id);
-            if (content) {
-                if (type) {
-                    const active = cell.getElementsByClassName("active")[0];
-                    active.textContent = "true";
-                } else {
-                    const banned = cell.getElementsByClassName("banned")[0];
-                    banned.textContent = "true";
-                }
+            option[0].style.cursor = "pointer";
+            option[1].style.cursor = "pointer";
+            options.hidden = true;
+            showOptions = false;
+            if (content === "ok") {
+                document.getElementById(id).getElementsByClassName(type)[0].textContent = value;
             } else {
-                document.getElementById("error").textContent = document.getElementById("textErrorUnexpected").textContent;
-            }
-        })
-        .catch(error => {
-            console.error(error);
-        });
-}
-
-function changeToFalse(e) {
-    const id = e.dataset.id;
-    const type = e.dataset.type;
-    fetch("/change_user", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams({
-            "id": id,
-            "type": type,
-            "value": false
-        })
-    })
-        .then(content => content.text())
-        .then(content => {
-            const cell = document.getElementById(id);
-            if (content) {
-                if (type) {
-                    const active = cell.getElementsByClassName("active")[0];
-                    active.textContent = "false";
-                } else {
-                    const banned = cell.getElementsByClassName("banned")[0];
-                    banned.textContent = "false";
-                }
-            } else {
-                document.getElementById("error").textContent = document.getElementById("textErrorUnexpected").textContent;
+                document.getElementById("error").textContent = content;
             }
         })
         .catch(error => {

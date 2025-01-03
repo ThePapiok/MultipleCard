@@ -43,7 +43,7 @@ public class AdminPanelServiceTest {
 
   @Test
   public void shouldSendEmailAtSendInfoAboutBlockedUserWhenIsFromPoland() {
-    final String title = "Zablokowanie - " + TEST_ID;
+    final String title = "Zablokowanie konta - " + TEST_ID;
     final String text = "Z pewnych względów twoje konto zostało zablokowane.";
 
     adminPanelService.sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
@@ -114,6 +114,96 @@ public class AdminPanelServiceTest {
         "Your category violated certain standards, we regret to inform you that it has been removed.";
 
     adminPanelService.sendInfoAboutDeletedCategory(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutUnblockedUserWhenIsFromPoland() {
+    final String title = "Odblokowanie konta - " + TEST_ID;
+    final String text = "Twoje konto zostało odblokowane.";
+
+    adminPanelService.sendInfoAboutUnblockedUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutUnblockedUserWhenIsFromOtherCountry() {
+    final String title = "Unblocking your account - " + TEST_ID;
+    final String text = "Your account has been unblocked.";
+
+    adminPanelService.sendInfoAboutUnblockedUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutActivatedUserWhenIsFromPoland() {
+    final String title = "Aktywowanie konta - " + TEST_ID;
+    final String text = "Twoje konto zostało aktywowane.";
+
+    adminPanelService.sendInfoAboutActivatedUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutActivatedUserWhenIsFromOtherCountry() {
+    final String title = "Activating your account - " + TEST_ID;
+    final String text = "Your account has been activated.";
+
+    adminPanelService.sendInfoAboutActivatedUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutDeactivatedUserWhenIsFromPoland() {
+    final String title = "Dezaktywowanie konta - " + TEST_ID;
+    final String text = "Twoje konto zostało dezaktywowane.";
+
+    adminPanelService.sendInfoAboutDeactivatedUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutDeactivatedUserWhenIsFromOtherCountry() {
+    final String title = "Deactivating your account - " + TEST_ID;
+    final String text = "Your account has been deactivated.";
+
+    adminPanelService.sendInfoAboutDeactivatedUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutChangeUserToAdminWhenIsFromPoland() {
+    final String title = "Awansowanie na Admina - " + TEST_ID;
+    final String text = "Uzyskałeś rolę Admin.";
+
+    adminPanelService.sendInfoAboutChangeUserToAdmin(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutChangeUserToAdminWhenIsFromOtherCountry() {
+    final String title = "Promotion to Admin - " + TEST_ID;
+    final String text = "Your account is now Admin.";
+
+    adminPanelService.sendInfoAboutChangeUserToAdmin(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutChangeAdminToUserWhenIsFromPoland() {
+    final String title = "Degradacja - " + TEST_ID;
+    final String text = "Twoje konto zostało zdegradowane do roli User.";
+
+    adminPanelService.sendInfoAboutChangeAdminToUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutChangeAdminToUserWhenIsFromOtherCountry() {
+    final String title = "Degradation - " + TEST_ID;
+    final String text = "Your account is now User.";
+
+    adminPanelService.sendInfoAboutChangeAdminToUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
     verify(emailService).sendEmail(text, TEST_EMAIL, title);
   }
 }

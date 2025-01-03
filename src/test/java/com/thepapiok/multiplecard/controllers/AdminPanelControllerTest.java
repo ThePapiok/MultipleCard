@@ -19,6 +19,7 @@ import com.thepapiok.multiplecard.services.ReviewService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AdminPanelControllerTest {
+  private static final String PL_LANGUAGE = "pl";
   private static final String TEST_PHONE = "+423423141234";
   private static final String TEST_EMAIL = "testEmail";
   private static final String ID_PARAM = "id";
@@ -40,6 +42,9 @@ public class AdminPanelControllerTest {
   private static final String TEST_DESCRIPTION = "test sadfasdfasdfasdfafsdf";
   private static final String TRUE_VALUE = "true";
   private static final String FALSE_VALUE = "false";
+  private static final String ERROR_MESSAGE = "error!";
+  private static final String SUCCESS_MESSAGE = "success!";
+  private static final String ROLE_USER = "ROLE_USER";
   private static final int BAD_REQUEST_STATUS = 400;
 
   @Autowired private MockMvc mockMvc;
@@ -80,34 +85,71 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtChangeUserWhenTypeActiveAndErrorAtChangeActive() throws Exception {
-    when(accountService.changeActive(TEST_ID, true)).thenReturn(false);
+  public void shouldReturnErrorMessageAtChangeUserWhenTypeActiveAndErrorAtChangeActive()
+      throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
-    performPostAtChangeUser(FALSE_VALUE, TRUE_VALUE, TEST_ID, TRUE_VALUE);
+    when(accountService.changeActive(TEST_ID, true, locale)).thenReturn(ERROR_MESSAGE);
+
+    performPostAtChangeUser(ERROR_MESSAGE, "active", TEST_ID, TRUE_VALUE);
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnTrueAtChangeUserWhenTypeActive() throws Exception {
-    when(accountService.changeActive(TEST_ID, true)).thenReturn(true);
+  public void shouldReturnSuccessMessageAtChangeUserWhenTypeActive() throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
-    performPostAtChangeUser(TRUE_VALUE, TRUE_VALUE, TEST_ID, TRUE_VALUE);
+    when(accountService.changeActive(TEST_ID, true, locale)).thenReturn(SUCCESS_MESSAGE);
+
+    performPostAtChangeUser(SUCCESS_MESSAGE, "active", TEST_ID, TRUE_VALUE);
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtChangeUserWhenTypeBannedAndErrorAtChangeBanned() throws Exception {
-    when(accountService.changeBanned(TEST_ID, true)).thenReturn(false);
+  public void shouldReturnErrorMessageAtChangeUserWhenTypeBannedAndErrorAtChangeBanned()
+      throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
-    performPostAtChangeUser(FALSE_VALUE, FALSE_VALUE, TEST_ID, TRUE_VALUE);
+    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn(ERROR_MESSAGE);
+
+    performPostAtChangeUser(ERROR_MESSAGE, "banned", TEST_ID, TRUE_VALUE);
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnTrueAtChangeUserWhenTypeBanned() throws Exception {
-    when(accountService.changeBanned(TEST_ID, true)).thenReturn(true);
+  public void shouldReturnSuccessMessageAtChangeUserWhenTypeBanned() throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
-    performPostAtChangeUser(TRUE_VALUE, FALSE_VALUE, TEST_ID, TRUE_VALUE);
+    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn(SUCCESS_MESSAGE);
+
+    performPostAtChangeUser(SUCCESS_MESSAGE, "banned", TEST_ID, TRUE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnErrorMessageAtChangeUserWhenTypeRoleAndErrorAtChangeRole()
+      throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
+
+    when(accountService.changeRole(TEST_ID, ROLE_USER, locale)).thenReturn(ERROR_MESSAGE);
+
+    performPostAtChangeUser(ERROR_MESSAGE, "role", TEST_ID, ROLE_USER);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnSuccessMessageAtChangeUserWhenTypeRole() throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
+
+    when(accountService.changeRole(TEST_ID, ROLE_USER, locale)).thenReturn(SUCCESS_MESSAGE);
+
+    performPostAtChangeUser(SUCCESS_MESSAGE, "role", TEST_ID, ROLE_USER);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnUnexpectedErrorAtChangeUserWhenTypeIsOther() throws Exception {
+    performPostAtChangeUser("Nieoczekiwany błąd", "cos", TEST_ID, "sdafas");
   }
 
   private void performPostAtChangeUser(String content, String type, String id, String value)
@@ -264,9 +306,10 @@ public class AdminPanelControllerTest {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountById(TEST_ID)).thenReturn(account);
-    when(accountService.changeBanned(TEST_ID, true)).thenReturn(false);
+    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn("notOk");
 
     performPostAtBlockUser(false, FALSE_VALUE);
   }
@@ -277,12 +320,12 @@ public class AdminPanelControllerTest {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountById(TEST_ID)).thenReturn(account);
-    when(accountService.changeBanned(TEST_ID, true)).thenReturn(true);
+    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn("ok");
 
     performPostAtBlockUser(false, TRUE_VALUE);
-    verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
   }
 
   @Test
@@ -293,12 +336,12 @@ public class AdminPanelControllerTest {
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
     account.setId(testId);
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
-    when(accountService.changeBanned(testId.toString(), true)).thenReturn(true);
+    when(accountService.changeBanned(testId.toString(), true, locale)).thenReturn("ok");
 
     performPostAtBlockUser(true, TRUE_VALUE);
-    verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, testId.toString());
   }
 
   private void performPostAtBlockUser(boolean isProduct, String content) throws Exception {

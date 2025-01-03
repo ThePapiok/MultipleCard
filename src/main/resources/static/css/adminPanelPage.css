@@ -16,7 +16,6 @@
     display: flex;
     width: 100%;
     font-weight: 600;
-    font-size: 14px;
     font-family: "Inter", sans-serif;
     background-color: #b168bd;
 }
@@ -25,7 +24,7 @@
     background-color: #7f3f8a;
 }
 
-.cell:not(.cellColumn):nth-child(6), .cell:not(.cellColumn):nth-child(7) {
+.cell:not(.cellColumn):nth-child(5), .cell:not(.cellColumn):nth-child(6), .cell:not(.cellColumn):nth-child(7) {
     cursor: pointer;
 }
 
@@ -63,6 +62,10 @@
     border: 1px solid black;
     box-sizing: border-box;
     cursor: pointer;
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
 }
 
 .option:hover {
@@ -105,6 +108,10 @@
     font-family: "Inter", sans-serif;
 }
 
+#error {
+    margin-left: 5%;
+}
+
 @media only screen and (max-width: 768px) {
     #searchInput {
         font-size: 13px;
@@ -116,8 +123,9 @@
         width: 20%;
     }
 
-    .cell {
+    .cell, .option {
         overflow-x: auto;
         font-size: 10px;
     }
+
 }

@@ -56,16 +56,17 @@
             <span class="cell" th:text="${user.firstName}"></span>
             <span class="cell" th:text="${user.lastName}"></span>
             <span class="cell" th:text="${user.phone}"></span>
-            <span class="cell" th:text="${user.role}"></span>
+            <span class="cell role" th:text="${user.role}"
+                  th:attr="onclick=|showOrHideOptions(this, 'role', '${user.id}', 'ROLE_USER', 'ROLE_ADMIN')|"></span>
             <span class="cell active" th:text="${user.active}"
-                  th:attr="onclick=|showOrHideOptions(this, true, '${user.id}')|"></span>
+                  th:attr="onclick=|showOrHideOptions(this, 'active', '${user.id}', 'true', 'false')|"></span>
             <span class="cell banned" th:text="${user.banned}"
-                  th:attr="onclick=|showOrHideOptions(this, false, '${user.id}')|"></span>
+                  th:attr="onclick=|showOrHideOptions(this, 'banned', '${user.id}', 'true', 'false')|"></span>
         </div>
     </div>
     <div id="options" hidden>
-        <span class="option" onclick="changeToTrue(this.parentElement)">true</span>
-        <span class="option" onclick="changeToFalse(this.parentElement)">false</span>
+        <span class="option" onclick="changeUser(this.parentElement, this)"></span>
+        <span class="option" onclick="changeUser(this.parentElement, this)"></span>
     </div>
 </div>
 <div id="footer">

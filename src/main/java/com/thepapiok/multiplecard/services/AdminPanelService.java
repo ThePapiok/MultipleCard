@@ -32,7 +32,7 @@ public class AdminPanelService {
     String text;
     String title;
     if (phone.startsWith(PL_CALLING_CODE)) {
-      title = "Zablokowanie - " + id;
+      title = "Zablokowanie konta - " + id;
       text = "Z pewnych względów twoje konto zostało zablokowane.";
     } else {
       title = "Blocking your account - " + id;
@@ -80,6 +80,71 @@ public class AdminPanelService {
       title = "Removal of the category - " + id;
       text =
           "Your category violated certain standards, we regret to inform you that it has been removed.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutUnblockedUser(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Odblokowanie konta - " + id;
+      text = "Twoje konto zostało odblokowane.";
+    } else {
+      title = "Unblocking your account - " + id;
+      text = "Your account has been unblocked.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutActivatedUser(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Aktywowanie konta - " + id;
+      text = "Twoje konto zostało aktywowane.";
+    } else {
+      title = "Activating your account - " + id;
+      text = "Your account has been activated.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutDeactivatedUser(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Dezaktywowanie konta - " + id;
+      text = "Twoje konto zostało dezaktywowane.";
+    } else {
+      title = "Deactivating your account - " + id;
+      text = "Your account has been deactivated.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutChangeUserToAdmin(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Awansowanie na Admina - " + id;
+      text = "Uzyskałeś rolę Admin.";
+    } else {
+      title = "Promotion to Admin - " + id;
+      text = "Your account is now Admin.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
+
+  public void sendInfoAboutChangeAdminToUser(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Degradacja - " + id;
+      text = "Twoje konto zostało zdegradowane do roli User.";
+    } else {
+      title = "Degradation - " + id;
+      text = "Your account is now User.";
     }
     emailService.sendEmail(text, email, title);
   }

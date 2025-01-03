@@ -72,12 +72,20 @@ public class AdminPanelController {
 
   @PostMapping("/change_user")
   @ResponseBody
-  public Boolean changeUser(
-      @RequestParam String id, @RequestParam boolean type, @RequestParam boolean value) {
-    if (type) {
-      return accountService.changeActive(id, value);
-    } else {
-      return accountService.changeBanned(id, value);
+  public String changeUser(
+      @RequestParam String id,
+      @RequestParam String type,
+      @RequestParam String value,
+      Locale locale) {
+    switch (type) {
+      case "active":
+        return accountService.changeActive(id, Boolean.parseBoolean(value), locale);
+      case "banned":
+        return accountService.changeBanned(id, Boolean.parseBoolean(value), locale);
+      case "role":
+        return accountService.changeRole(id, value, locale);
+      default:
+        return messageSource.getMessage("error.unexpected", null, locale);
     }
   }
 
@@ -131,8 +139,10 @@ public class AdminPanelController {
 
   @PostMapping("/block_user")
   @ResponseBody
-  public Boolean blockUser(@RequestParam String id, @RequestParam boolean isProduct) {
+  public Boolean blockUser(
+      @RequestParam String id, @RequestParam boolean isProduct, Locale locale) {
     Account account;
+    System.out.println(locale);
     if (isProduct) {
       account = accountService.getAccountByProductId(id);
       id = account.getId().toString();
@@ -140,10 +150,9 @@ public class AdminPanelController {
       account = accountService.getAccountById(id);
     }
     String email = account.getEmail();
-    if (email == null || !accountService.changeBanned(id, true)) {
+    if (email == null || !accountService.changeBanned(id, true, locale).equals("ok")) {
       return false;
     }
-    adminPanelService.sendInfoAboutBlockedUser(email, account.getPhone(), id);
     return true;
   }
 
