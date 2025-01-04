@@ -10,11 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ public class AdminPanelControllerTest {
   @MockBean private ProductService productService;
   @MockBean private AdminPanelService adminPanelService;
   @MockBean private ReviewService reviewService;
+  @MockBean private ResultService resultService;
 
   @Test
   @WithMockUser(roles = "ADMIN")
@@ -61,21 +64,39 @@ public class AdminPanelControllerTest {
     List<UserDTO> users = new ArrayList<>();
     UserDTO user = new UserDTO();
     user.setId(new ObjectId().toString());
+    user.setPhone(TEST_PHONE);
+    user.setEmail(TEST_EMAIL);
+    user.setRole(ROLE_USER);
+    user.setFirstName("firstName");
+    user.setLastName("lastName");
+    user.setBanned(false);
+    user.setActive(true);
     users.add(user);
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(users);
 
-    when(accountService.getUsers(null, null)).thenReturn(users);
+    when(accountService.getCurrentPage("", "", 0)).thenReturn(pageUserDTO);
+    when(resultService.getPages(1, 1)).thenReturn(List.of(1));
 
     mockMvc
         .perform(get("/admin_panel"))
         .andExpect(model().attribute("emptyUsers", false))
         .andExpect(model().attribute("users", users))
+        .andExpect(model().attribute("pageSelected", 1))
+        .andExpect(model().attribute("maxPage", 1))
+        .andExpect(model().attribute("pages", List.of(1)))
         .andExpect(view().name("adminPanelPage"));
   }
 
   @Test
   @WithMockUser(roles = "ADMIN")
   public void shouldReturnAdminPanelPageAtAdminPanelWhenNotFoundUsers() throws Exception {
-    when(accountService.getUsers(null, null)).thenReturn(List.of());
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(0);
+    pageUserDTO.setUsers(List.of());
+
+    when(accountService.getCurrentPage("", "", 0)).thenReturn(pageUserDTO);
 
     mockMvc
         .perform(get("/admin_panel"))

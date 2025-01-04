@@ -13,14 +13,17 @@ import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.ReservedProduct;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
+import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import com.thepapiok.multiplecard.dto.CategoryDTO;
 import com.thepapiok.multiplecard.dto.PageCategoryDTO;
 import com.thepapiok.multiplecard.dto.PageOwnerProductsDTO;
 import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.ProductAtCardDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
+import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.misc.ProductInfo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,6 +63,8 @@ public class AggregationRepositoryTest {
   private static final String TEST_CATEGORY_NAME = "category";
   private static final String TEST_CATEGORY_OTHER_NAME = "other";
   private static final String TEST_SHOP_NAME = "shop1";
+  private static final String TEST_FIRST_NAME_USER = "firstNameUser3";
+  private static final String TEST_LAST_NAME_USER = "lastNameUser3";
   private ProductDTO productDTO1;
   private ProductDTO productDTO2;
   private ProductDTO productDTO3;
@@ -76,9 +81,7 @@ public class AggregationRepositoryTest {
   private ProductDTO productDTO17;
   private Shop shop1;
   private Shop shop3;
-  private Product product10;
   private Product product1;
-  private Product product6;
   private ProductAtCardDTO productAtCardDTO1;
   private ProductAtCardDTO productAtCardDTO2;
   private ProductAtCardDTO productAtCardDTO3;
@@ -87,6 +90,13 @@ public class AggregationRepositoryTest {
   private CategoryDTO categoryDTO3;
   private CategoryDTO categoryDTO4;
   private CategoryDTO categoryDTO5;
+  private UserDTO userDTO1;
+  private UserDTO userDTO2;
+  private UserDTO userDTO3;
+  private UserDTO userDTO4;
+  private UserDTO userDTO5;
+  private UserDTO userDTO6;
+  private UserDTO userDTO7;
 
   @Autowired private MongoTemplate mongoTemplate;
   @Autowired private CategoryRepository categoryRepository;
@@ -96,6 +106,7 @@ public class AggregationRepositoryTest {
   @Autowired private ShopRepository shopRepository;
   @Autowired private ReservedProductsRepository reservedProductsRepository;
   @Autowired private OrderRepository orderRepository;
+  @Autowired private UserRepository userRepository;
   private AggregationRepository aggregationRepository;
   @MockBean private MongoTransactionManager mongoTransactionManager;
   @MockBean private RestTemplate restTemplate;
@@ -409,7 +420,7 @@ public class AggregationRepositoryTest {
     product5.setShopId(shop3.getId());
     product5.setCategories(List.of(category3.getId()));
     product5.setUpdatedAt(testDate5);
-    product6 = new Product();
+    Product product6 = new Product();
     product6.setImageUrl("url6");
     product6.setName(TEST_PRODUCT_NAME);
     product6.setDescription("description6");
@@ -445,7 +456,7 @@ public class AggregationRepositoryTest {
     product9.setShopId(shop3.getId());
     product9.setCategories(List.of(category1.getId()));
     product9.setUpdatedAt(testDate9);
-    product10 = new Product();
+    Product product10 = new Product();
     product10.setImageUrl("url10");
     product10.setName("product10");
     product10.setDescription("description10");
@@ -588,6 +599,33 @@ public class AggregationRepositoryTest {
     reservedProduct2.setCardId(new ObjectId());
     reservedProduct2.setEncryptedIp("sgdfaasdfdas3");
     mongoTemplate.save(reservedProduct2);
+    User user1 = new User();
+    user1.setRestricted(false);
+    user1.setPoints(0);
+    user1.setReview(null);
+    user1.setCardId(new ObjectId());
+    user1.setFirstName("firstNameUser1");
+    user1.setLastName("lastNameUser1");
+    user1.setAddress(address);
+    mongoTemplate.save(user1);
+    User user2 = new User();
+    user2.setRestricted(false);
+    user2.setPoints(0);
+    user2.setReview(null);
+    user2.setCardId(new ObjectId());
+    user2.setFirstName("firstNameUser2");
+    user2.setLastName("lastNameUser2");
+    user2.setAddress(address);
+    mongoTemplate.save(user2);
+    User user3 = new User();
+    user3.setRestricted(false);
+    user3.setPoints(0);
+    user3.setReview(null);
+    user3.setCardId(new ObjectId());
+    user3.setFirstName(TEST_FIRST_NAME_USER);
+    user3.setLastName(TEST_LAST_NAME_USER);
+    user3.setAddress(address);
+    mongoTemplate.save(user3);
     Account account1 = new Account();
     account1.setId(shop1.getId());
     account1.setPhone(TEST_PHONE);
@@ -624,6 +662,33 @@ public class AggregationRepositoryTest {
     account4.setActive(true);
     account4.setPassword("password4");
     mongoTemplate.save(account4);
+    Account account5 = new Account();
+    account5.setId(user1.getId());
+    account5.setPhone("+48535243252345");
+    account5.setEmail("test@test5");
+    account5.setRole(Role.ROLE_USER);
+    account5.setBanned(false);
+    account5.setActive(false);
+    account5.setPassword("password5");
+    mongoTemplate.save(account5);
+    Account account6 = new Account();
+    account6.setId(user2.getId());
+    account6.setPhone("+481234123452314");
+    account6.setEmail("test@test6");
+    account6.setRole(Role.ROLE_USER);
+    account6.setBanned(true);
+    account6.setActive(true);
+    account6.setPassword("password6");
+    mongoTemplate.save(account6);
+    Account account7 = new Account();
+    account7.setId(user3.getId());
+    account7.setPhone("+4853543535435");
+    account7.setEmail("test@test7");
+    account7.setRole(Role.ROLE_ADMIN);
+    account7.setBanned(true);
+    account7.setActive(false);
+    account7.setPassword("password7");
+    mongoTemplate.save(account7);
     Order order1 = new Order();
     order1.setCardId(TEST_CARD_ID);
     order1.setPrice(testOrder1Price);
@@ -2146,6 +2211,69 @@ public class AggregationRepositoryTest {
     productAtCardDTO3.setDescription(this.product1.getDescription());
     productAtCardDTO3.setShopImageUrl(shop1.getImageUrl());
     productAtCardDTO3.setShopName(shop1.getName());
+    userDTO1 = new UserDTO();
+    userDTO1.setActive(true);
+    userDTO1.setBanned(false);
+    userDTO1.setEmail("test@test1");
+    userDTO1.setPhone(TEST_PHONE);
+    userDTO1.setId(shop1.getId().toString());
+    userDTO1.setRole(Role.ROLE_SHOP.name());
+    userDTO1.setFirstName("firstNameShop1");
+    userDTO1.setLastName("lastNameShop1");
+    userDTO2 = new UserDTO();
+    userDTO2.setId(shop2.getId().toString());
+    userDTO2.setPhone("+48235324342423");
+    userDTO2.setEmail("test@test2");
+    userDTO2.setRole(Role.ROLE_SHOP.name());
+    userDTO2.setBanned(false);
+    userDTO2.setActive(true);
+    userDTO2.setFirstName("firstNameShop2");
+    userDTO2.setLastName("lastNameShop2");
+    userDTO3 = new UserDTO();
+    userDTO3.setId(shop3.getId().toString());
+    userDTO3.setPhone(TEST_PHONE3);
+    userDTO3.setEmail("test@test3");
+    userDTO3.setRole(Role.ROLE_SHOP.name());
+    userDTO3.setBanned(false);
+    userDTO3.setActive(true);
+    userDTO3.setFirstName("firstNameShop3");
+    userDTO3.setLastName("lastNameShop3");
+    userDTO4 = new UserDTO();
+    userDTO4.setId(shop4.getId().toString());
+    userDTO4.setPhone("+48121347392923");
+    userDTO4.setEmail("test@test4");
+    userDTO4.setRole(Role.ROLE_SHOP.name());
+    userDTO4.setBanned(false);
+    userDTO4.setActive(true);
+    userDTO4.setFirstName("firstNameShop4");
+    userDTO4.setLastName("lastNameShop4");
+    userDTO5 = new UserDTO();
+    userDTO5.setId(user1.getId().toString());
+    userDTO5.setPhone("+48535243252345");
+    userDTO5.setEmail("test@test5");
+    userDTO5.setRole(Role.ROLE_USER.name());
+    userDTO5.setBanned(false);
+    userDTO5.setActive(false);
+    userDTO5.setFirstName("firstNameUser1");
+    userDTO5.setLastName("lastNameUser1");
+    userDTO6 = new UserDTO();
+    userDTO6.setId(user2.getId().toString());
+    userDTO6.setPhone("+481234123452314");
+    userDTO6.setEmail("test@test6");
+    userDTO6.setRole(Role.ROLE_USER.name());
+    userDTO6.setBanned(true);
+    userDTO6.setActive(true);
+    userDTO6.setFirstName("firstNameUser2");
+    userDTO6.setLastName("lastNameUser2");
+    userDTO7 = new UserDTO();
+    userDTO7.setId(user3.getId().toString());
+    userDTO7.setPhone("+4853543535435");
+    userDTO7.setEmail("test@test7");
+    userDTO7.setRole(Role.ROLE_ADMIN.name());
+    userDTO7.setBanned(true);
+    userDTO7.setActive(false);
+    userDTO7.setFirstName(TEST_FIRST_NAME_USER);
+    userDTO7.setLastName(TEST_LAST_NAME_USER);
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
@@ -2164,6 +2292,7 @@ public class AggregationRepositoryTest {
     categoryRepository.deleteAll();
     reservedProductsRepository.deleteAll();
     orderRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test
@@ -2804,5 +2933,87 @@ public class AggregationRepositoryTest {
     pageCategoryDTO.setMaxPage(1);
 
     assertEquals(pageCategoryDTO, aggregationRepository.getCategories(0, TEST_CATEGORY_NAME));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenNotType() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(
+        List.of(userDTO1, userDTO2, userDTO3, userDTO4, userDTO5, userDTO6, userDTO7));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("", "", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType0() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO3));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("0", shop3.getId().toString(), 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType1() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO7));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("1", TEST_FIRST_NAME_USER, 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType2() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO7));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("2", TEST_LAST_NAME_USER, 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType3() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO6));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("3", " 481234123452314", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType4() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("4", "ROLE_SHOP", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType5() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4, userDTO6));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("5", "true", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType6() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO6, userDTO7));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("6", "true", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenNotFound() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(0);
+    pageUserDTO.setUsers(List.of());
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("2", "sdafdasfsadfsd", 0));
   }
 }

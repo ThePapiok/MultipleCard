@@ -7,14 +7,12 @@ import static org.mockito.Mockito.when;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Role;
-import com.thepapiok.multiplecard.collections.Shop;
-import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
-import com.thepapiok.multiplecard.repositories.ShopRepository;
-import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -30,8 +28,7 @@ public class AccountServiceTest {
   private static final String TEST_PHONE = "+4823412341242134";
   private static final String TEST_EMAIL = "testEmail";
   private static final String ROLE_ADMIN = "ROLE_ADMIN";
-  private static final String ROLE_SHOP = "ROLE_SHOP";
-  private static final String TEST_OTHER_PHONE = "+481352312341234423";
+  private static final String ROLE_USER = "ROLE_USER";
   private static final String TEST_ID = "123456789012345678901234";
   private static final String USER_NOT_FOUND_ERROR = "Nie ma takiego użytkownika";
   private static final String USER_ALREADY_HAS_ERROR = "Użytkownik posiada już taka wartość";
@@ -41,17 +38,13 @@ public class AccountServiceTest {
   private static final String UNEXPECTED_PARAM = "error.unexpected";
   private static final String OK_SUCCESS = "ok";
   private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
-  private static final ObjectId TEST_OBJECT_OTHER_ID = new ObjectId("673456789012345678901234");
-  private Shop shop;
-  private User user;
   private AccountService accountService;
   @Mock private AccountRepository accountRepository;
-  @Mock private UserRepository userRepository;
-  @Mock private ShopRepository shopRepository;
   @Mock private ProductRepository productRepository;
   @Mock private CategoryRepository categoryRepository;
   @Mock private MessageSource messageSource;
   @Mock private AdminPanelService adminPanelService;
+  @Mock private AggregationRepository aggregationRepository;
 
   @BeforeEach
   public void setUp() {
@@ -59,287 +52,43 @@ public class AccountServiceTest {
     accountService =
         new AccountService(
             accountRepository,
-            userRepository,
-            shopRepository,
             productRepository,
             categoryRepository,
             messageSource,
-            adminPanelService);
+            adminPanelService,
+            aggregationRepository);
   }
 
   @Test
-  public void shouldReturnEmptyListAtGetUsersWhenNotFoundShop() {
-    List<Account> accounts = new ArrayList<>();
-    Account account = new Account();
-    account.setRole(Role.ROLE_SHOP);
-    account.setId(TEST_OBJECT_ID);
-    accounts.add(account);
-
-    when(accountRepository.findAll()).thenReturn(accounts);
-    when(shopRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
-
-    assertEquals(List.of(), accountService.getUsers(null, null));
-  }
-
-  @Test
-  public void shouldReturnEmptyListAtGetUsersWhenNotFoundUser() {
-    List<Account> accounts = new ArrayList<>();
-    Account account = new Account();
-    account.setRole(Role.ROLE_ADMIN);
-    account.setId(TEST_OBJECT_ID);
-    accounts.add(account);
-
-    when(accountRepository.findAll()).thenReturn(accounts);
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
-
-    assertEquals(List.of(), accountService.getUsers(null, null));
-  }
-
-  @Test
-  public void shouldReturnEmptyListAtGetUsersWhenGetException() {
-    when(accountRepository.findAll()).thenThrow(MongoWriteException.class);
-
-    assertEquals(List.of(), accountService.getUsers(null, null));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIsNull() {
-    List<Account> accounts = setAccountsAtGetUsers();
+  public void shouldReturnPageUserDTOAtGetCurrentPageWhenEverythingOk() {
     List<UserDTO> userDTOS = new ArrayList<>();
     UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
+    userDTO1.setFirstName("testFirstName1");
+    userDTO1.setLastName("testLastName1");
+    userDTO1.setPhone("testPhone1");
+    userDTO1.setEmail("testEmail1");
     userDTO1.setBanned(false);
+    userDTO1.setBanned(true);
     userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
+    userDTO1.setId(new ObjectId().toString());
     UserDTO userDTO2 = new UserDTO();
-    userDTO2.setId(TEST_OBJECT_OTHER_ID.toString());
-    userDTO2.setPhone(TEST_OTHER_PHONE);
-    userDTO2.setActive(false);
-    userDTO2.setBanned(true);
-    userDTO2.setRole(ROLE_SHOP);
-    userDTO2.setFirstName(shop.getFirstName());
-    userDTO2.setLastName(shop.getLastName());
+    userDTO2.setFirstName("testFirstName2");
+    userDTO2.setLastName("testLastName2");
+    userDTO2.setPhone("testPhone2");
+    userDTO2.setEmail("testEmail2");
+    userDTO2.setBanned(false);
+    userDTO2.setBanned(false);
+    userDTO2.setRole(ROLE_USER);
+    userDTO2.setId(new ObjectId().toString());
     userDTOS.add(userDTO1);
     userDTOS.add(userDTO2);
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(userDTOS);
 
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
+    when(aggregationRepository.getUsers("", "", 0)).thenReturn(pageUserDTO);
 
-    assertEquals(userDTOS, accountService.getUsers(null, null));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs0() {
-    final int testType = 0;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, TEST_ID));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs1() {
-    final int testType = 1;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_OTHER_ID.toString());
-    userDTO1.setPhone(TEST_OTHER_PHONE);
-    userDTO1.setActive(false);
-    userDTO1.setBanned(true);
-    userDTO1.setRole(ROLE_SHOP);
-    userDTO1.setFirstName(shop.getFirstName());
-    userDTO1.setLastName(shop.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, shop.getFirstName()));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs2() {
-    final int testType = 2;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, user.getLastName()));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs3() {
-    final int testType = 3;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, TEST_PHONE));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs4() {
-    final int testType = 4;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, Role.ROLE_ADMIN.name()));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs5() {
-    final int testType = 5;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_OTHER_ID.toString());
-    userDTO1.setPhone(TEST_OTHER_PHONE);
-    userDTO1.setActive(false);
-    userDTO1.setBanned(true);
-    userDTO1.setRole(ROLE_SHOP);
-    userDTO1.setFirstName(shop.getFirstName());
-    userDTO1.setLastName(shop.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, "false"));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIs6() {
-    final int testType = 6;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    userDTOS.add(userDTO1);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, "false"));
-  }
-
-  @Test
-  public void shouldReturnListOfUserDTOAtGetUsersWhenTypeIsOther() {
-    final int testType = 8;
-    List<Account> accounts = setAccountsAtGetUsers();
-    List<UserDTO> userDTOS = new ArrayList<>();
-    UserDTO userDTO1 = new UserDTO();
-    userDTO1.setId(TEST_OBJECT_ID.toString());
-    userDTO1.setPhone(TEST_PHONE);
-    userDTO1.setActive(true);
-    userDTO1.setBanned(false);
-    userDTO1.setRole(ROLE_ADMIN);
-    userDTO1.setFirstName(user.getFirstName());
-    userDTO1.setLastName(user.getLastName());
-    UserDTO userDTO2 = new UserDTO();
-    userDTO2.setId(TEST_OBJECT_OTHER_ID.toString());
-    userDTO2.setPhone(TEST_OTHER_PHONE);
-    userDTO2.setActive(false);
-    userDTO2.setBanned(true);
-    userDTO2.setRole(ROLE_SHOP);
-    userDTO2.setFirstName(shop.getFirstName());
-    userDTO2.setLastName(shop.getLastName());
-    userDTOS.add(userDTO1);
-    userDTOS.add(userDTO2);
-
-    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(shopRepository.findById(TEST_OBJECT_OTHER_ID)).thenReturn(Optional.of(shop));
-    when(accountRepository.findAll()).thenReturn(accounts);
-
-    assertEquals(userDTOS, accountService.getUsers(testType, "some"));
-  }
-
-  private List<Account> setAccountsAtGetUsers() {
-    List<Account> accounts = new ArrayList<>();
-    Account account1 = new Account();
-    account1.setRole(Role.ROLE_ADMIN);
-    account1.setId(TEST_OBJECT_ID);
-    account1.setActive(true);
-    account1.setBanned(false);
-    account1.setPhone(TEST_PHONE);
-    Account account2 = new Account();
-    account2.setRole(Role.ROLE_SHOP);
-    account2.setId(TEST_OBJECT_OTHER_ID);
-    account2.setActive(false);
-    account2.setBanned(true);
-    account2.setPhone(TEST_OTHER_PHONE);
-    accounts.add(account1);
-    accounts.add(account2);
-    user = new User();
-    user.setFirstName("firstName");
-    user.setLastName("lastName");
-    shop = new Shop();
-    shop.setFirstName("firstNameShop");
-    shop.setLastName("lastNameShop");
-    return accounts;
+    assertEquals(pageUserDTO, accountService.getCurrentPage("", "", 0));
   }
 
   @Test
@@ -572,8 +321,7 @@ public class AccountServiceTest {
     when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
 
     assertEquals(
-        USER_ALREADY_HAS_ERROR,
-        accountService.changeRole(TEST_ID, "ROLE_USER", Locale.getDefault()));
+        USER_ALREADY_HAS_ERROR, accountService.changeRole(TEST_ID, ROLE_USER, Locale.getDefault()));
   }
 
   @Test
@@ -654,7 +402,7 @@ public class AccountServiceTest {
 
     when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
 
-    assertEquals(OK_SUCCESS, accountService.changeRole(TEST_ID, "ROLE_USER", locale));
+    assertEquals(OK_SUCCESS, accountService.changeRole(TEST_ID, ROLE_USER, locale));
     verify(accountRepository).save(expectedAccount);
     verify(adminPanelService).sendInfoAboutChangeAdminToUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
   }

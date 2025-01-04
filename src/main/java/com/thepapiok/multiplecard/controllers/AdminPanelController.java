@@ -1,12 +1,14 @@
 package com.thepapiok.multiplecard.controllers;
 
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
+import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
 import com.thepapiok.multiplecard.services.UserService;
 import java.security.Principal;
@@ -34,6 +36,7 @@ public class AdminPanelController {
   private final AdminPanelService adminPanelService;
   private final ReviewService reviewService;
   private final CategoryService categoryService;
+  private final ResultService resultService;
 
   @Autowired
   public AdminPanelController(
@@ -44,7 +47,8 @@ public class AdminPanelController {
       ProductService productService,
       AdminPanelService adminPanelService,
       ReviewService reviewService,
-      CategoryService categoryService) {
+      CategoryService categoryService,
+      ResultService resultService) {
     this.accountService = accountService;
     this.userService = userService;
     this.messageSource = messageSource;
@@ -53,19 +57,26 @@ public class AdminPanelController {
     this.adminPanelService = adminPanelService;
     this.reviewService = reviewService;
     this.categoryService = categoryService;
+    this.resultService = resultService;
   }
 
   @GetMapping("/admin_panel")
   public String adminPanel(
-      @RequestParam(required = false) Integer type,
-      @RequestParam(required = false) String value,
+      @RequestParam(defaultValue = "") String type,
+      @RequestParam(defaultValue = "") String value,
+      @RequestParam(defaultValue = "0") int page,
       Model model) {
-    List<UserDTO> users = accountService.getUsers(type, value);
+    final PageUserDTO currentPage = accountService.getCurrentPage(type, value, page);
+    final List<UserDTO> users = currentPage.getUsers();
+    final int maxPage = currentPage.getMaxPage();
     if (users.size() == 0) {
       model.addAttribute("emptyUsers", true);
     } else {
+      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+      model.addAttribute("pageSelected", page + 1);
       model.addAttribute("emptyUsers", false);
       model.addAttribute("users", users);
+      model.addAttribute("maxPage", maxPage);
     }
     return "adminPanelPage";
   }

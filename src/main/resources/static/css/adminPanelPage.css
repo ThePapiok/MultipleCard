@@ -4,6 +4,7 @@
     position: relative;
     left: 5%;
     width: 90%;
+    min-height: 300px;
 }
 
 #columns {
@@ -79,6 +80,7 @@
     width: 90%;
     height: 40px;
     margin-bottom: 20px;
+    margin-left: unset;
 }
 
 #searchInput {
@@ -97,7 +99,8 @@
     cursor: pointer;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
-    background-color: #CFCBCB;
+    background-color: #76c75b;
+    box-sizing: border-box;
 }
 
 #notFound {

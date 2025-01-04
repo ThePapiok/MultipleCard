@@ -1,9 +1,13 @@
 let showOptions = false;
-let showOptionsRole = false;
-let searchOption = -1;
+let searchOption = "";
 
-function atStart() {
+function atStart(maxPage, page) {
     checkLanguage();
+    let selectedPage = document.getElementById("page" + page);
+    if (selectedPage != null) {
+        selectedPage.classList.add("selectedPage");
+    }
+    checkButtonPages(page, maxPage);
 }
 
 function showOrHideOptions(e, type, id, firstValue, secondValue) {
@@ -63,30 +67,19 @@ function changeUser(options, e) {
 }
 
 function setSearch(index, e) {
-    if (searchOption !== -1) {
-        document.getElementById("cell" + searchOption).style.backgroundColor = "#dcdee0";
+    if (index === searchOption) {
+        e.style.backgroundColor = "#dcdee0";
+        searchOption = "";
+    } else {
+        if (searchOption !== "") {
+            document.getElementById("cell" + searchOption).style.backgroundColor = "#dcdee0";
+        }
+        searchOption = index;
+        e.style.backgroundColor = "#C1C3C4";
     }
-    searchOption = index;
-    e.style.backgroundColor = "#C1C3C4";
 }
 
 function searchUsers(e) {
     const value = e.value;
-    if (searchOption !== -1 && value.length > 0) {
-        window.location = "/admin_panel?type=" + searchOption + "&value=" + value;
-    }
-}
-
-function changeButton(button, e) {
-    if (searchOption !== -1 && e.value.length > 0) {
-        button.style.backgroundColor = "#76c75b";
-    } else {
-        button.style.backgroundColor = "#CFCBCB";
-    }
-}
-
-function changeToGreenButton(e, input) {
-    if (searchOption !== -1 && input.value.length > 0) {
-        e.style.backgroundColor = "#68B050";
-    }
+    window.location = "/admin_panel?type=" + searchOption + "&value=" + value;
 }
