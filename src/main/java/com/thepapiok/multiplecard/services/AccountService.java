@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AccountService {
-  private final String USER_NOT_FOUND_PARAM = "error.user.not_found";
-  private final String USER_ALREADY_HAS_PARAM = "adminPanel.error.user_already_has";
+  private final String USER_NOT_FOUND_PARAM = "error.user_not_found";
+  private final String USER_ALREADY_HAS_PARAM = "error.user_already_has";
   private final String UNEXPECTED_PARAM = "error.unexpected";
   private final String OK_MESSAGE = "ok";
   private final AccountRepository accountRepository;
@@ -116,7 +116,7 @@ public class AccountService {
       if (account.getRole().equals(newRole)) {
         return messageSource.getMessage(USER_ALREADY_HAS_PARAM, null, locale);
       } else if (account.getRole().equals(Role.ROLE_SHOP)) {
-        return messageSource.getMessage("adminPanel.error.bad_role", null, locale);
+        return messageSource.getMessage("error.bad_role", null, locale);
       }
       account.setRole(newRole);
       accountRepository.save(account);

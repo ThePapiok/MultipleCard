@@ -148,4 +148,17 @@ public class AdminPanelService {
     }
     emailService.sendEmail(text, email, title);
   }
+
+  public void sendInfoAboutUnmutedUser(String email, String phone, String id) {
+    String text;
+    String title;
+    if (phone.startsWith(PL_CALLING_CODE)) {
+      title = "Cofnięcie ograniczeń - " + id;
+      text = "Zabrano ograniczenia z twojego konta.";
+    } else {
+      title = "Withdrawal of restriction - " + id;
+      text = "Your account is now without restriction.";
+    }
+    emailService.sendEmail(text, email, title);
+  }
 }

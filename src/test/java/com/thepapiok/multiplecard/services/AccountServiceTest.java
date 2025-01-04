@@ -33,8 +33,8 @@ public class AccountServiceTest {
   private static final String USER_NOT_FOUND_ERROR = "Nie ma takiego użytkownika";
   private static final String USER_ALREADY_HAS_ERROR = "Użytkownik posiada już taka wartość";
   private static final String UNEXPECTED_ERROR = "Nieoczekiwany błąd";
-  private static final String USER_NOT_FOUND_PARAM = "error.user.not_found";
-  private static final String USER_ALREADY_HAS_PARAM = "adminPanel.error.user_already_has";
+  private static final String USER_NOT_FOUND_PARAM = "error.user_not_found";
+  private static final String USER_ALREADY_HAS_PARAM = "error.user_already_has";
   private static final String UNEXPECTED_PARAM = "error.unexpected";
   private static final String OK_SUCCESS = "ok";
   private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
@@ -335,7 +335,7 @@ public class AccountServiceTest {
     badAccount.setRole(Role.ROLE_SHOP);
     Locale locale = Locale.getDefault();
 
-    when(messageSource.getMessage("adminPanel.error.bad_role", null, locale))
+    when(messageSource.getMessage("error.bad_role", null, locale))
         .thenReturn("Nie możesz tego zmienić dla takiej roli użytkownika");
     when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(badAccount));
 

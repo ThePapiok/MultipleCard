@@ -95,6 +95,8 @@ public class AdminPanelController {
         return accountService.changeBanned(id, Boolean.parseBoolean(value), locale);
       case "role":
         return accountService.changeRole(id, value, locale);
+      case "restricted":
+        return userService.changeRestricted(id, Boolean.parseBoolean(value), locale);
       default:
         return messageSource.getMessage("error.unexpected", null, locale);
     }
@@ -181,13 +183,12 @@ public class AdminPanelController {
 
   @PostMapping("/mute_user")
   @ResponseBody
-  public Boolean muteUser(@RequestParam String id) {
+  public Boolean muteUser(@RequestParam String id, Locale locale) {
     Account account = accountService.getAccountById(id);
     String email = account.getEmail();
-    if (email == null || !userService.changeRestricted(id, true)) {
+    if (email == null || !userService.changeRestricted(id, true, locale).equals("ok")) {
       return false;
     }
-    adminPanelService.sendInfoAboutMutedUser(email, account.getPhone(), id);
     return true;
   }
 

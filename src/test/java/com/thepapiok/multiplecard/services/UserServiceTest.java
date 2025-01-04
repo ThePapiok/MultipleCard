@@ -15,12 +15,14 @@ import com.thepapiok.multiplecard.exceptions.NotActiveException;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,15 +33,19 @@ public class UserServiceTest {
   private static final String TEST_EMAIL = "email";
   private static final String TEST_PASSWORD = "123wefasdfasd123bsedf";
   private static final String TEST_ID = "123456789012345678901234";
+  private static final String USER_NOT_FOUND_ERROR = "Nie ma takiego użytkownika";
   private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
   @Mock private AccountRepository accountRepository;
   @Mock private UserRepository userRepository;
+  @Mock private MessageSource messageSource;
+  @Mock private AdminPanelService adminPanelService;
   private UserService userService;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    userService = new UserService(accountRepository, userRepository);
+    userService =
+        new UserService(accountRepository, userRepository, messageSource, adminPanelService);
   }
 
   @Test
@@ -143,44 +149,152 @@ public class UserServiceTest {
   }
 
   @Test
-  public void shouldReturnFalseAtChangeRestrictedWhenUserIsNotFound() {
+  public void shouldReturnUserNotFoundErrorAtChangeRestrictedWhenUserIsNotFound() {
+    Locale locale = Locale.getDefault();
+
     when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
+    when(messageSource.getMessage("error.user_not_found", null, locale))
+        .thenReturn(USER_NOT_FOUND_ERROR);
 
-    assertFalse(userService.changeRestricted(TEST_ID, true));
+    assertEquals(USER_NOT_FOUND_ERROR, userService.changeRestricted(TEST_ID, true, locale));
   }
 
   @Test
-  public void shouldReturnTrueAtChangeRestrictedWhenEverythingOk() {
+  public void shouldReturnUserNotFoundErrorAtChangeRestrictedWhenAccountIsNotFound() {
     com.thepapiok.multiplecard.collections.User user =
         new com.thepapiok.multiplecard.collections.User();
     user.setRestricted(false);
     user.setId(TEST_OBJECT_ID);
-    com.thepapiok.multiplecard.collections.User excpetedUser =
-        new com.thepapiok.multiplecard.collections.User();
-    excpetedUser.setRestricted(true);
-    excpetedUser.setId(TEST_OBJECT_ID);
+    Locale locale = Locale.getDefault();
 
     when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
+    when(messageSource.getMessage("error.user_not_found", null, locale))
+        .thenReturn(USER_NOT_FOUND_ERROR);
 
-    assertTrue(userService.changeRestricted(TEST_ID, true));
-    verify(userRepository).save(excpetedUser);
+    assertEquals(USER_NOT_FOUND_ERROR, userService.changeRestricted(TEST_ID, true, locale));
   }
 
   @Test
-  public void shouldReturnFalseAtChangeRestrictedWhenGetException() {
+  public void shouldReturnUserAlreadyHasErrorErrorAtChangeRestrictedWhenUserAlreadyHasThisValue() {
     com.thepapiok.multiplecard.collections.User user =
         new com.thepapiok.multiplecard.collections.User();
     user.setRestricted(false);
     user.setId(TEST_OBJECT_ID);
-    com.thepapiok.multiplecard.collections.User excpetedUser =
-        new com.thepapiok.multiplecard.collections.User();
-    excpetedUser.setRestricted(true);
-    excpetedUser.setId(TEST_OBJECT_ID);
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setRole(Role.ROLE_USER);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    Locale locale = Locale.getDefault();
 
     when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
-    when(userRepository.save(excpetedUser)).thenThrow(MongoWriteException.class);
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+    when(messageSource.getMessage("error.user_already_has", null, locale))
+        .thenReturn("Użytkownik posiada już taka wartość");
 
-    assertFalse(userService.changeRestricted(TEST_ID, true));
-    verify(userRepository).save(excpetedUser);
+    assertEquals(
+        "Użytkownik posiada już taka wartość",
+        userService.changeRestricted(TEST_ID, false, locale));
+  }
+
+  @Test
+  public void shouldReturnBadRoleErrorErrorAtChangeRestrictedWhenUserHasBadRole() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(false);
+    user.setId(TEST_OBJECT_ID);
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setRole(Role.ROLE_ADMIN);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    Locale locale = Locale.getDefault();
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+    when(messageSource.getMessage("error.bad_role", null, locale))
+        .thenReturn("Nie możesz tego zmienić dla takiej roli użytkownika");
+
+    assertEquals(
+        "Nie możesz tego zmienić dla takiej roli użytkownika",
+        userService.changeRestricted(TEST_ID, true, locale));
+  }
+
+  @Test
+  public void shouldReturnUnexpectedErrorAtChangeRestrictedWhenGetException() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(false);
+    user.setId(TEST_OBJECT_ID);
+    com.thepapiok.multiplecard.collections.User excpectedUser =
+        new com.thepapiok.multiplecard.collections.User();
+    excpectedUser.setRestricted(true);
+    excpectedUser.setId(TEST_OBJECT_ID);
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setRole(Role.ROLE_USER);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    Locale locale = Locale.getDefault();
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+    when(userRepository.save(excpectedUser)).thenThrow(MongoWriteException.class);
+    when(messageSource.getMessage("error.unexpected", null, locale))
+        .thenReturn("Nieoczekiwany błąd");
+
+    assertEquals("Nieoczekiwany błąd", userService.changeRestricted(TEST_ID, true, locale));
+    verify(userRepository).save(excpectedUser);
+  }
+
+  @Test
+  public void shouldReturnOkSuccessAtChangeRestrictedWhenEverythingOkAndValueTrue() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(false);
+    user.setId(TEST_OBJECT_ID);
+    com.thepapiok.multiplecard.collections.User excpectedUser =
+        new com.thepapiok.multiplecard.collections.User();
+    excpectedUser.setRestricted(true);
+    excpectedUser.setId(TEST_OBJECT_ID);
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setRole(Role.ROLE_USER);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    Locale locale = Locale.getDefault();
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+
+    assertEquals("ok", userService.changeRestricted(TEST_ID, true, locale));
+    verify(userRepository).save(excpectedUser);
+    verify(adminPanelService).sendInfoAboutMutedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  @Test
+  public void shouldReturnOksSuccessAtChangeRestrictedWhenEverythingOkAndValueTrue() {
+    com.thepapiok.multiplecard.collections.User user =
+        new com.thepapiok.multiplecard.collections.User();
+    user.setRestricted(true);
+    user.setId(TEST_OBJECT_ID);
+    com.thepapiok.multiplecard.collections.User excpectedUser =
+        new com.thepapiok.multiplecard.collections.User();
+    excpectedUser.setRestricted(false);
+    excpectedUser.setId(TEST_OBJECT_ID);
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setRole(Role.ROLE_USER);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    Locale locale = Locale.getDefault();
+
+    when(userRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(user));
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+
+    assertEquals("ok", userService.changeRestricted(TEST_ID, false, locale));
+    verify(userRepository).save(excpectedUser);
+    verify(adminPanelService).sendInfoAboutUnmutedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
   }
 }

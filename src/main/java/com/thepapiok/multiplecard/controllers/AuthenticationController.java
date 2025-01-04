@@ -391,7 +391,7 @@ public class AuthenticationController {
       return redirectPasswordResetError(
           httpSession, amount, reset, ERROR_PASSWORDS_NOT_THE_SAME_MESSAGE, locale);
     } else if (!authenticationService.getAccountByPhone(fullPhone)) {
-      return redirectPasswordResetError(httpSession, amount, reset, "error.user.not_found", locale);
+      return redirectPasswordResetError(httpSession, amount, reset, "error.user_not_found", locale);
     } else if (!authenticationService.changePassword(fullPhone, reset.getPassword())) {
       resetSession(httpSession, CODE_SMS_PARAM_RESET, RESET_PARAM);
       httpSession.setAttribute(
@@ -436,7 +436,7 @@ public class AuthenticationController {
     } else if (!phonePattern.matcher(phone).matches() || length > maxLength || length < minLength) {
       return messageSource.getMessage(ERROR_VALIDATION_INCORRECT_DATA_MESSAGE, null, locale);
     } else if (!newUser && !authenticationService.getAccountByPhone(phone)) {
-      return messageSource.getMessage("error.user.not_found", null, locale);
+      return messageSource.getMessage("error.user_not_found", null, locale);
     } else if (!generateVerificationSms(httpSession, phone, "", locale, param)) {
       return messageSource.getMessage(ERROR_SEND_SMS_PARAM_MESSAGE, null, locale);
     }

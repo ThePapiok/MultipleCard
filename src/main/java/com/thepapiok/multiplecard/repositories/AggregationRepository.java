@@ -1051,6 +1051,9 @@ public class AggregationRepository {
     final String type4 = "4";
     final String type5 = "5";
     final String type6 = "6";
+    final String type7 = "7";
+    final String type8 = "8";
+    final String type9 = "9";
     List<AggregationOperation> stages = new ArrayList<>();
     stages.add(lookup("users", ID_FIELD, ID_FIELD, USER_FIELD));
     stages.add(unwind(USER_FIELD, true));
@@ -1066,7 +1069,9 @@ public class AggregationRepository {
                     },
                     "lastName": {
                       $ifNull: ["$shop.lastName", "$user.lastName"]
-                    }
+                    },
+                    "restricted": "$user.restricted",
+                    "shopName": "$shop.name"
                   }
                 }
                 """));
@@ -1077,22 +1082,31 @@ public class AggregationRepository {
           stages.add(match(Criteria.where(ID_FIELD).is(new ObjectId(value))));
           break;
         case type1:
-          stages.add(match(Criteria.where("firstName").is(value)));
+          stages.add(match(Criteria.where("shopName").is(value)));
           break;
         case type2:
-          stages.add(match(Criteria.where("lastName").is(value)));
+          stages.add(match(Criteria.where("firstName").is(value)));
           break;
         case type3:
-          stages.add(match(Criteria.where("phone").is('+' + value.substring(1))));
+          stages.add(match(Criteria.where("lastName").is(value)));
           break;
         case type4:
-          stages.add(match(Criteria.where("role").is(value)));
+          stages.add(match(Criteria.where("phone").is('+' + value.substring(1))));
           break;
         case type5:
-          stages.add(match(Criteria.where("isActive").is(Boolean.parseBoolean(value))));
+          stages.add(match(Criteria.where("email").is(value)));
           break;
         case type6:
+          stages.add(match(Criteria.where("role").is(value)));
+          break;
+        case type7:
+          stages.add(match(Criteria.where("isActive").is(Boolean.parseBoolean(value))));
+          break;
+        case type8:
           stages.add(match(Criteria.where("isBanned").is(Boolean.parseBoolean(value))));
+          break;
+        case type9:
+          stages.add(match(Criteria.where("restricted").is(Boolean.parseBoolean(value))));
           break;
         default:
           break;

@@ -25,7 +25,7 @@
     background-color: #7f3f8a;
 }
 
-.cell:not(.cellColumn):nth-child(5), .cell:not(.cellColumn):nth-child(6), .cell:not(.cellColumn):nth-child(7) {
+.cell:not(.cellColumn):nth-child(7), .cell:not(.cellColumn):nth-child(8), .cell:not(.cellColumn):nth-child(9), .cell:not(.cellColumn):nth-child(10) {
     cursor: pointer;
 }
 
@@ -34,25 +34,27 @@
 }
 
 .cell {
-    width: 14.285714285714285714285714285714%;
+    width: 10%;
     height: 50px;
     border: 1px solid black;
     display: flex;
     align-items: center;
-    font-size: 12px;
+    font-size: 10px;
     position: relative;
     z-index: 1;
     padding-left: 5px;
+    overflow-x: auto;
 }
 
 #options {
     height: 100px;
     position: absolute;
-    width: 14.285714285714285714285714285714%;
+    width: 10%;
     background-color: wheat;
     top: 50px;
     border: 1px solid black;
     z-index: 2;
+    box-sizing: border-box;
 }
 
 .option {
@@ -64,9 +66,10 @@
     box-sizing: border-box;
     cursor: pointer;
     padding-left: 5px;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 600;
     font-family: "Inter", sans-serif;
+    overflow-x: auto;
 }
 
 .option:hover {
@@ -125,10 +128,4 @@
     #searchButton {
         width: 20%;
     }
-
-    .cell, .option {
-        overflow-x: auto;
-        font-size: 10px;
-    }
-
 }

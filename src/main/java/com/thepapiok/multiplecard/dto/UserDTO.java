@@ -12,4 +12,6 @@ public class UserDTO {
   private String role;
   private boolean isActive;
   private boolean isBanned;
+  private Boolean restricted;
+  private String shopName;
 }

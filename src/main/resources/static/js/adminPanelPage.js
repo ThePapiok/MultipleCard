@@ -15,7 +15,7 @@ function showOrHideOptions(e, type, id, firstValue, secondValue) {
     const options = document.getElementById("options");
     options.style.width = e.offsetWidth.toString() + "px";
     let hidden = options.hidden;
-    if (hidden && !showOptions && (type === "role" && (e.textContent === "ROLE_ADMIN" || e.textContent === "ROLE_USER")) || (type !== "role")) {
+    if (hidden && !showOptions && ((type === "role" && (e.textContent === "ROLE_ADMIN" || e.textContent === "ROLE_USER")) || (type !== "role")) && ((type === "restricted" && e.textContent !== "") || (type !== "restricted"))) {
         showOptions = true;
         let option = document.getElementsByClassName("option");
         option[0].textContent = firstValue;

@@ -8,6 +8,20 @@
     src: url('/fonts/Inconsolata.ttf') format('truetype');
 }
 
+::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: black;
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-track {
+    background: #474747;
+}
+
 textarea {
     resize: none;
 }

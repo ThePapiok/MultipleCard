@@ -206,4 +206,22 @@ public class AdminPanelServiceTest {
     adminPanelService.sendInfoAboutChangeAdminToUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
     verify(emailService).sendEmail(text, TEST_EMAIL, title);
   }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutUnmutedUserWhenIsFromPoland() {
+    final String title = "Cofnięcie ograniczeń - " + TEST_ID;
+    final String text = "Zabrano ograniczenia z twojego konta.";
+
+    adminPanelService.sendInfoAboutUnmutedUser(TEST_EMAIL, TEST_PHONE_PL, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
+
+  @Test
+  public void shouldSendEmailAtSendInfoAboutUnmutedUserWhenIsFromOtherCountry() {
+    final String title = "Withdrawal of restriction - " + TEST_ID;
+    final String text = "Your account is now without restriction.";
+
+    adminPanelService.sendInfoAboutUnmutedUser(TEST_EMAIL, TEST_PHONE_OTHER, TEST_ID);
+    verify(emailService).sendEmail(text, TEST_EMAIL, title);
+  }
 }

@@ -55,6 +55,7 @@ public class AggregationRepositoryTest {
   private static final ObjectId TEST_OTHER_CARD_ID = new ObjectId("517459789013345678901215");
   private static final String TEST_PHONE = "+48132423412342314231";
   private static final String TEST_PHONE3 = "+48135304342921";
+  private static final String TEST_EMAIL = "test@test2";
   private static final String TEST_PRODUCT_NAME = "product";
   private static final String COUNT_FIELD = "count";
   private static final String DATE_FIELD = "date";
@@ -63,6 +64,7 @@ public class AggregationRepositoryTest {
   private static final String TEST_CATEGORY_NAME = "category";
   private static final String TEST_CATEGORY_OTHER_NAME = "other";
   private static final String TEST_SHOP_NAME = "shop1";
+  private static final String TRUE_VALUE = "true";
   private static final String TEST_FIRST_NAME_USER = "firstNameUser3";
   private static final String TEST_LAST_NAME_USER = "lastNameUser3";
   private ProductDTO productDTO1;
@@ -600,7 +602,7 @@ public class AggregationRepositoryTest {
     reservedProduct2.setEncryptedIp("sgdfaasdfdas3");
     mongoTemplate.save(reservedProduct2);
     User user1 = new User();
-    user1.setRestricted(false);
+    user1.setRestricted(true);
     user1.setPoints(0);
     user1.setReview(null);
     user1.setCardId(new ObjectId());
@@ -618,7 +620,7 @@ public class AggregationRepositoryTest {
     user2.setAddress(address);
     mongoTemplate.save(user2);
     User user3 = new User();
-    user3.setRestricted(false);
+    user3.setRestricted(true);
     user3.setPoints(0);
     user3.setReview(null);
     user3.setCardId(new ObjectId());
@@ -638,7 +640,7 @@ public class AggregationRepositoryTest {
     Account account2 = new Account();
     account2.setId(shop2.getId());
     account2.setPhone("+48235324342423");
-    account2.setEmail("test@test2");
+    account2.setEmail(TEST_EMAIL);
     account2.setRole(Role.ROLE_SHOP);
     account2.setBanned(false);
     account2.setActive(true);
@@ -2220,15 +2222,19 @@ public class AggregationRepositoryTest {
     userDTO1.setRole(Role.ROLE_SHOP.name());
     userDTO1.setFirstName("firstNameShop1");
     userDTO1.setLastName("lastNameShop1");
+    userDTO1.setShopName(TEST_SHOP_NAME);
+    userDTO1.setRestricted(null);
     userDTO2 = new UserDTO();
     userDTO2.setId(shop2.getId().toString());
     userDTO2.setPhone("+48235324342423");
-    userDTO2.setEmail("test@test2");
+    userDTO2.setEmail(TEST_EMAIL);
     userDTO2.setRole(Role.ROLE_SHOP.name());
     userDTO2.setBanned(false);
     userDTO2.setActive(true);
     userDTO2.setFirstName("firstNameShop2");
     userDTO2.setLastName("lastNameShop2");
+    userDTO2.setShopName("shop2");
+    userDTO2.setRestricted(null);
     userDTO3 = new UserDTO();
     userDTO3.setId(shop3.getId().toString());
     userDTO3.setPhone(TEST_PHONE3);
@@ -2238,6 +2244,8 @@ public class AggregationRepositoryTest {
     userDTO3.setActive(true);
     userDTO3.setFirstName("firstNameShop3");
     userDTO3.setLastName("lastNameShop3");
+    userDTO3.setShopName("shop3");
+    userDTO3.setRestricted(null);
     userDTO4 = new UserDTO();
     userDTO4.setId(shop4.getId().toString());
     userDTO4.setPhone("+48121347392923");
@@ -2247,6 +2255,8 @@ public class AggregationRepositoryTest {
     userDTO4.setActive(true);
     userDTO4.setFirstName("firstNameShop4");
     userDTO4.setLastName("lastNameShop4");
+    userDTO4.setShopName("shop4");
+    userDTO4.setRestricted(null);
     userDTO5 = new UserDTO();
     userDTO5.setId(user1.getId().toString());
     userDTO5.setPhone("+48535243252345");
@@ -2256,6 +2266,8 @@ public class AggregationRepositoryTest {
     userDTO5.setActive(false);
     userDTO5.setFirstName("firstNameUser1");
     userDTO5.setLastName("lastNameUser1");
+    userDTO5.setShopName(null);
+    userDTO5.setRestricted(true);
     userDTO6 = new UserDTO();
     userDTO6.setId(user2.getId().toString());
     userDTO6.setPhone("+481234123452314");
@@ -2265,6 +2277,8 @@ public class AggregationRepositoryTest {
     userDTO6.setActive(true);
     userDTO6.setFirstName("firstNameUser2");
     userDTO6.setLastName("lastNameUser2");
+    userDTO6.setShopName(null);
+    userDTO6.setRestricted(false);
     userDTO7 = new UserDTO();
     userDTO7.setId(user3.getId().toString());
     userDTO7.setPhone("+4853543535435");
@@ -2274,6 +2288,8 @@ public class AggregationRepositoryTest {
     userDTO7.setActive(false);
     userDTO7.setFirstName(TEST_FIRST_NAME_USER);
     userDTO7.setLastName(TEST_LAST_NAME_USER);
+    userDTO7.setShopName(null);
+    userDTO7.setRestricted(true);
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
@@ -2958,9 +2974,9 @@ public class AggregationRepositoryTest {
   public void shouldReturnPageUserDTOAtGetUsersWhenType1() {
     PageUserDTO pageUserDTO = new PageUserDTO();
     pageUserDTO.setMaxPage(1);
-    pageUserDTO.setUsers(List.of(userDTO7));
+    pageUserDTO.setUsers(List.of(userDTO1));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("1", TEST_FIRST_NAME_USER, 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("1", TEST_SHOP_NAME, 0));
   }
 
   @Test
@@ -2969,43 +2985,70 @@ public class AggregationRepositoryTest {
     pageUserDTO.setMaxPage(1);
     pageUserDTO.setUsers(List.of(userDTO7));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("2", TEST_LAST_NAME_USER, 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("2", TEST_FIRST_NAME_USER, 0));
   }
 
   @Test
   public void shouldReturnPageUserDTOAtGetUsersWhenType3() {
     PageUserDTO pageUserDTO = new PageUserDTO();
     pageUserDTO.setMaxPage(1);
-    pageUserDTO.setUsers(List.of(userDTO6));
+    pageUserDTO.setUsers(List.of(userDTO7));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("3", " 481234123452314", 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("3", TEST_LAST_NAME_USER, 0));
   }
 
   @Test
   public void shouldReturnPageUserDTOAtGetUsersWhenType4() {
     PageUserDTO pageUserDTO = new PageUserDTO();
     pageUserDTO.setMaxPage(1);
-    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4));
+    pageUserDTO.setUsers(List.of(userDTO6));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("4", "ROLE_SHOP", 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("4", " 481234123452314", 0));
   }
 
   @Test
   public void shouldReturnPageUserDTOAtGetUsersWhenType5() {
     PageUserDTO pageUserDTO = new PageUserDTO();
     pageUserDTO.setMaxPage(1);
-    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4, userDTO6));
+    pageUserDTO.setUsers(List.of(userDTO2));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("5", "true", 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("5", TEST_EMAIL, 0));
   }
 
   @Test
   public void shouldReturnPageUserDTOAtGetUsersWhenType6() {
     PageUserDTO pageUserDTO = new PageUserDTO();
     pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("6", "ROLE_SHOP", 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType7() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO1, userDTO2, userDTO3, userDTO4, userDTO6));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("7", TRUE_VALUE, 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType8() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
     pageUserDTO.setUsers(List.of(userDTO6, userDTO7));
 
-    assertEquals(pageUserDTO, aggregationRepository.getUsers("6", "true", 0));
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("8", TRUE_VALUE, 0));
+  }
+
+  @Test
+  public void shouldReturnPageUserDTOAtGetUsersWhenType9() {
+    PageUserDTO pageUserDTO = new PageUserDTO();
+    pageUserDTO.setMaxPage(1);
+    pageUserDTO.setUsers(List.of(userDTO5, userDTO7));
+
+    assertEquals(pageUserDTO, aggregationRepository.getUsers("9", TRUE_VALUE, 0));
   }
 
   @Test

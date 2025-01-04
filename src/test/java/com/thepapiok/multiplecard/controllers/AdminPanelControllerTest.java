@@ -47,6 +47,7 @@ public class AdminPanelControllerTest {
   private static final String ERROR_MESSAGE = "error!";
   private static final String SUCCESS_MESSAGE = "success!";
   private static final String ROLE_USER = "ROLE_USER";
+  private static final String OK_MESSAGE = "ok";
   private static final int BAD_REQUEST_STATUS = 400;
 
   @Autowired private MockMvc mockMvc;
@@ -165,6 +166,27 @@ public class AdminPanelControllerTest {
     when(accountService.changeRole(TEST_ID, ROLE_USER, locale)).thenReturn(SUCCESS_MESSAGE);
 
     performPostAtChangeUser(SUCCESS_MESSAGE, "role", TEST_ID, ROLE_USER);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnErrorMessageAtChangeUserWhenTypeRestrictedAndErrorAtChangeRestricted()
+      throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
+
+    when(userService.changeRestricted(TEST_ID, true, locale)).thenReturn(ERROR_MESSAGE);
+
+    performPostAtChangeUser(ERROR_MESSAGE, "restricted", TEST_ID, TRUE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnSuccessMessageAtChangeUserWhenTypeRestricted() throws Exception {
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
+
+    when(userService.changeRestricted(TEST_ID, true, locale)).thenReturn(SUCCESS_MESSAGE);
+
+    performPostAtChangeUser(SUCCESS_MESSAGE, "restricted", TEST_ID, TRUE_VALUE);
   }
 
   @Test
@@ -344,7 +366,7 @@ public class AdminPanelControllerTest {
     Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountById(TEST_ID)).thenReturn(account);
-    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn("ok");
+    when(accountService.changeBanned(TEST_ID, true, locale)).thenReturn(OK_MESSAGE);
 
     performPostAtBlockUser(false, TRUE_VALUE);
   }
@@ -360,7 +382,7 @@ public class AdminPanelControllerTest {
     Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
-    when(accountService.changeBanned(testId.toString(), true, locale)).thenReturn("ok");
+    when(accountService.changeBanned(testId.toString(), true, locale)).thenReturn(OK_MESSAGE);
 
     performPostAtBlockUser(true, TRUE_VALUE);
   }
@@ -436,9 +458,10 @@ public class AdminPanelControllerTest {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountById(TEST_ID)).thenReturn(account);
-    when(userService.changeRestricted(TEST_ID, true)).thenReturn(false);
+    when(userService.changeRestricted(TEST_ID, true, locale)).thenReturn("notOk");
 
     performPostAtMuteUser(FALSE_VALUE);
   }
@@ -449,12 +472,12 @@ public class AdminPanelControllerTest {
     Account account = new Account();
     account.setPhone(TEST_PHONE);
     account.setEmail(TEST_EMAIL);
+    Locale locale = new Locale.Builder().setLanguage(PL_LANGUAGE).build();
 
     when(accountService.getAccountById(TEST_ID)).thenReturn(account);
-    when(userService.changeRestricted(TEST_ID, true)).thenReturn(true);
+    when(userService.changeRestricted(TEST_ID, true, locale)).thenReturn(OK_MESSAGE);
 
     performPostAtMuteUser(TRUE_VALUE);
-    verify(adminPanelService).sendInfoAboutMutedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
   }
 
   private void performPostAtMuteUser(String content) throws Exception {
