@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/adminPanelPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body th:attr="onload=|atStart('${maxPage}', '${pageSelected}')|">
+<script src="/js/page.js"></script>
+<script src="/js/results.js"></script>
+<script src="/js/adminPanelPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/reports}" class="h2 headerButton">
+        <button class="blackButton" th:text="#{adminPanelPage.button.reports}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <span hidden th:text="#{error.unexpected}" id="textErrorUnexpected"></span>
+    <p class="title" th:text="#{adminPanelPage.title}"></p>
+    <p id="error"></p>
+    <div id="searchBar">
+        <input type="text" id="searchInput"
+               th:placeholder="#{adminPanelPage.searchInput.placeHolder}">
+        <span id="searchButton" th:text="#{search.text}" onclick="searchUsers(this.previousElementSibling)"
+              onmouseenter="this.style.backgroundColor = '#68B050'"
+              onmouseleave="this.style.backgroundColor = '#76c75b'">
+        </span>
+    </div>
+    <span id="notFound" th:if="${emptyUsers}" th:text="#{select.no_results}"></span>
+    <div id="adminPanel" th:unless="${emptyUsers}">
+        <div id="columns" class="row">
+            <span id="cell0" class="cell cellColumn" onclick="setSearch('0', this)">Id</span>
+            <span id="cell1" class="cell cellColumn" onclick="setSearch('1', this)" th:text="#{shop_name.text}"></span>
+            <span id="cell2" class="cell cellColumn" onclick="setSearch('2', this)" th:text="#{firstName.text}"></span>
+            <span id="cell3" class="cell cellColumn" onclick="setSearch('3', this)" th:text="#{lastName.text}"></span>
+            <span id="cell4" class="cell cellColumn" onclick="setSearch('4', this)" th:text="#{phone.text}"></span>
+            <span id="cell5" class="cell cellColumn" onclick="setSearch('5', this)">Email</span>
+            <span id="cell6" class="cell cellColumn" onclick="setSearch('6', this)"
+                  th:text="#{adminPanelPage.role.text}"></span>
+            <span id="cell7" class="cell cellColumn" onclick="setSearch('7', this)"
+                  th:text="#{adminPanelPage.isActive.text}"></span>
+            <span id="cell8" class="cell cellColumn" onclick="setSearch('8', this)"
+                  th:text="#{adminPanelPage.isBanned.text}"></span>
+            <span id="cell9" class="cell cellColumn" onclick="setSearch('9', this)"
+                  th:text="#{adminPanel.isRestricted.text}"></span>
+        </div>
+        <div class="row" th:each="user : ${users}" th:id="${user.id}">
+            <span class="cell" th:text="${user.id}"></span>
+            <span class="cell" th:text="${user.shopName}"></span>
+            <span class="cell" th:text="${user.firstName}"></span>
+            <span class="cell" th:text="${user.lastName}"></span>
+            <span class="cell" th:text="${user.phone}"></span>
+            <span class="cell" th:text="${user.email}"></span>
+            <span class="cell role" th:text="${user.role}"
+                  th:attr="onclick=|showOrHideOptions(this, 'role', '${user.id}', 'ROLE_USER', 'ROLE_ADMIN')|"></span>
+            <span class="cell active" th:text="${user.active}"
+                  th:attr="onclick=|showOrHideOptions(this, 'active', '${user.id}', 'true', 'false')|"></span>
+            <span class="cell banned" th:text="${user.banned}"
+                  th:attr="onclick=|showOrHideOptions(this, 'banned', '${user.id}', 'true', 'false')|"></span>
+            <span class="cell restricted"
+                  th:attr="onclick=|showOrHideOptions(this, 'restricted', '${user.id}', 'true', 'false')|"
+                  th:text="${user.restricted}"></span>
+        </div>
+    </div>
+    <div id="pages">
+        <a>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
+        </a>
+        <div id="pagesSelect">
+            <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
+                  th:if="${emptyUsers} != true" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+        </div>
+        <a>
+            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
+                    th:attr="onclick=|nextPage('${maxPage}')|"></button>
+        </a>
+    </div>
+    <div id="options" hidden>
+        <span class="option" onclick="changeUser(this.parentElement, this)"></span>
+        <span class="option" onclick="changeUser(this.parentElement, this)"></span>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

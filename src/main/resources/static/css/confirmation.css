@@ -38,6 +38,7 @@
 
     .confirmationChoice {
         width: 90%;
+        padding: 0;
     }
 
     .confirmationChoice a {

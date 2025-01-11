@@ -1,5 +1,6 @@
 package com.thepapiok.multiplecard.repositories;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Category;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -119,20 +120,66 @@ public interface CategoryRepository extends MongoRepository<Category, ObjectId> 
   @Aggregation(
       pipeline = {
         """
-    {
-        $match: {
-            "name": {$regex: ?0, $options:  "i"}
-        }
-    }
-""",
+                                {
+                                    $match: {
+                                        "name": {$regex: ?0, $options:  "i"}
+                                    }
+                                }
+                            """,
         """
-    {
-        $project: {
-            "name": 1,
-            "_id": 0
-        }
-    }
-"""
+                                {
+                                    $project: {
+                                        "name": 1,
+                                        "_id": 0
+                                    }
+                                }
+                            """
       })
   List<String> getCategoryNamesByPrefix(String pattern);
+
+  @Aggregation(
+      pipeline = {
+        """
+              {
+                $match: {
+                  "name": ?0
+                }
+              }
+            """,
+        """
+              {
+                $lookup: {
+                  "from": "accounts",
+                  "localField": "ownerId",
+                  "foreignField": "_id",
+                  "as": "account"
+                }
+              }
+            """,
+        """
+              {
+                $unwind: {
+                  "path": "$account",
+                  "preserveNullAndEmptyArrays": true
+                }
+              }
+            """,
+        """
+              {
+                $project: {
+                  "account": 1,
+                  "_id": 0
+                }
+              }
+            """,
+        """
+              {
+                $addFields: {
+                  "phone": "$account.phone",
+                  "email": "$account.email"
+                }
+              }
+            """
+      })
+  Account findAccountByCategoryName(String name);
 }

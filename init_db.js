@@ -45,229 +45,229 @@ db.createCollection("accounts", {
     }
 });
 db.createCollection("shops", {
-    "validator": {
-        $jsonSchema: {
-            "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "accountNumber", "name", "imageUrl", "points", "_class"],
-            "additionalProperties": false,
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId",
-                    "description": "_id is required and must be objectId"
-                },
-                "firstName": {
-                    "bsonType": "string",
-                    "description": "firstName is required and must be string"
-                },
-                "lastName": {
-                    "bsonType": "string",
-                    "description": "lastName is required and must be string"
-                },
-                "name": {
-                    "bsonType": "string",
-                    "description": "name is required and must be string"
-                },
-                "imageUrl": {
-                    "bsonType": "string",
-                    "description": "imageUrl is required and must be string"
-                },
-                "accountNumber": {
-                    "bsonType": "string",
-                    "description": "accountNumber is required and must be string"
-                },
-                "points": {
-                    "bsonType": "array",
-                    "minItems": 1,
-                    "maxItems": 5,
-                    "uniqueItems": true,
-                    "items": {
-                        "bsonType": "object",
-                        "required": ["country", "city", "postalCode", "street", "houseNumber", "province"],
-                        "additionalProperties": false,
-                        "properties": {
-                            "country": {
-                                "bsonType": "string",
-                                "description": "country is required and must be string"
-                            },
-                            "city": {
-                                "bsonType": "string",
-                                "description": "city is required and must be string"
-                            },
-                            "postalCode": {
-                                "bsonType": "string",
-                                "description": "postalCode is required and must be string"
-                            },
-                            "street": {
-                                "bsonType": "string",
-                                "description": "street is required and must be string"
-                            },
-                            "houseNumber": {
-                                "bsonType": "string",
-                                "description": "houseNumber is required, must be string"
-                            },
-                            "apartmentNumber": {
-                                "bsonType": ["int", "null"],
-                                "minimum": 1,
-                                "description": "apartmentNumber should be int or null and must be greater than 0"
-                            },
-                            "province": {
-                                "bsonType": "string",
-                                "description": "province is required and must be string"
+        "validator": {
+            $jsonSchema: {
+                "bsonType": "object",
+                "required": ["_id", "firstName", "lastName", "accountNumber", "name", "imageUrl", "points", "_class"],
+                "additionalProperties": false,
+                "properties": {
+                    "_id": {
+                        "bsonType": "objectId",
+                        "description": "_id is required and must be objectId"
+                    },
+                    "firstName": {
+                        "bsonType": "string",
+                        "description": "firstName is required and must be string"
+                    },
+                    "lastName": {
+                        "bsonType": "string",
+                        "description": "lastName is required and must be string"
+                    },
+                    "name": {
+                        "bsonType": "string",
+                        "description": "name is required and must be string"
+                    },
+                    "imageUrl": {
+                        "bsonType": "string",
+                        "description": "imageUrl is required and must be string"
+                    },
+                    "accountNumber": {
+                        "bsonType": "string",
+                        "description": "accountNumber is required and must be string"
+                    },
+                    "points": {
+                        "bsonType": "array",
+                        "minItems": 1,
+                        "maxItems": 5,
+                        "uniqueItems": true,
+                        "items": {
+                            "bsonType": "object",
+                            "required": ["country", "city", "postalCode", "street", "houseNumber", "province"],
+                            "additionalProperties": false,
+                            "properties": {
+                                "country": {
+                                    "bsonType": "string",
+                                    "description": "country is required and must be string"
+                                },
+                                "city": {
+                                    "bsonType": "string",
+                                    "description": "city is required and must be string"
+                                },
+                                "postalCode": {
+                                    "bsonType": "string",
+                                    "description": "postalCode is required and must be string"
+                                },
+                                "street": {
+                                    "bsonType": "string",
+                                    "description": "street is required and must be string"
+                                },
+                                "houseNumber": {
+                                    "bsonType": "string",
+                                    "description": "houseNumber is required, must be string"
+                                },
+                                "apartmentNumber": {
+                                    "bsonType": ["int", "null"],
+                                    "minimum": 1,
+                                    "description": "apartmentNumber should be int or null and must be greater than 0"
+                                },
+                                "province": {
+                                    "bsonType": "string",
+                                    "description": "province is required and must be string"
+                                }
                             }
                         }
-                    }
 
-                },
-                "_class": {
-                    "bsonType": "string",
-                    "description": "_class is required and must be string",
+                    },
+                    "_class": {
+                        "bsonType": "string",
+                        "description": "_class is required and must be string",
+                    }
                 }
             }
         }
     }
-}
 );
 db.createCollection("products", {
-    "validator": {
-        $jsonSchema: {
-            "bsonType": "object",
-            "required": ["_id", "name", "description", "imageUrl", "barcode", "price", "shopId", "updatedAt", "_class"],
-            "additionalProperties": false,
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId",
-                    "description": "_id is required and must be objectId"
-                },
-                "name": {
-                    "bsonType": "string",
-                    "description": "name is required and must be string"
-                },
-                "description": {
-                    "bsonType": "string",
-                    "description": "description in review is required and must be string"
-                },
-                "imageUrl": {
-                    "bsonType": "string",
-                    "description": "imageUrl is required and must be string"
-                },
-                "barcode": {
-                    "bsonType": "string",
-                    "description": "barcode is required and must be string"
-                },
-                "categories": {
-                    "bsonType": "array",
-                    "minItems": 1,
-                    "maxItems": 3,
-                    "uniqueItems": true,
-                    "items": {
-                        "bsonType": ["objectId", "null"],
-                        "description": "categories must be objectId"
+        "validator": {
+            $jsonSchema: {
+                "bsonType": "object",
+                "required": ["_id", "name", "description", "imageUrl", "barcode", "price", "shopId", "updatedAt", "_class"],
+                "additionalProperties": false,
+                "properties": {
+                    "_id": {
+                        "bsonType": "objectId",
+                        "description": "_id is required and must be objectId"
+                    },
+                    "name": {
+                        "bsonType": "string",
+                        "description": "name is required and must be string"
+                    },
+                    "description": {
+                        "bsonType": "string",
+                        "description": "description in review is required and must be string"
+                    },
+                    "imageUrl": {
+                        "bsonType": "string",
+                        "description": "imageUrl is required and must be string"
+                    },
+                    "barcode": {
+                        "bsonType": "string",
+                        "description": "barcode is required and must be string"
+                    },
+                    "categories": {
+                        "bsonType": "array",
+                        "minItems": 1,
+                        "maxItems": 3,
+                        "uniqueItems": true,
+                        "items": {
+                            "bsonType": ["objectId", "null"],
+                            "description": "categories must be objectId"
+                        }
+                    },
+                    "price": {
+                        "bsonType": "int",
+                        "minimum": 0,
+                        "description": "price is required and must be greater or equal 0"
+                    },
+                    "updatedAt": {
+                        "bsonType": "date",
+                        "description": "updatedAt is required and must be date"
+                    },
+                    "shopId": {
+                        "bsonType": "objectId",
+                        "description": "shopId is required and must be objectId"
+                    },
+                    "_class": {
+                        "bsonType": "string",
+                        "description": "_class is required and must be string",
                     }
-                },
-                "price": {
-                    "bsonType": "int",
-                    "minimum": 0,
-                    "description": "price is required and must be greater or equal 0"
-                },
-                "updatedAt": {
-                    "bsonType": "date",
-                    "description": "updatedAt is required and must be date"
-                },
-                "shopId": {
-                    "bsonType": "objectId",
-                    "description": "shopId is required and must be objectId"
-                },
-                "_class": {
-                    "bsonType": "string",
-                    "description": "_class is required and must be string",
                 }
             }
         }
     }
-}
 );
 db.createCollection("orders", {
-    "validator": {
-        $jsonSchema: {
-            "bsonType": "object",
-            "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId", "shopId", "_class"],
-            "additionalProperties": false,
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId",
-                    "description": "_id is required and must be objectId"
-                },
-                "cardId": {
-                    "bsonType": "objectId",
-                    "description": "cardId is required and must be objectId"
-                },
-                "shopId": {
-                    "bsonType": "objectId",
-                    "description": "shopId is required and must be objectId"
-                },
-                "productId": {
-                    "bsonType": "objectId",
-                    "description": "productId is required and must be objectId" 
-                },
-                "createdAt": {
-                    "bsonType": "date",
-                    "description": "createdAt is required and must be date"
-                },
-                "isUsed": {
-                    "bsonType": "bool",
-                    "description": "isUsed is required and must be bool"
-                }, 
-                "price": {
-                    "bsonType": "int",
-                    "minimum": 0,
-                    "description": "price is required and must be greater or equal 0"
-                },
-                "orderId": {
-                    "bsonType": "objectId",
-                    "description": "orderId is required and must be objectId"
-                },
-                "_class": {
-                    "bsonType": "string",
-                    "description": "_class is required and must be string",
+        "validator": {
+            $jsonSchema: {
+                "bsonType": "object",
+                "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId", "shopId", "_class"],
+                "additionalProperties": false,
+                "properties": {
+                    "_id": {
+                        "bsonType": "objectId",
+                        "description": "_id is required and must be objectId"
+                    },
+                    "cardId": {
+                        "bsonType": "objectId",
+                        "description": "cardId is required and must be objectId"
+                    },
+                    "shopId": {
+                        "bsonType": "objectId",
+                        "description": "shopId is required and must be objectId"
+                    },
+                    "productId": {
+                        "bsonType": "objectId",
+                        "description": "productId is required and must be objectId"
+                    },
+                    "createdAt": {
+                        "bsonType": "date",
+                        "description": "createdAt is required and must be date"
+                    },
+                    "isUsed": {
+                        "bsonType": "bool",
+                        "description": "isUsed is required and must be bool"
+                    },
+                    "price": {
+                        "bsonType": "int",
+                        "minimum": 0,
+                        "description": "price is required and must be greater or equal 0"
+                    },
+                    "orderId": {
+                        "bsonType": "objectId",
+                        "description": "orderId is required and must be objectId"
+                    },
+                    "_class": {
+                        "bsonType": "string",
+                        "description": "_class is required and must be string",
+                    }
                 }
             }
         }
     }
-}
 );
 db.createCollection("categories", {
-    "validator": {
-        $jsonSchema: {
-            "bsonType": "object",
-            "required": ["_id", "name", "_class"],
-            "additionalProperties": false,
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId",
-                    "description": "_id is required and must be objectId"
-                },
-                "name":  {
-                    "bsonType": "string",
-                    "description": "name is required and must be string"
-                },
-                "ownerId":  {
-                    "bsonType": ["objectId", "null"],
-                    "description": "ownerId must be objectId"
-                },
-                "_class": {
-                    "bsonType": "string",
-                    "description": "_class is required and must be string",
+        "validator": {
+            $jsonSchema: {
+                "bsonType": "object",
+                "required": ["_id", "name", "_class"],
+                "additionalProperties": false,
+                "properties": {
+                    "_id": {
+                        "bsonType": "objectId",
+                        "description": "_id is required and must be objectId"
+                    },
+                    "name": {
+                        "bsonType": "string",
+                        "description": "name is required and must be string"
+                    },
+                    "ownerId": {
+                        "bsonType": ["objectId", "null"],
+                        "description": "ownerId must be objectId"
+                    },
+                    "_class": {
+                        "bsonType": "string",
+                        "description": "_class is required and must be string",
+                    }
                 }
             }
         }
     }
-}
 );
 db.createCollection("likes", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id","reviewUserId", "userId", "_class"],
+            "required": ["_id", "reviewUserId", "userId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -308,6 +308,10 @@ db.createCollection("users", {
                 "lastName": {
                     "bsonType": "string",
                     "description": "lastName is required and must be string"
+                },
+                "restricted": {
+                    "bsonType": "bool",
+                    "description": "restricted is required and must be bool"
                 },
                 "address": {
                     "bsonType": "object",
@@ -351,7 +355,7 @@ db.createCollection("users", {
                     "description":
                         "points is required, must be int and greater or equal than 0"
                 },
-                "cardId":{
+                "cardId": {
                     "bsonType": ["null", "objectId"],
                     "description": "cardId is required and must be objectId"
                 },
@@ -414,7 +418,7 @@ db.createCollection("cards", {
                     "maximum": 3,
                     "description": "attempts is required and must be in [0, 3]"
                 },
-                "userId":{
+                "userId": {
                     "bsonType": "objectId",
                     "description": "userId is required and must be objectId"
                 },
@@ -423,7 +427,9 @@ db.createCollection("cards", {
                     "description": "_class is required and must be string",
                 }
             }
-        }}})
+        }
+    }
+})
 db.createCollection("promotions", {
     "validator": {
         $jsonSchema: {
@@ -594,6 +600,46 @@ db.createCollection("refunds", {
         }
     }
 });
+db.createCollection("reports", {
+    "validator": {
+        $jsonSchema: {
+            "bsonType": "object",
+            "required": ["_id", "userId", "reportedId", "isProduct", "createdAt", "description", "_class"],
+            "additionalProperties": false,
+            "properties": {
+                "_id": {
+                    "bsonType": "objectId",
+                    "description": "_id is required and must be objectId"
+                },
+                "userId": {
+                    "bsonType": "objectId",
+                    "description": "userId is required and must be objectId"
+                },
+                "reportedId": {
+                    "bsonType": "objectId",
+                    "description": "reportedId is required and must be objectId"
+                },
+                "isProduct": {
+                    "bsonType": "bool",
+                    "description": "isRefunded is required and must be bool"
+                },
+                "createdAt": {
+                    "bsonType": "date",
+                    "description": "createdAt is required and must be date"
+                },
+                "description": {
+                    "bsonType": "string",
+                    "description": "description is required and must be string"
+                },
+                "_class": {
+                    "bsonType": "string",
+                    "description": "_class is required and must be string",
+                }
+            }
+
+        }
+    }
+});
 db.categories.createIndex({"name": 1}, {"unique": true});
 db.categories.createIndex({"name": "text"}, {"default_language": "none"})
 db.likes.createIndex({"reviewUserId": 1, "userId": 1}, {"unique": true});
@@ -607,5 +653,7 @@ db.promotions.createIndex({"productId": 1}, {"unique": true});
 db.promotions.createIndex({"expiredAt": 1}, {"expireAfterSeconds": 0});
 db.blockedProducts.createIndex({"productId": 1}, {"unique": true});
 db.refunds.createIndex({"orderId": 1}, {"unique": true});
+db.reports.createIndex({"userId": 1, "reportedId": 1}, {"unique": true});
+
 
 

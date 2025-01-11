@@ -53,6 +53,7 @@
     <span hidden th:text="#{upload_image.bad_type}" id="textBadType"></span>
     <span hidden th:text="#{upload_file.too_big}" id="textTooBig"></span>
     <span hidden th:text="#{upload_image.too_small}" id="textTooSmall"></span>
+    <span hidden th:text="#{remove_place.title_window}" id="textDeletePlace"></span>
     <p class="title" th:text="#{register.text}"></p>
     <form th:action="@{/register_shop}" th:object="${register}" id="form" method="post" enctype="multipart/form-data">
         <div class="block-horizontally">
@@ -242,7 +243,7 @@
                 <input disabled th:value="#{places.text}">
                 <div id="numberPlaces">
                     <span id="numberPlace">0</span>
-                    <img id="plus" src="/images/plus.png" alt="plus"
+                    <img id="plus" src="/images/plus.png" alt="plus" th:title="#{add_place.title_window}"
                          onclick="addPlace(this, '', '', '', '', '', '', '', 0)">
                 </div>
             </div>
@@ -265,10 +266,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

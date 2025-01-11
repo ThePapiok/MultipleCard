@@ -1,6 +1,7 @@
 package com.thepapiok.multiplecard.repositories;
 
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.ReviewAtReportDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -302,4 +303,78 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             """
       })
   ReviewGetDTO findReview(ObjectId objectId);
+
+  @Aggregation(
+      pipeline = {
+        """
+        {
+            $match: {
+                "_id": ?0
+            }
+        }
+    """,
+        """
+        {
+            $lookup: {
+                "from": "likes",
+                "localField": "_id",
+                "foreignField": "reviewUserId",
+                "as": "like"
+            }
+        }
+    """,
+        """
+        {
+            $unwind: {
+                "path": "$like",
+                "preserveNullAndEmptyArrays": true
+            }
+        }
+    """,
+        """
+        {
+            $group: {
+                "_id": "$_id",
+                "count": {
+                    "$count": {}
+                }
+            }
+        }
+    """,
+        """
+        {
+            $lookup: {
+                "from": "users",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    """,
+        """
+        {
+            $unwind: {
+                "path": "$user",
+                "preserveNullAndEmptyArrays": true
+            }
+        }
+    """,
+        """
+        {
+            $addFields: {
+                "firstName": "$user.firstName",
+                "description": "$user.review.description",
+                "rating": "$user.review.rating"
+            }
+        }
+    """,
+        """
+        {
+            $project: {
+                "user": 0
+            }
+        }
+    """
+      })
+  ReviewAtReportDTO getReviewAtReportDTOById(ObjectId id);
 }

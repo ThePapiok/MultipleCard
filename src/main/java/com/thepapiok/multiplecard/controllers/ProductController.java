@@ -2,14 +2,17 @@ package com.thepapiok.multiplecard.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ProfileService;
 import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ShopService;
 import jakarta.servlet.http.HttpSession;
@@ -50,6 +53,7 @@ public class ProductController {
   private final ProductService productService;
   private final AccountRepository accountRepository;
   private final ResultService resultService;
+  private final ProfileService profileService;
 
   @Autowired
   public ProductController(
@@ -58,13 +62,15 @@ public class ProductController {
       MessageSource messageSource,
       ProductService productService,
       AccountRepository accountRepository,
-      ResultService resultService) {
+      ResultService resultService,
+      ProfileService profileService) {
     this.categoryService = categoryService;
     this.shopService = shopService;
     this.messageSource = messageSource;
     this.productService = productService;
     this.accountRepository = accountRepository;
     this.resultService = resultService;
+    this.profileService = profileService;
   }
 
   @GetMapping("/products")
@@ -72,6 +78,8 @@ public class ProductController {
       @RequestParam(required = false) String error,
       @RequestParam(required = false) String success,
       @RequestParam(required = false) String id,
+      @RequestParam(defaultValue = "") String category,
+      @RequestParam(defaultValue = "") String shopName,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "count") String field,
       @RequestParam(defaultValue = "true") Boolean isDescending,
@@ -94,29 +102,44 @@ public class ProductController {
         httpSession.removeAttribute(SUCCESS_MESSAGE_PARAM);
       }
     }
-    if (id == null) {
-      PageProductsDTO currentPage =
-          productService.getProducts(phone, page, field, isDescending, text, "", "", false);
-      List<ProductDTO> allProducts = currentPage.getProducts();
+    if (profileService.checkRole(phone, Role.ROLE_SHOP)) {
+      if (id == null) {
+        PageProductsDTO currentPage =
+            productService.getProducts(phone, page, field, isDescending, text, "", "", false);
+        List<ProductDTO> allProducts = currentPage.getProducts();
+        maxPage = currentPage.getMaxPage();
+        model.addAttribute("field", field);
+        model.addAttribute("isDescending", isDescending);
+        model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
+        model.addAttribute("pageSelected", page + 1);
+        model.addAttribute("products", allProducts);
+        model.addAttribute("productsEmpty", allProducts.size() == 0);
+        model.addAttribute("maxPage", maxPage);
+        return "productsPage";
+      } else {
+        if (!productService.isProductOwner(principal.getName(), id)) {
+          return "redirect:/products";
+        }
+        Product product = productService.getProductById(id);
+        model.addAttribute("categories", categoryService.getAllNames());
+        model.addAttribute("productCategories", productService.getCategoriesNames(product));
+        model.addAttribute(PRODUCT_PARAM, productService.getEditProductDTO(product));
+        model.addAttribute("id", id);
+        return "productPage";
+      }
+    } else {
+      PageProductsWithShopDTO currentPage =
+          productService.getProductsWithShops(page, field, isDescending, text, category, shopName);
       maxPage = currentPage.getMaxPage();
+      List<ProductWithShopDTO> allProducts = currentPage.getProducts();
       model.addAttribute("field", field);
       model.addAttribute("isDescending", isDescending);
-      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("pageSelected", page + 1);
+      model.addAttribute("pages", resultService.getPages(page + 1, maxPage));
       model.addAttribute("products", allProducts);
       model.addAttribute("productsEmpty", allProducts.size() == 0);
       model.addAttribute("maxPage", maxPage);
-      return "productsPage";
-    } else {
-      if (!productService.isProductOwner(principal.getName(), id)) {
-        return "redirect:/products";
-      }
-      Product product = productService.getProductById(id);
-      model.addAttribute("categories", categoryService.getAllNames());
-      model.addAttribute("productCategories", productService.getCategoriesNames(product));
-      model.addAttribute(PRODUCT_PARAM, productService.getEditProductDTO(product));
-      model.addAttribute("id", id);
-      return "productPage";
+      return "productsAdminPage";
     }
   }
 
@@ -210,7 +233,7 @@ public class ProductController {
   public String deleteProduct(@RequestParam String id, Locale locale, Principal principal) {
     if (!productService.isProductOwner(principal.getName(), id)) {
       return messageSource.getMessage(ERROR_NOT_OWNER_MESSAGE, null, locale);
-    } else if (!productService.deleteProduct(id)) {
+    } else if (!productService.deleteProducts(List.of(new ObjectId(id)))) {
       return messageSource.getMessage(ERROR_UNEXPECTED_MESSAGE, null, locale);
     }
     return SUCCESS_OK_MESSAGE;

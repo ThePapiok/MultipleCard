@@ -105,11 +105,13 @@ public class AuthenticationServiceTest {
     expectedUser.setFirstName(registerDTO.getFirstName());
     expectedUser.setLastName(registerDTO.getLastName());
     expectedUser.setAddress(expectedAddress);
+    expectedUser.setRestricted(false);
     expectedUser2 = new User();
     expectedUser2.setFirstName(registerDTO.getFirstName());
     expectedUser2.setLastName(registerDTO.getLastName());
     expectedUser2.setAddress(expectedAddress);
     expectedUser2.setId(TEST_ID);
+    expectedUser2.setRestricted(false);
     expectedAccount = new Account();
     expectedAccount.setPassword("dsfbv134fvdb");
     expectedAccount.setPhone(registerDTO.getCallingCode() + registerDTO.getPhone());

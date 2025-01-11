@@ -50,9 +50,9 @@ function checkPrice(e) {
     let valuePercentage;
     let realPrice = e.value.toString();
     const lastCharIndex = realPrice.length - 1;
-    if(realPrice.charAt(lastCharIndex) === "%"){
+    if (realPrice.charAt(lastCharIndex) === "%") {
         valuePercentage = parseFloat(realPrice.substring(0, lastCharIndex));
-        if (valuePercentage != null){
+        if (valuePercentage != null) {
             e.value = (parseFloat(originalPrice) * parseInt(e.value.substring(0, lastCharIndex)) / 100.0).toFixed(2);
             checkPrice(e);
             unfocusedPrice(e);

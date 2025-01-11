@@ -20,17 +20,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Promotion;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.dto.AddProductDTO;
 import com.thepapiok.multiplecard.dto.EditProductDTO;
 import com.thepapiok.multiplecard.dto.PageProductsDTO;
+import com.thepapiok.multiplecard.dto.PageProductsWithShopDTO;
 import com.thepapiok.multiplecard.dto.ProductDTO;
 import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
+import com.thepapiok.multiplecard.services.ProfileService;
 import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ShopService;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,6 +118,7 @@ public class ProductControllerTest {
   @MockBean private ShopService shopService;
   @MockBean private ProductService productService;
   @MockBean private ResultService resultService;
+  @MockBean private ProfileService profileService;
 
   @BeforeEach
   public void setUp() {
@@ -143,8 +148,11 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPageWhenEverythingOk() throws Exception {
-    setDataForProductsPage();
+  public void shouldReturnProductsPageAtProductsPageWhenEverythingOkWithShopRole()
+      throws Exception {
+    setDataForProductsPageRoleShop();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL))
@@ -160,9 +168,11 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPageWithErrorParamWithoutMessage()
+  public void shouldReturnProductsPageAtProductsPageWithErrorParamWithoutMessageWithShopRole()
       throws Exception {
-    setDataForProductsPage();
+    setDataForProductsPageRoleShop();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(ERROR_PARAM, ""))
@@ -178,10 +188,12 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPageWithErrorParam() throws Exception {
+  public void shouldReturnProductsPageAtProductsPageWithErrorParamWithShopRole() throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(ERROR_MESSAGE_PARAM, ERROR_MESSAGE);
-    setDataForProductsPage();
+    setDataForProductsPageRoleShop();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(ERROR_PARAM, "").session(httpSession))
@@ -199,9 +211,11 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPageWithSuccessParamWithoutMessage()
+  public void shouldReturnProductsPageAtProductsPageWithSuccessParamWithoutMessageWithShopRole()
       throws Exception {
-    setDataForProductsPage();
+    setDataForProductsPageRoleShop();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param("success", ""))
@@ -217,11 +231,14 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductsPageAtProductsPageWithSuccessParam() throws Exception {
+  public void shouldReturnProductsPageAtProductsPageWithSuccessParamWithShopRole()
+      throws Exception {
     final String successMessage = "success!";
     MockHttpSession httpSession = new MockHttpSession();
     httpSession.setAttribute(SUCCESS_MESSAGE_PARAM, successMessage);
-    setDataForProductsPage();
+    setDataForProductsPageRoleShop();
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param("success", "").session(httpSession))
@@ -239,9 +256,10 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldRedirectToProductsAtProductsPageWithIdParamWhenNotProductOwner()
+  public void shouldRedirectToProductsAtProductsPageWithIdParamWhenNotProductOwnerWithShopRole()
       throws Exception {
     when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(false);
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
@@ -250,7 +268,8 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnProductPageAtProductsPageWithIdParamWhenEverythingOk() throws Exception {
+  public void shouldReturnProductPageAtProductsPageWithIdParamWhenEverythingOkWithShopRole()
+      throws Exception {
     final String productCategory = "food4";
     List<String> allCategories = List.of("food1", "food2", "food3", productCategory);
     Product product = new Product();
@@ -261,6 +280,7 @@ public class ProductControllerTest {
     when(productService.getEditProductDTO(product)).thenReturn(editProductDTO);
     when(categoryService.getAllNames()).thenReturn(allCategories);
     when(productService.getCategoriesNames(product)).thenReturn(List.of(productCategory));
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(true);
 
     mockMvc
         .perform(get(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
@@ -271,7 +291,7 @@ public class ProductControllerTest {
         .andExpect(view().name("productPage"));
   }
 
-  private void setDataForProductsPage() {
+  private void setDataForProductsPageRoleShop() {
     final int testYearStartAt = 2024;
     final int testMonthStartAt = 1;
     final int testDayStartAt = 1;
@@ -320,6 +340,90 @@ public class ProductControllerTest {
     when(productService.getProducts(TEST_PHONE, 0, COUNT_FIELD, true, "", "", "", false))
         .thenReturn(pageProductsDTO);
     when(resultService.getPages(1, 1)).thenReturn(testPages);
+  }
+
+  @Test
+  @WithMockUser(username = TEST_PHONE, roles = "ADMIN")
+  public void shouldReturnProductsAdminPageAtProductsPageWhenEverythingOkWithShopAdmin()
+      throws Exception {
+    final int testPrice1 = 123;
+    final int testQuantity1 = 5;
+    final int testNewPrice1 = 70;
+    final int testYearExpiredAt1 = 2024;
+    final int testMonthExpiredAt1 = 4;
+    final int testDayExpiredAt1 = 25;
+    final int testYearStartAt1 = 2024;
+    final int testMonthStartAt1 = 4;
+    final int testDayStartAt1 = 25;
+    final ObjectId testShopId1 = new ObjectId("123456789012345658611234");
+    final LocalDate testExpiredAt1 =
+        LocalDate.of(testYearExpiredAt1, testMonthExpiredAt1, testDayExpiredAt1);
+    final LocalDate testStartAt1 =
+        LocalDate.of(testYearStartAt1, testMonthStartAt1, testDayStartAt1);
+    final int testPrice2 = 1423;
+    final int testQuantity2 = 1;
+    final int testNewPrice2 = 213;
+    final int testYearExpiredAt2 = 2025;
+    final int testMonthExpiredAt2 = 1;
+    final int testDayExpiredAt2 = 12;
+    final int testYearStartAt2 = 2024;
+    final int testMonthStartAt2 = 6;
+    final int testDayStartAt2 = 21;
+    final ObjectId testShopId2 = new ObjectId("723456789012341658611234");
+    final LocalDate testExpiredAt2 =
+        LocalDate.of(testYearExpiredAt2, testMonthExpiredAt2, testDayExpiredAt2);
+    final LocalDate testStartAt2 =
+        LocalDate.of(testYearStartAt2, testMonthStartAt2, testDayStartAt2);
+    List<ProductWithShopDTO> products = new ArrayList<>();
+    ProductWithShopDTO product1 = new ProductWithShopDTO();
+    product1.setProductName(TEST_PRODUCT_NAME);
+    product1.setProductImageUrl("url1");
+    product1.setPrice(testPrice1);
+    product1.setActive(true);
+    product1.setQuantityPromotion(testQuantity1);
+    product1.setNewPricePromotion(testNewPrice1);
+    product1.setDescription(TEST_DESCRIPTION);
+    product1.setShopImageUrl("shopUrl1");
+    product1.setShopName("testShop1");
+    product1.setShopId(testShopId1);
+    product1.setProductId("testProductId1");
+    product1.setExpiredAtPromotion(testExpiredAt1);
+    product1.setStartAtPromotion(testStartAt1);
+    ProductWithShopDTO product2 = new ProductWithShopDTO();
+    product2.setProductName(TEST_PRODUCT_NAME + "A");
+    product2.setProductImageUrl("url2");
+    product2.setPrice(testPrice2);
+    product2.setActive(false);
+    product2.setQuantityPromotion(testQuantity2);
+    product2.setNewPricePromotion(testNewPrice2);
+    product2.setDescription(TEST_DESCRIPTION + "C");
+    product2.setShopImageUrl("shopUrl2");
+    product2.setShopName("testShop2");
+    product2.setShopId(testShopId2);
+    product2.setProductId("testProductId2");
+    product2.setExpiredAtPromotion(testExpiredAt2);
+    product2.setStartAtPromotion(testStartAt2);
+    products.add(product1);
+    products.add(product2);
+    PageProductsWithShopDTO pageProductsWithShopDTO = new PageProductsWithShopDTO();
+    pageProductsWithShopDTO.setMaxPage(1);
+    pageProductsWithShopDTO.setProducts(products);
+
+    when(profileService.checkRole(TEST_PHONE, Role.ROLE_SHOP)).thenReturn(false);
+    when(productService.getProductsWithShops(0, COUNT_FIELD, true, "", "", ""))
+        .thenReturn(pageProductsWithShopDTO);
+    when(resultService.getPages(1, 1)).thenReturn(List.of(1));
+
+    mockMvc
+        .perform(get(PRODUCTS_URL))
+        .andExpect(model().attribute(FIELD_PARAM, COUNT_FIELD))
+        .andExpect(model().attribute(IS_DESCENDING_PARAM, true))
+        .andExpect(model().attribute(PAGE_SELECTED_PARAM, 1))
+        .andExpect(model().attribute(PAGES_PARAM, List.of(1)))
+        .andExpect(model().attribute(PRODUCTS_PARAM, products))
+        .andExpect(model().attribute(PRODUCTS_EMPTY_PARAM, false))
+        .andExpect(model().attribute(MAX_PAGE_PARAM, 1))
+        .andExpect(view().name("productsAdminPage"));
   }
 
   @Test
@@ -743,9 +847,9 @@ public class ProductControllerTest {
 
   @Test
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
-  public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProduct() throws Exception {
+  public void shouldReturnErrorMessageAtDeleteProductWhenErrorAtDeleteProducts() throws Exception {
     when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(false);
+    when(productService.deleteProducts(List.of(TEST_OBJECT_ID))).thenReturn(false);
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))
@@ -756,7 +860,7 @@ public class ProductControllerTest {
   @WithMockUser(username = TEST_PHONE, roles = "SHOP")
   public void shouldReturnOkAtDeleteProductWhenEverythingOk() throws Exception {
     when(productService.isProductOwner(TEST_PHONE, TEST_ID)).thenReturn(true);
-    when(productService.deleteProduct(TEST_ID)).thenReturn(true);
+    when(productService.deleteProducts(List.of(TEST_OBJECT_ID))).thenReturn(true);
 
     mockMvc
         .perform(delete(PRODUCTS_URL).param(ID_PARAM, TEST_ID))

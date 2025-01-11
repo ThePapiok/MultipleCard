@@ -14,11 +14,13 @@ import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.ReviewAtReportDTO;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.misc.ReviewConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.LikeRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +57,7 @@ public class ReviewServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private LikeRepository likeRepository;
   @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private ReportRepository reportRepository;
   private ReviewService reviewService;
 
   @BeforeAll
@@ -77,6 +80,7 @@ public class ReviewServiceTest {
             accountRepository,
             userRepository,
             likeRepository,
+            reportRepository,
             mongoTransactionManager);
     reviewDTO = new ReviewDTO();
     reviewDTO.setRating(TEST_RATING);
@@ -321,6 +325,7 @@ public class ReviewServiceTest {
 
     assertTrue(reviewService.removeReview(TEST_ID1, TEST_PHONE));
     verify(userRepository).save(expectedUser);
+    verify(reportRepository).deleteAllByReportedId(TEST_ID1);
   }
 
   @Test
@@ -561,5 +566,21 @@ public class ReviewServiceTest {
     when(userRepository.countAllByReviewIsNotNull()).thenReturn(1);
 
     assertEquals(maxPage, reviewService.getMaxPage());
+  }
+
+  @Test
+  public void shouldReturnReviewAtReportDTOAtGetReviewByIdWhenEverythingOk() {
+    final String testFirstName = "testFirstName";
+    final int testCount = 4;
+    ReviewAtReportDTO reviewAtReportDTO = new ReviewAtReportDTO();
+    reviewAtReportDTO.setId(TEST_ID1.toString());
+    reviewAtReportDTO.setRating(TEST_RATING);
+    reviewAtReportDTO.setCount(testCount);
+    reviewAtReportDTO.setDescription(TEST_DESCRIPTION);
+    reviewAtReportDTO.setFirstName(testFirstName);
+
+    when(userRepository.getReviewAtReportDTOById(TEST_ID1)).thenReturn(reviewAtReportDTO);
+
+    assertEquals(reviewAtReportDTO, reviewService.getReviewById(TEST_ID1.toString()));
   }
 }

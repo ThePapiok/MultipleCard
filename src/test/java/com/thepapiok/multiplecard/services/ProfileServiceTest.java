@@ -15,12 +15,10 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
-import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
-import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
@@ -31,9 +29,7 @@ import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
-import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
-import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -51,7 +47,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,14 +72,13 @@ public class ProfileServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private ProfileConverter profileConverter;
   @Mock private CardRepository cardRepository;
-  @Mock private OrderRepository orderRepository;
   @Mock private ProductRepository productRepository;
   @Mock private MongoTemplate mongoTemplate;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private CloudinaryService cloudinaryService;
   @Mock private ShopRepository shopRepository;
   @Mock private EmailService emailService;
-  @Mock private PromotionRepository promotionRepository;
+  @Mock private ProductService productService;
   private ProfileService profileService;
 
   @BeforeEach
@@ -145,14 +139,13 @@ public class ProfileServiceTest {
             userRepository,
             profileConverter,
             cardRepository,
-            orderRepository,
             productRepository,
             mongoTemplate,
             mongoTransactionManager,
             cloudinaryService,
             shopRepository,
             emailService,
-            promotionRepository);
+            productService);
   }
 
   @Test
@@ -202,6 +195,7 @@ public class ProfileServiceTest {
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(List.of());
+    when(productService.deleteProducts(List.of())).thenReturn(true);
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
@@ -210,7 +204,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsButNoOrders() throws IOException {
+  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsDeleted() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -224,46 +218,20 @@ public class ProfileServiceTest {
     products.add(product1);
     products.add(product2);
     products.add(product3);
+    List<ObjectId> productsId = List.of(TEST_PRODUCT_ID1, TEST_PRODUCT_ID2, TEST_PRODUCT_ID3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndIsUsed(any(), eq(false))).thenReturn(List.of());
+    when(productService.deleteProducts(productsId)).thenReturn(true);
 
     assertTrue(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
-    verify(mongoTemplate).remove(product1);
-    verify(mongoTemplate).remove(product2);
-    verify(mongoTemplate).remove(product3);
     verify(cloudinaryService).deleteImage(TEST_ID.toString());
-    verify(cloudinaryService).deleteImage(product1.getId().toString());
-    verify(cloudinaryService).deleteImage(product2.getId().toString());
-    verify(cloudinaryService).deleteImage(product3.getId().toString());
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test
-  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsAndSomeOrders()
-      throws IOException {
-    final int centsPerZloty = 100;
-    final String pointsParam = "points";
-    final ObjectId cardId1 = new ObjectId("123132123312123312312579");
-    final ObjectId cardId2 = new ObjectId("123132103312123310312579");
-    final ObjectId cardId3 = new ObjectId("423132303311123310772599");
-    final int price1 = 10;
-    final int price2 = 20;
-    final int price3 = 30;
+  public void shouldReturnTrueAtDeleteAccountRoleShopWhenProductsNotDeleted() throws IOException {
     Account account = new Account();
     account.setId(TEST_ID);
     account.setRole(Role.ROLE_SHOP);
@@ -277,71 +245,16 @@ public class ProfileServiceTest {
     products.add(product1);
     products.add(product2);
     products.add(product3);
-    List<Order> orders = new ArrayList<>();
-    Order order1 = new Order();
-    order1.setPrice(price1);
-    order1.setCardId(cardId1);
-    order1.setUsed(false);
-    Order order2 = new Order();
-    order2.setPrice(price2);
-    order2.setCardId(cardId2);
-    order2.setUsed(false);
-    Order order3 = new Order();
-    order3.setPrice(price3);
-    order3.setCardId(cardId3);
-    order3.setUsed(false);
-    orders.add(order1);
-    orders.add(order2);
-    orders.add(order3);
+    List<ObjectId> productsId = List.of(TEST_PRODUCT_ID1, TEST_PRODUCT_ID2, TEST_PRODUCT_ID3);
 
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(productRepository.getAllByShopId(TEST_ID)).thenReturn(products);
-    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID1, false)).thenReturn(orders);
-    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID2, false))
-        .thenReturn(List.of());
-    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID3, false))
-        .thenReturn(List.of());
+    when(productService.deleteProducts(productsId)).thenReturn(false);
 
-    assertTrue(profileService.deleteAccount(TEST_PHONE));
+    assertFalse(profileService.deleteAccount(TEST_PHONE));
     verify(mongoTemplate).remove(query(where(ID_PARAM).is(TEST_ID)), Shop.class);
     verify(mongoTemplate).remove(account);
-    verify(mongoTemplate).remove(order1);
-    verify(mongoTemplate).remove(order2);
-    verify(mongoTemplate).remove(order3);
-    verify(mongoTemplate).remove(product1);
-    verify(mongoTemplate).remove(product2);
-    verify(mongoTemplate).remove(product3);
     verify(cloudinaryService).deleteImage(TEST_ID.toString());
-    verify(cloudinaryService).deleteImage(product1.getId().toString());
-    verify(cloudinaryService).deleteImage(product2.getId().toString());
-    verify(cloudinaryService).deleteImage(product3.getId().toString());
-    verify(mongoTemplate)
-        .updateFirst(
-            query(where(CARD_ID_PARAM).is(cardId1)),
-            new Update().inc(pointsParam, (price1 / centsPerZloty)),
-            User.class);
-    verify(mongoTemplate)
-        .updateFirst(
-            query(where(CARD_ID_PARAM).is(cardId2)),
-            new Update().inc(pointsParam, (price2 / centsPerZloty)),
-            User.class);
-    verify(mongoTemplate)
-        .updateFirst(
-            query(where(CARD_ID_PARAM).is(cardId3)),
-            new Update().inc(pointsParam, (price3 / centsPerZloty)),
-            User.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), Promotion.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID1)), BlockedProduct.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID2)), BlockedProduct.class);
-    verify(mongoTemplate)
-        .remove(query(where(PRODUCT_ID_PARAM).is(TEST_PRODUCT_ID3)), BlockedProduct.class);
   }
 
   @Test

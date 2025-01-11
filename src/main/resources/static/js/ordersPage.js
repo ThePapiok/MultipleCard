@@ -165,7 +165,7 @@ function createResult(product, barcode, type) {
                         <div class="result-horizontal notImageContainer">
                             <span class="name">` + product.name + `</span>
                             <span class="quantity">` + productsBarcode.get(barcode) + `</span>
-                            <a class="resultIcons" onclick="deleteProducts('` + barcode + `')">
+                            <a class="resultIcons" onclick="deleteProducts('` + barcode + `')" title="` + document.getElementById("textDelete").textContent + `">
                                 <img src="/images/close.png" alt="close" class="imageClose">
                             </a>
                         </div>

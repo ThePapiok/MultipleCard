@@ -38,7 +38,7 @@
             <option th:text="#{select_option.latest_add}" value="6"></option>
             <option th:text="#{select_option.oldest_add}" value="7"></option>
         </select>
-        <div id="searchButton" onclick="setParams('/products', false)">
+        <div id="searchButton" onclick="setParams('/products', false)" th:title="#{search.text}">
             <img id="searchImage" src="/images/search.png" alt="search">
         </div>
         <a href="/add_product" id="addProduct">
@@ -56,22 +56,22 @@
                         <span class="name" th:text="${product.productName}"></span>
                         <a class="resultIcons"
                            th:attr="onclick=|showOrHideBlockProduct('${product.productId}', this.parentElement.parentElement.parentElement)|"
-                           th:if="${product.active}">
+                           th:if="${product.active}" th:title="#{block.title_window}">
                             <img src="/images/block.png" alt="block">
                         </a>
                         <a class="resultIcons" th:attr="onclick=|unblockProduct('${product.productId}')|"
-                           th:unless="${product.active}">
+                           th:unless="${product.active}" th:title="#{unblock.title_window}">
                             <img src="/images/unblock.png" alt="unblock">
                         </a>
                         <a th:href="@{'/promotions?id=' + ${product.productId}}" class="resultIcons"
-                           th:if="${product.startAtPromotion} == null">
+                           th:if="${product.startAtPromotion} == null" th:title="#{promotion.title_window}">
                             <img src="/images/discount.png" alt="discount">
                         </a>
                         <a th:href="@{'/promotions?id=' + ${product.productId}}" class="resultIcons"
-                           th:unless="${product.startAtPromotion} == null">
+                           th:unless="${product.startAtPromotion} == null" th:title="#{promotion.title_window}">
                             <img src="/images/discount_fill.png" alt="discount">
                         </a>
-                        <a class="resultIcons"
+                        <a class="resultIcons" th:title="#{delete_product.text}"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
@@ -124,7 +124,7 @@
     </div>
     <div id="delete" class="confirmation" hidden data-id="">
         <div class="confirmationChoice">
-            <p th:text="#{productsPage.delete.title}" class="confirmationTitle"></p>
+            <p th:text="#{delete.title}" class="confirmationTitle"></p>
             <div>
                 <a>
                     <button type="button" class="darkGreenButton" th:text="#{button.yes}"
@@ -156,10 +156,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

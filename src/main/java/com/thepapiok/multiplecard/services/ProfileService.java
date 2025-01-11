@@ -4,12 +4,10 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.thepapiok.multiplecard.collections.Account;
-import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Order;
 import com.thepapiok.multiplecard.collections.Product;
-import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.collections.User;
@@ -19,9 +17,7 @@ import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.misc.ProfileConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.CardRepository;
-import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
-import com.thepapiok.multiplecard.repositories.PromotionRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import jakarta.mail.MessagingException;
@@ -35,7 +31,6 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -48,14 +43,13 @@ public class ProfileService {
   private final UserRepository userRepository;
   private final ProfileConverter profileConverter;
   private final CardRepository cardRepository;
-  private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
   private final MongoTemplate mongoTemplate;
   private final MongoTransactionManager mongoTransactionManager;
   private final CloudinaryService cloudinaryService;
   private final ShopRepository shopRepository;
   private final EmailService emailService;
-  private final PromotionRepository promotionRepository;
+  private final ProductService productService;
 
   @Autowired
   public ProfileService(
@@ -63,26 +57,24 @@ public class ProfileService {
       UserRepository userRepository,
       ProfileConverter profileConverter,
       CardRepository cardRepository,
-      OrderRepository orderRepository,
       ProductRepository productRepository,
       MongoTemplate mongoTemplate,
       MongoTransactionManager mongoTransactionManager,
       CloudinaryService cloudinaryService,
       ShopRepository shopRepository,
       EmailService emailService,
-      PromotionRepository promotionRepository) {
+      ProductService productService) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.profileConverter = profileConverter;
     this.cardRepository = cardRepository;
-    this.orderRepository = orderRepository;
     this.productRepository = productRepository;
     this.mongoTemplate = mongoTemplate;
     this.mongoTransactionManager = mongoTransactionManager;
     this.cloudinaryService = cloudinaryService;
     this.shopRepository = shopRepository;
     this.emailService = emailService;
-    this.promotionRepository = promotionRepository;
+    this.productService = productService;
   }
 
   public ProfileDTO getProfile(String phone) {
@@ -108,15 +100,12 @@ public class ProfileService {
   public boolean deleteAccount(String phone) {
     final String idParam = "_id";
     final String cardIdParam = "cardId";
-    final String productIdParam = "productId";
-    final float centsPerZloty = 100;
     TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
     try {
       transactionTemplate.execute(
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
-              ObjectId productId;
               Account account = accountRepository.findByPhone(phone);
               ObjectId id = account.getId();
               Role role = account.getRole();
@@ -128,27 +117,9 @@ public class ProfileService {
                   throw new RuntimeException(e);
                 }
                 mongoTemplate.remove(query(where(idParam).is(id)), Shop.class);
-                List<Product> products = productRepository.getAllByShopId(id);
-                for (Product product : products) {
-                  productId = product.getId();
-                  mongoTemplate.remove(query(where(productIdParam).is(productId)), Promotion.class);
-                  mongoTemplate.remove(
-                      query(where(productIdParam).is(productId)), BlockedProduct.class);
-                  List<Order> orders =
-                      orderRepository.findAllByProductIdAndIsUsed(productId, false);
-                  for (Order order : orders) {
-                    mongoTemplate.updateFirst(
-                        query(where(cardIdParam).is(order.getCardId())),
-                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
-                        User.class);
-                    mongoTemplate.remove(order);
-                  }
-                  try {
-                    cloudinaryService.deleteImage(product.getId().toString());
-                  } catch (IOException e) {
-                    throw new RuntimeException(e);
-                  }
-                  mongoTemplate.remove(product);
+                if (!productService.deleteProducts(
+                    productRepository.getAllByShopId(id).stream().map(Product::getId).toList())) {
+                  throw new RuntimeException();
                 }
               } else {
                 if (!role.equals(Role.ROLE_ADMIN)) {

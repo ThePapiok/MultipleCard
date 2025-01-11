@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -44,6 +45,7 @@ import com.thepapiok.multiplecard.repositories.CategoryRepository;
 import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.PromotionRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import com.thepapiok.multiplecard.repositories.ShopRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.io.IOException;
@@ -109,6 +111,7 @@ public class ProductServiceTest {
   @Mock private PromotionRepository promotionRepository;
   @Mock private ReservedProductService reservedProductService;
   @Mock private UserRepository userRepository;
+  @Mock private ReportRepository reportRepository;
   private ProductService productService;
 
   @BeforeAll
@@ -142,7 +145,8 @@ public class ProductServiceTest {
             shopRepository,
             promotionRepository,
             reservedProductService,
-            userRepository);
+            userRepository,
+            reportRepository);
   }
 
   @Test
@@ -375,8 +379,7 @@ public class ProductServiceTest {
   }
 
   @Test
-  public void shouldReturnTrueAtDeleteProductWhenEverythingOk() throws IOException {
-    final ObjectId productId = new ObjectId(TEST_ID);
+  public void shouldReturnTrueAtDeleteProductsWhenEverythingOk() throws IOException {
     final ObjectId cardId1 = new ObjectId("103586189012345678101240");
     final ObjectId cardId2 = new ObjectId("203586189012345678101240");
     final ObjectId cardId3 = new ObjectId("303586189012345678101240");
@@ -394,24 +397,24 @@ public class ProductServiceTest {
     card3.setId(cardId3);
     Order order1 = new Order();
     order1.setUsed(false);
-    order1.setProductId(productId);
+    order1.setProductId(TEST_PRODUCT_ID);
     order1.setCardId(cardId1);
     order1.setPrice(amount1);
     Order order2 = new Order();
     order2.setUsed(false);
-    order2.setProductId(productId);
+    order2.setProductId(TEST_PRODUCT_ID);
     order2.setCardId(cardId2);
     order2.setPrice(amount2);
     Order order3 = new Order();
     order3.setUsed(false);
-    order3.setProductId(productId);
+    order3.setProductId(TEST_PRODUCT_ID);
     order3.setCardId(cardId3);
     order3.setPrice(amount3);
     List<Order> orders = List.of(order1, order2, order3);
 
-    when(orderRepository.findAllByProductIdAndIsUsed(productId, false)).thenReturn(orders);
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID, false)).thenReturn(orders);
 
-    assertTrue(productService.deleteProduct(TEST_ID));
+    assertTrue(productService.deleteProducts(List.of(TEST_PRODUCT_ID)));
     verify(mongoTemplate)
         .updateFirst(
             query(where(cardIdField).is(cardId1)),
@@ -432,15 +435,16 @@ public class ProductServiceTest {
     verify(mongoTemplate).remove(order3);
     verify(cloudinaryService).deleteImage(TEST_ID);
     verify(promotionService).deletePromotion(TEST_ID);
-    verify(productRepository).deleteById(productId);
-    verify(blockedProductRepository).deleteByProductId(productId);
+    verify(productRepository).deleteById(TEST_PRODUCT_ID);
+    verify(blockedProductRepository).deleteByProductId(TEST_PRODUCT_ID);
+    verify(reportRepository).deleteAllByReportedId(TEST_PRODUCT_ID);
   }
 
   @Test
-  public void shouldReturnFalseAtDeleteProductWhenGetException() throws IOException {
+  public void shouldReturnFalseAtDeleteProductsWhenGetException() throws IOException {
     doThrow(RuntimeException.class).when(cloudinaryService).deleteImage(TEST_ID);
 
-    assertFalse(productService.deleteProduct(TEST_ID));
+    assertFalse(productService.deleteProducts(List.of(TEST_PRODUCT_ID)));
   }
 
   @Test
@@ -1254,5 +1258,127 @@ public class ProductServiceTest {
     when(promotionRepository.findNewPriceByProductId(testProductId2)).thenReturn(promotion);
 
     assertEquals(expectedProducts, productService.getProductsPayU(products));
+  }
+
+  @Test
+  public void shouldReturnTrueAtDeleteCategoryAndProductsWhenEverythingOk() throws IOException {
+    final ObjectId cardId1 = new ObjectId("103586189012345678101240");
+    final ObjectId cardId2 = new ObjectId("203586189012345678101240");
+    final ObjectId cardId3 = new ObjectId("303586189012345678101240");
+    final int amount1 = 500;
+    final int amount2 = 120;
+    final int amount3 = 4350;
+    final float centsPerZloty = 100;
+    final String cardIdField = "cardId";
+    final String pointsField = "points";
+    Card card1 = new Card();
+    card1.setId(cardId1);
+    Card card2 = new Card();
+    card2.setId(cardId2);
+    Card card3 = new Card();
+    card3.setId(cardId3);
+    Order order1 = new Order();
+    order1.setUsed(false);
+    order1.setProductId(TEST_PRODUCT_ID);
+    order1.setCardId(cardId1);
+    order1.setPrice(amount1);
+    Order order2 = new Order();
+    order2.setUsed(false);
+    order2.setProductId(TEST_PRODUCT_ID);
+    order2.setCardId(cardId2);
+    order2.setPrice(amount2);
+    Order order3 = new Order();
+    order3.setUsed(false);
+    order3.setProductId(TEST_PRODUCT_ID);
+    order3.setCardId(cardId3);
+    order3.setPrice(amount3);
+    List<Order> orders = List.of(order1, order2, order3);
+
+    when(productRepository.getProductsIdByCategoryId(new ObjectId(TEST_ID1)))
+        .thenReturn(List.of(TEST_PRODUCT_ID));
+    when(orderRepository.findAllByProductIdAndIsUsed(TEST_PRODUCT_ID, false)).thenReturn(orders);
+
+    assertTrue(productService.deleteCategoryAndProducts(TEST_ID1));
+    verify(categoryRepository).deleteById(new ObjectId(TEST_ID1));
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdField).is(cardId1)),
+            new Update().inc(pointsField, (Math.round(amount1 / centsPerZloty))),
+            User.class);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdField).is(cardId2)),
+            new Update().inc(pointsField, (Math.round(amount2 / centsPerZloty))),
+            User.class);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdField).is(cardId3)),
+            new Update().inc(pointsField, (Math.round(amount3 / centsPerZloty))),
+            User.class);
+    verify(mongoTemplate).remove(order1);
+    verify(mongoTemplate).remove(order2);
+    verify(mongoTemplate).remove(order3);
+    verify(cloudinaryService).deleteImage(TEST_ID);
+    verify(promotionService).deletePromotion(TEST_ID);
+    verify(productRepository).deleteById(TEST_PRODUCT_ID);
+    verify(blockedProductRepository).deleteByProductId(TEST_PRODUCT_ID);
+    verify(reportRepository).deleteAllByReportedId(TEST_PRODUCT_ID);
+  }
+
+  @Test
+  public void shouldReturnFalseAtDeleteCategoryAndProductsWhenGetException() throws IOException {
+    doThrow(RuntimeException.class).when(categoryRepository).deleteById(new ObjectId(TEST_ID1));
+
+    assertFalse(productService.deleteCategoryAndProducts(TEST_ID1));
+    verify(categoryRepository).deleteById(new ObjectId(TEST_ID1));
+    verifyNoInteractions(productRepository);
+  }
+
+  @Test
+  public void shouldReturnFalseAtDeleteCategoryAndProductsWhenErrorAtDeleteProducts()
+      throws IOException {
+    doThrow(RuntimeException.class).when(cloudinaryService).deleteImage(TEST_ID);
+
+    when(productRepository.getProductsIdByCategoryId(new ObjectId(TEST_ID1)))
+        .thenReturn(List.of(TEST_PRODUCT_ID));
+
+    assertFalse(productService.deleteCategoryAndProducts(TEST_ID1));
+    verify(categoryRepository).deleteById(new ObjectId(TEST_ID1));
+  }
+
+  @Test
+  public void shouldReturnProductWithShopDTOAtGetProductWithShopDTOByIdWhenEverythingOk() {
+    final String testDescription = "testDescription";
+    final int testPrice = 5234;
+    final int testQuantity = 2;
+    final int testNewPrice = 2442;
+    final int testStartAtYear = 2012;
+    final int testStartAtMonth = 1;
+    final int testStartAtDay = 3;
+    final int testExpiredAtYear = 2013;
+    final int testExpiredAtMonth = 7;
+    final int testExpiredAtDay = 23;
+    final LocalDate testStartAt = LocalDate.of(testStartAtYear, testStartAtMonth, testStartAtDay);
+    final LocalDate testExpiredAt =
+        LocalDate.of(testExpiredAtYear, testExpiredAtMonth, testExpiredAtDay);
+    ProductWithShopDTO productWithShopDTO = new ProductWithShopDTO();
+    productWithShopDTO.setShopName(TEST_SHOP_NAME);
+    productWithShopDTO.setShopId(TEST_OWNER_ID);
+    productWithShopDTO.setShopImageUrl(TEST_SHOP_IMAGE_URL);
+    productWithShopDTO.setActive(true);
+    productWithShopDTO.setDescription(testDescription);
+    productWithShopDTO.setProductId(TEST_PRODUCT_ID.toString());
+    productWithShopDTO.setProductName(TEST_PRODUCT_NAME);
+    productWithShopDTO.setProductImageUrl(TEST_URL);
+    productWithShopDTO.setPrice(testPrice);
+    productWithShopDTO.setQuantityPromotion(testQuantity);
+    productWithShopDTO.setNewPricePromotion(testNewPrice);
+    productWithShopDTO.setStartAtPromotion(testStartAt);
+    productWithShopDTO.setExpiredAtPromotion(testExpiredAt);
+
+    when(productRepository.getProductWithShopDTOById(TEST_PRODUCT_ID))
+        .thenReturn(productWithShopDTO);
+
+    assertEquals(productWithShopDTO, productService.getProductWithShopDTOById(TEST_ID));
   }
 }

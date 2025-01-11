@@ -42,6 +42,7 @@ function setFile(e) {
             let nameFile = document.createElement("span");
             let index = size;
             fileContainer.className = "fileContainer";
+            deleteFile.title = document.getElementById("textDeleteFile").textContent;
             deleteFile.src = "/images/close.png";
             deleteFile.alt = "close";
             deleteFile.className = "deleteFile";

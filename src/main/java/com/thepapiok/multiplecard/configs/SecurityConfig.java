@@ -21,18 +21,23 @@ public class SecurityConfig {
       throws Exception {
     final String loginUrl = "/login";
     final String roleUser = "USER";
+    final String roleAdmin = "ADMIN";
     http.authorizeHttpRequests(
             authorize ->
                 authorize
                     .requestMatchers(
-                        HttpMethod.POST, "/reviews/*", "/buy_for_points", "/find_nearest")
+                        HttpMethod.POST,
+                        "/reviews/*",
+                        "/buy_for_points",
+                        "/find_nearest",
+                        "/report")
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.DELETE, "/reviews")
                     .hasRole(roleUser)
                     .requestMatchers("/new_card", "/block_card", "/order_card")
                     .hasRole(roleUser)
                     .requestMatchers(HttpMethod.POST, "/user")
-                    .hasAnyRole(roleUser, "ADMIN")
+                    .hasAnyRole(roleUser, roleAdmin)
                     .requestMatchers("/register", "/password_reset", "/register_shop")
                     .anonymous()
                     .requestMatchers("/password_change", "/delete_account", "/edit_profile")
@@ -40,7 +45,6 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/profile")
                     .authenticated()
                     .requestMatchers(
-                        "/products",
                         "/add_product",
                         "/promotions",
                         "/block_product",
@@ -50,6 +54,22 @@ public class SecurityConfig {
                         "/check_pin",
                         "/finish_order")
                     .hasRole("SHOP")
+                    .requestMatchers(
+                        "/admin_panel",
+                        "/change_user",
+                        "/delete_product",
+                        "/block_user",
+                        "/delete_review",
+                        "/mute_user",
+                        "/categories",
+                        "/delete_category",
+                        "/reports",
+                        "/reject_report",
+                        "/block_at_report",
+                        "/delete_and_block")
+                    .hasRole(roleAdmin)
+                    .requestMatchers("/products")
+                    .hasAnyRole("SHOP", roleAdmin)
                     .anyRequest()
                     .permitAll())
         .formLogin(

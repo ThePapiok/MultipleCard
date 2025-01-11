@@ -24,4 +24,3 @@ function goToBasket(id) {
     window.location = "/cart";
 }
 
-

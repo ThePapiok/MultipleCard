@@ -30,6 +30,7 @@
     <span hidden id="textProductNotFound" th:text="#{ordersPage.error.product_not_found}"></span>
     <span hidden id="textTooManyProducts" th:text="#{ordersPage.error.too_many_products}"></span>
     <span hidden id="textBadProducts" th:text="#{ordersPage.error.bad_products}"></span>
+    <span hidden id="textDelete" th:text="#{delete.title_window}"></span>
     <p class="title" th:text="#{ordersPage.title.text}"></p>
     <form th:action="@{/orders}" id="form" method="post" th:object="${products}">
         <div id="barcode">
@@ -72,10 +73,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

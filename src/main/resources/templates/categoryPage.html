@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/searchBar.css">
+    <link rel="stylesheet" href="/css/confirmation.css">
+    <link rel="stylesheet" href="/css/categoryPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body th:attr="onload=|atStart('${maxPage}', '${pageSelected}')|">
+<script src="/js/page.js"></script>
+<script src="/js/results.js"></script>
+<script src="/js/searchBar.js"></script>
+<script src="/js/block.js"></script>
+<script src="/js/categoryPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <p class="title" th:text="#{categories.title}"></p>
+    <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
+    <span hidden th:text="#{success.delete}" id="textSuccessDelete"></span>
+    <span hidden th:text="#{success.block_user}" id="textSuccessBlockUser"></span>
+    <div id="searchBar">
+        <input type="text" id="searchInput" th:title="#{search.text}" th:placeholder="#{search.text}"
+               th:value="${param.text}">
+        <div class="select">
+            <div id="searchButton" onclick="setPageWithName()" th:title="#{search.text}">
+                <img id="searchImage" src="/images/search.png" alt="search">
+            </div>
+        </div>
+    </div>
+    <p id="error"></p>
+    <p id="success"></p>
+    <div id="allResults">
+        <div id="results">
+            <div class="result" th:if="${categoriesEmpty} != true" th:each="category : ${categories}">
+                <div class="result-vertical">
+                    <div class="result-horizontal notImageContainer">
+                        <span class="name" th:text="${category.name}"></span>
+                    </div>
+                    <div class="result-horizontal notImageContainer resultsIcons">
+                        <a class="resultIcons" th:title="#{delete.title_window}"
+                           th:attr="onclick=|showOrHideDeleteCategory('${category.name}', this.parentElement.parentElement.parentElement)|">
+                            <img src="/images/close.png" alt="close">
+                        </a>
+                        <a class="resultIcons" th:title="#{block.title_window}"
+                           th:attr="onclick=|showOrHideBlockUser('${category.ownerId}', this.parentElement.parentElement.parentElement)|">
+                            <img src="/images/block_user.png" alt="block">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <span th:data-results-empty="${categoriesEmpty}" th:text="#{select.no_results}" id="noResults"></span>
+        </div>
+    </div>
+    <div id="pages">
+        <a>
+            <button id="previousPage" class="darkGreenButton" th:text="#{reviewPage.button.previous}"
+                    onclick="previousPage()"></button>
+        </a>
+        <div id="pagesSelect">
+            <span class="numberPage" th:id="'page' + ${page}" th:each="page: ${pages}" th:text="${page}"
+                  th:if="${categoriesEmpty} != true" th:attr="onclick=|setPage('${maxPage}', '${page}')|"></span>
+        </div>
+        <a>
+            <button id="nextPage" class="darkGreenButton" th:text="#{reviewPage.button.next}"
+                    th:attr="onclick=|nextPage('${maxPage}')|"></button>
+        </a>
+    </div>
+    <div id="delete" class="confirmation" hidden data-name="">
+        <div class="confirmationChoice">
+            <p th:text="#{delete.title}" class="confirmationTitle"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationDelete" class="greenButton" th:text="#{button.yes}"
+                            onclick="deleteCategory()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideDeleteCategory()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="block" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{block.title}" class="confirmationTitle"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationBlock" class="greenButton" th:text="#{button.yes}"
+                            onclick="blockUser(false)"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBlockUser()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,12 +22,18 @@
     <a th:href="@{/}" id="h5" class="headerButton">
         <button class="blackButton" th:text="#{button.landingPage}"></button>
     </a>
+    <a th:href="@{/logout}" class="h1 headerButton" sec:authorize="isAuthenticated()">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
 </div>
 <div id="body">
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <span hidden th:text="#{cartPage.error.new_quantity_promotion}" id="textGetNewQuantity"></span>
     <span hidden th:text="#{cartPage.error.too_many_products}" id="textTooManyProducts"></span>
     <span hidden th:text="${points}" id="points"></span>
+    <span hidden th:text="#{add_product.text}" id="textAddProduct"></span>
+    <span hidden th:text="#{delete_product.text}" id="textDeleteProduct"></span>
+    <span hidden th:text="#{delete.title_window}" id="textDelete"></span>
     <p class="title" th:text="#{cartPage.title}"></p>
     <div class="block-horizontally" id="yourPoints">
         <label>
@@ -78,10 +84,10 @@
 </div>
 <div id="footer">
     <label id="language" onclick="setLanguage()">
-        <a id="enLanguage">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
             <img class="flag" src="/images/en_language.png" alt="enLanguage">
         </a>
-        <a id="plLanguage">
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
             <img class="flag" src="/images/pl_language.png" alt="plLanguage">
         </a>
     </label>

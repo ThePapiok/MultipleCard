@@ -4,6 +4,7 @@ import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.services.ResultService;
 import com.thepapiok.multiplecard.services.ReviewService;
+import com.thepapiok.multiplecard.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -29,13 +30,18 @@ public class ReviewController {
   private final MessageSource messageSource;
   private final ReviewService reviewService;
   private final ResultService resultService;
+  private final UserService userService;
 
   @Autowired
   public ReviewController(
-      MessageSource messageSource, ReviewService reviewService, ResultService resultService) {
+      MessageSource messageSource,
+      ReviewService reviewService,
+      ResultService resultService,
+      UserService userService) {
     this.messageSource = messageSource;
     this.reviewService = reviewService;
     this.resultService = resultService;
+    this.userService = userService;
   }
 
   @PostMapping
@@ -47,11 +53,17 @@ public class ReviewController {
       Principal principal) {
     final String errorMessageParam = "errorMessage";
     final String redirectLandingPageError = "redirect:/?error";
+    final String phone = principal.getName();
     if (bindingResult.hasErrors()) {
       session.setAttribute(
           errorMessageParam, messageSource.getMessage("validation.incorrect_data", null, locale));
       return redirectLandingPageError;
-    } else if (!reviewService.addReview(review, principal.getName())) {
+    } else if (userService.checkIsRestricted(phone)) {
+      session.setAttribute(
+          errorMessageParam,
+          messageSource.getMessage("reportProduct.error.isRestricted", null, locale));
+      return redirectLandingPageError;
+    } else if (!reviewService.addReview(review, phone)) {
       session.setAttribute(
           errorMessageParam, messageSource.getMessage("error.unexpected", null, locale));
       return redirectLandingPageError;

@@ -75,6 +75,7 @@ public class AuthenticationService {
               user.setCardId(null);
               user.setPoints(0);
               user.setReview(null);
+              user.setRestricted(false);
               user = mongoTemplate.save(user);
               Account account = accountConverter.getEntity(register);
               account.setId(user.getId());
