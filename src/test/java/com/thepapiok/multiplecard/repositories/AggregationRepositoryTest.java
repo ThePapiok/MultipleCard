@@ -2290,12 +2290,18 @@ public class AggregationRepositoryTest {
     userDTO7.setLastName(TEST_LAST_NAME_USER);
     userDTO7.setShopName(null);
     userDTO7.setRestricted(true);
-    TextIndexDefinition textIndex =
+    TextIndexDefinition textIndex1 =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onFields("description", "name")
             .withDefaultLanguage("none")
             .build();
-    mongoTemplate.indexOps(Product.class).ensureIndex(textIndex);
+    mongoTemplate.indexOps(Product.class).ensureIndex(textIndex1);
+    TextIndexDefinition textIndex2 =
+        new TextIndexDefinition.TextIndexDefinitionBuilder()
+            .onField("name")
+            .withDefaultLanguage("none")
+            .build();
+    mongoTemplate.indexOps(Category.class).ensureIndex(textIndex2);
   }
 
   @AfterEach
