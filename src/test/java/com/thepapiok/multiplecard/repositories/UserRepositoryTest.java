@@ -8,6 +8,7 @@ import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.configs.DbConfig;
+import com.thepapiok.multiplecard.dto.ReviewAtReportDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -285,5 +286,19 @@ public class UserRepositoryTest {
   @Test
   public void shouldReturnReviewGetDTOAtFindReviewWhenEverythingOk() {
     assertEquals(reviewGetDTO2, userRepository.findReview(TEST_ID2));
+  }
+
+  @Test
+  public void shouldReturnReviewAtReportDTOAtGetReviewAtReportDTOByIdWhenEverythingOk() {
+    final int testCount = 2;
+    final int testRating = 3;
+    ReviewAtReportDTO reviewAtReportDTO = new ReviewAtReportDTO();
+    reviewAtReportDTO.setFirstName(TEST1_TEXT);
+    reviewAtReportDTO.setDescription(TEST1_TEXT);
+    reviewAtReportDTO.setRating(testRating);
+    reviewAtReportDTO.setId(TEST_ID1.toString());
+    reviewAtReportDTO.setCount(testCount);
+
+    assertEquals(reviewAtReportDTO, userRepository.getReviewAtReportDTOById(TEST_ID1));
   }
 }

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/reviews.css">
+    <link rel="stylesheet" href="/css/results.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/shopInfo.css">
+    <link rel="stylesheet" href="/css/confirmation.css">
+    <link rel="stylesheet" href="/css/reports.css">
+    <link rel="stylesheet" href="/css/reportsPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body th:attr="onload=|atStart()|">
+<script src="/js/page.js"></script>
+<script src="/js/shopInfo.js"></script>
+<script src="/js/block.js"></script>
+<script src="/js/deleteReviewAndMuteUser.js"></script>
+<script src="/js/reportsPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+    <a th:href="@{/logout}" class="h1 headerButton" sec:authorize="isAuthenticated()">
+        <button class="redButton" th:text="#{button.logout}"></button>
+    </a>
+</div>
+<div id="body">
+    <p class="title" th:text="#{reportsPage.title}"></p>
+    <span hidden th:text="#{success.block_user}" id="textSuccessBlockUser"></span>
+    <span hidden th:text="#{success.delete}" id="textSuccessDelete"></span>
+    <span hidden th:text="#{success.mute_user}" id="textSuccessMuteUser"></span>
+    <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
+    <span th:if="${reports} == null" id="noResult" th:text="#{select.no_results}"></span>
+    <div th:if="${reports} != null" id="reportContainer">
+        <div id="report">
+            <div id="review" th:unless="${isProduct}">
+                <div class="result">
+                    <div class="result-vertical">
+                        <div class="result-horizontal">
+                            <span class="name" th:text="${review.firstName}"></span>
+                            <div class="amountHearths">
+                                <span class="amount isAdded" th:text="${review.count}"></span>
+                                <img class="resultIcons fullHearth" src="/images/hearth.png" alt="hearth">
+                            </div>
+                        </div>
+                        <span class="description" th:text="'&quot;' + ${review.description} + '&quot;'"></span>
+                        <div class="result-horizontal">
+                            <div class="stars">
+                                <img class="star" src="/images/star.png" alt="star"
+                                     th:each="i : ${#numbers.sequence(1, review.rating)}">
+                                <img class="star" src="/images/star_empty.png" alt="emptyStar"
+                                     th:if="${review.rating} < 5"
+                                     th:each="i : ${#numbers.sequence(1, 5 - review.rating)}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="product" th:if="${isProduct}">
+                <div class="result">
+                    <div class="result-vertical">
+                        <div class="result-horizontal notImageContainer">
+                            <span class="name" th:text="${product.productName}"></span>
+                        </div>
+                        <div class="result-horizontal imageContainer">
+                            <div class="shopLogo" th:title="${product.shopName}">
+                                <img class="shopImage" th:src="${product.shopImageUrl}">
+                            </div>
+                            <img class="productImage" th:src="${product.productImageUrl}" alt="product"
+                                 onmouseenter="hideLogo(this.previousElementSibling)"
+                                 onmouseleave="showLogo(this.previousElementSibling)">
+                            <div class="description" th:text="${product.description}">
+                            </div>
+                        </div>
+                        <div class="result-horizontal notImageContainer">
+                            <span hidden class="realPrice" th:text="${product.price}/100 + 'zł'"></span>
+                            <span class="price fullPrice" th:text="${product.price}/100 + 'zł'"
+                                  th:if="${product.startAtPromotion} == null"></span>
+                            <div class="promotionContainer" th:unless="${product.startAtPromotion} == null">
+                                <div class="result-horizontal">
+                                    <div class="result-vertical promotionInfo">
+                                        <div class="date">
+                                            <span th:text="${product.startAtPromotion}"></span>
+                                            <span>-</span>
+                                            <span th:text="${product.expiredAtPromotion}"></span>
+                                        </div>
+                                        <span class="productsLeft" th:if="${product.quantityPromotion} != null"
+                                              th:data-actual-value="${product.quantityPromotion}"
+                                              th:data-start-value="${product.quantityPromotion}"
+                                              th:id="'count' + ${product.productId}"
+                                              th:text="${product.quantityPromotion} + ' ' + #{promotion.left_products}"></span>
+                                    </div>
+                                    <div class="promotionPrice">
+                                        <span class="price promotion" th:text="${product.price}/100"></span>
+                                        <span class="price" th:text="${product.newPricePromotion}/100 + 'zł'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="buttons">
+            <a th:attr="onclick=|showOrHideNextReport('${id}', this)|" th:href="@{/reports}">
+                <button class="blackButton" th:text="#{reportsPage.button.next_report}"></button>
+            </a>
+            <a th:attr="onclick=|showOrHideRejectReport('${id}', this)|">
+                <button class="blackButton" th:text="#{reportsPage.button.reject}"></button>
+            </a>
+            <a th:attr="onclick=|showOrHideBlockUserReported('${id}', this)|">
+                <button class="blackButton" th:text="#{block.title_window}"></button>
+            </a>
+            <a th:if="${isProduct}" th:attr="onclick=|showOrHideDeleteProductReport('${id}', this)|">
+                <button class="blackButton" th:text="#{delete_product.text}"></button>
+            </a>
+            <a th:unless="${isProduct}" th:attr="onclick=|showOrHideDeleteReviewReport('${id}', this, '${isProduct}')|">
+                <button class="blackButton" th:text="#{delete_review.text}"></button>
+            </a>
+            <a th:attr="onclick=|showOrHideBlockAndDelete('${id}', this, '${isProduct}')|">
+                <button class="blackButton" th:text="#{reportsPage.button.report_delete}"></button>
+            </a>
+        </div>
+        <p id="error"></p>
+        <p id="success"></p>
+        <div id="reports">
+            <div class="report" th:each="report : ${reports}">
+                <div class="userInfo">
+                    <div class="nameReport">
+                        <span th:text="${report.firstName}" class="firstNameReport"></span>
+                        <span th:text="${report.lastName}" class="lastNameReport"></span>
+                    </div>
+                    <a class="resultIcons" th:title="#{mute.title_window}"
+                       th:attr="onclick=|showOrHideMuteUser('${report.userId}', this.parentElement.parentElement)|">
+                        <img src="/images/mute.png" alt="mute">
+                    </a>
+                    <a class="resultIcons" th:title="#{block.title_window}"
+                       th:attr="onclick=|showOrHideBlockUser('${report.userId}', this.parentElement.parentElement)|">
+                        <img src="/images/block_user.png" alt="block">
+                    </a>
+                </div>
+                <div class="reportDescription">
+                    <span th:text="${report.description}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="block" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{block.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationBlock" class="greenButton" th:text="#{button.yes}"
+                            onclick="blockUser(false)"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBlockUser()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="mute" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{mute_user.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationMute" class="greenButton" th:text="#{button.yes}"
+                            onclick="muteUser()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideMuteUser()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="blockReported" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{block.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationBlockReported" class="greenButton"
+                            th:text="#{button.yes}"
+                            onclick="blockUserReported()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBlockUserReported()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="deleteProduct" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{delete.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationDeleteProduct" class="greenButton"
+                            th:text="#{button.yes}"
+                            onclick="deleteProductReport()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideDeleteProductReport()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="deleteReview" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{delete.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationDeleteReview" class="greenButton"
+                            th:text="#{button.yes}"
+                            onclick="deleteReviewReport()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideDeleteReviewReport()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="blockAndDelete" class="confirmation" hidden data-id="" data-is-product="">
+        <div class="confirmationChoice">
+            <p th:text="#{reportsPage.report_block.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationBlockAndDelete" class="greenButton"
+                            th:text="#{button.yes}"
+                            onclick="blockAndDelete()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideBlockAndDelete()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="reject" class="confirmation" hidden data-id="">
+        <div class="confirmationChoice">
+            <p th:text="#{reportsPage.reject_report.title}" class="confirmationTitle withoutText"></p>
+            <div>
+                <a>
+                    <button type="button" id="buttonConfirmationReject" class="greenButton" th:text="#{button.yes}"
+                            onclick="rejectReport()"></button>
+                </a>
+                <a>
+                    <button type="button" class="redButton" th:text="#{button.no}"
+                            onclick="showOrHideRejectReport()"></button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

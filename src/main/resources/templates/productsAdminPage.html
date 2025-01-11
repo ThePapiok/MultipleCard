@@ -76,7 +76,7 @@
                 <div class="result-vertical">
                     <div class="result-horizontal notImageContainer">
                         <span class="name" th:text="${product.productName}"></span>
-                        <a class="resultIcons" th:title="#{delete_product.title_window}"
+                        <a class="resultIcons" th:title="#{delete_product.text}"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>

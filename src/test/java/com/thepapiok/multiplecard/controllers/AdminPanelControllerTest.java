@@ -14,6 +14,7 @@ import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.AdminPanelService;
+import com.thepapiok.multiplecard.services.CategoryService;
 import com.thepapiok.multiplecard.services.ProductService;
 import com.thepapiok.multiplecard.services.ReportService;
 import com.thepapiok.multiplecard.services.ResultService;
@@ -38,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class AdminPanelControllerTest {
   private static final String PL_LANGUAGE = "pl";
   private static final String TEST_PHONE = "+423423141234";
+  private static final String TEST_CATEGORY_NAME = "testCategory";
   private static final String TEST_EMAIL = "testEmail";
   private static final String ID_PARAM = "id";
   private static final String TEST_ID = "123456789012345678901234";
@@ -58,6 +60,7 @@ public class AdminPanelControllerTest {
   @MockBean private AdminPanelService adminPanelService;
   @MockBean private ReviewService reviewService;
   @MockBean private ResultService resultService;
+  @MockBean private CategoryService categoryService;
 
   @Test
   @WithMockUser(roles = "ADMIN")
@@ -289,11 +292,8 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtDeleteProductWhenNotFoundEmail() throws Exception {
-    Account account = new Account();
-    account.setPhone(TEST_PHONE);
-
-    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(account);
+  public void shouldReturnFalseAtDeleteProductWhenAccountNotFound() throws Exception {
+    when(accountService.getAccountByProductId(TEST_ID)).thenReturn(null);
 
     performPostAtDeleteProduct(FALSE_VALUE);
   }
@@ -333,11 +333,9 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtBlockUserWhenEmailIsNullWithNotProductParam() throws Exception {
-    Account account = new Account();
-    account.setPhone(TEST_PHONE);
-
-    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+  public void shouldReturnFalseAtBlockUserWhenAccountNotFoundWithNotProductParam()
+      throws Exception {
+    when(accountService.getAccountById(TEST_ID)).thenReturn(null);
 
     performPostAtBlockUser(false, FALSE_VALUE);
   }
@@ -399,11 +397,8 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtDeleteReviewWhenNotFoundEmail() throws Exception {
-    Account account = new Account();
-    account.setPhone(TEST_PHONE);
-
-    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+  public void shouldReturnFalseAtDeleteReviewWhenAccountNotFound() throws Exception {
+    when(accountService.getAccountById(TEST_ID)).thenReturn(null);
 
     performPostAtDeleteReview(FALSE_VALUE);
   }
@@ -443,11 +438,8 @@ public class AdminPanelControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  public void shouldReturnFalseAtMuteUserWhenNotFoundEmail() throws Exception {
-    Account account = new Account();
-    account.setPhone(TEST_PHONE);
-
-    when(accountService.getAccountById(TEST_ID)).thenReturn(account);
+  public void shouldReturnFalseAtMuteUserWhenAccountNotFound() throws Exception {
+    when(accountService.getAccountById(TEST_ID)).thenReturn(null);
 
     performPostAtMuteUser(FALSE_VALUE);
   }
@@ -483,6 +475,50 @@ public class AdminPanelControllerTest {
   private void performPostAtMuteUser(String content) throws Exception {
     mockMvc
         .perform(post("/mute_user").param(ID_PARAM, TEST_ID))
+        .andExpect(content().string(content));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteCategoryWhenAccountNotFound() throws Exception {
+    when(accountService.getAccountByCategoryName(TEST_CATEGORY_NAME)).thenReturn(null);
+
+    performPostAtDeleteCategory(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnFalseAtDeleteCategoryWhenErrorAtDeleteCategoryAndProducts()
+      throws Exception {
+    Account account = new Account();
+    account.setEmail(TEST_EMAIL);
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountByCategoryName(TEST_CATEGORY_NAME)).thenReturn(account);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME)).thenReturn(new ObjectId(TEST_ID));
+    when(productService.deleteCategoryAndProducts(TEST_ID)).thenReturn(false);
+
+    performPostAtDeleteCategory(FALSE_VALUE);
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  public void shouldReturnTrueAtDeleteCategoryWhenEverythingOk() throws Exception {
+    Account account = new Account();
+    account.setEmail(TEST_EMAIL);
+    account.setPhone(TEST_PHONE);
+
+    when(accountService.getAccountByCategoryName(TEST_CATEGORY_NAME)).thenReturn(account);
+    when(categoryService.getCategoryIdByName(TEST_CATEGORY_NAME)).thenReturn(new ObjectId(TEST_ID));
+    when(productService.deleteCategoryAndProducts(TEST_ID)).thenReturn(true);
+
+    performPostAtDeleteCategory(TRUE_VALUE);
+    verify(adminPanelService).sendInfoAboutDeletedCategory(TEST_EMAIL, TEST_PHONE, TEST_ID);
+  }
+
+  private void performPostAtDeleteCategory(String content) throws Exception {
+    mockMvc
+        .perform(post("/delete_category").param("name", TEST_CATEGORY_NAME))
         .andExpect(content().string(content));
   }
 }

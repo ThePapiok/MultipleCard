@@ -71,7 +71,7 @@
                            th:unless="${product.startAtPromotion} == null" th:title="#{promotion.title_window}">
                             <img src="/images/discount_fill.png" alt="discount">
                         </a>
-                        <a class="resultIcons" th:title="#{delete_product.title_window}"
+                        <a class="resultIcons" th:title="#{delete_product.text}"
                            th:attr="onclick=|showOrHideDeleteProduct('${product.productId}', this.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>

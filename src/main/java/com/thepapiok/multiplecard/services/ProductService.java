@@ -511,4 +511,8 @@ public class ProductService {
     }
     return true;
   }
+
+  public ProductWithShopDTO getProductWithShopDTOById(String id) {
+    return productRepository.getProductWithShopDTOById(new ObjectId(id));
+  }
 }

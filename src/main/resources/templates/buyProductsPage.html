@@ -34,7 +34,7 @@
 <div id="body">
     <span hidden th:text="#{promotion.left_products}" id="textLeftProducts"></span>
     <span hidden th:text="#{add_product.text}" id="textAddProduct"></span>
-    <span hidden th:text="#{delete_product.title_window}" id="textDeleteProduct"></span>
+    <span hidden th:text="#{delete_product.text}" id="textDeleteProduct"></span>
     <span hidden th:text="#{delete.title_window}" id="textDelete"></span>
     <p class="title" th:text="#{products.text}"></p>
     <p id="errorCardNotFound" th:unless="${cardExists} == true" th:text="#{buyProducts.error.card_not_exists}"></p>
@@ -96,11 +96,11 @@
                                th:attr="onclick=|addProduct('${product.productId}', this.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false, false)|">
                                 <img src="/images/plus.png" alt="add">
                             </a>
-                            <a class="resultIcons" th:title="#{delete_product.title_window}"
+                            <a class="resultIcons" th:title="#{delete_product.text}"
                                th:attr="onclick=|deleteProduct('${product.productId}', this.previousElementSibling.previousElementSibling, '${product.quantityPromotion}' != 'null', this.parentElement.parentElement.parentElement, false)|">
                                 <img src="/images/minus.png" alt="minus">
                             </a>
-                            <a class="resultIcons" th:unless="${isBuy}" th:title="#{report.title_window}"
+                            <a class="resultIcons" th:title="#{report.title_window}"
                                th:attr="onclick=|showOrHideReportProduct('${product.productId}', this.parentElement.parentElement.parentElement)|"
                                sec:authorize="hasRole('USER')">
                                 <img src="/images/report.png" alt="report">

@@ -7,9 +7,12 @@ import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.collections.Promotion;
 import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.Shop;
 import com.thepapiok.multiplecard.configs.DbConfig;
+import com.thepapiok.multiplecard.dto.ProductWithShopDTO;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -33,6 +36,8 @@ public class ProductRepositoryTest {
   private Product product2;
   private Account account;
   private Category category;
+  private Shop shop;
+  private Promotion promotion;
 
   @Autowired private ProductRepository productRepository;
   @Autowired private CategoryRepository categoryRepository;
@@ -46,6 +51,8 @@ public class ProductRepositoryTest {
   @BeforeEach
   public void setUp() {
     final int price = 500;
+    final int pricePromotion = 300;
+    final int quantityPromotion = 2;
     final int testYearOfCreatedAt = 2024;
     final int testMonthOfCreatedAt = 5;
     final int testDayOfCreatedAt = 5;
@@ -68,7 +75,7 @@ public class ProductRepositoryTest {
     address.setCity("city1");
     address.setPostalCode("postalCode1");
     address.setApartmentNumber(null);
-    Shop shop = new Shop();
+    shop = new Shop();
     shop.setName("shop1");
     shop.setImageUrl("shopImageUrl1");
     shop.setFirstName("firstName1");
@@ -90,8 +97,15 @@ public class ProductRepositoryTest {
     product1.setCategories(List.of(category.getId()));
     product1.setUpdatedAt(localDateTime);
     product1 = mongoTemplate.save(product1);
+    promotion = new Promotion();
+    promotion.setNewPrice(pricePromotion);
+    promotion.setQuantity(quantityPromotion);
+    promotion.setProductId(product1.getId());
+    promotion.setStartAt(LocalDate.now());
+    promotion.setExpiredAt(LocalDate.now().plusDays(1));
+    promotion = promotionRepository.save(promotion);
     product2 = new Product();
-    product2.setShopId(shop.getId());
+    product2.setShopId(testShop.getId());
     product2.setImageUrl("url2");
     product2.setName("name2");
     product2.setBarcode("barcode2");
@@ -159,5 +173,25 @@ public class ProductRepositoryTest {
     assertEquals(
         List.of(product1.getId(), product2.getId()),
         productRepository.getProductsIdByCategoryId(category.getId()));
+  }
+
+  @Test
+  public void shouldReturnProductWithShopDTOAtGetProductWithShopDTOByIdWhenEverythingOk() {
+    ProductWithShopDTO productWithShopDTO = new ProductWithShopDTO();
+    productWithShopDTO.setProductId(product1.getId().toString());
+    productWithShopDTO.setProductName(product1.getName());
+    productWithShopDTO.setProductImageUrl(product1.getImageUrl());
+    productWithShopDTO.setDescription(product1.getDescription());
+    productWithShopDTO.setPrice(product1.getPrice());
+    productWithShopDTO.setShopId(shop.getId());
+    productWithShopDTO.setShopName(shop.getName());
+    productWithShopDTO.setActive(true);
+    productWithShopDTO.setShopImageUrl(shop.getImageUrl());
+    productWithShopDTO.setNewPricePromotion(promotion.getNewPrice());
+    productWithShopDTO.setQuantityPromotion(promotion.getQuantity());
+    productWithShopDTO.setStartAtPromotion(promotion.getStartAt());
+    productWithShopDTO.setExpiredAtPromotion(promotion.getExpiredAt());
+
+    assertEquals(productWithShopDTO, productRepository.getProductWithShopDTOById(product1.getId()));
   }
 }

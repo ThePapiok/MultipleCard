@@ -4,11 +4,13 @@ import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
 import com.thepapiok.multiplecard.collections.User;
+import com.thepapiok.multiplecard.dto.ReviewAtReportDTO;
 import com.thepapiok.multiplecard.dto.ReviewDTO;
 import com.thepapiok.multiplecard.dto.ReviewGetDTO;
 import com.thepapiok.multiplecard.misc.ReviewConverter;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.LikeRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import com.thepapiok.multiplecard.repositories.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +29,7 @@ public class ReviewService {
   private final AccountRepository accountRepository;
   private final UserRepository userRepository;
   private final LikeRepository likeRepository;
+  private final ReportRepository reportRepository;
   private final MongoTransactionManager mongoTransactionManager;
 
   @Autowired
@@ -35,11 +38,13 @@ public class ReviewService {
       AccountRepository accountRepository,
       UserRepository userRepository,
       LikeRepository likeRepository,
+      ReportRepository reportRepository,
       MongoTransactionManager mongoTransactionManager) {
     this.reviewConverter = reviewConverter;
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.likeRepository = likeRepository;
+    this.reportRepository = reportRepository;
     this.mongoTransactionManager = mongoTransactionManager;
   }
 
@@ -139,20 +144,28 @@ public class ReviewService {
 
   public boolean removeReview(ObjectId id, String phone) {
     try {
-      ObjectId userId = accountRepository.findIdByPhone(phone).getId();
-      Optional<User> optionalUser = userRepository.findById(id);
-      if (optionalUser.isEmpty()) {
-        return false;
-      } else if (!userId.equals(id)) {
-        return false;
-      }
-      User user = optionalUser.get();
-      user.setReview(null);
-      userRepository.save(user);
-      return true;
+      TransactionTemplate transactionTemplate = new TransactionTemplate(mongoTransactionManager);
+      transactionTemplate.execute(
+          new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+              ObjectId userId = accountRepository.findIdByPhone(phone).getId();
+              Optional<User> optionalUser = userRepository.findById(id);
+              if (optionalUser.isEmpty()) {
+                throw new RuntimeException();
+              } else if (!userId.equals(id)) {
+                throw new RuntimeException();
+              }
+              User user = optionalUser.get();
+              user.setReview(null);
+              userRepository.save(user);
+              reportRepository.deleteAllByReportedId(id);
+            }
+          });
     } catch (Exception e) {
       return false;
     }
+    return true;
   }
 
   public List<ReviewGetDTO> getReviewsFirst3(String phone) {
@@ -200,5 +213,9 @@ public class ReviewService {
     final float countReviewsAtPage = 12.0F;
     int count = userRepository.countAllByReviewIsNotNull();
     return (int) Math.ceil(count / countReviewsAtPage);
+  }
+
+  public ReviewAtReportDTO getReviewById(String id) {
+    return userRepository.getReviewAtReportDTOById(new ObjectId(id));
   }
 }

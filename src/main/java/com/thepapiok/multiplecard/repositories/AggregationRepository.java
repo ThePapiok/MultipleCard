@@ -501,7 +501,7 @@ public class AggregationRepository {
                                                     "as": "reservedProduct",
                                                     "let": {
                                                         "promotionId": "$promotion._id"
-                                                    }
+                                                    },
                                                     "pipeline": [
                                                         {
                                                             $group: {

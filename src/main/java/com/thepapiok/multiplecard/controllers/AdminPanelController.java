@@ -142,8 +142,11 @@ public class AdminPanelController {
   @ResponseBody
   public Boolean deleteProduct(@RequestParam String id) {
     Account account = accountService.getAccountByProductId(id);
+    if (account == null) {
+      return false;
+    }
     String email = account.getEmail();
-    if (email == null || !productService.deleteProducts(List.of(new ObjectId(id)))) {
+    if (!productService.deleteProducts(List.of(new ObjectId(id)))) {
       return false;
     }
     adminPanelService.sendInfoAboutDeletedProduct(email, account.getPhone(), id);
@@ -155,26 +158,27 @@ public class AdminPanelController {
   public Boolean blockUser(
       @RequestParam String id, @RequestParam boolean isProduct, Locale locale) {
     Account account;
-    System.out.println(locale);
     if (isProduct) {
       account = accountService.getAccountByProductId(id);
       id = account.getId().toString();
     } else {
       account = accountService.getAccountById(id);
     }
-    String email = account.getEmail();
-    if (email == null || !accountService.changeBanned(id, true, locale).equals("ok")) {
+    if (account == null) {
       return false;
     }
-    return true;
+    return accountService.changeBanned(id, true, locale).equals("ok");
   }
 
   @PostMapping("/delete_review")
   @ResponseBody
   public Boolean deleteReview(@RequestParam String id) {
     Account account = accountService.getAccountById(id);
+    if (account == null) {
+      return false;
+    }
     String email = account.getEmail();
-    if (email == null || !reviewService.removeReview(new ObjectId(id), account.getPhone())) {
+    if (!reviewService.removeReview(new ObjectId(id), account.getPhone())) {
       return false;
     }
     adminPanelService.sendInfoAboutDeletedReview(email, account.getPhone(), id);
@@ -185,20 +189,22 @@ public class AdminPanelController {
   @ResponseBody
   public Boolean muteUser(@RequestParam String id, Locale locale) {
     Account account = accountService.getAccountById(id);
-    String email = account.getEmail();
-    if (email == null || !userService.changeRestricted(id, true, locale).equals("ok")) {
+    if (account == null) {
       return false;
     }
-    return true;
+    return userService.changeRestricted(id, true, locale).equals("ok");
   }
 
   @PostMapping("/delete_category")
   @ResponseBody
   public Boolean deleteCategory(@RequestParam String name) {
     Account account = accountService.getAccountByCategoryName(name);
+    if (account == null) {
+      return false;
+    }
     String id = categoryService.getCategoryIdByName(name).toString();
     String email = account.getEmail();
-    if (email == null || !productService.deleteCategoryAndProducts(id)) {
+    if (!productService.deleteCategoryAndProducts(id)) {
       return false;
     }
     adminPanelService.sendInfoAboutDeletedCategory(email, account.getPhone(), id);

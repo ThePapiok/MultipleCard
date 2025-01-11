@@ -67,6 +67,7 @@
     <span hidden th:text="#{success.block_user}" id="textSuccessBlockUser"></span>
     <span hidden th:text="#{success.delete}" id="textSuccessDelete"></span>
     <span hidden th:text="#{success.mute_user}" id="textSuccessMuteUser"></span>
+    <span hidden th:text="#{error.unexpected}" id="textUnexpectedError"></span>
     <div id="results">
         <div class="result" th:each="review : ${reviews}">
             <div class="result-vertical">
@@ -89,7 +90,7 @@
                            sec:authorize="hasRole('USER')">
                             <img src="/images/report.png" alt="report">
                         </a>
-                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')" th:title="#{delete_review.title_window}"
+                        <a class="resultIcons" sec:authorize="hasRole('ADMIN')" th:title="#{delete_review.text}"
                            th:attr="onclick=|showOrHideDeleteReview('${review.id}', this.parentElement.parentElement.parentElement.parentElement)|">
                             <img src="/images/close.png" alt="close">
                         </a>
@@ -112,7 +113,7 @@
                              th:each="i : ${#numbers.sequence(1, 5 - review.review.rating)}"
                              th:if="${review.review.rating} < 5">
                     </div>
-                    <img th:title="#{delete_review.title_window}" class="resultIcons delete" src="/images/close.png"
+                    <img th:title="#{delete_review.text}" class="resultIcons delete" src="/images/close.png"
                          alt="delete" th:if="${review.owner}"
                          th:attr="onclick=|removeReview('${review.id}', this)|">
                 </div>

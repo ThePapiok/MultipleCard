@@ -62,7 +62,11 @@ public class SecurityConfig {
                         "/delete_review",
                         "/mute_user",
                         "/categories",
-                        "/delete_category")
+                        "/delete_category",
+                        "/reports",
+                        "/reject_report",
+                        "/block_at_report",
+                        "/delete_and_block")
                     .hasRole(roleAdmin)
                     .requestMatchers("/products")
                     .hasAnyRole("SHOP", roleAdmin)

@@ -1345,4 +1345,40 @@ public class ProductServiceTest {
     assertFalse(productService.deleteCategoryAndProducts(TEST_ID1));
     verify(categoryRepository).deleteById(new ObjectId(TEST_ID1));
   }
+
+  @Test
+  public void shouldReturnProductWithShopDTOAtGetProductWithShopDTOByIdWhenEverythingOk() {
+    final String testDescription = "testDescription";
+    final int testPrice = 5234;
+    final int testQuantity = 2;
+    final int testNewPrice = 2442;
+    final int testStartAtYear = 2012;
+    final int testStartAtMonth = 1;
+    final int testStartAtDay = 3;
+    final int testExpiredAtYear = 2013;
+    final int testExpiredAtMonth = 7;
+    final int testExpiredAtDay = 23;
+    final LocalDate testStartAt = LocalDate.of(testStartAtYear, testStartAtMonth, testStartAtDay);
+    final LocalDate testExpiredAt =
+        LocalDate.of(testExpiredAtYear, testExpiredAtMonth, testExpiredAtDay);
+    ProductWithShopDTO productWithShopDTO = new ProductWithShopDTO();
+    productWithShopDTO.setShopName(TEST_SHOP_NAME);
+    productWithShopDTO.setShopId(TEST_OWNER_ID);
+    productWithShopDTO.setShopImageUrl(TEST_SHOP_IMAGE_URL);
+    productWithShopDTO.setActive(true);
+    productWithShopDTO.setDescription(testDescription);
+    productWithShopDTO.setProductId(TEST_PRODUCT_ID.toString());
+    productWithShopDTO.setProductName(TEST_PRODUCT_NAME);
+    productWithShopDTO.setProductImageUrl(TEST_URL);
+    productWithShopDTO.setPrice(testPrice);
+    productWithShopDTO.setQuantityPromotion(testQuantity);
+    productWithShopDTO.setNewPricePromotion(testNewPrice);
+    productWithShopDTO.setStartAtPromotion(testStartAt);
+    productWithShopDTO.setExpiredAtPromotion(testExpiredAt);
+
+    when(productRepository.getProductWithShopDTOById(TEST_PRODUCT_ID))
+        .thenReturn(productWithShopDTO);
+
+    assertEquals(productWithShopDTO, productService.getProductWithShopDTOById(TEST_ID));
+  }
 }

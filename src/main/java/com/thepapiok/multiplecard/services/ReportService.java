@@ -2,10 +2,12 @@ package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Report;
+import com.thepapiok.multiplecard.dto.ReportsDTO;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ReportRepository;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,5 +63,18 @@ public class ReportService {
     } catch (Exception e) {
       return true;
     }
+  }
+
+  public ReportsDTO getReport(HashSet<String> ids) {
+    return reportRepository.getFirstReport(ids.stream().map(ObjectId::new).toList());
+  }
+
+  public boolean removeReport(String id) {
+    try {
+      reportRepository.deleteAllByReportedId(new ObjectId(id));
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 }

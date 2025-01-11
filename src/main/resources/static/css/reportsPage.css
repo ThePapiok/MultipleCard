@@ -1,0 +1,89 @@
+#noResult {
+    margin-left: 5%;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#reportContainer {
+    margin-left: 5%;
+}
+
+#reports {
+    display: flex;
+    flex-wrap: wrap;
+    width: 95%;
+}
+
+#report, #buttons {
+    width: 90%;
+    justify-content: center;
+    display: flex;
+    margin-bottom: 50px;
+}
+
+#report, #buttons, #reports {
+    width: 90%;
+}
+
+.report {
+    width: 23%;
+    margin-right: 20px;
+    margin-top: 20px;
+    height: 150px;
+    border-radius: 7px;
+    border: 1px solid black;
+}
+
+.reportDescription, .userInfo {
+    padding: 5px;
+    font-family: "Inter", sans-serif;
+}
+
+.userInfo {
+    font-size: 17px;
+    font-weight: 700;
+    background-color: #E0E1E9;
+    height: 20%;
+    box-sizing: border-box;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    display: flex;
+}
+
+.reportDescription {
+    font-size: 14px;
+    font-weight: 500;
+    height: 80%;
+    box-sizing: border-box;
+    overflow-y: auto;
+    word-wrap: break-word;
+    background-color: #F9F5FF;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    border-top: 1px solid black;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.nameReport {
+    width: 80%;
+    display: flex;
+}
+
+.firstNameReport {
+    margin-right: 5px;
+}
+
+.imageContainer {
+    cursor: auto;
+}
+
+@media only screen and (max-width: 768px) {
+    .result {
+        width: auto;
+    }
+
+    .report {
+        width: 100%;
+    }
+}
