@@ -1,21 +1,33 @@
 package com.thepapiok.multiplecard.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 import com.mongodb.MongoWriteException;
 import com.thepapiok.multiplecard.collections.Account;
+import com.thepapiok.multiplecard.collections.Order;
+import com.thepapiok.multiplecard.collections.Product;
 import com.thepapiok.multiplecard.collections.Role;
+import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
+import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import com.thepapiok.multiplecard.repositories.ReportRepository;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +35,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.MessageSource;
+import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Update;
 
 public class AccountServiceTest {
   private static final String TEST_PHONE = "+4823412341242134";
@@ -30,6 +45,7 @@ public class AccountServiceTest {
   private static final String ROLE_ADMIN = "ROLE_ADMIN";
   private static final String ROLE_USER = "ROLE_USER";
   private static final String TEST_ID = "123456789012345678901234";
+  private static final String TEST_OTHER_ID = "773456789012345678901234";
   private static final String USER_NOT_FOUND_ERROR = "Nie ma takiego użytkownika";
   private static final String USER_ALREADY_HAS_ERROR = "Użytkownik posiada już taka wartość";
   private static final String UNEXPECTED_ERROR = "Nieoczekiwany błąd";
@@ -38,6 +54,7 @@ public class AccountServiceTest {
   private static final String UNEXPECTED_PARAM = "error.unexpected";
   private static final String OK_SUCCESS = "ok";
   private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
+  private static final ObjectId TEST_OTHER_OBJECT_ID = new ObjectId(TEST_OTHER_ID);
   private AccountService accountService;
   @Mock private AccountRepository accountRepository;
   @Mock private ProductRepository productRepository;
@@ -45,6 +62,10 @@ public class AccountServiceTest {
   @Mock private MessageSource messageSource;
   @Mock private AdminPanelService adminPanelService;
   @Mock private AggregationRepository aggregationRepository;
+  @Mock private MongoTransactionManager mongoTransactionManager;
+  @Mock private MongoTemplate mongoTemplate;
+  @Mock private OrderRepository orderRepository;
+  @Mock private ReportRepository reportRepository;
 
   @BeforeEach
   public void setUp() {
@@ -56,7 +77,11 @@ public class AccountServiceTest {
             categoryRepository,
             messageSource,
             adminPanelService,
-            aggregationRepository);
+            aggregationRepository,
+            mongoTransactionManager,
+            mongoTemplate,
+            orderRepository,
+            reportRepository);
   }
 
   @Test
@@ -222,7 +247,88 @@ public class AccountServiceTest {
   }
 
   @Test
-  public void shouldReturnOkSuccessAtChangeBannedWhenEverythingOkAndValueTrue() {
+  public void shouldReturnOkSuccessAtChangeBannedWhenEverythingOkAndValueTrueAndIsShop() {
+    final float centsPerZloty = 100;
+    final ObjectId testProductId1 = new ObjectId("123456789012345678906666");
+    final ObjectId testProductId2 = new ObjectId("123457789012345678906667");
+    final ObjectId testCardId1 = new ObjectId("523457789012345678906667");
+    final ObjectId testCardId2 = new ObjectId("423457789012345678906667");
+    final ObjectId testCardId3 = new ObjectId("323457789012345678906667");
+    final int testPrice1 = 234;
+    final int testPrice2 = 543;
+    final int testPrice3 = 111;
+    final String cardIdKey = "cardId";
+    final String pointsKey = "points";
+    Account account = new Account();
+    account.setId(TEST_OBJECT_ID);
+    account.setBanned(false);
+    account.setActive(false);
+    account.setPhone(TEST_PHONE);
+    account.setEmail(TEST_EMAIL);
+    account.setRole(Role.ROLE_SHOP);
+    Account expectedAccount = new Account();
+    expectedAccount.setId(TEST_OBJECT_ID);
+    expectedAccount.setBanned(true);
+    expectedAccount.setActive(false);
+    expectedAccount.setPhone(TEST_PHONE);
+    expectedAccount.setEmail(TEST_EMAIL);
+    expectedAccount.setRole(Role.ROLE_SHOP);
+    Locale locale = Locale.getDefault();
+    Product product1 = new Product();
+    product1.setId(testProductId1);
+    Product product2 = new Product();
+    product2.setId(testProductId2);
+    Order order1 = new Order();
+    order1.setCardId(testCardId1);
+    order1.setPrice(testPrice1);
+    order1.setUsed(false);
+    order1.setProductId(testProductId1);
+    Order order2 = new Order();
+    order2.setCardId(testCardId2);
+    order2.setUsed(false);
+    order2.setProductId(testProductId1);
+    order2.setPrice(testPrice2);
+    Order order3 = new Order();
+    order3.setCardId(testCardId3);
+    order3.setUsed(false);
+    order3.setProductId(testProductId2);
+    order3.setPrice(testPrice3);
+
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+    when(productRepository.getProductsIdByShopId(TEST_OBJECT_ID))
+        .thenReturn(List.of(product1, product2));
+    when(orderRepository.findAllByProductIdAndIsUsed(testProductId1, false))
+        .thenReturn(List.of(order1, order2));
+    when(orderRepository.findAllByProductIdAndIsUsed(testProductId2, false))
+        .thenReturn(List.of(order3));
+
+    assertEquals(OK_SUCCESS, accountService.changeBanned(TEST_ID, true, locale));
+    verify(accountRepository).save(expectedAccount);
+    verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
+    verify(reportRepository).deleteAllByReportedId(testProductId1);
+    verify(reportRepository).deleteAllByReportedId(testProductId2);
+    verify(mongoTemplate).remove(order1);
+    verify(mongoTemplate).remove(order2);
+    verify(mongoTemplate).remove(order3);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdKey).is(testCardId1)),
+            new Update().inc(pointsKey, Math.round(testPrice1 / centsPerZloty)),
+            User.class);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdKey).is(testCardId2)),
+            new Update().inc(pointsKey, Math.round(testPrice2 / centsPerZloty)),
+            User.class);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(cardIdKey).is(testCardId3)),
+            new Update().inc(pointsKey, Math.round(testPrice3 / centsPerZloty)),
+            User.class);
+  }
+
+  @Test
+  public void shouldReturnOkSuccessAtChangeBannedWhenEverythingOkAndValueTrueAndIsUser() {
     Account account = setAccount();
     Account expectedAccount = new Account();
     expectedAccount.setId(TEST_OBJECT_ID);
@@ -238,6 +344,7 @@ public class AccountServiceTest {
     assertEquals(OK_SUCCESS, accountService.changeBanned(TEST_ID, true, locale));
     verify(accountRepository).save(expectedAccount);
     verify(adminPanelService).sendInfoAboutBlockedUser(TEST_EMAIL, TEST_PHONE, TEST_ID);
+    verify(reportRepository).deleteAllByReportedId(TEST_OBJECT_ID);
   }
 
   @Test
@@ -416,5 +523,83 @@ public class AccountServiceTest {
     account.setEmail(TEST_EMAIL);
     account.setRole(Role.ROLE_USER);
     return account;
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckUserIsBannedWhenAccountNotFound() {
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.empty());
+
+    assertTrue(accountService.checkUserIsBanned(TEST_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckUserIsBannedWhenAccountIsBanned() {
+    Account account = new Account();
+    account.setBanned(true);
+    account.setId(TEST_OBJECT_ID);
+
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+
+    assertTrue(accountService.checkUserIsBanned(TEST_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckUserIsBannedWhenAccountIsNotBanned() {
+    Account account = new Account();
+    account.setBanned(false);
+    account.setId(TEST_OBJECT_ID);
+
+    when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
+
+    assertFalse(accountService.checkUserIsBanned(TEST_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckAnyShopIsBannedWhenAccountIsNotFound() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account = new Account();
+    account.setBanned(false);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(null);
+
+    assertTrue(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckAnyShopIsBannedWhenAccountIsBlocked() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account1 = new Account();
+    account1.setBanned(false);
+    Account account2 = new Account();
+    account2.setBanned(true);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account1);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(account2);
+
+    assertTrue(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckAnyShopIsBannedWhenEverythingOk() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account1 = new Account();
+    account1.setBanned(false);
+    Account account2 = new Account();
+    account2.setBanned(false);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account1);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(account2);
+
+    assertFalse(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  private Map<ProductInfo, Integer> getProductsInfo() {
+    Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+    ProductInfo productInfo1 = new ProductInfo(TEST_ID, false);
+    ProductInfo productInfo2 = new ProductInfo(TEST_OTHER_ID, true);
+    productsInfo.put(productInfo1, 0);
+    productsInfo.put(productInfo2, 0);
+    return productsInfo;
   }
 }

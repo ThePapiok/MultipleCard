@@ -6,6 +6,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.BlockedProduct;
 import com.thepapiok.multiplecard.collections.Category;
 import com.thepapiok.multiplecard.collections.Order;
@@ -56,6 +57,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
+  private static final String CARD_ID_KEY = "cardId";
+  private static final String POINTS_KEY = "points";
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
   private final ProductRepository productRepository;
@@ -195,8 +198,9 @@ public class ProductService {
                       orderRepository.findAllByProductIdAndIsUsed(productId, false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
-                        query(where("cardId").is(order.getCardId())),
-                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
+                        query(where(CARD_ID_KEY).is(order.getCardId())),
+                        new Update()
+                            .inc(POINTS_KEY, (Math.round(order.getPrice() / centsPerZloty))),
                         User.class);
                     mongoTemplate.remove(order);
                   }
@@ -342,6 +346,10 @@ public class ProductService {
     List<ProductWithShopDTO> products = new ArrayList<>();
     for (ProductDTO productDTO : pageProductsDTO.getProducts()) {
       Shop shop = shopRepository.findImageUrlAndNameById(productDTO.getShopId());
+      Optional<Account> optionalAccount = accountRepository.findById(productDTO.getShopId());
+      if (optionalAccount.isEmpty() || optionalAccount.get().isBanned()) {
+        continue;
+      }
       products.add(new ProductWithShopDTO(productDTO, shop.getName(), shop.getImageUrl()));
     }
     return new PageProductsWithShopDTO(pageProductsDTO.getMaxPage(), products);
@@ -392,6 +400,7 @@ public class ProductService {
           new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus status) {
+              final float centsPerZloty = 100;
               int newQuantity;
               Map<String, Object> productInfo;
               ObjectId productId;
@@ -402,7 +411,34 @@ public class ProductService {
                       objectMapper.readValue(
                           product.getName(), new TypeReference<Map<String, Object>>() {});
                   productId = new ObjectId((String) productInfo.get("productId"));
-                  shopId = productRepository.findShopIdById(productId).getShopId();
+                  Optional<Product> optionalProduct = productRepository.findById(productId);
+                  if (optionalProduct.isEmpty()) {
+                    mongoTemplate.updateFirst(
+                        query(where(CARD_ID_KEY).is(new ObjectId(cardId))),
+                        new Update()
+                            .inc(
+                                POINTS_KEY,
+                                Math.round(product.getUnitPrice() / centsPerZloty)
+                                    * product.getQuantity()),
+                        User.class);
+                    continue;
+                  }
+                  Product productOb = optionalProduct.get();
+                  shopId = productOb.getShopId();
+                  Optional<Account> optionalAccount = accountRepository.findById(shopId);
+                  if (optionalAccount.isEmpty()
+                      || optionalAccount.get().isBanned()
+                      || blockedProductRepository.existsByProductId(productOb.getId())) {
+                    mongoTemplate.updateFirst(
+                        query(where(CARD_ID_KEY).is(new ObjectId(cardId))),
+                        new Update()
+                            .inc(
+                                POINTS_KEY,
+                                Math.round(product.getUnitPrice() / centsPerZloty)
+                                    * product.getQuantity()),
+                        User.class);
+                    continue;
+                  }
                   for (int i = 1; i <= product.getQuantity(); i++) {
                     Order order = new Order();
                     order.setProductId(productId);

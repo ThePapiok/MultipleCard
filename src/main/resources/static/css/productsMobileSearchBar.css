@@ -1,0 +1,25 @@
+@media only screen and (max-width: 768px) {
+    #searchBar {
+        height: 240px;
+        flex-direction: column;
+    }
+
+    .select, #searchInput, #searchSelect {
+        width: 100%;
+        height: 30px;
+    }
+
+    .select, #searchInput, #searchSelect, #searchButton, #basket {
+        height: 40px;
+    }
+
+    #searchButton {
+        height: 30px;
+        display: flex;
+        justify-content: center;
+    }
+
+    #categoryInput, #shopNameInput {
+        font-size: 13px;
+    }
+}

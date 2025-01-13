@@ -88,6 +88,10 @@ Dodaj zmienne środowiskowe (przykładowe)
   export CLOUDINARY_API_KEY=cloudinaryApiKeyTest
   export CLOUDINARY_API_SECRET=cloudinaryApiSecretTest
   export IBANAPI_API_KEY=ibanapiApiKeyTest
+  export PAYU_CLIENT_SECRET=payuClientSecretTest
+  export PAYU_CLIENT_ID=payuClientIdTest
+  export PAYU_KEY_MD5=payuKeyMD5Test
+  export GOOGLE_API_KEY=googleApiKeyTest
 ```
 
 Uruchom kontenery

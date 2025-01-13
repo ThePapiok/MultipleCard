@@ -84,25 +84,28 @@ public class CardService {
                 }
                 mongoTemplate.remove(existsCard);
               }
+              Account account = accountRepository.findByPhone(phone);
               Card card = new Card();
               card.setName(name);
               card.setPin(encryptedPin);
               card.setId(new ObjectId(cardId));
               card.setAttempts(0);
-              card.setUserId(accountRepository.findIdByPhone(phone).getId());
+              card.setUserId(account.getId());
               card.setImageUrl("");
               try {
                 byte[] qrCode = qrCodeService.generateQrCode(appUrl + "cards?id=" + cardId);
                 card.setImageUrl(cloudinaryService.addImage(qrCode, cardId));
                 List<CustomMultipartFile> cardImage =
                     imageService.generateImage(qrCode, name, cardId);
-                Account account = accountRepository.findByPhone(phone);
                 Optional<User> optionalUser = userRepository.findById(account.getId());
                 if (optionalUser.isEmpty()) {
                   throw new RuntimeException();
                 }
-                emailService.sendCardImage(cardImage, cardId, account, optionalUser.get());
-                mongoTemplate.save(card);
+                User user = optionalUser.get();
+                emailService.sendCardImage(cardImage, cardId, account, user);
+                card = mongoTemplate.save(card);
+                user.setCardId(card.getId());
+                mongoTemplate.save(user);
               } catch (WriterException | IOException e) {
                 throw new RuntimeException(e);
               } catch (MessagingException e) {

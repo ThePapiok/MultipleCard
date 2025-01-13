@@ -2,10 +2,12 @@ package com.thepapiok.multiplecard.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Address;
 import com.thepapiok.multiplecard.collections.Card;
 import com.thepapiok.multiplecard.collections.Like;
 import com.thepapiok.multiplecard.collections.Review;
+import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.configs.DbConfig;
 import com.thepapiok.multiplecard.dto.ReviewAtReportDTO;
@@ -34,6 +36,7 @@ public class UserRepositoryTest {
   private static final ObjectId TEST_ID1 = new ObjectId("123456789012345678901234");
   private static final ObjectId TEST_ID2 = new ObjectId("123456789012345678901235");
   private static final ObjectId TEST_ID3 = new ObjectId("123456789012345678901236");
+  private static final ObjectId TEST_ID5 = new ObjectId("123456789012115678901231");
   private static final String TEST1_TEXT = "Test1";
   private static final String FIELD_COUNT = "count";
   private static final String FIELD_CREATED_ADT = "review.createdAt";
@@ -45,6 +48,7 @@ public class UserRepositoryTest {
   @Autowired private LikeRepository likeRepository;
   @Autowired private CardRepository cardRepository;
   @Autowired private MongoTemplate mongoTemplate;
+  @Autowired private AccountRepository accountRepository;
   @MockBean private RestTemplate restTemplate;
 
   @BeforeEach
@@ -56,21 +60,28 @@ public class UserRepositoryTest {
     final int year1 = 2012;
     final int year2 = 2013;
     final int year3 = 2015;
+    final int year5 = 2018;
     final int month1 = 5;
     final int month2 = 1;
-    final int monht3 = 2;
+    final int month3 = 2;
+    final int month5 = 6;
     final int dayOfMonth1 = 3;
     final int dayOfMonth2 = 5;
     final int dayOfMonth3 = 1;
+    final int dayOfMonth5 = 1;
     final int hour1 = 6;
     final int hour2 = 12;
     final int hour3 = 22;
+    final int hour5 = 6;
     final int minute1 = 1;
     final int minute2 = 6;
     final int minute3 = 6;
+    final int minute5 = 34;
     final int rating1 = 3;
     final int rating2 = 5;
     final int rating3 = 1;
+    final int rating5 = 3;
+    final ObjectId testUserId4 = new ObjectId("123456789012345678901237");
     Review review1 = new Review();
     review1.setDescription(TEST1_TEXT);
     review1.setCreatedAt(LocalDateTime.of(year1, month1, dayOfMonth1, hour1, minute1));
@@ -119,7 +130,7 @@ public class UserRepositoryTest {
     mongoTemplate.save(user2);
     Review review3 = new Review();
     review3.setDescription("b");
-    review3.setCreatedAt(LocalDateTime.of(year3, monht3, dayOfMonth3, hour3, minute3));
+    review3.setCreatedAt(LocalDateTime.of(year3, month3, dayOfMonth3, hour3, minute3));
     review3.setRating(rating3);
     Address address3 = new Address();
     address3.setCity("city3");
@@ -145,11 +156,30 @@ public class UserRepositoryTest {
     address4.setStreet("street4");
     User user4 = new User();
     user4.setFirstName("Test4");
-    user4.setId(new ObjectId("123456789012345678901237"));
+    user4.setId(testUserId4);
     user4.setLastName("last4");
     user4.setAddress(address4);
     user4.setCardId(null);
     mongoTemplate.save(user4);
+    Address address5 = new Address();
+    address5.setCity("city5");
+    address5.setCountry("country5");
+    address5.setHouseNumber("h5");
+    address5.setPostalCode("p5");
+    address5.setProvince("province5");
+    address5.setStreet("street5");
+    Review review5 = new Review();
+    review5.setDescription("sfdaa");
+    review5.setCreatedAt(LocalDateTime.of(year5, month5, dayOfMonth5, hour5, minute5));
+    review5.setRating(rating5);
+    User user5 = new User();
+    user5.setFirstName("Test5");
+    user5.setId(TEST_ID5);
+    user5.setReview(review5);
+    user5.setLastName("last5");
+    user5.setAddress(address5);
+    user5.setCardId(null);
+    mongoTemplate.save(user5);
     Like like1 = new Like();
     like1.setReviewUserId(TEST_ID1);
     like1.setUserId(TEST_ID1);
@@ -183,6 +213,51 @@ public class UserRepositoryTest {
     reviewGetDTO3.setIsAdded(0);
     reviewGetDTO3.setReview(review3);
     reviewGetDTO3.setOwner(false);
+    Account account1 = new Account();
+    account1.setId(TEST_ID1);
+    account1.setPhone("+23412312343421");
+    account1.setRole(Role.ROLE_USER);
+    account1.setActive(true);
+    account1.setBanned(false);
+    account1.setEmail("emailasfdfdasafds");
+    account1.setPassword("sdfasdffasdfdsa");
+    accountRepository.save(account1);
+    Account account2 = new Account();
+    account2.setId(TEST_ID2);
+    account2.setPhone("+345235443");
+    account2.setRole(Role.ROLE_USER);
+    account2.setActive(true);
+    account2.setBanned(false);
+    account2.setEmail("emailsadffsaddsaf");
+    account2.setPassword("sfdaasfddasewrqwer");
+    accountRepository.save(account2);
+    Account account3 = new Account();
+    account3.setId(TEST_ID3);
+    account3.setPhone("+13413223141324");
+    account3.setRole(Role.ROLE_USER);
+    account3.setActive(true);
+    account3.setBanned(false);
+    account3.setEmail("emailhffdhdfgds");
+    account3.setPassword("dsggfsgsdsgdsddgs");
+    accountRepository.save(account3);
+    Account account4 = new Account();
+    account4.setId(testUserId4);
+    account4.setPhone("+34524352345");
+    account4.setRole(Role.ROLE_USER);
+    account4.setActive(true);
+    account4.setBanned(false);
+    account4.setEmail("emaildfsgsdfgsdfg");
+    account4.setPassword("hfghdggdfgdfs");
+    accountRepository.save(account4);
+    Account account5 = new Account();
+    account5.setId(testUserId4);
+    account5.setPhone("+213423153245324");
+    account5.setRole(Role.ROLE_USER);
+    account5.setActive(true);
+    account5.setBanned(true);
+    account5.setEmail("emaildertwertwertwe");
+    account5.setPassword("gdsgdgsdgertw");
+    accountRepository.save(account5);
     TextIndexDefinition textIndex =
         new TextIndexDefinition.TextIndexDefinitionBuilder()
             .onField("review.description")
@@ -196,10 +271,12 @@ public class UserRepositoryTest {
     userRepository.deleteAll();
     likeRepository.deleteAll();
     cardRepository.deleteAll();
+    accountRepository.deleteAll();
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenIsDescendingAndFieldCount() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfReviewWithCountAndIsAddedCheckWithTextWhenIsDescendingAndFieldCount() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 
@@ -213,7 +290,8 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenWithFieldCountAndAscending() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfReviewWithCountAndIsAddedCheckWithTextWhenWithFieldCountAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO2, reviewGetDTO1);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -227,7 +305,8 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldCreatedAtAndDescending() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfRevieWithCountAndIsAddedCheckWithTextWhenFieldCreatedAtAndDescending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO2, reviewGetDTO1);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -242,7 +321,8 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldCreatedAtAndAscending() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfReviewWithCountAndIsAddedCheckWithTextWhenFieldCreatedAtAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO1, reviewGetDTO2, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 
@@ -256,7 +336,8 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldRatingAndDescending() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfReviewWithCountAndIsAddedCheckWithTextWhenFieldRatingAndDescending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO2, reviewGetDTO1, reviewGetDTO3);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO2, reviewGetDTO1);
 
@@ -270,7 +351,8 @@ public class UserRepositoryTest {
   }
 
   @Test
-  public void shouldReturnListOfReviewGetDTOAtFindPagesOfReviewWhenFieldRatingAndAscending() {
+  public void
+      shouldReturnListOfReviewGetDTOAtFindPageOfReviewWithCountAndIsAddedCheckWithTextWhenFieldRatingAndAscending() {
     List<ReviewGetDTO> expectedWithoutText = List.of(reviewGetDTO3, reviewGetDTO1, reviewGetDTO2);
     List<ReviewGetDTO> expectedWithText = List.of(reviewGetDTO1, reviewGetDTO2);
 

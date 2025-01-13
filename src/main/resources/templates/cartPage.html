@@ -34,8 +34,9 @@
     <span hidden th:text="#{add_product.text}" id="textAddProduct"></span>
     <span hidden th:text="#{delete_product.text}" id="textDeleteProduct"></span>
     <span hidden th:text="#{delete.title_window}" id="textDelete"></span>
+    <span hidden sec:authorize="hasRole('USER')" id="isUser"></span>
     <p class="title" th:text="#{cartPage.title}"></p>
-    <div class="block-horizontally" id="yourPoints">
+    <div class="block-horizontally" id="yourPoints" sec:authorize="hasRole('USER')">
         <label>
             <label class="placeholderWithInput">
                 <label class="placeholderInput" th:text="#{points_text}"
@@ -53,8 +54,8 @@
             <button id="buyButton" class="grayButton" th:text="#{cartPage.button.buy_products}"></button>
         </a>
     </div>
-    <div id="conf"></div>
-    <div class="buyContainer">
+    <div id="conf" sec:authorize="hasRole('USER')"></div>
+    <div class="buyContainer" sec:authorize="hasRole('USER')">
         <span id="totalPoints"></span>
         <a class="buyUrl" onclick="showOrHideBuyProducts(this.parentElement.previousElementSibling)">
             <button id="buyButtonPoints" class="grayButton" th:text="#{cartPage.button.buy_products}"></button>

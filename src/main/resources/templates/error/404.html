@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/404.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/404.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+</div>
+<div id="body">
+    <p id="error404" th:text="#{error.page_not_found}"></p>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>

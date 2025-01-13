@@ -1,4 +1,5 @@
 let buyProd = false;
+let isUser = false;
 
 
 class Product {
@@ -38,6 +39,9 @@ class Product {
 let totalAmount = 0;
 
 function atStart(page) {
+    if (document.getElementById("isUser") != null) {
+        isUser = true;
+    }
     let productKeys = [];
     let results = document.getElementById("results");
     let result;
@@ -192,13 +196,19 @@ function atStart(page) {
             if (response.length !== 0) {
                 document.getElementById("noResults").dataset.resultsEmpty = "false";
                 document.getElementById("buyButton").className = "greenButton";
-                checkPoints();
+                if (isUser) {
+                    checkPoints();
+                }
             } else {
                 document.getElementById("buyButton").className = "grayButton";
-                document.getElementById("buyButtonPoints").className = "grayButton";
+                if (isUser) {
+                    document.getElementById("buyButtonPoints").className = "grayButton";
+                }
             }
             document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
-            document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+            if (isUser) {
+                document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+            }
             if (sessionStorage.getItem("newOrder") != null) {
                 location.reload();
             }
@@ -214,9 +224,11 @@ function addProduct(id, e, hasPromotion, product, related, isCart) {
         productsQuantity++;
         sessionStorage.setItem("productsId", JSON.stringify(Object.fromEntries(productsId)));
         totalAmount += parseInt(product.dataset.price);
-        checkPoints();
         document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
-        document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+        if (isUser) {
+            checkPoints();
+            document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+        }
     }
 }
 
@@ -229,9 +241,11 @@ function deleteProduct(id, e, hasPromotion, product, related) {
             removeProduct(id, product, hasPromotion);
         }
         totalAmount -= parseInt(product.dataset.price);
-        checkPoints();
+        if (isUser) {
+            checkPoints();
+            document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+        }
         document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
-        document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
     }
 }
 
@@ -244,14 +258,18 @@ function removeProduct(productId, e, hasPromotion) {
     }
     productsQuantity -= quantity;
     totalAmount -= (parseInt(e.dataset.price) * quantity);
-    checkPoints();
     document.getElementById("totalAmount").textContent = totalAmount / 100 + "zł";
-    document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+    if (isUser) {
+        checkPoints();
+        document.getElementById("totalPoints").textContent = Math.ceil(totalAmount / 100) + "p";
+    }
     productsId.delete(productInfo);
     if (productsId.size === 0) {
         document.getElementById("noResults").dataset.resultsEmpty = "true";
         document.getElementById("buyButton").className = "grayButton";
-        document.getElementById("buyButtonPoints").className = "grayButton";
+        if (isUser) {
+            document.getElementById("buyButtonPoints").className = "grayButton";
+        }
     }
     if (e.classList.contains("related")) {
         parentProduct = document.getElementById("product" + productId);
@@ -263,11 +281,13 @@ function removeProduct(productId, e, hasPromotion) {
 }
 
 function checkPoints() {
-    const points = Math.ceil(totalAmount / 100);
-    if (points <= parseInt(document.getElementById("points").textContent) && points !== 0) {
-        document.getElementById("buyButtonPoints").className = "greenButton";
-    } else {
-        document.getElementById("buyButtonPoints").className = "grayButton";
+    if (isUser) {
+        const points = Math.ceil(totalAmount / 100);
+        if (points <= parseInt(document.getElementById("points").textContent) && points !== 0) {
+            document.getElementById("buyButtonPoints").className = "greenButton";
+        } else {
+            document.getElementById("buyButtonPoints").className = "grayButton";
+        }
     }
 }
 
@@ -298,7 +318,7 @@ function buyProducts(e) {
 
 function buyProductsByPoints(e) {
     const cardId = sessionStorage.getItem("cardId");
-    if (productsId.size === 0 || e.className === "grayButton") {
+    if (!isUser || productsId.size === 0 || e.className === "grayButton") {
         return;
     }
     fetch("/buy_for_points?cardId=" + cardId, {
@@ -322,7 +342,7 @@ function buyProductsByPoints(e) {
 }
 
 function showOrHideBuyProducts(e) {
-    if (!buyProd && (productsId.size === 0 || document.getElementById("buyButtonPoints").className === "grayButton")) {
+    if (!isUser || (!buyProd && (productsId.size === 0 || document.getElementById("buyButtonPoints").className === "grayButton"))) {
         return;
     }
     let buyProduct = document.getElementById("buy");

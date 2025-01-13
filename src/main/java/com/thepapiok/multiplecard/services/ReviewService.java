@@ -31,6 +31,7 @@ public class ReviewService {
   private final LikeRepository likeRepository;
   private final ReportRepository reportRepository;
   private final MongoTransactionManager mongoTransactionManager;
+  private final AccountService accountService;
 
   @Autowired
   public ReviewService(
@@ -39,13 +40,15 @@ public class ReviewService {
       UserRepository userRepository,
       LikeRepository likeRepository,
       ReportRepository reportRepository,
-      MongoTransactionManager mongoTransactionManager) {
+      MongoTransactionManager mongoTransactionManager,
+      AccountService accountService) {
     this.reviewConverter = reviewConverter;
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
     this.likeRepository = likeRepository;
     this.reportRepository = reportRepository;
     this.mongoTransactionManager = mongoTransactionManager;
+    this.accountService = accountService;
   }
 
   public boolean addReview(ReviewDTO reviewDTO, String phone) {
@@ -88,6 +91,8 @@ public class ReviewService {
           .findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1))
           .isPresent()) {
         return false;
+      } else if (accountService.checkUserIsBanned(id)) {
+        return false;
       }
       Like like = new Like();
       like.setReviewUserId(objectIds.get(0));
@@ -110,6 +115,8 @@ public class ReviewService {
       Optional<Like> like =
           likeRepository.findByReviewUserIdAndUserId(objectIds.get(0), objectIds.get(1));
       if (like.isEmpty()) {
+        return false;
+      } else if (accountService.checkUserIsBanned(id)) {
         return false;
       }
       likeRepository.delete(like.get());
