@@ -2,7 +2,10 @@
 
 docker-compose up db -d
 
-sleep 10
+until mongosh --host localhost --port 27017 --username user --password user --quiet --eval "db.runCommand({ ping: 1 })" > /dev/null 2>&1; do
+    echo "Oczekiwanie na mongoDB..."
+    sleep 1
+done
 
 mongosh --host localhost --port 27017 --username user --password user --quiet<<EOF
 rs.initiate({
