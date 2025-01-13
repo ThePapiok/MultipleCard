@@ -82,7 +82,7 @@ public class SecurityConfig {
                     .failureHandler(customAuthenticationFailureHandler))
         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl(loginUrl))
         .csrf(AbstractHttpConfigurer::disable)
-        .exceptionHandling(exception -> exception.accessDeniedPage("/"));
+        .exceptionHandling(exception -> exception.accessDeniedPage("/access_denied"));
     return http.build();
   }
 
