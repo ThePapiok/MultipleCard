@@ -24,6 +24,38 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                             }
                                         """,
         """
+                                    {
+                                        $lookup: {
+                                            "from": "accounts",
+                                            "localField": "_id",
+                                            "foreignField": "_id",
+                                            "as": "account",
+                                            "pipeline": [
+                                                {
+                                                    $project: {
+                                                        "isBanned": 1
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                            """,
+        """
+                            {
+                                $unwind: {
+                                    "path": "$account",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $match: {
+                                    "account.isBanned": false
+                                }
+                            }
+                            """,
+        """
                             {
                                 $lookup: {
                                     "from": "likes",
@@ -129,6 +161,38 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
                                 }
                             }
                                         """,
+        """
+                                    {
+                                        $lookup: {
+                                            "from": "accounts",
+                                            "localField": "_id",
+                                            "foreignField": "_id",
+                                            "as": "account",
+                                            "pipeline": [
+                                                {
+                                                    $project: {
+                                                        "isBanned": 1
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                            """,
+        """
+                            {
+                                $unwind: {
+                                    "path": "$account",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            }
+                            """,
+        """
+                            {
+                                $match: {
+                                    "account.isBanned": false
+                                }
+                            }
+                            """,
         """
                             {
                                 $lookup: {
@@ -307,74 +371,74 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
   @Aggregation(
       pipeline = {
         """
-        {
-            $match: {
-                "_id": ?0
-            }
-        }
-    """,
+                                {
+                                    $match: {
+                                        "_id": ?0
+                                    }
+                                }
+                            """,
         """
-        {
-            $lookup: {
-                "from": "likes",
-                "localField": "_id",
-                "foreignField": "reviewUserId",
-                "as": "like"
-            }
-        }
-    """,
+                                {
+                                    $lookup: {
+                                        "from": "likes",
+                                        "localField": "_id",
+                                        "foreignField": "reviewUserId",
+                                        "as": "like"
+                                    }
+                                }
+                            """,
         """
-        {
-            $unwind: {
-                "path": "$like",
-                "preserveNullAndEmptyArrays": true
-            }
-        }
-    """,
+                                {
+                                    $unwind: {
+                                        "path": "$like",
+                                        "preserveNullAndEmptyArrays": true
+                                    }
+                                }
+                            """,
         """
-        {
-            $group: {
-                "_id": "$_id",
-                "count": {
-                    "$count": {}
-                }
-            }
-        }
-    """,
+                                {
+                                    $group: {
+                                        "_id": "$_id",
+                                        "count": {
+                                            "$count": {}
+                                        }
+                                    }
+                                }
+                            """,
         """
-        {
-            $lookup: {
-                "from": "users",
-                "localField": "_id",
-                "foreignField": "_id",
-                "as": "user"
-            }
-        }
-    """,
+                                {
+                                    $lookup: {
+                                        "from": "users",
+                                        "localField": "_id",
+                                        "foreignField": "_id",
+                                        "as": "user"
+                                    }
+                                }
+                            """,
         """
-        {
-            $unwind: {
-                "path": "$user",
-                "preserveNullAndEmptyArrays": true
-            }
-        }
-    """,
+                                {
+                                    $unwind: {
+                                        "path": "$user",
+                                        "preserveNullAndEmptyArrays": true
+                                    }
+                                }
+                            """,
         """
-        {
-            $addFields: {
-                "firstName": "$user.firstName",
-                "description": "$user.review.description",
-                "rating": "$user.review.rating"
-            }
-        }
-    """,
+                                {
+                                    $addFields: {
+                                        "firstName": "$user.firstName",
+                                        "description": "$user.review.description",
+                                        "rating": "$user.review.rating"
+                                    }
+                                }
+                            """,
         """
-        {
-            $project: {
-                "user": 0
-            }
-        }
-    """
+                                {
+                                    $project: {
+                                        "user": 0
+                                    }
+                                }
+                            """
       })
   ReviewAtReportDTO getReviewAtReportDTOById(ObjectId id);
 }

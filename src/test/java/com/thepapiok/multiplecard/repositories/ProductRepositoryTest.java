@@ -88,7 +88,7 @@ public class ProductRepositoryTest {
     category.setOwnerId(testShop.getId());
     category = mongoTemplate.save(category);
     product1 = new Product();
-    product1.setShopId(shop.getId());
+    product1.setShopId(testShop.getId());
     product1.setImageUrl("url1");
     product1.setName("name1");
     product1.setBarcode("barcode1");
@@ -115,6 +115,7 @@ public class ProductRepositoryTest {
     product2.setUpdatedAt(localDateTime);
     product2 = mongoTemplate.save(product2);
     account = new Account();
+    account.setId(testShop.getId());
     account.setBanned(false);
     account.setActive(false);
     account.setRole(Role.ROLE_SHOP);
@@ -155,12 +156,13 @@ public class ProductRepositoryTest {
 
   @Test
   public void shouldReturnAccountAtFindAccountByProductIdWhenEverythingOk() {
-    Account account = new Account();
-    account.setEmail(account.getEmail());
-    account.setPhone(account.getPhone());
-    account.setId(account.getId());
+    Account account1 = new Account();
+    account1.setEmail(account.getEmail());
+    account1.setPhone(account.getPhone());
+    account1.setId(account.getId());
+    account1.setBanned(account.isBanned());
 
-    assertEquals(account, productRepository.findAccountByProductId(product1.getId()));
+    assertEquals(account1, productRepository.findAccountByProductId(product1.getId()));
   }
 
   @Test
@@ -193,5 +195,18 @@ public class ProductRepositoryTest {
     productWithShopDTO.setExpiredAtPromotion(promotion.getExpiredAt());
 
     assertEquals(productWithShopDTO, productRepository.getProductWithShopDTOById(product1.getId()));
+  }
+
+  @Test
+  public void
+      shouldReturnListOfProductWithProductsIdFieldAtGetProductsIdByShopIdWhenEverythingOk() {
+    Product expectedProduct1 = new Product();
+    expectedProduct1.setId(product1.getId());
+    Product expectedProduct2 = new Product();
+    expectedProduct2.setId(product2.getId());
+
+    assertEquals(
+        List.of(expectedProduct1, expectedProduct2),
+        productRepository.getProductsIdByShopId(shop.getId()));
   }
 }

@@ -58,6 +58,7 @@ public class ReviewServiceTest {
   @Mock private LikeRepository likeRepository;
   @Mock private MongoTransactionManager mongoTransactionManager;
   @Mock private ReportRepository reportRepository;
+  @Mock private AccountService accountService;
   private ReviewService reviewService;
 
   @BeforeAll
@@ -81,7 +82,8 @@ public class ReviewServiceTest {
             userRepository,
             likeRepository,
             reportRepository,
-            mongoTransactionManager);
+            mongoTransactionManager,
+            accountService);
     reviewDTO = new ReviewDTO();
     reviewDTO.setRating(TEST_RATING);
     reviewDTO.setDescription(TEST_DESCRIPTION);
@@ -248,6 +250,16 @@ public class ReviewServiceTest {
   }
 
   @Test
+  public void shouldReturnFalseAtAddLikeWhenUserIsBanned() {
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
+        .thenReturn(Optional.empty());
+    when(accountService.checkUserIsBanned(TEST_ID2)).thenReturn(true);
+
+    assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
   public void shouldReturnFalseAtAddLikeWhenGetException() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
@@ -256,6 +268,7 @@ public class ReviewServiceTest {
     atLike();
     when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
         .thenReturn(Optional.empty());
+    when(accountService.checkUserIsBanned(TEST_ID2)).thenReturn(false);
     doThrow(MongoWriteException.class).when(likeRepository).save(expectedLike);
 
     assertFalse(reviewService.addLike(TEST_ID2, TEST_PHONE));
@@ -272,6 +285,20 @@ public class ReviewServiceTest {
   }
 
   @Test
+  public void shouldReturnFalseDeleteLikeWhenUserIsBanned() {
+    Like expectedLike = new Like();
+    expectedLike.setUserId(TEST_ID1);
+    expectedLike.setReviewUserId(TEST_ID2);
+
+    atLike();
+    when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
+        .thenReturn(Optional.of(expectedLike));
+    when(accountService.checkUserIsBanned(TEST_ID2)).thenReturn(true);
+
+    assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
+  }
+
+  @Test
   public void shouldReturnFalseDeleteLikeWhenGetException() {
     Like expectedLike = new Like();
     expectedLike.setUserId(TEST_ID1);
@@ -280,6 +307,7 @@ public class ReviewServiceTest {
     atLike();
     when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
         .thenReturn(Optional.of(expectedLike));
+    when(accountService.checkUserIsBanned(TEST_ID2)).thenReturn(false);
     doThrow(MongoWriteException.class).when(likeRepository).delete(expectedLike);
 
     assertFalse(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
@@ -295,6 +323,7 @@ public class ReviewServiceTest {
     atLike();
     when(likeRepository.findByReviewUserIdAndUserId(TEST_ID2, TEST_ID1))
         .thenReturn(Optional.of(expectedLike));
+    when(accountService.checkUserIsBanned(TEST_ID2)).thenReturn(false);
 
     assertTrue(reviewService.deleteLike(TEST_ID2, TEST_PHONE));
     verify(likeRepository).delete(expectedLike);

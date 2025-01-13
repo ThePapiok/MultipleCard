@@ -121,7 +121,6 @@ public class CardServiceTest {
     account.setPhone(TEST_PHONE);
     User user = new User();
     user.setId(TEST_ID);
-
     Card expectedCard = new Card();
     expectedCard.setName(TEST_CARD_NAME);
     expectedCard.setPin(TEST_ENCRYPTED_PIN);
@@ -130,6 +129,9 @@ public class CardServiceTest {
     expectedCard.setImageUrl("");
     expectedCard.setId(TEST_CARD_OBJECT_ID);
     expectedCard.setImageUrl("dasdas1231231@sdfasdfds");
+    User expectedUser = new User();
+    expectedUser.setId(TEST_ID);
+    expectedUser.setCardId(TEST_CARD_OBJECT_ID);
     CustomMultipartFile customMultipartFile1 =
         new CustomMultipartFile("file1", "file1", "png", imageFrontBytes);
     CustomMultipartFile customMultipartFile2 =
@@ -143,11 +145,13 @@ public class CardServiceTest {
     when(imageService.generateImage(bytes, TEST_CARD_NAME, TEST_CARD_ID)).thenReturn(cardImage);
     when(accountRepository.findByPhone(TEST_PHONE)).thenReturn(account);
     when(userRepository.findById(TEST_ID)).thenReturn(Optional.of(user));
+    when(mongoTemplate.save(expectedCard)).thenReturn(expectedCard);
 
     assertTrue(
         cardService.createCard(TEST_PHONE, TEST_CARD_ID, TEST_ENCRYPTED_PIN, TEST_CARD_NAME));
     verify(mongoTemplate).save(expectedCard);
     verify(emailService).sendCardImage(cardImage, TEST_CARD_ID, account, user);
+    verify(mongoTemplate).save(expectedUser);
   }
 
   @Test

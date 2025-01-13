@@ -62,7 +62,8 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
     $addFields: {
       "phone": "$account.phone",
       "email": "$account.email",
-      "_id": "$account._id"
+      "_id": "$account._id",
+      "isBanned": "$account.isBanned"
     }
   }
 """
@@ -223,4 +224,7 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
   """
       })
   ProductWithShopDTO getProductWithShopDTOById(ObjectId id);
+
+  @Query(value = "{'shopId': ?0}", fields = "{'_id': 1}")
+  List<Product> getProductsIdByShopId(ObjectId id);
 }
