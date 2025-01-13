@@ -2,9 +2,12 @@ package com.thepapiok.multiplecard.services;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +20,20 @@ public class BlockedProductService {
   private final AccountRepository accountRepository;
   private final ProductRepository productRepository;
   private final MessageSource messageSource;
+  private final BlockedProductRepository blockedProductRepository;
 
   @Autowired
   public BlockedProductService(
       EmailService emailService,
       AccountRepository accountRepository,
       ProductRepository productRepository,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      BlockedProductRepository blockedProductRepository) {
     this.emailService = emailService;
     this.accountRepository = accountRepository;
     this.productRepository = productRepository;
     this.messageSource = messageSource;
+    this.blockedProductRepository = blockedProductRepository;
   }
 
   public void sendWarning(ObjectId productId, String messageParam) {
@@ -53,5 +59,14 @@ public class BlockedProductService {
         messageSource.getMessage("blockedProductService.warning.title", null, locale)
             + " - "
             + product.getName());
+  }
+
+  public boolean checkAnyProductIsBlocked(Map<ProductInfo, Integer> productsInfo) {
+    for (ProductInfo productInfo : productsInfo.keySet()) {
+      if (blockedProductRepository.existsByProductId(productInfo.getProductId())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

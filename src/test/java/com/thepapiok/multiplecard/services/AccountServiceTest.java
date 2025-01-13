@@ -16,6 +16,7 @@ import com.thepapiok.multiplecard.collections.Role;
 import com.thepapiok.multiplecard.collections.User;
 import com.thepapiok.multiplecard.dto.PageUserDTO;
 import com.thepapiok.multiplecard.dto.UserDTO;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
 import com.thepapiok.multiplecard.repositories.AggregationRepository;
 import com.thepapiok.multiplecard.repositories.CategoryRepository;
@@ -23,8 +24,10 @@ import com.thepapiok.multiplecard.repositories.OrderRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
 import com.thepapiok.multiplecard.repositories.ReportRepository;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +45,7 @@ public class AccountServiceTest {
   private static final String ROLE_ADMIN = "ROLE_ADMIN";
   private static final String ROLE_USER = "ROLE_USER";
   private static final String TEST_ID = "123456789012345678901234";
+  private static final String TEST_OTHER_ID = "773456789012345678901234";
   private static final String USER_NOT_FOUND_ERROR = "Nie ma takiego użytkownika";
   private static final String USER_ALREADY_HAS_ERROR = "Użytkownik posiada już taka wartość";
   private static final String UNEXPECTED_ERROR = "Nieoczekiwany błąd";
@@ -50,6 +54,7 @@ public class AccountServiceTest {
   private static final String UNEXPECTED_PARAM = "error.unexpected";
   private static final String OK_SUCCESS = "ok";
   private static final ObjectId TEST_OBJECT_ID = new ObjectId(TEST_ID);
+  private static final ObjectId TEST_OTHER_OBJECT_ID = new ObjectId(TEST_OTHER_ID);
   private AccountService accountService;
   @Mock private AccountRepository accountRepository;
   @Mock private ProductRepository productRepository;
@@ -547,5 +552,54 @@ public class AccountServiceTest {
     when(accountRepository.findById(TEST_OBJECT_ID)).thenReturn(Optional.of(account));
 
     assertFalse(accountService.checkUserIsBanned(TEST_OBJECT_ID));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckAnyShopIsBannedWhenAccountIsNotFound() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account = new Account();
+    account.setBanned(false);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(null);
+
+    assertTrue(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckAnyShopIsBannedWhenAccountIsBlocked() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account1 = new Account();
+    account1.setBanned(false);
+    Account account2 = new Account();
+    account2.setBanned(true);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account1);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(account2);
+
+    assertTrue(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckAnyShopIsBannedWhenEverythingOk() {
+    Map<ProductInfo, Integer> productsInfo = getProductsInfo();
+    Account account1 = new Account();
+    account1.setBanned(false);
+    Account account2 = new Account();
+    account2.setBanned(false);
+
+    when(productRepository.findAccountByProductId(TEST_OBJECT_ID)).thenReturn(account1);
+    when(productRepository.findAccountByProductId(TEST_OTHER_OBJECT_ID)).thenReturn(account2);
+
+    assertFalse(accountService.checkAnyShopIsBanned(productsInfo));
+  }
+
+  private Map<ProductInfo, Integer> getProductsInfo() {
+    Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+    ProductInfo productInfo1 = new ProductInfo(TEST_ID, false);
+    ProductInfo productInfo2 = new ProductInfo(TEST_OTHER_ID, true);
+    productsInfo.put(productInfo1, 0);
+    productsInfo.put(productInfo2, 0);
+    return productsInfo;
   }
 }

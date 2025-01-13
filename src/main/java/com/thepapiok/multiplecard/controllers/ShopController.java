@@ -8,6 +8,7 @@ import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.BlockedIpService;
+import com.thepapiok.multiplecard.services.BlockedProductService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.GoogleMapsService;
 import com.thepapiok.multiplecard.services.OrderService;
@@ -53,6 +54,7 @@ public class ShopController {
   private final ProfileService profileService;
   private final GoogleMapsService googleMapsService;
   private final AccountService accountService;
+  private final BlockedProductService blockedProductService;
 
   @Autowired
   public ShopController(
@@ -67,7 +69,8 @@ public class ShopController {
       RefundService refundService,
       ProfileService profileService,
       GoogleMapsService googleMapsService,
-      AccountService accountService) {
+      AccountService accountService,
+      BlockedProductService blockedProductService) {
     this.shopService = shopService;
     this.productService = productService;
     this.reservedProductService = reservedProductService;
@@ -80,6 +83,7 @@ public class ShopController {
     this.profileService = profileService;
     this.googleMapsService = googleMapsService;
     this.accountService = accountService;
+    this.blockedProductService = blockedProductService;
   }
 
   @PostMapping("/get_shop_names")
@@ -168,6 +172,9 @@ public class ShopController {
     } else if (accountService.checkAnyShopIsBanned(productsInfo)) {
       return new ResponseEntity<>(
           messageSource.getMessage("error.shop_banned", null, locale), HttpStatus.BAD_REQUEST);
+    } else if (blockedProductService.checkAnyProductIsBlocked(productsInfo)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.product_blocked", null, locale), HttpStatus.BAD_REQUEST);
     }
     Pair<Boolean, String> response =
         payUService.productsOrder(productsInfo, cardId, ip, orderId.toHexString(), locale);
@@ -219,6 +226,9 @@ public class ShopController {
     } else if (accountService.checkAnyShopIsBanned(productsInfo)) {
       return new ResponseEntity<>(
           messageSource.getMessage("error.shop_banned", null, locale), HttpStatus.BAD_REQUEST);
+    } else if (blockedProductService.checkAnyProductIsBlocked(productsInfo)) {
+      return new ResponseEntity<>(
+          messageSource.getMessage("error.product_blocked", null, locale), HttpStatus.BAD_REQUEST);
     }
     List<ProductPayU> products = productService.getProductsPayU(productsInfo);
     int points = profileService.calculatePoints(products);

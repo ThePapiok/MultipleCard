@@ -1,14 +1,20 @@
 package com.thepapiok.multiplecard.services;
 
+import static com.mongodb.assertions.Assertions.assertFalse;
+import static com.mongodb.assertions.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.thepapiok.multiplecard.collections.Account;
 import com.thepapiok.multiplecard.collections.Product;
+import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.repositories.AccountRepository;
+import com.thepapiok.multiplecard.repositories.BlockedProductRepository;
 import com.thepapiok.multiplecard.repositories.ProductRepository;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +32,18 @@ public class BlockedProductServiceTest {
   @Mock private AccountRepository accountRepository;
   @Mock private ProductRepository productRepository;
   @Mock private MessageSource messageSource;
+  @Mock private BlockedProductRepository blockedProductRepository;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     blockedProductService =
         new BlockedProductService(
-            emailService, accountRepository, productRepository, messageSource);
+            emailService,
+            accountRepository,
+            productRepository,
+            messageSource,
+            blockedProductRepository);
   }
 
   @Test
@@ -107,5 +118,40 @@ public class BlockedProductServiceTest {
             "Tomorrow your product will be deleted. You can still unblock it today.",
             TEST_EMAIL,
             "Warning - " + testProductName);
+  }
+
+  @Test
+  public void shouldReturnTrueAtCheckAnyProductsIsBlockedWhenFoundBlockedProduct() {
+    final String testProductId1 = "123456789012345618105234";
+    final String testProductId2 = "523456789012345618105234";
+    Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+    ProductInfo productInfo1 = new ProductInfo(testProductId1, false);
+    ProductInfo productInfo2 = new ProductInfo(testProductId2, true);
+    productsInfo.put(productInfo1, 0);
+    productsInfo.put(productInfo2, 0);
+
+    when(blockedProductRepository.existsByProductId(new ObjectId(testProductId1)))
+        .thenReturn(false);
+    when(blockedProductRepository.existsByProductId(new ObjectId(testProductId2))).thenReturn(true);
+
+    assertTrue(blockedProductService.checkAnyProductIsBlocked(productsInfo));
+  }
+
+  @Test
+  public void shouldReturnFalseAtCheckAnyProductsIsBlockedWhenNotFoundBlockedProduct() {
+    final String testProductId1 = "123456789012345618105234";
+    final String testProductId2 = "523456789012345618105234";
+    Map<ProductInfo, Integer> productsInfo = new HashMap<>();
+    ProductInfo productInfo1 = new ProductInfo(testProductId1, false);
+    ProductInfo productInfo2 = new ProductInfo(testProductId2, true);
+    productsInfo.put(productInfo1, 0);
+    productsInfo.put(productInfo2, 0);
+
+    when(blockedProductRepository.existsByProductId(new ObjectId(testProductId1)))
+        .thenReturn(false);
+    when(blockedProductRepository.existsByProductId(new ObjectId(testProductId2)))
+        .thenReturn(false);
+
+    assertFalse(blockedProductService.checkAnyProductIsBlocked(productsInfo));
   }
 }

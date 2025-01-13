@@ -930,14 +930,17 @@ public class ProductServiceTest {
     final int testProduct5Quantity = 2;
     final int testProduct6Quantity = 3;
     final int testProduct7Quantity = 4;
+    final int testProduct8Quantity = 5;
     final int testProduct2Price = 500;
     final int testProduct5Price = 502;
     final int testProduct6Price = 234;
     final int testProduct7Price = 333;
+    final int testProduct8Price = 423;
     final float centsPerZloty = 100;
     final String testProduct4Id = "123456709832145678091423";
     final String testProduct5Id = "333351709832145628091415";
     final String testProduct6Id = "333411709872145628091415";
+    final String testProduct7Id = "933411009872145628091415";
     final String testCardId = "783456709832145678091423";
     final String testOrderId = "915456709832145678091423";
     final ObjectId testShopObjectId = new ObjectId("915451709832145628091425");
@@ -951,6 +954,7 @@ public class ProductServiceTest {
     final ObjectId testProduct4ObjectId = new ObjectId(testProduct4Id);
     final ObjectId testProduct5ObjectId = new ObjectId(testProduct5Id);
     final ObjectId testProduct6ObjectId = new ObjectId(testProduct6Id);
+    final ObjectId testProduct7ObjectId = new ObjectId(testProduct7Id);
     Promotion promotion1 = new Promotion();
     promotion1.setNewPrice(testPromotion1NewPrice);
     promotion1.setQuantity(null);
@@ -996,6 +1000,10 @@ public class ProductServiceTest {
     productPayU7.setQuantity(testProduct7Quantity);
     productPayU7.setUnitPrice(testProduct7Price);
     productPayU7.setName(setNameAtBuyProducts(testProduct6Id, false));
+    ProductPayU productPayU8 = new ProductPayU();
+    productPayU8.setQuantity(testProduct8Quantity);
+    productPayU8.setUnitPrice(testProduct8Price);
+    productPayU8.setName(setNameAtBuyProducts(testProduct7Id, false));
     productPayUS.add(productPayU1);
     productPayUS.add(productPayU2);
     productPayUS.add(productPayU3);
@@ -1003,6 +1011,7 @@ public class ProductServiceTest {
     productPayUS.add(productPayU5);
     productPayUS.add(productPayU6);
     productPayUS.add(productPayU7);
+    productPayUS.add(productPayU8);
     Product product1 = new Product();
     product1.setShopId(testShopObjectId);
     Product product2 = new Product();
@@ -1054,12 +1063,13 @@ public class ProductServiceTest {
     Account account2 = new Account();
     account2.setBanned(true);
 
-    when(productRepository.findShopIdById(new ObjectId(TEST_ID))).thenReturn(product1);
-    when(productRepository.findShopIdById(new ObjectId(TEST_ID1))).thenReturn(product1);
-    when(productRepository.findShopIdById(new ObjectId(TEST_ID2))).thenReturn(product1);
-    when(productRepository.findShopIdById(testProduct4ObjectId)).thenReturn(product1);
-    when(productRepository.findShopIdById(testProduct5ObjectId)).thenReturn(product2);
-    when(productRepository.findShopIdById(testProduct6ObjectId)).thenReturn(product2);
+    when(productRepository.findById(new ObjectId(TEST_ID))).thenReturn(Optional.of(product1));
+    when(productRepository.findById(new ObjectId(TEST_ID1))).thenReturn(Optional.of(product1));
+    when(productRepository.findById(new ObjectId(TEST_ID2))).thenReturn(Optional.of(product1));
+    when(productRepository.findById(testProduct4ObjectId)).thenReturn(Optional.of(product1));
+    when(productRepository.findById(testProduct5ObjectId)).thenReturn(Optional.of(product2));
+    when(productRepository.findById(testProduct6ObjectId)).thenReturn(Optional.of(product2));
+    when(productRepository.findById(testProduct7ObjectId)).thenReturn(Optional.empty());
     when(promotionRepository.findByProductId(testProduct3ObjectId)).thenReturn(promotion1);
     when(promotionRepository.findByProductId(testProduct1ObjectId)).thenReturn(promotion2);
     when(promotionRepository.findByProductId(testProduct4ObjectId)).thenReturn(promotion3);
@@ -1083,6 +1093,14 @@ public class ProductServiceTest {
                 .inc(
                     POINTS_FIELD,
                     Math.round(testProduct7Price / centsPerZloty) * testProduct7Quantity),
+            User.class);
+    verify(mongoTemplate)
+        .updateFirst(
+            query(where(CARD_ID_FIELD).is(testCardObjectId)),
+            new Update()
+                .inc(
+                    POINTS_FIELD,
+                    Math.round(testProduct8Price / centsPerZloty) * testProduct8Quantity),
             User.class);
     verify(mongoTemplate).remove(promotion2);
     verify(mongoTemplate).save(expectedPromotion3);
@@ -1215,7 +1233,7 @@ public class ProductServiceTest {
     expectedUser.setId(TEST_OWNER_ID);
 
     when(accountRepository.findById(any(ObjectId.class))).thenReturn(Optional.of(account));
-    when(productRepository.findShopIdById(any(ObjectId.class))).thenReturn(product);
+    when(productRepository.findById(any(ObjectId.class))).thenReturn(Optional.of(product));
     when(promotionRepository.findByProductId(testProduct3ObjectId)).thenReturn(promotion1);
     when(promotionRepository.findByProductId(testProduct1ObjectId)).thenReturn(promotion2);
     when(promotionRepository.findByProductId(testProduct4ObjectId)).thenReturn(promotion3);

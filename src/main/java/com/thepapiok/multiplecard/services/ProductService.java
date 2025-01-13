@@ -57,6 +57,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductService {
+  private static final String CARD_ID_KEY = "cardId";
+  private static final String POINTS_KEY = "points";
   private final CategoryService categoryService;
   private final ProductConverter productConverter;
   private final ProductRepository productRepository;
@@ -196,8 +198,9 @@ public class ProductService {
                       orderRepository.findAllByProductIdAndIsUsed(productId, false);
                   for (Order order : orders) {
                     mongoTemplate.updateFirst(
-                        query(where("cardId").is(order.getCardId())),
-                        new Update().inc("points", (Math.round(order.getPrice() / centsPerZloty))),
+                        query(where(CARD_ID_KEY).is(order.getCardId())),
+                        new Update()
+                            .inc(POINTS_KEY, (Math.round(order.getPrice() / centsPerZloty))),
                         User.class);
                     mongoTemplate.remove(order);
                   }
@@ -408,14 +411,29 @@ public class ProductService {
                       objectMapper.readValue(
                           product.getName(), new TypeReference<Map<String, Object>>() {});
                   productId = new ObjectId((String) productInfo.get("productId"));
-                  shopId = productRepository.findShopIdById(productId).getShopId();
-                  Optional<Account> optionalAccount = accountRepository.findById(shopId);
-                  if (optionalAccount.isEmpty() || optionalAccount.get().isBanned()) {
+                  Optional<Product> optionalProduct = productRepository.findById(productId);
+                  if (optionalProduct.isEmpty()) {
                     mongoTemplate.updateFirst(
-                        query(where("cardId").is(new ObjectId(cardId))),
+                        query(where(CARD_ID_KEY).is(new ObjectId(cardId))),
                         new Update()
                             .inc(
-                                "points",
+                                POINTS_KEY,
+                                Math.round(product.getUnitPrice() / centsPerZloty)
+                                    * product.getQuantity()),
+                        User.class);
+                    continue;
+                  }
+                  Product productOb = optionalProduct.get();
+                  shopId = productOb.getShopId();
+                  Optional<Account> optionalAccount = accountRepository.findById(shopId);
+                  if (optionalAccount.isEmpty()
+                      || optionalAccount.get().isBanned()
+                      || blockedProductRepository.existsByProductId(productOb.getId())) {
+                    mongoTemplate.updateFirst(
+                        query(where(CARD_ID_KEY).is(new ObjectId(cardId))),
+                        new Update()
+                            .inc(
+                                POINTS_KEY,
                                 Math.round(product.getUnitPrice() / centsPerZloty)
                                     * product.getQuantity()),
                         User.class);

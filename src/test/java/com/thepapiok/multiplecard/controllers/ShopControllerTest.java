@@ -17,6 +17,7 @@ import com.thepapiok.multiplecard.misc.ProductInfo;
 import com.thepapiok.multiplecard.misc.ProductPayU;
 import com.thepapiok.multiplecard.services.AccountService;
 import com.thepapiok.multiplecard.services.BlockedIpService;
+import com.thepapiok.multiplecard.services.BlockedProductService;
 import com.thepapiok.multiplecard.services.EmailService;
 import com.thepapiok.multiplecard.services.GoogleMapsService;
 import com.thepapiok.multiplecard.services.OrderService;
@@ -96,6 +97,7 @@ public class ShopControllerTest {
   @MockBean private ProfileService profileService;
   @MockBean private GoogleMapsService googleMapsService;
   @MockBean private AccountService accountService;
+  @MockBean private BlockedProductService blockedProductService;
 
   @Test
   public void shouldReturnListOfShopNamesAtGetShopNamesWhenEverythingOk() throws Exception {
@@ -414,6 +416,24 @@ public class ShopControllerTest {
   }
 
   @Test
+  public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenProductIsBlocked()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setProductsInfo();
+
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
+    when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
+        .thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
+        .thenReturn(true);
+    when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(true);
+
+    performPostAtMakeOrder("Jeden z produktów jest zablokowany", STATUS_BAD_REQUEST, httpSession);
+  }
+
+  @Test
   public void shouldReturnResponseWithErrorMessageAtMakeOrderWhenErrorMakeOrderOfProducts()
       throws Exception {
     MockHttpSession httpSession = new MockHttpSession();
@@ -426,6 +446,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(payUService.productsOrder(
             eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString(), any(Locale.class)))
         .thenReturn(Pair.of(false, "error"));
@@ -446,6 +467,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(payUService.productsOrder(
             eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString(), any(Locale.class)))
         .thenReturn(Pair.of(true, "pay.com"));
@@ -468,6 +490,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(payUService.productsOrder(
             eq(productsInfo), eq(TEST_CARD_ID), anyString(), anyString(), any(Locale.class)))
         .thenReturn(Pair.of(true, "payu.com"));
@@ -614,6 +637,26 @@ public class ShopControllerTest {
 
   @Test
   @WithMockUser(roles = "USER", username = TEST_PHONE)
+  public void shouldReturnResponseWithErrorMessageAtBuyForPointsWhenProductIsBlocked()
+      throws Exception {
+    MockHttpSession httpSession = new MockHttpSession();
+    setProductsInfo();
+
+    when(blockedIpService.checkIpIsNotBlocked(anyString())).thenReturn(true);
+    when(productService.checkProductsQuantity(productsInfo)).thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByCardId(TEST_CARD_ID))
+        .thenReturn(true);
+    when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
+        .thenReturn(true);
+    when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(true);
+
+    performPostAtBuyForPoints(
+        "Jeden z produktów jest zablokowany", STATUS_BAD_REQUEST, httpSession);
+  }
+
+  @Test
+  @WithMockUser(roles = "USER", username = TEST_PHONE)
   public void shouldReturnResponseWithErrorMessageAtBuyForPointsWhenTooFewPoints()
       throws Exception {
     final int testProductsPoints = 4324;
@@ -629,6 +672,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(productService.getProductsPayU(productsInfo)).thenReturn(productPayUS);
     when(profileService.calculatePoints(productPayUS)).thenReturn(testProductsPoints);
     when(profileService.getPoints(TEST_PHONE)).thenReturn(testPoints);
@@ -653,6 +697,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(productService.getProductsPayU(productsInfo)).thenReturn(productPayUS);
     when(profileService.calculatePoints(productPayUS)).thenReturn(testProductsPoints);
     when(profileService.getPoints(TEST_PHONE)).thenReturn(testPoints);
@@ -680,6 +725,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(productService.getProductsPayU(productsInfo)).thenReturn(productPayUS);
     when(profileService.calculatePoints(productPayUS)).thenReturn(testProductsPoints);
     when(profileService.getPoints(TEST_PHONE)).thenReturn(testPoints);
@@ -713,6 +759,7 @@ public class ShopControllerTest {
     when(reservedProductService.checkReservedProductsIsLessThan100ByEncryptedIp(anyString()))
         .thenReturn(true);
     when(accountService.checkAnyShopIsBanned(productsInfo)).thenReturn(false);
+    when(blockedProductService.checkAnyProductIsBlocked(productsInfo)).thenReturn(false);
     when(productService.getProductsPayU(productsInfo)).thenReturn(productPayUS);
     when(profileService.calculatePoints(productPayUS)).thenReturn(testProductsPoints);
     when(profileService.getPoints(TEST_PHONE)).thenReturn(testPoints);
