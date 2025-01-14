@@ -1,0 +1,58 @@
+#title {
+    font-family: "Inconsolata", sans-serif;
+    font-size: 35px;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#text {
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.paragraph {
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    text-align: justify;
+    margin-bottom: 20px;
+    display: block;
+}
+
+#links {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+#image {
+    width: 100px;
+    height: 100px;
+}
+
+#github {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    cursor: pointer;
+}
+
+#github:hover {
+    opacity: 50%;
+}
+
+#name {
+    font-family: "Inconsolata", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+#info {
+    display: flex;
+    flex-direction: column;
+    left: 5%;
+    width: 90%;
+    position: relative;
+}
