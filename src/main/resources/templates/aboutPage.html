@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>MultipleCard</title>
+    <link rel="stylesheet" href="/css/page.css">
+    <link rel="stylesheet" href="/css/aboutPage.css">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/3d9NnZt.png">
+</head>
+<body onload="atStart()">
+<script src="/js/page.js"></script>
+<script src="/js/aboutPage.js"></script>
+<div id="header">
+    <a th:href="@{/}" id="h5" class="headerButton">
+        <button class="blackButton" th:text="#{button.landingPage}"></button>
+    </a>
+</div>
+<div id="body">
+    <div id="info">
+        <p id="title">MultipleCard</p>
+        <div id="text">
+            <span class="paragraph">
+            Projekt ten został stworzony w ramach pracy inżynierskiej. Prace nad aplikacją rozpoczęły się w lipcu 2024 roku i trwały do stycznia 2025 roku. Do obsługi backendu wykorzystano framework Spring,
+            a do frontendu HTML,CSS oraz JavaScript. Jako bazę danych użyto MongoDB.
+            </span>
+            <span class="paragraph">
+            Zadaniem aplikacji jest generowanie i obsługa kart podarunkowych wielokrotnego użytku.
+            Przykładowo, karta pozwoli na zaoszczędzenie czasu oraz większą kontrolę nad zakupami dokonywanymi przez dzieci. Zamiast przekazywać dziecku gotówkę, rodzic może samodzielnie wybrać produkty i kupić je przez stronę internetową.
+            Po zakończeniu płatności dziecko może samodzielnie odebrać kupione produkty w danym sklepie. Dodatkowo sklepy zyskują dodatkową możliwość zarobku.
+            </span>
+            <span class="paragraph">
+            Każdy nowy użytkownik może zamówić taką kartę na adres podany podczas rejestracji. Obecnie jednak aplikacja nie realizuje fizycznych wysyłek kart, a ogranicza się do symulacji, prezentując potencjalne rozwiązanie w przyszłości.
+            Oczywiście dane do wysyłki można zmienić w każdej chwili.
+            </span>
+            <span class="paragraph">
+            Po otrzymaniu karty, użytkownik może przekazać ją drugiej osobie w celu zeskanowania
+            kodu QR znajdującego się na niej. Osoba skanująca może kupić wybrane produkty, które są następnie dodawane do zawartości karty.
+            Chociaż proces zakupowy jest symulacja to aplikacja wykorzystuje zewnętrzny serwis PayU, który także umożliwia realizację płatności na prawdziwych pieniądzach.
+            </span>
+            <span class="paragraph">
+            Właściciel karty ma możliwość sprawdzenia produktów dostępnych na swojej karcie. Aby szybko zlokalizować najbliższy sklep dla wybranego produktu, wystarczy na niego kliknąć, a zostanie wyznaczona
+            trasa dzięki Google Maps, bazując na adresie użytkownika i danego sklepu.
+            </span>
+            <span class="paragraph">
+            Klient, będąc w sklepie, podczas płatności może pokazać kartę kasjerowi, który ją skanuje w celu weryfikacji produktów.
+            Jednak przed taką weryfikacją przebiega proces logowania użytkownika. Do takiego logowania potrzebny jest kod PIN oraz nazwa karty. Jeżeli wszystko przebiegnie pomyślnie,
+            sklep otrzymuje zapłatę, a klient swoje produkty.
+            </span>
+            <span class="paragraph">
+            Aplikacja pozwala także na rejestracje sklepów, jednak to wymaga dodatkowej weryfikacji. Sklep może dodawać swoje produkty, tworzyć promocje o określonym czasie trwania i ograniczonej liczbie sztuk.
+            </span>
+        </div>
+        <div id="links">
+            <div id="github" onclick="window.location='https://github.com/ThePapiok'">
+                <img id="image" src="/images/github.png" alt="github">
+                <span id="name">ThePapiok</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <label id="language" onclick="setLanguage()">
+        <a id="enLanguage" th:title="#{en_language.title_window}">
+            <img class="flag" src="/images/en_language.png" alt="enLanguage">
+        </a>
+        <a id="plLanguage" th:title="#{pl_language.title_window}">
+            <img class="flag" src="/images/pl_language.png" alt="plLanguage">
+        </a>
+    </label>
+</div>
+</body>
+</html>
