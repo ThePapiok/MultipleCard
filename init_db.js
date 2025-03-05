@@ -294,7 +294,7 @@ db.createCollection("users", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "firstName", "lastName", "points", "address", "_class"],
+            "required": ["_id", "firstName", "lastName", "points", "isRestricted", "address", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
