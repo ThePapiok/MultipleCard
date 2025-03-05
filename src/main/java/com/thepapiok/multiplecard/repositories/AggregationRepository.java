@@ -1070,7 +1070,7 @@ public class AggregationRepository {
                     "lastName": {
                       $ifNull: ["$shop.lastName", "$user.lastName"]
                     },
-                    "restricted": "$user.restricted",
+                    "restricted": "$user.isRestricted",
                     "shopName": "$shop.name"
                   }
                 }

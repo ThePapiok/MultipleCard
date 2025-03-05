@@ -337,13 +337,17 @@ public class CardServiceTest {
   @Test
   public void shouldReturnTrueAtCheckPinWhenPinMatches() {
     Card card = new Card();
-    card.setAttempts(0);
+    card.setAttempts(2);
     card.setPin(TEST_ENCRYPTED_PIN);
+    Card expectedCard = new Card();
+    expectedCard.setAttempts(0);
+    expectedCard.setPin(TEST_ENCRYPTED_PIN);
 
     when(cardRepository.findById(TEST_CARD_OBJECT_ID)).thenReturn(Optional.of(card));
     when(passwordEncoder.matches(TEST_PIN, TEST_ENCRYPTED_PIN)).thenReturn(true);
 
     assertTrue(cardService.checkPin(TEST_CARD_ID, TEST_PIN));
+    verify(cardRepository).save(expectedCard);
   }
 
   @Test

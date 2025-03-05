@@ -190,7 +190,7 @@ db.createCollection("orders", {
         "validator": {
             $jsonSchema: {
                 "bsonType": "object",
-                "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId", "shopId", "_class"],
+                "required": ["_id", "cardId", "productId", "createdAt", "isUsed", "price", "orderId" , "shopId", "_class"],
                 "additionalProperties": false,
                 "properties": {
                     "_id": {
@@ -213,6 +213,10 @@ db.createCollection("orders", {
                         "bsonType": "date",
                         "description": "createdAt is required and must be date"
                     },
+                    "orderId": {
+                        "bsonType": "objectId",
+                        "description": "orderId is required and must be objectId"
+                    },
                     "isUsed": {
                         "bsonType": "bool",
                         "description": "isUsed is required and must be bool"
@@ -221,10 +225,6 @@ db.createCollection("orders", {
                         "bsonType": "int",
                         "minimum": 0,
                         "description": "price is required and must be greater or equal 0"
-                    },
-                    "orderId": {
-                        "bsonType": "objectId",
-                        "description": "orderId is required and must be objectId"
                     },
                     "_class": {
                         "bsonType": "string",
@@ -309,9 +309,9 @@ db.createCollection("users", {
                     "bsonType": "string",
                     "description": "lastName is required and must be string"
                 },
-                "restricted": {
+                "isRestricted": {
                     "bsonType": "bool",
-                    "description": "restricted is required and must be bool"
+                    "description": "isRestricted is required and must be bool"
                 },
                 "address": {
                     "bsonType": "object",

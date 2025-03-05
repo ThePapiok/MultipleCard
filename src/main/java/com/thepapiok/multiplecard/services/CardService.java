@@ -178,9 +178,10 @@ public class CardService {
     boolean result = passwordEncoder.matches(pin, card.getPin());
     if (!result) {
       card.setAttempts(card.getAttempts() + 1);
-      cardRepository.save(card);
-      return false;
+    } else {
+      card.setAttempts(0);
     }
-    return true;
+    cardRepository.save(card);
+    return result;
   }
 }

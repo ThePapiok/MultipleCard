@@ -15,5 +15,5 @@ public class User {
   private int points;
   private Review review;
   private Address address;
-  private boolean restricted;
+  private boolean isRestricted;
 }

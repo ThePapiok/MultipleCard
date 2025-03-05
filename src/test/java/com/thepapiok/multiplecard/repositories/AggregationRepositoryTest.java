@@ -888,7 +888,7 @@ public class AggregationRepositoryTest {
     order16.setCreatedAt(testDate7);
     order16.setShopId(shop3.getId());
     order16.setOrderId(TEST_ORDER_ID);
-    order16 = mongoTemplate.save(order16);
+    mongoTemplate.save(order16);
     Order order17 = new Order();
     order17.setCardId(testOtherCardId);
     order17.setPrice(testOrder4Price);
