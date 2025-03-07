@@ -13,5 +13,5 @@ public interface BlockedProductRepository extends MongoRepository<BlockedProduct
 
   void deleteByProductId(ObjectId productId);
 
-  List<BlockedProduct> findAllByExpiredAtIsBefore(LocalDate date);
+  List<BlockedProduct> findAllByExpiresAtIsBefore(LocalDate date);
 }

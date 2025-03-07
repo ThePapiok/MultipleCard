@@ -476,7 +476,7 @@ db.createCollection("blockedProducts", {
     "validator": {
         $jsonSchema: {
             "bsonType": "object",
-            "required": ["_id", "expiredAt", "productId", "_class"],
+            "required": ["_id", "expiresAt", "productId", "_class"],
             "additionalProperties": false,
             "properties": {
                 "_id": {
@@ -487,7 +487,7 @@ db.createCollection("blockedProducts", {
                     "bsonType": "objectId",
                     "description": "productId is required and must be objectId"
                 },
-                "expiredAt": {
+                "expiresAt": {
                     "bsonType": "date",
                     "description": "expiredAt is required and must be date"
                 },

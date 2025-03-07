@@ -226,7 +226,7 @@ public class ProductService {
       final int month = 30;
       BlockedProduct blockedProduct = new BlockedProduct();
       blockedProduct.setProductId(new ObjectId(id));
-      blockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+      blockedProduct.setExpiresAt(LocalDate.now().plusDays(month));
       blockedProductRepository.save(blockedProduct);
       return true;
     } catch (Exception e) {

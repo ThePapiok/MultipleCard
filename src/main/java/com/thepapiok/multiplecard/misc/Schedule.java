@@ -53,7 +53,7 @@ public class Schedule {
     final int periodIs0 = 0;
     int days;
     for (BlockedProduct blockedProduct : blockedProductRepository.findAll()) {
-      days = Period.between(blockedProduct.getExpiredAt(), LocalDate.now()).getDays();
+      days = Period.between(blockedProduct.getExpiresAt(), LocalDate.now()).getDays();
       if (days == periodIs7) {
         blockedProductService.sendWarning(
             blockedProduct.getProductId(), "blockedProductService.warning.text_7days");

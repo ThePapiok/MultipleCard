@@ -55,7 +55,7 @@ public class ScheduleTest {
     final int days = 10;
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
-    blockedProduct.setExpiredAt(LocalDate.now().minusDays(days));
+    blockedProduct.setExpiresAt(LocalDate.now().minusDays(days));
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
@@ -72,7 +72,7 @@ public class ScheduleTest {
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
     blockedProduct.setProductId(TEST_PRODUCT_ID);
-    blockedProduct.setExpiredAt(LocalDate.now().minusDays(days));
+    blockedProduct.setExpiresAt(LocalDate.now().minusDays(days));
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
@@ -90,7 +90,7 @@ public class ScheduleTest {
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
     blockedProduct.setProductId(TEST_PRODUCT_ID);
-    blockedProduct.setExpiredAt(LocalDate.now().minusDays(days));
+    blockedProduct.setExpiresAt(LocalDate.now().minusDays(days));
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
@@ -107,7 +107,7 @@ public class ScheduleTest {
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
     blockedProduct.setProductId(TEST_PRODUCT_ID);
-    blockedProduct.setExpiredAt(LocalDate.now());
+    blockedProduct.setExpiresAt(LocalDate.now());
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);
@@ -124,7 +124,7 @@ public class ScheduleTest {
     List<BlockedProduct> blockedProducts = new ArrayList<>();
     BlockedProduct blockedProduct = new BlockedProduct();
     blockedProduct.setProductId(TEST_PRODUCT_ID);
-    blockedProduct.setExpiredAt(LocalDate.now());
+    blockedProduct.setExpiresAt(LocalDate.now());
     blockedProducts.add(blockedProduct);
 
     when(blockedProductRepository.findAll()).thenReturn(blockedProducts);

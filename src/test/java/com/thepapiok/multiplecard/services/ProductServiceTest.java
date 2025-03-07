@@ -465,7 +465,7 @@ public class ProductServiceTest {
   public void shouldReturnTrueAtBlockProductWhenEverythingOk() {
     final int month = 30;
     BlockedProduct expectedBlockedProduct = new BlockedProduct();
-    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setExpiresAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     assertTrue(productService.blockProduct(TEST_ID));
@@ -476,7 +476,7 @@ public class ProductServiceTest {
   public void shouldReturnFalseAtBlockProductWhenGetException() {
     final int month = 30;
     BlockedProduct expectedBlockedProduct = new BlockedProduct();
-    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setExpiresAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     when(blockedProductRepository.save(expectedBlockedProduct))
@@ -490,7 +490,7 @@ public class ProductServiceTest {
   public void shouldReturnTrueAtUnblockProductWhenEverythingOk() {
     final int month = 30;
     BlockedProduct expectedBlockedProduct = new BlockedProduct();
-    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setExpiresAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     when(blockedProductRepository.findByProductId(TEST_PRODUCT_ID))
@@ -504,7 +504,7 @@ public class ProductServiceTest {
   public void shouldReturnFalseAtUnblockProductWhenGetException() {
     final int month = 30;
     BlockedProduct expectedBlockedProduct = new BlockedProduct();
-    expectedBlockedProduct.setExpiredAt(LocalDate.now().plusDays(month));
+    expectedBlockedProduct.setExpiresAt(LocalDate.now().plusDays(month));
     expectedBlockedProduct.setProductId(TEST_PRODUCT_ID);
 
     when(blockedProductRepository.findByProductId(TEST_PRODUCT_ID))

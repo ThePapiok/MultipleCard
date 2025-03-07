@@ -11,5 +11,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BlockedProduct {
   @Id private ObjectId id;
   private ObjectId productId;
-  private LocalDate expiredAt;
+  private LocalDate expiresAt;
 }
